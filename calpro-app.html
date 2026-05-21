@@ -29,15 +29,15 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Thai',sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top);}
-.app{max-width:480px;margin:0 auto;padding:0 12px 80px;padding-bottom:calc(80px + env(safe-area-inset-bottom));}
+.app{max-width:480px;margin:0 auto;padding:0 14px 80px;padding-bottom:calc(86px + env(safe-area-inset-bottom));}
 
 /* ── SCREENS ── */
 .screen{display:none;}.screen.active{display:block;}
 
 /* ── BOTTOM NAV ── */
 .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
-.bnt{flex:1;padding:9px 4px 7px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);font-size:.65rem;display:flex;flex-direction:column;align-items:center;gap:2px;transition:color .2s;}
-.bnt .ico{font-size:1.15rem;}.bnt.active{color:var(--accent);}
+.bnt{flex:1;padding:10px 4px 8px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);font-size:.68rem;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s;}
+.bnt .ico{font-size:1.25rem;}.bnt.active{color:var(--accent);}
 
 /* ── AUTH ── */
 .auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
@@ -65,14 +65,35 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .auth-msg.ok{color:var(--green);}
 
 /* ── HEADER ── */
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 0 10px;}
-.hdr-left h1{font-size:1.25rem;font-weight:700;}.hdr-left h1 span{color:var(--accent);}
-.hdr-left p{font-size:.73rem;color:var(--muted);margin-top:1px;}
-.icon-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:50%;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 0 14px;gap:8px;}
+.hdr-left{flex:1;min-width:0;}
+.hdr-left h1{font-size:1.2rem;font-weight:700;line-height:1.1;}.hdr-left h1 span{color:var(--accent);}
+.hdr-left p{font-size:.7rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.icon-btn{background:transparent;border:none;color:var(--text);width:38px;height:38px;border-radius:10px;font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.icon-btn:hover,.icon-btn:active{background:var(--surface2);}
+
+/* ── DRAWER ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;backdrop-filter:blur(2px);}
+.drawer-overlay.open{opacity:1;pointer-events:auto;}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:var(--surface);transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);box-shadow:2px 0 16px rgba(0,0,0,.2);}
+.drawer.open{transform:translateX(0);}
+.drawer-hd{padding:20px 18px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
+.drawer-hd .user-avatar{width:80px;height:80px;font-size:2rem;margin:0 0 6px;}
+.drawer-hd .user-avatar::after{width:24px;height:24px;font-size:.7rem;}
+.drawer-name{font-size:.95rem;font-weight:600;}
+.drawer-email{font-size:.7rem;color:var(--muted);}
+.drawer-nav{flex:1;padding:8px 0;}
+.drawer-sect{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:14px 18px 6px;font-weight:600;}
+.drawer-item{display:flex;align-items:center;gap:12px;width:100%;padding:11px 18px;background:none;border:none;color:var(--text);font-size:.9rem;font-family:inherit;cursor:pointer;text-align:left;transition:background .15s;}
+.drawer-item:hover,.drawer-item.active{background:var(--surface2);}
+.drawer-item .di-ico{font-size:1.15rem;width:24px;text-align:center;flex-shrink:0;}
+.drawer-item .di-arrow{margin-left:auto;color:var(--muted);font-size:.8rem;}
+.drawer-divider{height:1px;background:var(--border);margin:8px 18px;}
+.drawer-foot{padding:14px 18px;border-top:1px solid var(--border);font-size:.66rem;color:var(--muted);text-align:center;}
 
 /* ── CARD ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;}
-.card h3{font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;}
+.card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;font-weight:600;}
 
 /* ── DATE NAV ── */
 .dnav{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;}
@@ -248,7 +269,30 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .cmp-table tr:last-child td{border-bottom:none;}
 .win{color:var(--green);font-weight:600;}.lose{color:var(--accent);}
 
+/* ── PAGE HEADERS ── */
+.page-hd{display:flex;align-items:center;gap:6px;margin:4px 0 14px;}
+.page-hd h2{font-size:1.05rem;font-weight:700;}
+.back-btn{background:transparent;border:none;color:var(--text);font-size:1.5rem;cursor:pointer;padding:0 4px;line-height:1;}
+.back-btn:hover{color:var(--accent);}
+
 /* ── SETTINGS ── */
+.setting-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);}
+.setting-row:first-of-type{border-top:none;}
+.sr-l{flex:1;min-width:0;}
+.sr-name{font-size:.86rem;font-weight:500;}
+.sr-sub{font-size:.7rem;color:var(--muted);margin-top:2px;line-height:1.4;}
+.switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--surface2);border:1px solid var(--border);transition:.2s;border-radius:34px;}
+.switch .slider:before{position:absolute;content:'';height:18px;width:18px;left:2px;top:1px;background:var(--text);transition:.2s;border-radius:50%;opacity:.5;}
+.switch input:checked + .slider{background:var(--accent);border-color:var(--accent);}
+.switch input:checked + .slider:before{transform:translateX(20px);background:#fff;opacity:1;}
+.meal-time-row{display:grid;grid-template-columns:1fr 80px;gap:10px;align-items:center;padding:6px 0;}
+.meal-time-row label{font-size:.82rem;}
+.meal-time-row .mtr-input{display:flex;align-items:center;gap:4px;}
+.meal-time-row .mtr-input input{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 8px;font-size:.85rem;font-family:inherit;width:48px;text-align:center;}
+.meal-time-row .mtr-input span{font-size:.78rem;color:var(--muted);}
+
 .theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
 .th-swatch{height:42px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;position:relative;display:flex;align-items:center;justify-content:center;font-family:inherit;}
 .th-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,255,255,.2) inset;}
@@ -287,14 +331,12 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 
     <!-- HEADER -->
     <div class="hdr">
+      <button class="icon-btn" onclick="openDrawer()" title="Menu">☰</button>
       <div class="hdr-left">
         <h1>Cal<span>Pro</span></h1>
         <p id="hdrSub" data-i18n="welcome">ยินดีต้อนรับ</p>
       </div>
-      <div style="display:flex;gap:7px">
-        <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง">🌙</button>
-        <button class="icon-btn" onclick="openSettings()">⚙️</button>
-      </div>
+      <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง">🌙</button>
     </div>
 
     <!-- TODAY -->
@@ -334,7 +376,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
       <div class="wwrow">
         <div class="wwcard">
           <h4>💧 <span data-i18n="water">น้ำดื่ม</span></h4>
-          <div class="wwval"><span id="waterCount">0</span>/<span>8</span> <span data-i18n="cups_unit">แก้ว</span></div>
+          <div class="wwval"><span id="waterCount">0</span>/<span id="waterGoalDisp">8</span> <span data-i18n="cups_unit">แก้ว</span></div>
           <div class="water-dots" id="waterDots"></div>
           <div class="water-ctrl">
             <button onclick="addWater(-1)">−</button>
@@ -487,6 +529,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 
     <!-- PROFILE -->
     <div class="screen" id="pg-profile">
+      <div class="page-hd">
+        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <h2 data-i18n="profile">โปรไฟล์</h2>
+      </div>
       <div class="card" style="text-align:center;padding:20px 14px">
         <div class="user-avatar" id="profileAvatar" onclick="openAvatarModal()" title="คลิกเพื่อเปลี่ยน">?</div>
         <div style="font-size:1rem;font-weight:600" id="profileName2">—</div>
@@ -538,14 +584,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         </div>
         <div class="tip" id="tipBox"></div>
       </div>
-      <div class="card" id="cloudCard">
-        <h3>☁️ <span data-i18n="cloud_sync">Cloud Sync</span></h3>
-        <div id="cloudStatus"></div>
-      </div>
-      <div class="card" id="friendsCard" style="display:none">
-        <h3>👥 <span data-i18n="friends">เพื่อน + Leaderboard</span></h3>
-        <div id="friendsBody"></div>
-      </div>
       <div class="card">
         <h3>📐 <span data-i18n="body_measurements">สัดส่วนร่างกาย</span></h3>
         <div class="pgrid">
@@ -558,8 +596,73 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <div id="bfResult" style="margin-top:10px;font-size:.78rem"></div>
         <div id="measureHistory" style="margin-top:10px;font-size:.74rem;color:var(--muted)"></div>
       </div>
+    </div>
+
+    <!-- SETTINGS (full page) -->
+    <div class="screen" id="pg-settings">
+      <div class="page-hd">
+        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <h2 data-i18n="settings">ตั้งค่า</h2>
+      </div>
       <div class="card">
-        <h3 data-i18n="manage_data">จัดการข้อมูล</h3>
+        <h3>☁️ <span data-i18n="cloud_sync">Cloud Sync</span></h3>
+        <div id="cloudStatus"></div>
+      </div>
+      <div class="card">
+        <h3>🎨 <span data-i18n="appearance">รูปลักษณ์</span></h3>
+        <div class="sec-lbl" data-i18n="theme">ธีมสี</div>
+        <div class="theme-grid" id="themeGrid"></div>
+        <div class="sec-lbl" data-i18n="accent">สีหลัก</div>
+        <div class="accent-grid" id="accentGrid"></div>
+        <div class="setting-row">
+          <div class="sr-l">
+            <div class="sr-name" data-i18n="compact_mode">โหมดกะทัดรัด</div>
+            <div class="sr-sub" data-i18n="compact_mode_sub">ลดช่องว่าง · เห็นข้อมูลได้มากขึ้นต่อหน้า</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="compactToggle" onchange="toggleCompact()"><span class="slider"></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🌍 <span data-i18n="language">ภาษา</span></h3>
+        <div class="lang-row">
+          <button class="lbtn" data-lang="th" onclick="setLang('th')">🇹🇭 ไทย</button>
+          <button class="lbtn" data-lang="en" onclick="setLang('en')">🇬🇧 English</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔔 <span data-i18n="reminders">การเตือน</span></h3>
+        <div class="setting-row">
+          <div class="sr-l">
+            <div class="sr-name" data-i18n="meal_reminders">เตือนมื้ออาหาร</div>
+            <div class="sr-sub" data-i18n="meal_reminders_sub">แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="mealRemToggle" onchange="toggleReminder('meal')"><span class="slider"></span></label>
+        </div>
+        <div id="mealTimesGrid" style="margin-top:8px"></div>
+        <div class="setting-row">
+          <div class="sr-l">
+            <div class="sr-name" data-i18n="smart_goal_pref">ปรับเป้าหมายอัตโนมัติ</div>
+            <div class="sr-sub" data-i18n="smart_goal_pref_sub">แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="smartGoalToggle" onchange="toggleReminder('smart')"><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="sr-l">
+            <div class="sr-name" data-i18n="weekly_recap_pref">สรุปรายสัปดาห์</div>
+            <div class="sr-sub" data-i18n="weekly_recap_pref_sub">popup ทุกวันจันทร์เช้า</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="recapToggle" onchange="toggleReminder('recap')"><span class="slider"></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>💧 <span data-i18n="water_goal_cfg">เป้าหมายน้ำดื่ม</span></h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="range" id="waterGoalRange" min="4" max="16" step="1" oninput="changeWaterGoal(this.value)" style="flex:1">
+          <div style="font-size:1rem;font-weight:700;min-width:60px;text-align:right"><span id="waterGoalVal">8</span> <span data-i18n="cups_unit">แก้ว</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>💾 <span data-i18n="manage_data">จัดการข้อมูล</span></h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
           <button class="btn-sec" onclick="exportData()">📤 Export</button>
           <button class="btn-sec" onclick="document.getElementById('importFile').click()">📥 Import</button>
@@ -567,8 +670,45 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <input type="file" id="importFile" accept="application/json,.json" hidden onchange="importData(this.files[0])">
         <button class="btn-danger" onclick="resetAllData()" data-i18n="reset_all">ล้างข้อมูลทั้งหมด</button>
       </div>
-      <div style="text-align:center;font-size:.7rem;color:var(--muted);padding:8px 0 20px">
-        CalPro <span id="appVer">v1.0.0</span> · made with 🔥
+    </div>
+
+    <!-- FRIENDS -->
+    <div class="screen" id="pg-friends">
+      <div class="page-hd">
+        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <h2 data-i18n="friends">เพื่อน + Leaderboard</h2>
+      </div>
+      <div class="card" id="friendsCard">
+        <div id="friendsBody"></div>
+      </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="screen" id="pg-about">
+      <div class="page-hd">
+        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <h2 data-i18n="about">เกี่ยวกับ</h2>
+      </div>
+      <div class="card" style="text-align:center;padding:24px 14px">
+        <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
+        <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.2.0</span></div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
+      </div>
+      <div class="card">
+        <h3 data-i18n="about_links">ลิงก์</h3>
+        <a href="https://github.com/peerawatsuper271-afk/calpro" target="_blank" class="drawer-item" style="border-radius:9px"><span class="di-ico">📂</span><span>GitHub Repository</span><span class="di-arrow">↗</span></a>
+        <a href="https://peerawatsuper271-afk.github.io/calpro/" target="_blank" class="drawer-item" style="border-radius:9px"><span class="di-ico">🌐</span><span>Live URL</span><span class="di-arrow">↗</span></a>
+      </div>
+      <div class="card">
+        <h3 data-i18n="about_credits">เครดิต</h3>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.7">
+          • Harris-Benedict (revised 1984) formula<br>
+          • US Navy Body Fat % formula<br>
+          • MET values from Compendium of Physical Activities<br>
+          • Built with vanilla HTML/CSS/JS · PWA<br>
+          • Backend: Supabase (opt-in cloud sync)
+        </div>
       </div>
     </div>
 
@@ -680,31 +820,35 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
   </div>
 </div>
 
-<!-- SETTINGS MODAL -->
-<div class="modal-bg hide" id="settingsModal">
-  <div class="modal">
-    <div class="modal-hdr"><h3 data-i18n="settings">ตั้งค่า</h3><button class="mc-close" onclick="closeSettings()">✕</button></div>
-    <div class="sec-lbl" id="lblTheme" data-i18n="theme">ธีมสี</div>
-    <div class="theme-grid" id="themeGrid"></div>
-    <div class="sec-lbl" id="lblAccent" data-i18n="accent">สีหลัก</div>
-    <div class="accent-grid" id="accentGrid"></div>
-    <div class="sec-lbl" id="lblLang" data-i18n="language">ภาษา</div>
-    <div class="lang-row">
-      <button class="lbtn" data-lang="th" onclick="setLang('th')">🇹🇭 ไทย</button>
-      <button class="lbtn" data-lang="en" onclick="setLang('en')">🇬🇧 English</button>
-    </div>
-    <button class="btn" id="btnDoneSettings" onclick="closeSettings()" data-i18n="done">เสร็จสิ้น</button>
-    <div style="text-align:center;font-size:.68rem;color:var(--muted);margin-top:12px">CalPro <span class="ver-tag">v1.0.0</span></div>
+
+<!-- DRAWER (slide-out menu) -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-hd">
+    <div class="user-avatar" id="drawerAvatar" onclick="openAvatarModal()">?</div>
+    <div class="drawer-name" id="drawerName">—</div>
+    <div class="drawer-email" id="drawerEmail">—</div>
   </div>
-</div>
+  <nav class="drawer-nav">
+    <div class="drawer-sect" data-i18n="account_section">บัญชี</div>
+    <button class="drawer-item" onclick="navTo('profile')"><span class="di-ico">👤</span><span data-i18n="profile">โปรไฟล์</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span class="di-ico">👥</span><span data-i18n="friends_only">เพื่อน</span><span class="di-arrow">›</span></button>
+
+    <div class="drawer-sect" data-i18n="settings_section">การตั้งค่า</div>
+    <button class="drawer-item" onclick="navTo('settings')"><span class="di-ico">⚙️</span><span data-i18n="settings">ตั้งค่า</span><span class="di-arrow">›</span></button>
+
+    <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
+    <button class="drawer-item" onclick="navTo('about')"><span class="di-ico">ℹ️</span><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
+  </nav>
+  <div class="drawer-foot">CalPro <span class="ver-tag">v2.2.0</span></div>
+</aside>
 
 <!-- BOTTOM NAV -->
 <div class="bnav" id="mainNav">
-  <button class="bnt active" onclick="showPage('today',this)"><span class="ico">🏠</span>วันนี้</button>
-  <button class="bnt" onclick="showPage('add',this)"><span class="ico">➕</span>เพิ่ม</button>
-  <button class="bnt" onclick="showPage('analysis',this)"><span class="ico">📊</span>วิเคราะห์</button>
+  <button class="bnt active" onclick="showPage('today',this)"><span class="ico">🏠</span><span data-i18n="home">วันนี้</span></button>
+  <button class="bnt" onclick="showPage('add',this)"><span class="ico">➕</span><span data-i18n="add">เพิ่ม</span></button>
+  <button class="bnt" onclick="showPage('analysis',this)"><span class="ico">📊</span><span data-i18n="analysis">วิเคราะห์</span></button>
   <button class="bnt" onclick="showPage('tdee',this)"><span class="ico">🔥</span>TDEE</button>
-  <button class="bnt" onclick="showPage('profile',this)"><span class="ico">👤</span>โปรไฟล์</button>
 </div>
 
 <!-- PHOTO VIEWER -->
@@ -718,7 +862,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.1.1';
+const APP_VERSION = '2.2.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -778,6 +922,14 @@ const I18N = {
     act_1:'ไม่ค่อยออกกำลังกาย',act_2:'เบา 1–3 วัน/สัปดาห์',act_3:'ปานกลาง 3–5 วัน/สัปดาห์',act_4:'หนัก 6–7 วัน/สัปดาห์',act_5:'หนักมาก / งานใช้แรง',
     tact_1:'นั่งทำงาน · ไม่ออกกำลังกาย (×1.2)',tact_2:'เบา · 1–3 วัน/สัปดาห์ (×1.375)',tact_3:'ปานกลาง · 3–5 วัน/สัปดาห์ (×1.55)',tact_4:'หนัก · 6–7 วัน/สัปดาห์ (×1.725)',tact_5:'หนักมาก · งานใช้แรง (×1.9)',
     name_ph_profile:'ชื่อ',goal_label:'เป้าหมาย',
+    account_section:'บัญชี',settings_section:'การตั้งค่า',other_section:'อื่น ๆ',friends_only:'เพื่อน',about:'เกี่ยวกับ',
+    appearance:'รูปลักษณ์',compact_mode:'โหมดกะทัดรัด',compact_mode_sub:'ลดช่องว่าง · เห็นข้อมูลได้มากขึ้นต่อหน้า',
+    reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
+    smart_goal_pref:'ปรับเป้าหมายอัตโนมัติ',smart_goal_pref_sub:'แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า',
+    weekly_recap_pref:'สรุปรายสัปดาห์',weekly_recap_pref_sub:'popup ทุกวันจันทร์เช้า',
+    water_goal_cfg:'เป้าหมายน้ำดื่ม',
+    about_desc:'ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง',
+    about_links:'ลิงก์',about_credits:'เครดิต',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -828,6 +980,14 @@ const I18N = {
     act_1:'Sedentary',act_2:'Light · 1–3 days/wk',act_3:'Moderate · 3–5 days/wk',act_4:'Active · 6–7 days/wk',act_5:'Very active / heavy labor',
     tact_1:'Sedentary (×1.2)',tact_2:'Light · 1–3 days/wk (×1.375)',tact_3:'Moderate · 3–5 days/wk (×1.55)',tact_4:'Active · 6–7 days/wk (×1.725)',tact_5:'Very active / heavy labor (×1.9)',
     name_ph_profile:'Name',goal_label:'Goal',
+    account_section:'Account',settings_section:'Settings',other_section:'Other',friends_only:'Friends',about:'About',
+    appearance:'Appearance',compact_mode:'Compact mode',compact_mode_sub:'Tighter spacing · more info per screen',
+    reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
+    smart_goal_pref:'Auto goal adjustment',smart_goal_pref_sub:'Popup every 4 weeks if weight trend deviates',
+    weekly_recap_pref:'Weekly recap',weekly_recap_pref_sub:'Popup every Monday morning',
+    water_goal_cfg:'Water goal',
+    about_desc:'Calorie tracking, TDEE calculator and weight management · Free · No login required · Data stored locally',
+    about_links:'Links',about_credits:'Credits',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -1035,9 +1195,9 @@ const EXERCISES = [
 ];
 let currentDate = todayKey();
 let activeCat = 'thai';
-let settings = {theme:'dark', accent:'#ff6b6b', lang:'th'};
+let settings = {theme:'dark', accent:'#ff6b6b', lang:'th', compact:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8};
 let tdeeGoalType = 'lose';
-const WATER_GOAL = 8;
+function getWaterGoal(){return settings.waterGoal||8;}
 
 // ═══ HELPERS ═══
 function dateKey(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${da}`;}
@@ -1192,6 +1352,9 @@ function showPage(id,btn){
   if(id==='analysis')renderAnalysis();
   if(id==='tdee')syncTDEEFromProfile();
   if(id==='add')renderQuickList();
+  if(id==='settings')renderSettings();
+  if(id==='friends')renderFriendsCard();
+  if(id==='profile')renderProfileUI();
 }
 
 // ═══ DATE ═══
@@ -1754,6 +1917,7 @@ function renderWorkoutsList(){
 
 // ═══ SMART GOAL ADJUSTMENT ═══
 function checkSmartGoal(){
+  if(settings.smartGoal===false)return;
   if(!userProfile||!userProfile.goal_type||userProfile.goal_type==='maintain')return;
   const lastCheck=lsLoad('calpro_smart_goal_check',0);
   const now=Date.now();
@@ -1822,6 +1986,7 @@ function isoWeek(d){
   return t.getUTCFullYear()+'-W'+String(Math.ceil(((t-ys)/86400000+1)/7)).padStart(2,'0');
 }
 function checkWeeklyRecap(){
+  if(settings.weeklyRecap===false)return;
   const now=new Date();const curWeek=isoWeek(now);
   const lastShown=lsLoad('calpro_recap_week',null);
   if(lastShown===curWeek)return;
@@ -1861,14 +2026,17 @@ function closeRecap(){document.getElementById('recapModal').classList.add('hide'
 // ═══ MEAL REMINDERS (in-app) ═══
 const MEAL_TIMES=[{meal:'เช้า',hour:9,emoji:'🌅'},{meal:'กลางวัน',hour:14,emoji:'☀️'},{meal:'เย็น',hour:20,emoji:'🌙'}];
 function renderReminderBanner(){
-  const wrap=document.getElementById('reminderBanner');wrap.innerHTML='';
+  const wrap=document.getElementById('reminderBanner');if(!wrap)return; wrap.innerHTML='';
+  if(settings.mealReminders===false)return;
   // Only show on today
   if(currentDate!==todayKey())return;
   if(lsLoad('calpro_dismissed_'+todayKey(),false))return;
   const now=new Date();const hour=now.getHours();
+  const ct=settings.mealTimes||{morning:9,lunch:14,dinner:20};
+  const customTimes=[{meal:'เช้า',hour:ct.morning,emoji:'🌅'},{meal:'กลางวัน',hour:ct.lunch,emoji:'☀️'},{meal:'เย็น',hour:ct.dinner,emoji:'🌙'}];
   // Find latest missed meal
   let missed=null;
-  for(const m of MEAL_TIMES){
+  for(const m of customTimes){
     if(hour>=m.hour){
       const has=dailyEntries.some(e=>e.meal===m.meal);
       if(!has)missed=m;
@@ -1899,8 +2067,9 @@ function addWater(delta){
 function renderWaterWidget(){
   const cur=allWater[currentDate]||0;
   document.getElementById('waterCount').textContent=cur;
+  const goalEl=document.getElementById('waterGoalDisp');if(goalEl)goalEl.textContent=getWaterGoal();
   const dots=document.getElementById('waterDots');dots.innerHTML='';
-  const total=Math.max(WATER_GOAL,cur);
+  const total=Math.max(getWaterGoal(),cur);
   for(let i=0;i<total;i++){
     const d=document.createElement('div');d.className='wd'+(i<cur?' full':'');
     d.onclick=()=>{allWater[currentDate]=i+1;lsSave(LS_WATER,allWater);renderWaterWidget();};
@@ -2076,12 +2245,12 @@ function renderWaterStats(){
     const k=dateKey(d);
     days7.push({k,c:allWater[k]||0,label:d.toLocaleDateString(loc2,{weekday:'short'})});
   }
-  const hit=days7.filter(d=>d.c>=WATER_GOAL).length;
+  const hit=days7.filter(d=>d.c>=getWaterGoal()).length;
   const avg=days7.reduce((s,d)=>s+d.c,0)/7;
   const wrap=document.getElementById('waterStats');
   const bars=days7.map(d=>{
-    const pct=Math.min(d.c/WATER_GOAL,1);
-    const hue=d.c>=WATER_GOAL?'var(--blue)':'var(--surface2)';
+    const pct=Math.min(d.c/getWaterGoal(),1);
+    const hue=d.c>=getWaterGoal()?'var(--blue)':'var(--surface2)';
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">`+
       `<div style="width:14px;height:48px;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden">`+
         `<div style="position:absolute;bottom:0;left:0;right:0;height:${(pct*100).toFixed(1)}%;background:${hue};transition:height .3s"></div>`+
@@ -2090,7 +2259,7 @@ function renderWaterStats(){
       `<div style="font-size:.55rem;color:var(--muted)">${d.c||''}</div>`+
     `</div>`;
   }).join('');
-  const goalLbl=settings.lang==='en'?'Hit 8 cups':'บรรลุเป้า 8 แก้ว';
+  const goalLbl=settings.lang==='en'?`Hit ${getWaterGoal()} cups`:`บรรลุเป้า ${getWaterGoal()} แก้ว`;
   wrap.innerHTML=`<div style="display:flex;gap:5px;justify-content:space-between;margin-bottom:8px">${bars}</div>`+
     `<div class="rrow"><span class="rl">${goalLbl}</span><span class="rv" style="color:var(--blue)">${hit}/7 ${t('days')}</span></div>`+
     `<div class="rrow"><span class="rl">${t('avg_per_day')}</span><span class="rv">${avg.toFixed(1)} ${t('cups_unit')}</span></div>`;
@@ -2221,6 +2390,24 @@ function renderProfileUI(){
   renderFriendsCard();
 }
 
+// ═══ COMPACT MODE STYLES (applied via data-compact) ═══
+const COMPACT_CSS = `
+[data-compact="1"] .card{padding:10px 11px;margin-bottom:8px;}
+[data-compact="1"] .card h3{margin-bottom:7px;}
+[data-compact="1"] .stats{gap:5px;margin-bottom:8px;}
+[data-compact="1"] .sc{padding:7px 4px;}
+[data-compact="1"] .macros{margin-bottom:8px;}
+[data-compact="1"] .mc{padding:7px;}
+[data-compact="1"] .wwrow{gap:6px;margin-bottom:8px;}
+[data-compact="1"] .wwcard{padding:8px 10px;}
+[data-compact="1"] .ring-wrap{margin-bottom:8px;}
+[data-compact="1"] .ring-cont{width:124px;height:124px;}
+[data-compact="1"] .ring-cont svg{width:124px;height:124px;}
+[data-compact="1"] .ring-num{font-size:1.35rem;}
+[data-compact="1"] .dnav{margin-bottom:8px;}
+`;
+(function(){const s=document.createElement('style');s.textContent=COMPACT_CSS;document.head.appendChild(s);})();
+
 // ═══ SETTINGS / THEME ═══
 function applyTheme(){
   const th=THEMES[settings.theme]||THEMES.dark;
@@ -2229,6 +2416,7 @@ function applyTheme(){
   r.setProperty('--border',th.b);r.setProperty('--text',th.t);r.setProperty('--muted',th.m);
   r.setProperty('--accent',settings.accent||'#ff6b6b');
   document.documentElement.dataset.mode=th.mode||'dark';
+  document.documentElement.dataset.compact=settings.compact?'1':'0';
   const tg=document.getElementById('modeToggle');
   if(tg)tg.textContent=th.mode==='light'?'☀️':'🌙';
   // Update browser theme-color meta
@@ -2248,40 +2436,116 @@ function toggleMode(){
   applyTheme();
 }
 const THEME_LABELS={dark:'มืด',night:'ดึก',forest:'ป่า',warm:'อุ่น',ocean:'มหาสมุทร',light:'สว่าง',cream:'ครีม',mint:'มินต์'};
-function openSettings(){
-  document.getElementById('settingsModal').classList.remove('hide');
-  const tg=document.getElementById('themeGrid');tg.innerHTML='';
-  Object.entries(THEMES).forEach(([k,v])=>{
-    const b=document.createElement('button');b.className='th-swatch'+(settings.theme===k?' active':'');
-    b.style.background=v.s2;b.style.border='2px solid '+(settings.theme===k?'#fff':'transparent');
-    b.title=THEME_LABELS[k]||k;
-    b.innerHTML='<span style="font-size:.55rem;color:'+v.t+';font-weight:600">'+(THEME_LABELS[k]||k)+'</span>';
-    b.onclick=()=>{
-      settings.theme=k;
-      if(v.mode==='dark')settings.lastDark=k; else settings.lastLight=k;
-      lsSave(LS_SETTINGS,settings);applyTheme();openSettings();
-    };
-    tg.appendChild(b);
-  });
-  const ag=document.getElementById('accentGrid');ag.innerHTML='';
-  ACCENTS.forEach(ac=>{
-    const b=document.createElement('button');b.className='ac-dot'+(settings.accent===ac?' active':'');
-    b.style.background=ac;b.style.border='3px solid '+(settings.accent===ac?'#fff':'transparent');
-    b.onclick=()=>{settings.accent=ac;lsSave(LS_SETTINGS,settings);applyTheme();openSettings();};
-    ag.appendChild(b);
-  });
+// openSettings deprecated — use navTo('settings') instead
+// ═══ DRAWER ═══
+function openDrawer(){
+  renderDrawerHeader();
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
 }
-function closeSettings(){document.getElementById('settingsModal').classList.add('hide');}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
+function renderDrawerHeader(){
+  const av=document.getElementById('drawerAvatar');
+  const p=userProfile;
+  if(p?.avatar&&p.avatar.startsWith('data:'))av.innerHTML='<img src="'+p.avatar+'" alt="avatar">';
+  else if(p?.avatar)av.textContent=p.avatar;
+  else av.textContent=((p?.display_name||'?')[0]||'?').toUpperCase();
+  document.getElementById('drawerName').textContent=p?.display_name||t('you');
+  document.getElementById('drawerEmail').textContent=cloudUser?.email||(settings.lang==='en'?'Local only':'เครื่องนี้เท่านั้น');
+  // Show friends button only if signed in
+  document.getElementById('drawerFriendsBtn').style.display=cloudUser?'flex':'none';
+}
+function navTo(page){
+  closeDrawer();
+  // Map drawer pages to actual screen ids; some are bottom-nav tabs
+  const navTabIdx={'today':0,'add':1,'analysis':2,'tdee':3};
+  if(page in navTabIdx){
+    showPage(page,document.querySelectorAll('.bnt')[navTabIdx[page]]);
+  }else{
+    showPage(page,null);
+    // Clear bottom nav active state since this page isn't in nav
+    document.querySelectorAll('.bnt').forEach(b=>b.classList.remove('active'));
+  }
+}
+
+// ═══ SETTINGS TOGGLES ═══
+function toggleCompact(){
+  settings.compact=document.getElementById('compactToggle').checked;
+  lsSave(LS_SETTINGS,settings);
+  document.documentElement.dataset.compact=settings.compact?'1':'0';
+}
+function toggleReminder(kind){
+  if(kind==='meal')settings.mealReminders=document.getElementById('mealRemToggle').checked;
+  else if(kind==='smart')settings.smartGoal=document.getElementById('smartGoalToggle').checked;
+  else if(kind==='recap')settings.weeklyRecap=document.getElementById('recapToggle').checked;
+  lsSave(LS_SETTINGS,settings);
+  renderToday();
+}
+function changeWaterGoal(v){
+  settings.waterGoal=+v;
+  document.getElementById('waterGoalVal').textContent=v;
+  lsSave(LS_SETTINGS,settings);
+  renderWaterWidget();
+}
+function changeMealTime(meal,hr){
+  if(!settings.mealTimes)settings.mealTimes={morning:9,lunch:14,dinner:20};
+  settings.mealTimes[meal]=+hr;
+  lsSave(LS_SETTINGS,settings);
+}
+function renderSettings(){
+  // Themes
+  const tg=document.getElementById('themeGrid');if(tg){tg.innerHTML='';
+    Object.entries(THEMES).forEach(([k,v])=>{
+      const b=document.createElement('button');b.className='th-swatch'+(settings.theme===k?' active':'');
+      b.style.background=v.s2;b.style.border='2px solid '+(settings.theme===k?'var(--accent)':'transparent');
+      b.title=THEME_LABELS[k]||k;
+      b.innerHTML='<span style="font-size:.55rem;color:'+v.t+';font-weight:600">'+(THEME_LABELS[k]||k)+'</span>';
+      b.onclick=()=>{settings.theme=k;if(v.mode==='dark')settings.lastDark=k;else settings.lastLight=k;lsSave(LS_SETTINGS,settings);applyTheme();renderSettings();};
+      tg.appendChild(b);
+    });
+  }
+  const ag=document.getElementById('accentGrid');if(ag){ag.innerHTML='';
+    ACCENTS.forEach(ac=>{
+      const b=document.createElement('button');b.className='ac-dot'+(settings.accent===ac?' active':'');
+      b.style.background=ac;b.style.border='3px solid '+(settings.accent===ac?'#fff':'transparent');
+      b.onclick=()=>{settings.accent=ac;lsSave(LS_SETTINGS,settings);applyTheme();renderSettings();};
+      ag.appendChild(b);
+    });
+  }
+  // Toggles
+  const setCk=(id,val)=>{const el=document.getElementById(id);if(el)el.checked=!!val;};
+  setCk('compactToggle',settings.compact);
+  setCk('mealRemToggle',settings.mealReminders!==false);
+  setCk('smartGoalToggle',settings.smartGoal!==false);
+  setCk('recapToggle',settings.weeklyRecap!==false);
+  // Water goal
+  const wr=document.getElementById('waterGoalRange'),wv=document.getElementById('waterGoalVal');
+  if(wr){wr.value=getWaterGoal();}
+  if(wv){wv.textContent=getWaterGoal();}
+  // Meal times
+  const mt=document.getElementById('mealTimesGrid');
+  if(mt){
+    const times=settings.mealTimes||{morning:9,lunch:14,dinner:20};
+    const meals=[['morning',t('morning'),'🌅'],['lunch',t('lunch'),'☀️'],['dinner',t('dinner'),'🌙']];
+    mt.innerHTML=meals.map(([k,name,ico])=>`<div class="meal-time-row"><label>${ico} ${name}</label><div class="mtr-input"><input type="number" min="0" max="23" value="${times[k]}" oninput="changeMealTime('${k}',this.value)"><span>:00</span></div></div>`).join('');
+  }
+  // Lang buttons
+  document.querySelectorAll('.lbtn').forEach(b=>b.classList.toggle('active',b.dataset.lang===(settings.lang||'th')));
+  renderCloudStatus();
+}
 function setLang(lang){
   settings.lang=lang;lsSave(LS_SETTINGS,settings);
   applyLang();
   document.querySelectorAll('.lbtn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
-  // Re-render labels that are set in JS
-  const ttl={settings:'lblSettings',accent:'lblAccent',language:'lblLang',done:'btnDoneSettings',theme:'lblTheme'};
   showApp();
   // Re-render anything currently shown
-  if(document.getElementById('pg-add').classList.contains('active'))renderQuickList();
-  if(document.getElementById('pg-analysis').classList.contains('active'))renderAnalysis();
+  if(document.getElementById('pg-add')?.classList.contains('active'))renderQuickList();
+  if(document.getElementById('pg-analysis')?.classList.contains('active'))renderAnalysis();
+  if(document.getElementById('pg-settings')?.classList.contains('active'))renderSettings();
+  if(document.getElementById('pg-friends')?.classList.contains('active'))renderFriendsCard();
 }
 function applyLang(){
   document.documentElement.lang=settings.lang||'th';

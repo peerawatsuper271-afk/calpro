@@ -51,6 +51,7 @@ icon-*.png             ← App icons
 
 ## เวอร์ชั่น
 
+- **v2.2.0** — UI redesign: minimalist + left drawer (☰) สำหรับ Profile/Friends/Settings/About · ลด bottom nav เหลือ 4 tabs · Settings page ใหม่ครบ (theme/lang/reminders/water goal/meal times/compact mode/data) · ย้าย Profile เข้า drawer
 - **v2.1.0** — ☁️ Cloud sync ผ่าน Supabase (opt-in · email login · push/pull localStorage ↔ cloud · 8 ตาราง · friends + leaderboard กลับมา · default ยังเป็น localStorage)
 - **v2.0.0** — รองรับ 2 ภาษา 🇹🇭/🇬🇧 (i18n layer + toggle ใน settings), บันทึกออกกำลังกาย 20 ประเภท (MET formula → kcal เผาผลาญ → เพิ่มในเป้าหมาย), บันทึกสัดส่วนร่างกาย (เอว/สะโพก/อก/คอ) + Navy Body Fat % calculator
 - **v1.5.0** — แนบรูปอาหารต่อรายการ, banner เตือนมื้อที่ลืม, ปรับเป้า kcal อัตโนมัติทุก 4 สัปดาห์ตามแนวโน้มน้ำหนัก, สรุปสัปดาห์ที่แล้ว popup
