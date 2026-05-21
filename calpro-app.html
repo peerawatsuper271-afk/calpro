@@ -129,6 +129,21 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .lc-dot{stroke-width:0;}
 .lc-trend{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3;fill:none;opacity:.6;}
 
+/* ── MEAL PHOTOS ── */
+.fi-photo{width:42px;height:42px;border-radius:7px;object-fit:cover;cursor:pointer;flex-shrink:0;}
+.photo-viewer{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.photo-viewer img{max-width:95%;max-height:95%;border-radius:8px;}
+.photo-viewer.hide{display:none;}
+.photo-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 10px;font-size:.78rem;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
+.photo-btn:hover{border-color:var(--accent);}
+.photo-preview{width:60px;height:60px;border-radius:8px;object-fit:cover;margin-top:6px;display:none;}
+
+/* ── BANNERS ── */
+.banner{background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,169,77,.08));border:1px solid rgba(255,107,107,.3);border-radius:11px;padding:11px 13px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:.82rem;cursor:pointer;}
+.banner .b-ico{font-size:1.3rem;flex-shrink:0;}
+.banner .b-txt{flex:1;line-height:1.4;}
+.banner .b-x{background:none;border:none;color:var(--muted);font-size:.95rem;cursor:pointer;padding:2px 6px;}
+
 /* ── FOOD LOG ── */
 .mg{margin-bottom:12px;}
 .mg-hdr{font-size:.73rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:5px;}
@@ -287,6 +302,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <button onclick="changeDay(1)">›</button>
         <input type="date" id="datePicker" onchange="pickDate(this.value)" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
       </div>
+      <div id="reminderBanner"></div>
       <div class="ring-wrap">
         <div class="ring-cont">
           <svg width="144" height="144" viewBox="0 0 144 144">
@@ -365,9 +381,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
           <div class="fl"><label>คาร์บ (g)</label><input type="number" id="fC" min="0" placeholder="0"></div>
           <div class="fl"><label>ไขมัน (g)</label><input type="number" id="fF" min="0" placeholder="0"></div>
         </div>
-        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);margin-bottom:10px;cursor:pointer;user-select:none">
-          <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> 💾 บันทึกลงไลบรารีของฉัน
-        </label>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);cursor:pointer;user-select:none">
+            <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> 💾 บันทึกลงไลบรารี
+          </label>
+          <button type="button" class="photo-btn" onclick="document.getElementById('photoUpload').click()">📷 แนบรูป</button>
+          <input type="file" id="photoUpload" accept="image/*" hidden onchange="loadPhotoForEntry(this.files[0])">
+          <img id="photoPreview" class="photo-preview" alt="">
+        </div>
         <button class="btn" onclick="addManual()">+ เพิ่มอาหาร</button>
       </div>
     </div>
@@ -537,6 +558,27 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
   </div><!-- end app -->
 </div><!-- end appScreen -->
 
+<!-- SMART GOAL MODAL -->
+<div class="modal-bg hide" id="smartGoalModal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>💡 ปรับเป้าหมายอัตโนมัติ?</h3><button class="mc-close" onclick="closeSmartGoal()">✕</button></div>
+    <div id="smartGoalBody" style="font-size:.85rem;line-height:1.6;color:var(--text);margin-bottom:14px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn-sec" onclick="closeSmartGoal()">ทีหลัง</button>
+      <button class="btn" id="smartGoalApply">ปรับให้เลย</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEEKLY RECAP MODAL -->
+<div class="modal-bg hide" id="recapModal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>📅 สรุปสัปดาห์ที่แล้ว</h3><button class="mc-close" onclick="closeRecap()">✕</button></div>
+    <div id="recapBody" style="font-size:.85rem;line-height:1.7"></div>
+    <button class="btn" onclick="closeRecap()" style="margin-top:14px">รับทราบ</button>
+  </div>
+</div>
+
 <!-- EDIT FOOD MODAL -->
 <div class="modal-bg hide" id="editModal">
   <div class="modal">
@@ -599,13 +641,18 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
   <button class="bnt" onclick="showPage('profile',this)"><span class="ico">👤</span>โปรไฟล์</button>
 </div>
 
+<!-- PHOTO VIEWER -->
+<div class="photo-viewer hide" id="photoViewer" onclick="closePhotoViewer()">
+  <img id="photoViewerImg" alt="meal photo">
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.5.0';
 
 // ═══ STORAGE LAYER ═══
 const LS_PROFILE = 'calpro_profile';
@@ -1057,8 +1104,37 @@ function addManual(){
   ['fName','fCal','fP','fC','fF'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('saveLib').checked=false;
 }
+let pendingPhoto=null;
+function loadPhotoForEntry(file){
+  if(!file)return;
+  if(file.size>3*1024*1024){showToast('รูปใหญ่เกินไป (สูงสุด 3MB)');return;}
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const SIZE=512;
+      const ratio=Math.min(SIZE/img.width,SIZE/img.height,1);
+      const w=Math.round(img.width*ratio),h=Math.round(img.height*ratio);
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      pendingPhoto=c.toDataURL('image/jpeg',0.78);
+      const prev=document.getElementById('photoPreview');
+      prev.src=pendingPhoto;prev.style.display='block';
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function openPhotoViewer(src){
+  document.getElementById('photoViewerImg').src=src;
+  document.getElementById('photoViewer').classList.remove('hide');
+}
+function closePhotoViewer(){document.getElementById('photoViewer').classList.add('hide');}
 function insertEntry(data){
   const row={id:uid(),entry_date:currentDate,created_at:new Date().toISOString(),...data};
+  if(pendingPhoto){row.photo=pendingPhoto;pendingPhoto=null;
+    const prev=document.getElementById('photoPreview');if(prev){prev.src='';prev.style.display='none';}
+  }
   dailyEntries.push(row);
   saveEntries_LS();
   renderToday();
@@ -1082,6 +1158,127 @@ function editFood(id){
   document.getElementById('editModal').classList.remove('hide');
 }
 function closeEditModal(){document.getElementById('editModal').classList.add('hide');}
+// ═══ SMART GOAL ADJUSTMENT ═══
+function checkSmartGoal(){
+  if(!userProfile||!userProfile.goal_type||userProfile.goal_type==='maintain')return;
+  const lastCheck=lsLoad('calpro_smart_goal_check',0);
+  const now=Date.now();
+  const FOUR_WEEKS=28*24*60*60*1000;
+  if(now-lastCheck<FOUR_WEEKS)return;
+  // Need at least 14 weight entries
+  const keys=Object.keys(allWeights).sort();
+  if(keys.length<14)return;
+  const recent=keys.slice(-28).map(k=>({k,v:allWeights[k]}));
+  const n=recent.length;if(n<14)return;
+  // Linear regression slope
+  const xs=recent.map((_,i)=>i);
+  const ys=recent.map(r=>r.v);
+  const mx=xs.reduce((a,b)=>a+b,0)/n;
+  const my=ys.reduce((a,b)=>a+b,0)/n;
+  let num=0,den=0;
+  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);den+=(xs[i]-mx)**2;}
+  const perWeek=(den?num/den:0)*7;
+  const goalDir=userProfile.goal_type;  // 'lose' or 'gain'
+  // Expected: lose ~0.5/week, gain ~0.3/week
+  const expected=goalDir==='lose'?-0.5:0.3;
+  const deviation=perWeek-expected;
+  // If too off-target, suggest
+  if(Math.abs(deviation)<0.15){lsSave('calpro_smart_goal_check',now);return;}
+  const cur=userProfile.goal_cal;
+  let suggested=cur;
+  let reason='';
+  if(goalDir==='lose'&&perWeek>-0.1){
+    suggested=Math.max(1200,cur-150);
+    reason=`น้ำหนักลดเพียง ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์ ในช่วง 4 สัปดาห์ที่ผ่านมา (เป้า −0.5) · แนะนำลด ${cur-suggested} kcal/วัน`;
+  }else if(goalDir==='lose'&&perWeek<-1){
+    suggested=cur+150;
+    reason=`น้ำหนักลดเร็วเกินไป ${perWeek.toFixed(2)} กก./สัปดาห์ · แนะนำเพิ่ม ${suggested-cur} kcal/วัน เพื่อรักษากล้ามเนื้อ`;
+  }else if(goalDir==='gain'&&perWeek<0.1){
+    suggested=cur+200;
+    reason=`น้ำหนักเพิ่มน้อย ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์ · แนะนำเพิ่ม ${suggested-cur} kcal/วัน`;
+  }else{lsSave('calpro_smart_goal_check',now);return;}
+  document.getElementById('smartGoalBody').innerHTML=`${reason}<br><br>เป้าปัจจุบัน: <strong>${cur.toLocaleString()} kcal/วัน</strong><br>แนะนำ: <strong style="color:var(--accent)">${suggested.toLocaleString()} kcal/วัน</strong>`;
+  document.getElementById('smartGoalApply').onclick=()=>{
+    userProfile.goal_cal=suggested;saveProfile_LS();
+    document.getElementById('hdrSub').textContent=(userProfile.display_name||'คุณ')+' · '+suggested.toLocaleString()+' kcal/วัน';
+    renderToday();
+    lsSave('calpro_smart_goal_check',now);
+    closeSmartGoal();
+    showToast('ปรับเป้าเป็น '+suggested.toLocaleString()+' kcal ✓');
+  };
+  lsSave('calpro_smart_goal_check',now);
+  document.getElementById('smartGoalModal').classList.remove('hide');
+}
+function closeSmartGoal(){document.getElementById('smartGoalModal').classList.add('hide');}
+
+// ═══ WEEKLY RECAP ═══
+function isoWeek(d){
+  const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);
+  const ys=new Date(Date.UTC(t.getUTCFullYear(),0,1));
+  return t.getUTCFullYear()+'-W'+String(Math.ceil(((t-ys)/86400000+1)/7)).padStart(2,'0');
+}
+function checkWeeklyRecap(){
+  const now=new Date();const curWeek=isoWeek(now);
+  const lastShown=lsLoad('calpro_recap_week',null);
+  if(lastShown===curWeek)return;
+  // Show only on Monday or later in the week (so Sunday data is in)
+  const day=now.getDay();
+  if(day===0)return;  // Wait for Monday
+  // Calculate previous week range
+  const prev=new Date(now);prev.setDate(now.getDate()-7);
+  const prevWeek=isoWeek(prev);
+  // Collect days that belong to the previous week
+  const prevDays=[];
+  for(let i=0;i<28;i++){const d=new Date(now);d.setDate(now.getDate()-i);if(isoWeek(d)===prevWeek)prevDays.push(dateKey(d));}
+  if(prevDays.length===0){lsSave('calpro_recap_week',curWeek);return;}
+  // Stats
+  const calArr=prevDays.map(k=>(allEntries[k]||[]).reduce((s,e)=>s+e.calories,0));
+  const logged=calArr.filter(c=>c>0).length;
+  if(logged===0){lsSave('calpro_recap_week',curWeek);return;}  // Skip if no data
+  const avg=Math.round(calArr.reduce((s,c)=>s+c,0)/Math.max(1,logged));
+  const wts=prevDays.map(k=>allWeights[k]).filter(Boolean);
+  const wDiff=wts.length>=2?(wts[wts.length-1]-wts[0]).toFixed(1):null;
+  const waterAvg=(prevDays.reduce((s,k)=>s+(allWater[k]||0),0)/prevDays.length).toFixed(1);
+  const goal=userProfile?.goal_cal||1800;
+  const onTrack=calArr.filter(c=>c>0&&c<=goal).length;
+  document.getElementById('recapBody').innerHTML=
+    `<div style="text-align:center;margin-bottom:12px;font-size:2rem">📊</div>`+
+    `<div class="rrow"><span class="rl">วันที่บันทึก</span><span class="rv">${logged}/${prevDays.length} วัน</span></div>`+
+    `<div class="rrow"><span class="rl">เฉลี่ย/วัน</span><span class="rv">${avg.toLocaleString()} kcal</span></div>`+
+    `<div class="rrow"><span class="rl">วันในเป้า</span><span class="rv" style="color:var(--green)">${onTrack} วัน</span></div>`+
+    (wDiff!==null?`<div class="rrow"><span class="rl">น้ำหนัก</span><span class="rv" style="color:${+wDiff>0?'var(--accent)':'var(--green)'}">${+wDiff>0?'+':''}${wDiff} กก.</span></div>`:'')+
+    `<div class="rrow"><span class="rl">น้ำดื่มเฉลี่ย</span><span class="rv" style="color:var(--blue)">${waterAvg} แก้ว/วัน</span></div>`;
+  lsSave('calpro_recap_week',curWeek);
+  document.getElementById('recapModal').classList.remove('hide');
+}
+function closeRecap(){document.getElementById('recapModal').classList.add('hide');}
+
+// ═══ MEAL REMINDERS (in-app) ═══
+const MEAL_TIMES=[{meal:'เช้า',hour:9,emoji:'🌅'},{meal:'กลางวัน',hour:14,emoji:'☀️'},{meal:'เย็น',hour:20,emoji:'🌙'}];
+function renderReminderBanner(){
+  const wrap=document.getElementById('reminderBanner');wrap.innerHTML='';
+  // Only show on today
+  if(currentDate!==todayKey())return;
+  if(lsLoad('calpro_dismissed_'+todayKey(),false))return;
+  const now=new Date();const hour=now.getHours();
+  // Find latest missed meal
+  let missed=null;
+  for(const m of MEAL_TIMES){
+    if(hour>=m.hour){
+      const has=dailyEntries.some(e=>e.meal===m.meal);
+      if(!has)missed=m;
+    }
+  }
+  if(!missed)return;
+  wrap.innerHTML=`<div class="banner"><div class="b-ico">${missed.emoji}</div><div class="b-txt">เลย${missed.hour}:00 แล้ว · ยังไม่ได้บันทึก<strong>มื้อ${missed.meal}</strong></div><button class="b-x" onclick="dismissReminder()">✕</button></div>`;
+  wrap.querySelector('.banner').onclick=(e)=>{if(e.target.classList.contains('b-x'))return; showPage('add',document.querySelectorAll('.bnt')[1]); document.getElementById('mealSel').value=missed.meal;};
+}
+function dismissReminder(){
+  lsSave('calpro_dismissed_'+todayKey(),true);
+  document.getElementById('reminderBanner').innerHTML='';
+}
+
 // ═══ WATER ═══
 function addWater(delta){
   const cur=allWater[currentDate]||0;
@@ -1186,7 +1383,7 @@ function renderToday(){
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
   document.getElementById('mCB').style.width=Math.min(totC/250*100,100).toFixed(1)+'%';
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
-  renderWaterWidget();renderWeightWidget();
+  renderWaterWidget();renderWeightWidget();renderReminderBanner();
   const log=document.getElementById('foodLog');
   if(!E.length){log.innerHTML='<div class="empty">ยังไม่มีรายการ<br>กด ➕ เพื่อบันทึกอาหาร</div>';return;}
   log.innerHTML='';
@@ -1201,7 +1398,12 @@ function renderToday(){
       if(item.amount_g)meta.push(item.amount_g+'g');
       if(item.protein)meta.push('P:'+item.protein);
       if(item.carbs)meta.push('C:'+item.carbs);
-      div.innerHTML=`<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="แก้ไข">✏️</button><button class="del" onclick="delFood('${item.id}')" title="ลบ">✕</button></div>`;
+      const photoHtml=item.photo?`<img src="${item.photo}" class="fi-photo" onclick="openPhotoViewer('${item.id}_photo')" data-id="${item.id}" alt="">`:'';
+      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="แก้ไข">✏️</button><button class="del" onclick="delFood('${item.id}')" title="ลบ">✕</button></div>`;
+      if(item.photo){
+        const imgEl=div.querySelector('.fi-photo');
+        imgEl.onclick=()=>openPhotoViewer(item.photo);
+      }
       g.appendChild(div);
     });
     log.appendChild(g);
@@ -1618,6 +1820,9 @@ function applyTDEEtoProfile(){
 // ═══ INIT ═══
 loadUserData();
 showApp();
+// Run smart checks shortly after load (so UI is mounted)
+setTimeout(()=>{checkWeeklyRecap();},800);
+setTimeout(()=>{checkSmartGoal();},2400);
 document.getElementById('appVer').textContent='v'+APP_VERSION;
 document.querySelectorAll('.ver-tag').forEach(e=>e.textContent='v'+APP_VERSION);
 
