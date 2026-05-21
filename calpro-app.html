@@ -6,6 +6,9 @@
 <meta name="description" content="ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก">
 <title>CalPro</title>
 
+<!-- Supabase SDK (optional · used only when cloud sync enabled) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <!-- PWA -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#ff6b6b">
@@ -548,6 +551,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         </div>
         <div class="tip" id="tipBox"></div>
       </div>
+      <div class="card" id="cloudCard">
+        <h3>☁️ <span data-i18n="cloud_sync">Cloud Sync</span></h3>
+        <div id="cloudStatus"></div>
+      </div>
+      <div class="card" id="friendsCard" style="display:none">
+        <h3>👥 <span data-i18n="friends">เพื่อน + Leaderboard</span></h3>
+        <div id="friendsBody"></div>
+      </div>
       <div class="card">
         <h3>📐 <span data-i18n="body_measurements">สัดส่วนร่างกาย</span></h3>
         <div class="pgrid">
@@ -595,6 +606,34 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
     <div class="modal-hdr"><h3>📅 สรุปสัปดาห์ที่แล้ว</h3><button class="mc-close" onclick="closeRecap()">✕</button></div>
     <div id="recapBody" style="font-size:.85rem;line-height:1.7"></div>
     <button class="btn" onclick="closeRecap()" style="margin-top:14px">รับทราบ</button>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-bg hide" id="authModal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>☁️ <span id="authTitle">เชื่อมต่อบัญชี</span></h3><button class="mc-close" onclick="closeAuthModal()">✕</button></div>
+    <div style="font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:12px">
+      <span data-i18n="cloud_help">เชื่อมต่อเพื่อ sync ข้อมูลข้ามเครื่อง · ฟรี · ลบบัญชีได้ตลอด</span>
+    </div>
+    <div style="display:flex;gap:5px;background:var(--surface2);border-radius:9px;padding:3px;margin-bottom:12px">
+      <button class="qtab active" id="authTabLogin" onclick="switchAuthMode('login')" data-i18n="login">เข้าสู่ระบบ</button>
+      <button class="qtab" id="authTabSignup" onclick="switchAuthMode('signup')" data-i18n="signup">สมัครสมาชิก</button>
+    </div>
+    <div id="signupNameWrap" class="fl" style="margin-bottom:10px;display:none">
+      <label data-i18n="display_name">ชื่อที่แสดง</label>
+      <input type="text" id="authName" placeholder="ชื่อของคุณ">
+    </div>
+    <div class="fl" style="margin-bottom:10px">
+      <label>Email</label>
+      <input type="email" id="authEmail" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="fl" style="margin-bottom:12px">
+      <label data-i18n="password">รหัสผ่าน</label>
+      <input type="password" id="authPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn" id="authSubmit" onclick="submitAuth()">เข้าสู่ระบบ</button>
+    <div id="authMsg" style="margin-top:10px;font-size:.78rem;text-align:center;min-height:18px"></div>
   </div>
 </div>
 
@@ -692,7 +731,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.1.0';
+
+// ═══ SUPABASE CONFIG ═══
+const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidHhzaG9kYWV6dHB0ZWdrZ3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMzM1MzgsImV4cCI6MjA5NDkwOTUzOH0.OdtByENjyyPU-NLWDftSOz4ODyMa-vmAF-7mq74St4I';
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+let cloudUser = null;     // current Supabase user (null if not signed in)
+let syncing = false;
 
 // ═══ i18n ═══
 const I18N = {
@@ -725,6 +771,9 @@ const I18N = {
     cute_avatars:'เลือกอวาตาร์น่ารัก ๆ',or:'หรือ',upload_photo:'📷 อัพโหลดรูป',use_initial:'ใช้ตัวอักษรแรก',
     workouts:'ออกกำลังกาย',add_workout:'+ เพิ่มออกกำลังกาย',duration_min:'นาที',kcal_burned:'kcal เผาผลาญ',
     body_measurements:'สัดส่วนร่างกาย',waist:'รอบเอว',hip:'รอบสะโพก',chest:'รอบอก',neck:'รอบคอ',bodyfat:'ไขมัน %',
+    cloud_sync:'Cloud Sync',cloud_help:'เชื่อมต่อเพื่อ sync ข้อมูลข้ามเครื่อง · ฟรี · ลบบัญชีได้ตลอด',
+    login:'เข้าสู่ระบบ',signup:'สมัครสมาชิก',password:'รหัสผ่าน',display_name:'ชื่อที่แสดง',
+    friends:'เพื่อน + Leaderboard',
   },
   en:{
     welcome:'Welcome',
@@ -755,6 +804,9 @@ const I18N = {
     cute_avatars:'Pick a cute avatar',or:'Or',upload_photo:'📷 Upload photo',use_initial:'Use initial letter',
     workouts:'Workouts',add_workout:'+ Add workout',duration_min:'min',kcal_burned:'kcal burned',
     body_measurements:'Body measurements',waist:'Waist',hip:'Hip',chest:'Chest',neck:'Neck',bodyfat:'Body fat %',
+    cloud_sync:'Cloud Sync',cloud_help:'Sync your data across devices · Free · Delete account anytime',
+    login:'Sign in',signup:'Sign up',password:'Password',display_name:'Display name',
+    friends:'Friends + Leaderboard',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -1354,6 +1406,274 @@ function renderMeasurements(){
   }else{document.getElementById('measureHistory').innerHTML='';}
 }
 
+// ═══ CLOUD SYNC (Supabase) ═══
+let authMode='login';
+function openAuthModal(mode){
+  authMode=mode||'login';
+  switchAuthMode(authMode);
+  document.getElementById('authEmail').value='';
+  document.getElementById('authPass').value='';
+  document.getElementById('authMsg').textContent='';
+  document.getElementById('authModal').classList.remove('hide');
+}
+function closeAuthModal(){document.getElementById('authModal').classList.add('hide');}
+function switchAuthMode(mode){
+  authMode=mode;
+  document.getElementById('authTabLogin').classList.toggle('active',mode==='login');
+  document.getElementById('authTabSignup').classList.toggle('active',mode==='signup');
+  document.getElementById('signupNameWrap').style.display=mode==='signup'?'block':'none';
+  document.getElementById('authTitle').textContent=mode==='login'?(settings.lang==='en'?'Sign in':'เข้าสู่ระบบ'):(settings.lang==='en'?'Sign up':'สมัครสมาชิก');
+  document.getElementById('authSubmit').textContent=mode==='login'?(settings.lang==='en'?'Sign in':'เข้าสู่ระบบ'):(settings.lang==='en'?'Create account':'สร้างบัญชี');
+}
+async function submitAuth(){
+  if(!sb){showToast('Supabase ไม่พร้อม');return;}
+  const email=document.getElementById('authEmail').value.trim();
+  const pass=document.getElementById('authPass').value;
+  const msgEl=document.getElementById('authMsg');
+  if(!email||!pass){msgEl.style.color='var(--accent)';msgEl.textContent='ใส่อีเมล + รหัสผ่าน';return;}
+  msgEl.style.color='var(--muted)';msgEl.textContent='กำลังดำเนินการ...';
+  try{
+    if(authMode==='login'){
+      const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+      msgEl.style.color='var(--green)';msgEl.textContent='เข้าสู่ระบบสำเร็จ ✓';
+    }else{
+      const name=document.getElementById('authName').value.trim()||email.split('@')[0];
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{display_name:name}}});
+      if(error)throw error;
+      msgEl.style.color='var(--green)';
+      msgEl.textContent=data.session?'สมัครสำเร็จ ✓':'สมัครสำเร็จ! กรุณายืนยันอีเมล (ถ้าเปิด confirm email)';
+    }
+    setTimeout(()=>closeAuthModal(),700);
+  }catch(e){
+    msgEl.style.color='var(--accent)';msgEl.textContent=e.message||'ผิดพลาด';
+  }
+}
+async function signOutCloud(){
+  if(!confirm(settings.lang==='en'?'Sign out? Local data stays.':'ออกจากระบบ? ข้อมูลในเครื่องยังอยู่ครับ'))return;
+  await sb.auth.signOut();
+}
+async function deleteCloudAccount(){
+  if(!confirm(settings.lang==='en'?'Delete cloud data ONLY (local data stays)?':'ลบเฉพาะข้อมูลใน cloud (ข้อมูลในเครื่องยังอยู่)?'))return;
+  try{
+    const uid=cloudUser.id;
+    await Promise.all([
+      sb.from('food_entries').delete().eq('user_id',uid),
+      sb.from('weights').delete().eq('user_id',uid),
+      sb.from('water').delete().eq('user_id',uid),
+      sb.from('workouts').delete().eq('user_id',uid),
+      sb.from('body_measures').delete().eq('user_id',uid),
+      sb.from('favorites').delete().eq('user_id',uid),
+      sb.from('custom_foods').delete().eq('user_id',uid),
+      sb.from('friends').delete().eq('user_id',uid),
+    ]);
+    showToast('ลบข้อมูลใน cloud แล้ว');
+  }catch(e){showToast('ลบไม่สำเร็จ: '+e.message);}
+}
+
+// Auth state listener
+if(sb){
+  sb.auth.onAuthStateChange(async (event,session)=>{
+    cloudUser=session?.user||null;
+    if(cloudUser){
+      await syncFromCloud();
+      await syncToCloud();
+    }
+    renderCloudStatus();
+    renderToday();
+  });
+}
+
+function renderCloudStatus(){
+  const wrap=document.getElementById('cloudStatus');if(!wrap)return;
+  if(!sb){wrap.innerHTML='<div style="font-size:.78rem;color:var(--muted)">Supabase SDK โหลดไม่ได้</div>';return;}
+  if(!cloudUser){
+    wrap.innerHTML=
+      `<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;line-height:1.5">${settings.lang==='en'?'Not signed in · Data stored in this browser only':'ยังไม่เชื่อมต่อ · ข้อมูลอยู่ในเบราว์เซอร์นี้เท่านั้น'}</div>`+
+      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">`+
+        `<button class="btn-sec" onclick="openAuthModal('login')">${settings.lang==='en'?'Sign in':'เข้าสู่ระบบ'}</button>`+
+        `<button class="btn" style="padding:8px" onclick="openAuthModal('signup')">${settings.lang==='en'?'Sign up':'สมัครสมาชิก'}</button>`+
+      `</div>`;
+  }else{
+    const lastSync=lsLoad('calpro_last_sync',null);
+    const lastTxt=lastSync?new Date(lastSync).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    wrap.innerHTML=
+      `<div style="font-size:.82rem;margin-bottom:4px">✓ <strong>${cloudUser.email}</strong></div>`+
+      `<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">${settings.lang==='en'?'Last sync':'ซิงค์ล่าสุด'}: ${lastTxt}</div>`+
+      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">`+
+        `<button class="btn-sec" onclick="manualSync()" ${syncing?'disabled':''}>${syncing?'⏳ ...':'🔄 '+(settings.lang==='en'?'Sync now':'ซิงค์เลย')}</button>`+
+        `<button class="btn-sec" onclick="signOutCloud()">${settings.lang==='en'?'Sign out':'ออกจากระบบ'}</button>`+
+      `</div>`+
+      `<button class="btn-danger" onclick="deleteCloudAccount()" style="font-size:.74rem;padding:7px">${settings.lang==='en'?'Delete cloud data':'ลบข้อมูลใน cloud'}</button>`;
+  }
+}
+
+// ═══ FRIENDS (cloud-only) ═══
+async function renderFriendsCard(){
+  const card=document.getElementById('friendsCard');
+  const body=document.getElementById('friendsBody');
+  if(!card||!body)return;
+  if(!cloudUser){card.style.display='none';return;}
+  card.style.display='block';
+  body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${settings.lang==='en'?'Loading...':'กำลังโหลด...'}</div>`;
+  try{
+    // Load friends list
+    const {data:fr}=await sb.from('friends').select('friend_id, profiles!friends_friend_id_fkey(id,display_name,avatar,goal_cal)').eq('user_id',cloudUser.id);
+    const friendsList=(fr||[]).map(x=>x.profiles).filter(Boolean);
+    // Build leaderboard: self + friends
+    const allUsers=[{id:cloudUser.id,display_name:userProfile?.display_name||'คุณ',avatar:userProfile?.avatar,goal_cal:userProfile?.goal_cal||1800},...friendsList];
+    const scores=[];
+    for(const u of allUsers){
+      const {data}=await sb.from('food_entries').select('entry_date,calories').eq('user_id',u.id);
+      const ebd={};(data||[]).forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);});
+      const score=daysOnTrack(ebd)*10+calcStreak(ebd)*5;
+      scores.push({...u,score,streak:calcStreak(ebd),onTrack:daysOnTrack(ebd)});
+    }
+    scores.sort((a,b)=>b.score-a.score);
+    let html='';
+    scores.forEach((u,i)=>{
+      const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
+      const isMe=u.id===cloudUser.id;
+      const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
+      html+=`<div class="lb-item${isMe?' me':''}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
+        `<div style="width:22px;text-align:center;font-weight:700">${rank}</div>`+
+        av+
+        `<div style="flex:1"><div style="font-size:.84rem;font-weight:600">${u.display_name||'?'}${isMe?' (คุณ)':''}</div><div style="font-size:.68rem;color:var(--muted)">Streak ${u.streak} · ในเป้า ${u.onTrack} วัน</div></div>`+
+        `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div></div>`;
+    });
+    body.innerHTML=html+`<button class="btn-sec" onclick="addFriendPrompt()" style="width:100%;margin-top:6px">+ ${settings.lang==='en'?'Add friend by email':'เพิ่มเพื่อนด้วยอีเมล'}</button>`;
+  }catch(e){body.innerHTML=`<div class="empty" style="padding:10px 0">โหลดไม่สำเร็จ: ${e.message}</div>`;}
+}
+async function addFriendPrompt(){
+  const email=prompt(settings.lang==='en'?'Friend email:':'อีเมลของเพื่อน:');
+  if(!email)return;
+  const {data:prof,error}=await sb.from('profiles').select('id,display_name').eq('email',email.trim()).maybeSingle();
+  if(error||!prof){showToast(settings.lang==='en'?'User not found':'ไม่พบผู้ใช้');return;}
+  if(prof.id===cloudUser.id){showToast(settings.lang==='en'?'Cannot add yourself':'เพิ่มตัวเองไม่ได้');return;}
+  const {error:e2}=await sb.from('friends').insert({user_id:cloudUser.id,friend_id:prof.id});
+  if(e2){showToast(e2.message);return;}
+  showToast((settings.lang==='en'?'Added ':'เพิ่ม ')+prof.display_name+' ✓');
+  renderFriendsCard();
+}
+
+async function manualSync(){
+  if(!cloudUser)return;
+  syncing=true;renderCloudStatus();
+  try{await syncFromCloud();await syncToCloud();showToast(settings.lang==='en'?'Sync complete ✓':'ซิงค์เสร็จ ✓');}
+  catch(e){showToast('Sync error: '+e.message);}
+  finally{syncing=false;renderCloudStatus();renderToday();}
+}
+
+// PUSH localStorage → cloud
+async function syncToCloud(){
+  if(!cloudUser||!sb)return;
+  const uid=cloudUser.id;
+  try{
+    // 1. Profile (upsert)
+    if(userProfile){
+      const p={...userProfile,id:uid,email:cloudUser.email,updated_at:new Date().toISOString()};
+      delete p.created_at;
+      await sb.from('profiles').upsert(p,{onConflict:'id'});
+    }
+    // 2. Food entries (upsert by client_id)
+    const entries=[];
+    Object.entries(allEntries).forEach(([date,arr])=>{
+      (arr||[]).forEach(e=>{
+        entries.push({
+          user_id:uid,entry_date:date,
+          food_name:e.food_name,calories:e.calories,
+          protein:e.protein||0,carbs:e.carbs||0,fat:e.fat||0,
+          amount_g:e.amount_g,meal:e.meal,photo:e.photo||null,
+          client_id:e.id,
+        });
+      });
+    });
+    if(entries.length){
+      // Delete existing then re-insert (simpler than upsert by client_id)
+      await sb.from('food_entries').delete().eq('user_id',uid);
+      // Chunk into 100s to avoid payload limits
+      for(let i=0;i<entries.length;i+=100){
+        await sb.from('food_entries').insert(entries.slice(i,i+100));
+      }
+    }
+    // 3. Weights (upsert)
+    const weights=Object.entries(allWeights).map(([d,kg])=>({user_id:uid,entry_date:d,kg}));
+    if(weights.length)await sb.from('weights').upsert(weights,{onConflict:'user_id,entry_date'});
+    // 4. Water
+    const waters=Object.entries(allWater).map(([d,cups])=>({user_id:uid,entry_date:d,cups}));
+    if(waters.length)await sb.from('water').upsert(waters,{onConflict:'user_id,entry_date'});
+    // 5. Workouts
+    const workouts=[];
+    Object.entries(allWorkouts).forEach(([d,arr])=>(arr||[]).forEach(w=>{
+      workouts.push({user_id:uid,entry_date:d,name:w.name,name_en:w.name_en,met:w.met,minutes:w.minutes,kcal:w.kcal,client_id:w.id});
+    }));
+    if(workouts.length){
+      await sb.from('workouts').delete().eq('user_id',uid);
+      for(let i=0;i<workouts.length;i+=100)await sb.from('workouts').insert(workouts.slice(i,i+100));
+    }
+    // 6. Body measures
+    const measures=Object.entries(allMeasures).map(([d,m])=>({user_id:uid,entry_date:d,...m}));
+    if(measures.length)await sb.from('body_measures').upsert(measures,{onConflict:'user_id,entry_date'});
+    // 7. Favorites
+    if(favorites.length){
+      await sb.from('favorites').delete().eq('user_id',uid);
+      await sb.from('favorites').insert(favorites.map(n=>({user_id:uid,food_name:n})));
+    }
+    // 8. Custom foods (replace all)
+    if(customFoods.length){
+      await sb.from('custom_foods').delete().eq('user_id',uid);
+      await sb.from('custom_foods').insert(customFoods.map(f=>({user_id:uid,name:f.n,name_en:f.e||'',calories:f.c,protein:f.p,carbs:f.cb,fat:f.f,amount_g:f.a})));
+    }
+    lsSave('calpro_last_sync',new Date().toISOString());
+  }catch(e){console.error('syncToCloud error',e);throw e;}
+}
+
+// PULL cloud → localStorage (merge, cloud wins for conflicts)
+async function syncFromCloud(){
+  if(!cloudUser||!sb)return;
+  const uid=cloudUser.id;
+  try{
+    // Profile
+    const {data:p}=await sb.from('profiles').select('*').eq('id',uid).single();
+    if(p){
+      userProfile={...userProfile,...p};
+      saveProfile_LS();
+    }
+    // Food entries
+    const {data:fe}=await sb.from('food_entries').select('*').eq('user_id',uid);
+    if(fe){
+      const grouped={};
+      fe.forEach(e=>{
+        if(!grouped[e.entry_date])grouped[e.entry_date]=[];
+        grouped[e.entry_date].push({id:e.client_id||e.id,food_name:e.food_name,calories:e.calories,protein:e.protein,carbs:e.carbs,fat:e.fat,amount_g:e.amount_g,meal:e.meal,photo:e.photo,entry_date:e.entry_date,created_at:e.created_at});
+      });
+      allEntries=grouped;lsSave(LS_ENTRIES,allEntries);loadEntries();
+    }
+    // Weights
+    const {data:wts}=await sb.from('weights').select('*').eq('user_id',uid);
+    if(wts){allWeights={};wts.forEach(w=>allWeights[w.entry_date]=+w.kg);lsSave(LS_WEIGHTS,allWeights);}
+    // Water
+    const {data:wat}=await sb.from('water').select('*').eq('user_id',uid);
+    if(wat){allWater={};wat.forEach(w=>allWater[w.entry_date]=w.cups);lsSave(LS_WATER,allWater);}
+    // Workouts
+    const {data:wk}=await sb.from('workouts').select('*').eq('user_id',uid);
+    if(wk){
+      const grp={};
+      wk.forEach(w=>{if(!grp[w.entry_date])grp[w.entry_date]=[];grp[w.entry_date].push({id:w.client_id||w.id,name:w.name,name_en:w.name_en,met:+w.met,minutes:w.minutes,kcal:w.kcal});});
+      allWorkouts=grp;lsSave(LS_WORKOUTS,allWorkouts);
+    }
+    // Body measures
+    const {data:bm}=await sb.from('body_measures').select('*').eq('user_id',uid);
+    if(bm){allMeasures={};bm.forEach(m=>allMeasures[m.entry_date]={waist:+m.waist||null,hip:+m.hip||null,chest:+m.chest||null,neck:+m.neck||null});lsSave(LS_MEASURES,allMeasures);}
+    // Favorites
+    const {data:fv}=await sb.from('favorites').select('food_name').eq('user_id',uid);
+    if(fv){favorites=fv.map(f=>f.food_name);lsSave(LS_FAVORITES,favorites);}
+    // Custom foods
+    const {data:cf}=await sb.from('custom_foods').select('*').eq('user_id',uid);
+    if(cf){customFoods=cf.map(f=>({n:f.name,e:f.name_en,c:f.calories,p:+f.protein,cb:+f.carbs,f:+f.fat,a:f.amount_g,cat:'custom'}));lsSave(LS_CUSTOM,customFoods);}
+  }catch(e){console.error('syncFromCloud error',e);throw e;}
+}
+
 // ═══ WORKOUTS ═══
 function openWorkoutModal(){
   const sel=document.getElementById('wkType');sel.innerHTML='';
@@ -1829,6 +2149,8 @@ function renderProfileUI(){
   document.getElementById('pAct').value=p.activity||1.55;
   document.querySelectorAll('#pg-profile .gchip').forEach(b=>b.classList.toggle('active',b.dataset.g===(p.goal_type||'lose')));
   renderMeasurements();
+  renderCloudStatus();
+  renderFriendsCard();
 }
 
 // ═══ SETTINGS / THEME ═══
