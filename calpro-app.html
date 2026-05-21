@@ -102,6 +102,33 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .mc-b{background:var(--surface2);border-radius:99px;height:3px;margin-top:4px;overflow:hidden;}
 .mc-bf{height:100%;border-radius:99px;transition:width .5s;}
 
+/* ── WATER / WEIGHT WIDGETS ── */
+.wwrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.wwcard{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 12px;}
+.wwcard h4{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.wwval{font-size:1rem;font-weight:700;}
+.water-dots{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
+.wd{width:14px;height:18px;border-radius:3px 3px 7px 7px;background:var(--surface2);border:1px solid var(--border);transition:background .15s;cursor:pointer;}
+.wd.full{background:var(--blue);border-color:var(--blue);}
+.water-ctrl{display:flex;gap:5px;margin-top:5px;}
+.water-ctrl button{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px;font-size:.78rem;cursor:pointer;font-family:inherit;}
+.water-ctrl button:hover{border-color:var(--blue);}
+.weight-input{display:flex;gap:5px;align-items:center;margin-top:4px;}
+.weight-input input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px 8px;font-size:.85rem;outline:none;font-family:inherit;}
+.weight-input input:focus{border-color:var(--accent);}
+.weight-input button{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:.78rem;cursor:pointer;font-family:inherit;font-weight:600;}
+.weight-trend{font-size:.65rem;color:var(--muted);margin-top:3px;}
+.weight-trend.up{color:var(--accent);}
+.weight-trend.down{color:var(--green);}
+
+/* ── CHART ── */
+.lc-wrap{width:100%;overflow:hidden;}
+.lc-wrap svg{width:100%;height:auto;display:block;}
+.lc-axis{stroke:var(--border);stroke-width:1;}
+.lc-line{fill:none;stroke-width:2;}
+.lc-dot{stroke-width:0;}
+.lc-trend{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3;fill:none;opacity:.6;}
+
 /* ── FOOD LOG ── */
 .mg{margin-bottom:12px;}
 .mg-hdr{font-size:.73rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:5px;}
@@ -278,6 +305,26 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <div class="mc"><div class="mc-l">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--amber)">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--amber)"></div></div></div>
         <div class="mc"><div class="mc-l">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--purple)">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--purple)"></div></div></div>
       </div>
+      <div class="wwrow">
+        <div class="wwcard">
+          <h4>💧 น้ำดื่ม</h4>
+          <div class="wwval"><span id="waterCount">0</span>/<span>8</span> แก้ว</div>
+          <div class="water-dots" id="waterDots"></div>
+          <div class="water-ctrl">
+            <button onclick="addWater(-1)">−</button>
+            <button onclick="addWater(1)">+</button>
+          </div>
+        </div>
+        <div class="wwcard">
+          <h4>⚖️ น้ำหนัก</h4>
+          <div class="wwval"><span id="weightToday">—</span> กก.</div>
+          <div class="weight-input">
+            <input type="number" id="weightInput" step="0.1" min="20" max="300" placeholder="กรอก...">
+            <button onclick="logWeight()">บันทึก</button>
+          </div>
+          <div class="weight-trend" id="weightTrend"></div>
+        </div>
+      </div>
       <div id="foodLog"></div>
       <button class="btn-sec" onclick="shareDaily()" style="width:100%;margin-top:8px">📤 แชร์สรุปวันนี้</button>
     </div>
@@ -310,7 +357,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 
     <!-- ANALYSIS -->
     <div class="screen" id="pg-analysis">
-      <div class="card"><h3>7 วันล่าสุด</h3><div class="wbars" id="wBars"></div><div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div></div>
+      <div class="card"><h3>แคลอรี่ 7 วัน</h3><div class="wbars" id="wBars"></div><div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div></div>
+      <div class="card"><h3>น้ำหนัก 30 วัน</h3><div class="lc-wrap" id="weightChart"></div><div id="weightSum" style="font-size:.74rem;color:var(--muted);margin-top:6px;text-align:center"></div></div>
+      <div class="card"><h3>น้ำดื่ม 7 วัน</h3><div id="waterStats"></div></div>
       <div class="card"><h3>สรุป</h3><div id="wkSum"></div></div>
       <div class="card"><h3>คำแนะนำ</h3><div id="insDiv"></div></div>
       <div class="card">
@@ -539,12 +588,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 
 // ═══ STORAGE LAYER ═══
 const LS_PROFILE = 'calpro_profile';
 const LS_ENTRIES = 'calpro_entries';  // { 'YYYY-MM-DD': [entry, ...] }
 const LS_SETTINGS = 'calpro_settings';
+const LS_WEIGHTS = 'calpro_weights';   // { 'YYYY-MM-DD': number }
+const LS_WATER = 'calpro_water';       // { 'YYYY-MM-DD': number (cups) }
 
 function lsLoad(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
 function lsSave(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
@@ -621,10 +672,13 @@ const ACCENTS=['#ff6b6b','#ffa94d','#51cf66','#74c0fc','#b197fc','#f783ac','#ffd
 let userProfile = null;
 let allEntries = {};  // { 'YYYY-MM-DD': [...] }
 let dailyEntries = [];
+let allWeights = {};  // { date: kg }
+let allWater = {};    // { date: cups }
 let currentDate = todayKey();
 let activeCat = 'thai';
 let settings = {theme:'dark', accent:'#ff6b6b'};
 let tdeeGoalType = 'lose';
+const WATER_GOAL = 8;
 
 // ═══ HELPERS ═══
 function dateKey(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${da}`;}
@@ -666,6 +720,8 @@ function loadUserData(){
     age: 25, gender: 'male', activity: 1.55, goal_type: 'lose', goal_weight: 60
   });
   allEntries = lsLoad(LS_ENTRIES, {});
+  allWeights = lsLoad(LS_WEIGHTS, {});
+  allWater = lsLoad(LS_WATER, {});
   loadEntries();
   const ls = lsLoad(LS_SETTINGS, null);
   if (ls) settings = ls;
@@ -682,9 +738,11 @@ function saveEntries_LS(){
   lsSave(LS_ENTRIES, allEntries);
 }
 function resetAllData(){
-  if (!confirm('ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหารทุกวัน)? ไม่สามารถกู้คืนได้')) return;
+  if (!confirm('ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหาร + น้ำหนัก + น้ำดื่ม)? ไม่สามารถกู้คืนได้')) return;
   localStorage.removeItem(LS_PROFILE);
   localStorage.removeItem(LS_ENTRIES);
+  localStorage.removeItem(LS_WEIGHTS);
+  localStorage.removeItem(LS_WATER);
   showToast('ล้างข้อมูลแล้ว');
   setTimeout(()=>location.reload(), 800);
 }
@@ -697,6 +755,8 @@ function exportData(){
     exported_at:new Date().toISOString(),
     profile:userProfile,
     entries:allEntries,
+    weights:allWeights,
+    water:allWater,
     settings:settings,
   };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -722,6 +782,8 @@ function importData(file){
       if(!confirm(msg))return;
       lsSave(LS_PROFILE,data.profile);
       lsSave(LS_ENTRIES,data.entries);
+      if(data.weights)lsSave(LS_WEIGHTS,data.weights);
+      if(data.water)lsSave(LS_WATER,data.water);
       if(data.settings)lsSave(LS_SETTINGS,data.settings);
       showToast('Import สำเร็จ · กำลังโหลด...');
       setTimeout(()=>location.reload(),800);
@@ -842,6 +904,65 @@ function editFood(id){
   document.getElementById('editModal').classList.remove('hide');
 }
 function closeEditModal(){document.getElementById('editModal').classList.add('hide');}
+// ═══ WATER ═══
+function addWater(delta){
+  const cur=allWater[currentDate]||0;
+  const next=Math.max(0,Math.min(20,cur+delta));
+  allWater[currentDate]=next;
+  lsSave(LS_WATER,allWater);
+  renderWaterWidget();
+}
+function renderWaterWidget(){
+  const cur=allWater[currentDate]||0;
+  document.getElementById('waterCount').textContent=cur;
+  const dots=document.getElementById('waterDots');dots.innerHTML='';
+  const total=Math.max(WATER_GOAL,cur);
+  for(let i=0;i<total;i++){
+    const d=document.createElement('div');d.className='wd'+(i<cur?' full':'');
+    d.onclick=()=>{allWater[currentDate]=i+1;lsSave(LS_WATER,allWater);renderWaterWidget();};
+    dots.appendChild(d);
+  }
+}
+
+// ═══ WEIGHT ═══
+function logWeight(){
+  const v=+document.getElementById('weightInput').value;
+  if(!v||v<20||v>300){showToast('กรอกน้ำหนักเป็นกก. (20-300)');return;}
+  allWeights[currentDate]=v;
+  lsSave(LS_WEIGHTS,allWeights);
+  // Auto-sync profile weight if logging today
+  if(currentDate===todayKey()){
+    userProfile.weight=v;
+    saveProfile_LS();
+  }
+  document.getElementById('weightInput').value='';
+  renderWeightWidget();renderProfileUI();
+  showToast('บันทึกน้ำหนัก '+v+' กก. ✓');
+}
+function renderWeightWidget(){
+  const w=allWeights[currentDate];
+  document.getElementById('weightToday').textContent=w?w.toFixed(1):'—';
+  // Trend over last 14 days
+  const keys=Object.keys(allWeights).sort();
+  const recent=keys.slice(-14).map(k=>({k,v:allWeights[k]}));
+  const t=document.getElementById('weightTrend');
+  if(recent.length<2){t.textContent='บันทึกอย่างน้อย 2 วันเพื่อดูแนวโน้ม';t.className='weight-trend';return;}
+  // Linear regression slope (kg per day)
+  const n=recent.length;
+  const xs=recent.map((_,i)=>i);
+  const ys=recent.map(r=>r.v);
+  const mx=xs.reduce((a,b)=>a+b,0)/n;
+  const my=ys.reduce((a,b)=>a+b,0)/n;
+  let num=0,den=0;
+  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);den+=(xs[i]-mx)**2;}
+  const slope=den?num/den:0;
+  const perWeek=slope*7;
+  const cls=perWeek>0.05?'up':perWeek<-0.05?'down':'';
+  const arrow=perWeek>0.05?'↑':perWeek<-0.05?'↓':'→';
+  t.textContent=`${arrow} ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์ (${n} วัน)`;
+  t.className='weight-trend '+cls;
+}
+
 function saveEditedFood(){
   const id=document.getElementById('editId').value;
   const i=dailyEntries.findIndex(x=>x.id===id);if(i<0)return;
@@ -887,6 +1008,7 @@ function renderToday(){
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
   document.getElementById('mCB').style.width=Math.min(totC/250*100,100).toFixed(1)+'%';
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
+  renderWaterWidget();renderWeightWidget();
   const log=document.getElementById('foodLog');
   if(!E.length){log.innerHTML='<div class="empty">ยังไม่มีรายการ<br>กด ➕ เพื่อบันทึกอาหาร</div>';return;}
   log.innerHTML='';
@@ -909,7 +1031,72 @@ function renderToday(){
 }
 
 // ═══ ANALYSIS ═══
+function renderWeightChart(){
+  const keys=Object.keys(allWeights).sort();
+  const recent=keys.slice(-30).map(k=>({k,v:allWeights[k]}));
+  const wrap=document.getElementById('weightChart');
+  const sum=document.getElementById('weightSum');
+  if(recent.length<2){wrap.innerHTML='<div class="empty" style="padding:20px 0;font-size:.78rem">บันทึกอย่างน้อย 2 วันเพื่อดูกราฟ</div>';sum.textContent='';return;}
+  const W=320,H=120,PAD=8;
+  const vs=recent.map(r=>r.v);
+  const minV=Math.min(...vs),maxV=Math.max(...vs);
+  const range=Math.max(0.5,maxV-minV);
+  const yMin=minV-range*0.1,yMax=maxV+range*0.1;
+  const n=recent.length;
+  const xstep=(W-PAD*2)/(n-1||1);
+  // Linear regression for trend line
+  const xs=recent.map((_,i)=>i);
+  const mx=xs.reduce((a,b)=>a+b,0)/n;
+  const my=vs.reduce((a,b)=>a+b,0)/n;
+  let num=0,den=0;
+  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(vs[i]-my);den+=(xs[i]-mx)**2;}
+  const slope=den?num/den:0;
+  const intercept=my-slope*mx;
+  const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#ff6b6b';
+  const yPx=v=>PAD+(H-PAD*2)*(1-(v-yMin)/(yMax-yMin));
+  const pts=recent.map((r,i)=>[PAD+i*xstep,yPx(r.v)]);
+  const path=pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const trendStart=yPx(intercept);
+  const trendEnd=yPx(intercept+slope*(n-1));
+  const dots=pts.map(p=>`<circle class="lc-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="${accent}"/>`).join('');
+  wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+
+    `<line class="lc-trend" x1="${PAD}" y1="${trendStart.toFixed(1)}" x2="${PAD+(n-1)*xstep}" y2="${trendEnd.toFixed(1)}"/>`+
+    `<path class="lc-line" d="${path}" stroke="${accent}"/>`+dots+`</svg>`+
+    `<div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:2px"><span>${recent[0].k.slice(5)}</span><span>${maxV.toFixed(1)}–${minV.toFixed(1)} กก.</span><span>${recent[n-1].k.slice(5)}</span></div>`;
+  const startV=recent[0].v,endV=recent[n-1].v;
+  const totalDiff=endV-startV;
+  const perWeek=slope*7;
+  const arrow=totalDiff>0.1?'↑':totalDiff<-0.1?'↓':'→';
+  const cls=totalDiff>0.1?'color:var(--accent)':totalDiff<-0.1?'color:var(--green)':'';
+  sum.innerHTML=`<span style="${cls}">${arrow} ${totalDiff>0?'+':''}${totalDiff.toFixed(1)} กก. ใน ${n} วัน</span> · เฉลี่ย ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์`;
+}
+function renderWaterStats(){
+  const days7=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const k=dateKey(d);
+    days7.push({k,c:allWater[k]||0,label:d.toLocaleDateString('th-TH',{weekday:'short'})});
+  }
+  const hit=days7.filter(d=>d.c>=WATER_GOAL).length;
+  const avg=days7.reduce((s,d)=>s+d.c,0)/7;
+  const wrap=document.getElementById('waterStats');
+  const bars=days7.map(d=>{
+    const pct=Math.min(d.c/WATER_GOAL,1);
+    const hue=d.c>=WATER_GOAL?'var(--blue)':'var(--surface2)';
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">`+
+      `<div style="width:14px;height:48px;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden">`+
+        `<div style="position:absolute;bottom:0;left:0;right:0;height:${(pct*100).toFixed(1)}%;background:${hue};transition:height .3s"></div>`+
+      `</div>`+
+      `<div style="font-size:.58rem;color:var(--muted)">${d.label}</div>`+
+      `<div style="font-size:.55rem;color:var(--muted)">${d.c||''}</div>`+
+    `</div>`;
+  }).join('');
+  wrap.innerHTML=`<div style="display:flex;gap:5px;justify-content:space-between;margin-bottom:8px">${bars}</div>`+
+    `<div class="rrow"><span class="rl">บรรลุเป้า 8 แก้ว</span><span class="rv" style="color:var(--blue)">${hit}/7 วัน</span></div>`+
+    `<div class="rrow"><span class="rl">เฉลี่ย/วัน</span><span class="rv">${avg.toFixed(1)} แก้ว</span></div>`;
+}
 function renderAnalysis(){
+  renderWeightChart();renderWaterStats();
   const days=[];
   for(let i=6;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);

@@ -6,15 +6,19 @@
 
 ## ฟีเจอร์
 
-- 🏠 บันทึกอาหารแบบ real-time (เช้า/กลางวัน/เย็น/ของว่าง)
+- 🏠 บันทึกอาหารแบบ real-time (เช้า/กลางวัน/เย็น/ของว่าง) · แก้ไข/ลบรายการได้
 - 🔥 เครื่องคำนวณ **TDEE / BMR / BMI** สูตร Harris-Benedict (revised 1984)
-- 📊 วิเคราะห์ 7 วันล่าสุด + เหรียญตรา (badges)
+- ⚖️ บันทึกน้ำหนักรายวัน + กราฟ 30 วัน พร้อมแนวโน้ม (linear regression)
+- 💧 ติดตามน้ำดื่ม 8 แก้ว/วัน · สถิติ 7 วัน
+- 📊 วิเคราะห์ trends ทั้งหมด + เหรียญตรา (badges)
 - 🍽️ ฐานข้อมูลอาหาร 40+ รายการ (ไทย/ญี่ปุ่น/เกาหลี/อิตาเลียน/อินเดีย/fast food/healthy)
 - 🎨 8 ธีม (5 dark + 3 light) + 8 สี accent · toggle ☀️/🌙 ที่ header
 - 🦊 รูปประจำตัว — เลือก emoji หรืออัพโหลดรูปจากเครื่อง
+- 💾 Export/Import JSON backup — ย้ายข้อมูลข้ามเครื่องได้
 - 📤 แชร์สรุปวันนี้ / ความสำเร็จ (badges, streak)
-- 📱 **PWA** — ติดตั้งบน Android/iOS, ใช้งาน offline ได้
-- 💾 เก็บข้อมูลใน localStorage (ไม่ต้องล็อคอิน, ไม่มี backend)
+- 📅 เลือกวันที่จาก calendar picker โดยตรง
+- 📱 **PWA** — ติดตั้งบน Android/iOS, ใช้งาน offline ได้, แจ้งเตือนเมื่อมีเวอร์ชั่นใหม่
+- 🔒 ข้อมูลทั้งหมดเก็บใน localStorage บนเครื่อง (ไม่ต้องล็อคอิน, ไม่มี backend)
 
 ## โครงสร้าง
 
@@ -41,5 +45,7 @@ icon-*.png             ← App icons
 
 ## เวอร์ชั่น
 
+- **v1.3.0** — บันทึกน้ำหนัก (30-day line chart + trend regression), บันทึกน้ำดื่ม 8 แก้ว/วัน (widget + 7-day bars), Analysis page รวม trends ทั้งหมด
+- **v1.2.0** — แก้ไขรายการอาหาร (modal pre-fill), Export/Import JSON backup, Service worker update toast, Direct date picker
 - **v1.1.0** — เพิ่มรูปประจำตัว (emoji 24 ตัว + อัพโหลด), ธีมสว่าง (light/cream/mint) + ปุ่ม toggle 🌞🌙, แชร์สรุปวันนี้/ความสำเร็จ (Web Share API + clipboard fallback)
 - **v1.0.0** — initial release
