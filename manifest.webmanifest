@@ -1,7 +1,7 @@
 {
-  "name": "CalPro — แคลอรี่ & TDEE",
-  "short_name": "CalPro",
-  "description": "ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก",
+  "name": "CalPro+ — แคลอรี่ & TDEE",
+  "short_name": "CalPro+",
+  "description": "CalPro+ — ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก",
   "lang": "th",
   "dir": "ltr",
   "start_url": "./calpro-app.html",

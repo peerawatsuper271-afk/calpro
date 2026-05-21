@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก">
-<title>CalPro</title>
+<meta name="description" content="CalPro+ — ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก">
+<title>CalPro+</title>
 
 <!-- Supabase SDK (optional · used only when cloud sync enabled) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,7 +19,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CalPro">
+<meta name="apple-mobile-web-app-title" content="CalPro+">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
@@ -37,7 +37,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 /* ── BOTTOM NAV ── */
 .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
 .bnt{flex:1;padding:10px 4px 8px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);font-size:.68rem;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s;}
-.bnt .ico{font-size:1.25rem;}.bnt.active{color:var(--accent);}
+.bnt svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.bnt.active{color:var(--accent);}
+.icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
 /* ── AUTH ── */
 .auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
@@ -331,12 +333,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 
     <!-- HEADER -->
     <div class="hdr">
-      <button class="icon-btn" onclick="openDrawer()" title="Menu">☰</button>
+      <button class="icon-btn" onclick="openDrawer()" title="Menu">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
       <div class="hdr-left">
-        <h1>Cal<span>Pro</span></h1>
+        <h1>Cal<span>Pro+</span></h1>
         <p id="hdrSub" data-i18n="welcome">ยินดีต้อนรับ</p>
       </div>
-      <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง">🌙</button>
+      <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง">
+        <svg viewBox="0 0 24 24" id="modeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      </button>
     </div>
 
     <!-- TODAY -->
@@ -616,6 +622,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <div class="accent-grid" id="accentGrid"></div>
         <div class="setting-row">
           <div class="sr-l">
+            <div class="sr-name" data-i18n="simple_mode">โหมดใช้งานง่าย</div>
+            <div class="sr-sub" data-i18n="simple_mode_sub">เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="simpleToggle" onchange="toggleSimple()"><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="sr-l">
             <div class="sr-name" data-i18n="compact_mode">โหมดกะทัดรัด</div>
             <div class="sr-sub" data-i18n="compact_mode_sub">ลดช่องว่าง · เห็นข้อมูลได้มากขึ้นต่อหน้า</div>
           </div>
@@ -691,7 +704,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
       </div>
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
-        <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro</span></div>
+        <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
         <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.2.0</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
@@ -840,15 +853,27 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
     <button class="drawer-item" onclick="navTo('about')"><span class="di-ico">ℹ️</span><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro <span class="ver-tag">v2.2.0</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.3.0</span></div>
 </aside>
 
 <!-- BOTTOM NAV -->
 <div class="bnav" id="mainNav">
-  <button class="bnt active" onclick="showPage('today',this)"><span class="ico">🏠</span><span data-i18n="home">วันนี้</span></button>
-  <button class="bnt" onclick="showPage('add',this)"><span class="ico">➕</span><span data-i18n="add">เพิ่ม</span></button>
-  <button class="bnt" onclick="showPage('analysis',this)"><span class="ico">📊</span><span data-i18n="analysis">วิเคราะห์</span></button>
-  <button class="bnt" onclick="showPage('tdee',this)"><span class="ico">🔥</span>TDEE</button>
+  <button class="bnt active" onclick="showPage('today',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>
+    <span data-i18n="home">วันนี้</span>
+  </button>
+  <button class="bnt" onclick="showPage('add',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+    <span data-i18n="add">เพิ่ม</span>
+  </button>
+  <button class="bnt" onclick="showPage('analysis',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-7"/></svg>
+    <span data-i18n="analysis">วิเคราะห์</span>
+  </button>
+  <button class="bnt" onclick="showPage('tdee',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 2c0 5-5 7-5 12a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 3 1-3-1-7-1-11z"/></svg>
+    <span>TDEE</span>
+  </button>
 </div>
 
 <!-- PHOTO VIEWER -->
@@ -862,7 +887,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.3.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -924,6 +949,7 @@ const I18N = {
     name_ph_profile:'ชื่อ',goal_label:'เป้าหมาย',
     account_section:'บัญชี',settings_section:'การตั้งค่า',other_section:'อื่น ๆ',friends_only:'เพื่อน',about:'เกี่ยวกับ',
     appearance:'รูปลักษณ์',compact_mode:'โหมดกะทัดรัด',compact_mode_sub:'ลดช่องว่าง · เห็นข้อมูลได้มากขึ้นต่อหน้า',
+    simple_mode:'โหมดใช้งานง่าย',simple_mode_sub:'เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น',
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
     smart_goal_pref:'ปรับเป้าหมายอัตโนมัติ',smart_goal_pref_sub:'แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า',
     weekly_recap_pref:'สรุปรายสัปดาห์',weekly_recap_pref_sub:'popup ทุกวันจันทร์เช้า',
@@ -982,6 +1008,7 @@ const I18N = {
     name_ph_profile:'Name',goal_label:'Goal',
     account_section:'Account',settings_section:'Settings',other_section:'Other',friends_only:'Friends',about:'About',
     appearance:'Appearance',compact_mode:'Compact mode',compact_mode_sub:'Tighter spacing · more info per screen',
+    simple_mode:'Simple mode',simple_mode_sub:'Focus on calorie ring + meals · larger fonts · hides other widgets',
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
     smart_goal_pref:'Auto goal adjustment',smart_goal_pref_sub:'Popup every 4 weeks if weight trend deviates',
     weekly_recap_pref:'Weekly recap',weekly_recap_pref_sub:'Popup every Monday morning',
@@ -1195,7 +1222,7 @@ const EXERCISES = [
 ];
 let currentDate = todayKey();
 let activeCat = 'thai';
-let settings = {theme:'dark', accent:'#ff6b6b', lang:'th', compact:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8};
+let settings = {theme:'dark', accent:'#ff6b6b', lang:'th', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8};
 let tdeeGoalType = 'lose';
 function getWaterGoal(){return settings.waterGoal||8;}
 
@@ -1210,9 +1237,12 @@ function fmtDate(k){
   if(k===dateKey(y))return t('yesterday')+' · '+d.toLocaleDateString(loc,{day:'numeric',month:'short'});
   return d.toLocaleDateString(loc,{weekday:'short',day:'numeric',month:'short',year:'2-digit'});
 }
+let toastTimer=null;
 function showToast(msg, ms=2200){
-  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),ms);
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{el.classList.remove('show');toastTimer=null;},ms);
 }
 function calcStreak(entries_by_day){
   let s=0;
@@ -1280,7 +1310,7 @@ function resetAllData(){
 // ═══ EXPORT / IMPORT ═══
 function exportData(){
   const data={
-    app:'CalPro',
+    app:'CalPro+',
     version:APP_VERSION,
     exported_at:new Date().toISOString(),
     profile:userProfile,
@@ -1309,7 +1339,7 @@ function importData(file){
   reader.onload=(e)=>{
     try{
       const data=JSON.parse(e.target.result);
-      if(data.app!=='CalPro')throw new Error('ไฟล์ไม่ใช่ของ CalPro');
+      if(data.app!=='CalPro'&&data.app!=='CalPro+')throw new Error('ไฟล์ไม่ใช่ของ CalPro+');
       if(!data.profile||!data.entries)throw new Error('ไฟล์ข้อมูลไม่ครบ');
       const exportDate=data.exported_at?new Date(data.exported_at).toLocaleDateString('th-TH'):'ไม่ทราบ';
       const numDays=Object.keys(data.entries).length;
@@ -1435,8 +1465,10 @@ function renderQuickList(){
   }
   w.innerHTML='';list.slice(0,8).forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}" onclick="toggleFavorite('${f.n.replace(/'/g,"\\'")}'​,event)">⭐</span></div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
     d.onclick=()=>addFromSearch(f);
+    const starEl=d.querySelector('.star');
+    starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
     w.appendChild(d);
   });
 }
@@ -1450,9 +1482,10 @@ function renderResults(list){
   if(!list.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   list.forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    const star=`<span class="star ${isFav(f.n)?'on':''}" onclick="toggleFavorite('${f.n.replace(/'/g,"\\'")}'​,event)">⭐</span>`;
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div>${star}</div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
     d.onclick=()=>addFromSearch(f);
+    const starEl=d.querySelector('.star');
+    starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
     w.appendChild(d);
   });
 }
@@ -1750,119 +1783,168 @@ async function addFriendPrompt(){
 async function manualSync(){
   if(!cloudUser)return;
   syncing=true;renderCloudStatus();
-  try{await syncFromCloud();await syncToCloud();showToast(settings.lang==='en'?'Sync complete ✓':'ซิงค์เสร็จ ✓');}
-  catch(e){showToast('Sync error: '+e.message);}
-  finally{syncing=false;renderCloudStatus();renderToday();}
+  showToast(settings.lang==='en'?'Syncing...':'กำลังซิงค์...',60000);
+  let toastErr=null;
+  try{
+    await syncFromCloud();
+    await syncToCloud();
+  }catch(e){toastErr=e.message||'sync failed';}
+  finally{
+    syncing=false;renderCloudStatus();renderToday();
+    if(toastErr){showToast((settings.lang==='en'?'Partial sync: ':'ซิงค์ไม่ครบ: ')+toastErr,4000);}
+    else{showToast(settings.lang==='en'?'Sync complete ✓':'ซิงค์เสร็จ ✓');}
+  }
 }
 
-// PUSH localStorage → cloud
+// Helper: wrap a Supabase promise with a timeout
+function withTimeout(promise, ms=15000, label='operation'){
+  return Promise.race([
+    promise,
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+' timed out')),ms))
+  ]);
+}
+async function syncStep(label, fn){
+  try{
+    await withTimeout(fn(),15000,label);
+    console.log('[sync ✓]',label);
+    return true;
+  }catch(e){
+    console.warn('[sync ✗]',label,e.message);
+    return false;
+  }
+}
+
+// PUSH localStorage → cloud (per-table, isolated errors, with timeouts)
 async function syncToCloud(){
   if(!cloudUser||!sb)return;
   const uid=cloudUser.id;
-  try{
-    // 1. Profile (upsert)
-    if(userProfile){
-      const p={...userProfile,id:uid,email:cloudUser.email,updated_at:new Date().toISOString()};
-      delete p.created_at;
-      await sb.from('profiles').upsert(p,{onConflict:'id'});
-    }
-    // 2. Food entries (upsert by client_id)
-    const entries=[];
-    Object.entries(allEntries).forEach(([date,arr])=>{
-      (arr||[]).forEach(e=>{
-        entries.push({
-          user_id:uid,entry_date:date,
-          food_name:e.food_name,calories:e.calories,
-          protein:e.protein||0,carbs:e.carbs||0,fat:e.fat||0,
-          amount_g:e.amount_g,meal:e.meal,photo:e.photo||null,
-          client_id:e.id,
-        });
-      });
+  let okCount=0,failCount=0;
+  // 1. Profile
+  if(userProfile){
+    const p={...userProfile,id:uid,email:cloudUser.email,updated_at:new Date().toISOString()};
+    delete p.created_at;
+    const ok=await syncStep('profile', async ()=>{
+      const {error}=await sb.from('profiles').upsert(p,{onConflict:'id'});
+      if(error)throw error;
     });
-    if(entries.length){
-      // Delete existing then re-insert (simpler than upsert by client_id)
-      await sb.from('food_entries').delete().eq('user_id',uid);
-      // Chunk into 100s to avoid payload limits
-      for(let i=0;i<entries.length;i+=100){
-        await sb.from('food_entries').insert(entries.slice(i,i+100));
+    ok?okCount++:failCount++;
+  }
+  // 2. Food entries
+  const entries=[];
+  Object.entries(allEntries).forEach(([date,arr])=>(arr||[]).forEach(e=>{
+    entries.push({user_id:uid,entry_date:date,food_name:e.food_name,calories:e.calories,protein:e.protein||0,carbs:e.carbs||0,fat:e.fat||0,amount_g:e.amount_g,meal:e.meal,photo:e.photo||null,client_id:e.id});
+  }));
+  if(entries.length){
+    const ok=await syncStep('food_entries', async ()=>{
+      const {error:e1}=await sb.from('food_entries').delete().eq('user_id',uid);if(e1)throw e1;
+      for(let i=0;i<entries.length;i+=50){
+        const {error:e2}=await sb.from('food_entries').insert(entries.slice(i,i+50));if(e2)throw e2;
       }
-    }
-    // 3. Weights (upsert)
-    const weights=Object.entries(allWeights).map(([d,kg])=>({user_id:uid,entry_date:d,kg}));
-    if(weights.length)await sb.from('weights').upsert(weights,{onConflict:'user_id,entry_date'});
-    // 4. Water
-    const waters=Object.entries(allWater).map(([d,cups])=>({user_id:uid,entry_date:d,cups}));
-    if(waters.length)await sb.from('water').upsert(waters,{onConflict:'user_id,entry_date'});
-    // 5. Workouts
-    const workouts=[];
-    Object.entries(allWorkouts).forEach(([d,arr])=>(arr||[]).forEach(w=>{
-      workouts.push({user_id:uid,entry_date:d,name:w.name,name_en:w.name_en,met:w.met,minutes:w.minutes,kcal:w.kcal,client_id:w.id});
-    }));
-    if(workouts.length){
-      await sb.from('workouts').delete().eq('user_id',uid);
-      for(let i=0;i<workouts.length;i+=100)await sb.from('workouts').insert(workouts.slice(i,i+100));
-    }
-    // 6. Body measures
-    const measures=Object.entries(allMeasures).map(([d,m])=>({user_id:uid,entry_date:d,...m}));
-    if(measures.length)await sb.from('body_measures').upsert(measures,{onConflict:'user_id,entry_date'});
-    // 7. Favorites
-    if(favorites.length){
-      await sb.from('favorites').delete().eq('user_id',uid);
-      await sb.from('favorites').insert(favorites.map(n=>({user_id:uid,food_name:n})));
-    }
-    // 8. Custom foods (replace all)
-    if(customFoods.length){
-      await sb.from('custom_foods').delete().eq('user_id',uid);
-      await sb.from('custom_foods').insert(customFoods.map(f=>({user_id:uid,name:f.n,name_en:f.e||'',calories:f.c,protein:f.p,carbs:f.cb,fat:f.f,amount_g:f.a})));
-    }
-    lsSave('calpro_last_sync',new Date().toISOString());
-  }catch(e){console.error('syncToCloud error',e);throw e;}
+    });
+    ok?okCount++:failCount++;
+  }
+  // 3. Weights
+  const weights=Object.entries(allWeights).map(([d,kg])=>({user_id:uid,entry_date:d,kg}));
+  if(weights.length){
+    const ok=await syncStep('weights', async ()=>{
+      const {error}=await sb.from('weights').upsert(weights,{onConflict:'user_id,entry_date'});if(error)throw error;
+    });
+    ok?okCount++:failCount++;
+  }
+  // 4. Water
+  const waters=Object.entries(allWater).map(([d,cups])=>({user_id:uid,entry_date:d,cups}));
+  if(waters.length){
+    const ok=await syncStep('water', async ()=>{
+      const {error}=await sb.from('water').upsert(waters,{onConflict:'user_id,entry_date'});if(error)throw error;
+    });
+    ok?okCount++:failCount++;
+  }
+  // 5. Workouts
+  const workouts=[];
+  Object.entries(allWorkouts).forEach(([d,arr])=>(arr||[]).forEach(w=>{
+    workouts.push({user_id:uid,entry_date:d,name:w.name,name_en:w.name_en,met:w.met,minutes:w.minutes,kcal:w.kcal,client_id:w.id});
+  }));
+  if(workouts.length){
+    const ok=await syncStep('workouts', async ()=>{
+      const {error:e1}=await sb.from('workouts').delete().eq('user_id',uid);if(e1)throw e1;
+      for(let i=0;i<workouts.length;i+=50){
+        const {error:e2}=await sb.from('workouts').insert(workouts.slice(i,i+50));if(e2)throw e2;
+      }
+    });
+    ok?okCount++:failCount++;
+  }
+  // 6. Body measures
+  const measures=Object.entries(allMeasures).map(([d,m])=>({user_id:uid,entry_date:d,...m}));
+  if(measures.length){
+    const ok=await syncStep('body_measures', async ()=>{
+      const {error}=await sb.from('body_measures').upsert(measures,{onConflict:'user_id,entry_date'});if(error)throw error;
+    });
+    ok?okCount++:failCount++;
+  }
+  // 7. Favorites
+  if(favorites.length){
+    const ok=await syncStep('favorites', async ()=>{
+      const {error:e1}=await sb.from('favorites').delete().eq('user_id',uid);if(e1)throw e1;
+      const {error:e2}=await sb.from('favorites').insert(favorites.map(n=>({user_id:uid,food_name:n})));if(e2)throw e2;
+    });
+    ok?okCount++:failCount++;
+  }
+  // 8. Custom foods
+  if(customFoods.length){
+    const ok=await syncStep('custom_foods', async ()=>{
+      const {error:e1}=await sb.from('custom_foods').delete().eq('user_id',uid);if(e1)throw e1;
+      const {error:e2}=await sb.from('custom_foods').insert(customFoods.map(f=>({user_id:uid,name:f.n,name_en:f.e||'',calories:f.c,protein:f.p,carbs:f.cb,fat:f.f,amount_g:f.a})));if(e2)throw e2;
+    });
+    ok?okCount++:failCount++;
+  }
+  lsSave('calpro_last_sync',new Date().toISOString());
+  if(failCount>0){throw new Error(`${okCount} ok, ${failCount} failed (check console)`);}
 }
 
-// PULL cloud → localStorage (merge, cloud wins for conflicts)
+// PULL cloud → localStorage (per-table, isolated errors)
 async function syncFromCloud(){
   if(!cloudUser||!sb)return;
   const uid=cloudUser.id;
-  try{
-    // Profile
-    const {data:p}=await sb.from('profiles').select('*').eq('id',uid).single();
-    if(p){
-      userProfile={...userProfile,...p};
-      saveProfile_LS();
-    }
-    // Food entries
-    const {data:fe}=await sb.from('food_entries').select('*').eq('user_id',uid);
-    if(fe){
-      const grouped={};
-      fe.forEach(e=>{
-        if(!grouped[e.entry_date])grouped[e.entry_date]=[];
-        grouped[e.entry_date].push({id:e.client_id||e.id,food_name:e.food_name,calories:e.calories,protein:e.protein,carbs:e.carbs,fat:e.fat,amount_g:e.amount_g,meal:e.meal,photo:e.photo,entry_date:e.entry_date,created_at:e.created_at});
-      });
-      allEntries=grouped;lsSave(LS_ENTRIES,allEntries);loadEntries();
-    }
-    // Weights
-    const {data:wts}=await sb.from('weights').select('*').eq('user_id',uid);
+  await syncStep('pull:profile', async ()=>{
+    const {data:p,error}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle();
+    if(error)throw error;
+    if(p){userProfile={...userProfile,...p};saveProfile_LS();}
+  });
+  await syncStep('pull:food_entries', async ()=>{
+    const {data:fe,error}=await sb.from('food_entries').select('*').eq('user_id',uid);
+    if(error)throw error;
+    if(fe){const grouped={};fe.forEach(e=>{if(!grouped[e.entry_date])grouped[e.entry_date]=[];grouped[e.entry_date].push({id:e.client_id||e.id,food_name:e.food_name,calories:e.calories,protein:e.protein,carbs:e.carbs,fat:e.fat,amount_g:e.amount_g,meal:e.meal,photo:e.photo,entry_date:e.entry_date,created_at:e.created_at});});allEntries=grouped;lsSave(LS_ENTRIES,allEntries);loadEntries();}
+  });
+  await syncStep('pull:weights', async ()=>{
+    const {data:wts,error}=await sb.from('weights').select('*').eq('user_id',uid);
+    if(error)throw error;
     if(wts){allWeights={};wts.forEach(w=>allWeights[w.entry_date]=+w.kg);lsSave(LS_WEIGHTS,allWeights);}
-    // Water
-    const {data:wat}=await sb.from('water').select('*').eq('user_id',uid);
+  });
+  await syncStep('pull:water', async ()=>{
+    const {data:wat,error}=await sb.from('water').select('*').eq('user_id',uid);
+    if(error)throw error;
     if(wat){allWater={};wat.forEach(w=>allWater[w.entry_date]=w.cups);lsSave(LS_WATER,allWater);}
-    // Workouts
-    const {data:wk}=await sb.from('workouts').select('*').eq('user_id',uid);
-    if(wk){
-      const grp={};
-      wk.forEach(w=>{if(!grp[w.entry_date])grp[w.entry_date]=[];grp[w.entry_date].push({id:w.client_id||w.id,name:w.name,name_en:w.name_en,met:+w.met,minutes:w.minutes,kcal:w.kcal});});
-      allWorkouts=grp;lsSave(LS_WORKOUTS,allWorkouts);
-    }
-    // Body measures
-    const {data:bm}=await sb.from('body_measures').select('*').eq('user_id',uid);
+  });
+  await syncStep('pull:workouts', async ()=>{
+    const {data:wk,error}=await sb.from('workouts').select('*').eq('user_id',uid);
+    if(error)throw error;
+    if(wk){const grp={};wk.forEach(w=>{if(!grp[w.entry_date])grp[w.entry_date]=[];grp[w.entry_date].push({id:w.client_id||w.id,name:w.name,name_en:w.name_en,met:+w.met,minutes:w.minutes,kcal:w.kcal});});allWorkouts=grp;lsSave(LS_WORKOUTS,allWorkouts);}
+  });
+  await syncStep('pull:body_measures', async ()=>{
+    const {data:bm,error}=await sb.from('body_measures').select('*').eq('user_id',uid);
+    if(error)throw error;
     if(bm){allMeasures={};bm.forEach(m=>allMeasures[m.entry_date]={waist:+m.waist||null,hip:+m.hip||null,chest:+m.chest||null,neck:+m.neck||null});lsSave(LS_MEASURES,allMeasures);}
-    // Favorites
-    const {data:fv}=await sb.from('favorites').select('food_name').eq('user_id',uid);
+  });
+  await syncStep('pull:favorites', async ()=>{
+    const {data:fv,error}=await sb.from('favorites').select('food_name').eq('user_id',uid);
+    if(error)throw error;
     if(fv){favorites=fv.map(f=>f.food_name);lsSave(LS_FAVORITES,favorites);}
-    // Custom foods
-    const {data:cf}=await sb.from('custom_foods').select('*').eq('user_id',uid);
+  });
+  await syncStep('pull:custom_foods', async ()=>{
+    const {data:cf,error}=await sb.from('custom_foods').select('*').eq('user_id',uid);
+    if(error)throw error;
     if(cf){customFoods=cf.map(f=>({n:f.name,e:f.name_en,c:f.calories,p:+f.protein,cb:+f.carbs,f:+f.fat,a:f.amount_g,cat:'custom'}));lsSave(LS_CUSTOM,customFoods);}
-  }catch(e){console.error('syncFromCloud error',e);throw e;}
+  });
 }
 
 // ═══ WORKOUTS ═══
@@ -2391,7 +2473,7 @@ function renderProfileUI(){
 }
 
 // ═══ COMPACT MODE STYLES (applied via data-compact) ═══
-const COMPACT_CSS = `
+const DENSITY_CSS = `
 [data-compact="1"] .card{padding:10px 11px;margin-bottom:8px;}
 [data-compact="1"] .card h3{margin-bottom:7px;}
 [data-compact="1"] .stats{gap:5px;margin-bottom:8px;}
@@ -2405,8 +2487,30 @@ const COMPACT_CSS = `
 [data-compact="1"] .ring-cont svg{width:124px;height:124px;}
 [data-compact="1"] .ring-num{font-size:1.35rem;}
 [data-compact="1"] .dnav{margin-bottom:8px;}
+
+/* SIMPLE MODE — hides clutter, bigger fonts */
+[data-simple="1"] .stats,
+[data-simple="1"] .macros,
+[data-simple="1"] .wwrow,
+[data-simple="1"] #pg-today .card:has(#workoutsList),
+[data-simple="1"] #pg-today > button.btn-sec{display:none;}
+[data-simple="1"] .ring-cont{width:200px;height:200px;}
+[data-simple="1"] .ring-cont svg{width:200px;height:200px;}
+[data-simple="1"] .ring-num{font-size:2.4rem;}
+[data-simple="1"] .ring-lbl{font-size:.9rem;}
+[data-simple="1"] .ring-sub{font-size:1rem;margin-top:10px;}
+[data-simple="1"] .ring-track,[data-simple="1"] .ring-fill{stroke-width:16;}
+[data-simple="1"] .card h3{font-size:.9rem;text-transform:none;letter-spacing:0;}
+[data-simple="1"] .fi-n{font-size:1rem;}
+[data-simple="1"] .fi-c{font-size:1.1rem;}
+[data-simple="1"] .mg-hdr{font-size:.9rem;}
+[data-simple="1"] .bnt{font-size:.82rem;padding:12px 4px 10px;}
+[data-simple="1"] .bnt .ico{font-size:1.5rem;}
+[data-simple="1"] .dlbl{font-size:1.05rem;}
+[data-simple="1"] .dnav button{width:38px;height:38px;font-size:1.2rem;}
+[data-simple="1"] .empty{font-size:1rem;padding:32px 0;}
 `;
-(function(){const s=document.createElement('style');s.textContent=COMPACT_CSS;document.head.appendChild(s);})();
+(function(){const s=document.createElement('style');s.textContent=DENSITY_CSS;document.head.appendChild(s);})();
 
 // ═══ SETTINGS / THEME ═══
 function applyTheme(){
@@ -2417,8 +2521,13 @@ function applyTheme(){
   r.setProperty('--accent',settings.accent||'#ff6b6b');
   document.documentElement.dataset.mode=th.mode||'dark';
   document.documentElement.dataset.compact=settings.compact?'1':'0';
-  const tg=document.getElementById('modeToggle');
-  if(tg)tg.textContent=th.mode==='light'?'☀️':'🌙';
+  document.documentElement.dataset.simple=settings.simple?'1':'0';
+  const mi=document.getElementById('modeIcon');
+  if(mi){
+    mi.innerHTML=th.mode==='light'
+      ?'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>'
+      :'<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>';
+  }
   // Update browser theme-color meta
   const meta=document.querySelector('meta[name="theme-color"]');
   if(meta)meta.setAttribute('content',th.bg);
@@ -2477,6 +2586,11 @@ function toggleCompact(){
   lsSave(LS_SETTINGS,settings);
   document.documentElement.dataset.compact=settings.compact?'1':'0';
 }
+function toggleSimple(){
+  settings.simple=document.getElementById('simpleToggle').checked;
+  lsSave(LS_SETTINGS,settings);
+  document.documentElement.dataset.simple=settings.simple?'1':'0';
+}
 function toggleReminder(kind){
   if(kind==='meal')settings.mealReminders=document.getElementById('mealRemToggle').checked;
   else if(kind==='smart')settings.smartGoal=document.getElementById('smartGoalToggle').checked;
@@ -2518,6 +2632,7 @@ function renderSettings(){
   // Toggles
   const setCk=(id,val)=>{const el=document.getElementById(id);if(el)el.checked=!!val;};
   setCk('compactToggle',settings.compact);
+  setCk('simpleToggle',settings.simple);
   setCk('mealRemToggle',settings.mealReminders!==false);
   setCk('smartGoalToggle',settings.smartGoal!==false);
   setCk('recapToggle',settings.weeklyRecap!==false);
@@ -2549,10 +2664,13 @@ function setLang(lang){
 }
 function applyLang(){
   document.documentElement.lang=settings.lang||'th';
-  // Nav buttons
+  // Nav buttons — update only the label span, preserve SVG icon
   const navs=document.querySelectorAll('.bnt');
-  const navKeys=['home','add','analysis','tdee','profile'];
-  navs.forEach((b,i)=>{const ico=b.querySelector('.ico')?.outerHTML||'';b.innerHTML=ico+t(navKeys[i]);});
+  const navKeys=['home','add','analysis','tdee'];
+  navs.forEach((b,i)=>{
+    const lbl=b.querySelector('span:not(.ico)')||b.querySelector('span');
+    if(lbl&&navKeys[i])lbl.textContent=t(navKeys[i]);
+  });
   // Static elements via data-i18n
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k=el.dataset.i18n;
@@ -2630,11 +2748,11 @@ function shareDaily(){
   const av=userProfile?.avatar&&!userProfile.avatar.startsWith('data:')?userProfile.avatar+' ':'';
   const dateStr=fmtDate(currentDate).replace(/^วันนี้ · |^เมื่อวาน · /,'');
   const status=totCal===0?'ยังไม่ได้บันทึก':totCal>goal?'⚠️ เกินเป้า':totCal>=goal*0.85?'✅ ใกล้เป้า':'🎯 ในเป้า';
-  const text=`${av}CalPro · ${dateStr}\n`+
+  const text=`${av}CalPro+ · ${dateStr}\n`+
     `🔥 ${totCal.toLocaleString()}/${goal.toLocaleString()} kcal ${status}\n`+
     `💪 P:${totP}g · C:${totC}g · F:${totF}g\n`+
     `📝 ${E.length} รายการ`;
-  shareText(text,'CalPro - สรุปประจำวัน');
+  shareText(text,'CalPro+ - สรุปประจำวัน');
 }
 function shareAchievements(){
   // Build entries_by_day from allEntries
@@ -2645,7 +2763,7 @@ function shareAchievements(){
   const totalDays=logDays(ebd);
   const av=userProfile?.avatar&&!userProfile.avatar.startsWith('data:')?userProfile.avatar+' ':'';
   const name=userProfile?.display_name||'ฉัน';
-  let text=`${av}${name} · CalPro\n`+
+  let text=`${av}${name} · CalPro+\n`+
     `🔥 Streak: ${streak} วัน\n`+
     `🎯 อยู่ในเป้า: ${ontrack} วัน\n`+
     `📝 บันทึกรวม: ${totalDays} วัน`;
@@ -2653,7 +2771,7 @@ function shareAchievements(){
     const badgeIcons=BADGES.filter(b=>earned.includes(b.id)).map(b=>b.ico).join(' ');
     text+=`\n🏆 เหรียญ: ${badgeIcons}`;
   }
-  shareText(text,'CalPro - ความสำเร็จของฉัน');
+  shareText(text,'CalPro+ - ความสำเร็จของฉัน');
 }
 
 // ═══ TDEE LIVE CALCULATOR ═══

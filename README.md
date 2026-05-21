@@ -1,4 +1,4 @@
-# CalPro 🔥
+# CalPro+ 🔥
 
 แอปติดตามแคลอรี่ + คำนวณ TDEE ภาษาไทย ทำงานเป็น PWA ติดตั้งได้บนมือถือ
 
@@ -51,6 +51,7 @@ icon-*.png             ← App icons
 
 ## เวอร์ชั่น
 
+- **v2.3.0** — เปลี่ยนชื่อ **CalPro+** · แก้บั๊ก: sync ค้าง (per-table try/catch + 15s timeout) · favorites ⭐ กดได้แล้ว (zero-width space bug) · เพิ่ม **โหมดใช้งานง่าย** (ซ่อน widgets, ring ใหญ่, ฟอนต์ใหญ่) · เปลี่ยน emoji ใน bottom nav + header เป็น **SVG icons** (clean, minimalist)
 - **v2.2.0** — UI redesign: minimalist + left drawer (☰) สำหรับ Profile/Friends/Settings/About · ลด bottom nav เหลือ 4 tabs · Settings page ใหม่ครบ (theme/lang/reminders/water goal/meal times/compact mode/data) · ย้าย Profile เข้า drawer
 - **v2.1.0** — ☁️ Cloud sync ผ่าน Supabase (opt-in · email login · push/pull localStorage ↔ cloud · 8 ตาราง · friends + leaderboard กลับมา · default ยังเป็น localStorage)
 - **v2.0.0** — รองรับ 2 ภาษา 🇹🇭/🇬🇧 (i18n layer + toggle ใน settings), บันทึกออกกำลังกาย 20 ประเภท (MET formula → kcal เผาผลาญ → เพิ่มในเป้าหมาย), บันทึกสัดส่วนร่างกาย (เอว/สะโพก/อก/คอ) + Navy Body Fat % calculator
