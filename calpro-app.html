@@ -249,8 +249,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
     <div class="screen active" id="pg-today">
       <div class="dnav">
         <button onclick="changeDay(-1)">‹</button>
-        <div class="dlbl" id="dateLabel">—</div>
+        <div class="dlbl" id="dateLabel" onclick="openDatePicker()" style="cursor:pointer" title="คลิกเพื่อเลือกวันที่">—</div>
         <button onclick="changeDay(1)">›</button>
+        <input type="date" id="datePicker" onchange="pickDate(this.value)" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
       </div>
       <div class="ring-wrap">
         <div class="ring-cont">
@@ -455,6 +456,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
       </div>
       <div class="card">
         <h3>จัดการข้อมูล</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <button class="btn-sec" onclick="exportData()">📤 Export</button>
+          <button class="btn-sec" onclick="document.getElementById('importFile').click()">📥 Import</button>
+        </div>
+        <input type="file" id="importFile" accept="application/json,.json" hidden onchange="importData(this.files[0])">
         <button class="btn-danger" onclick="resetAllData()">ล้างข้อมูลทั้งหมด</button>
       </div>
       <div style="text-align:center;font-size:.7rem;color:var(--muted);padding:8px 0 20px">
@@ -464,6 +470,33 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 
   </div><!-- end app -->
 </div><!-- end appScreen -->
+
+<!-- EDIT FOOD MODAL -->
+<div class="modal-bg hide" id="editModal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>แก้ไขรายการ</h3><button class="mc-close" onclick="closeEditModal()">✕</button></div>
+    <input type="hidden" id="editId">
+    <div class="fgrid g2">
+      <div class="fl"><label>ชื่ออาหาร</label><input type="text" id="eName"></div>
+      <div class="fl"><label>แคลอรี่</label><input type="number" id="eCal" min="0"></div>
+    </div>
+    <div class="fgrid g3" style="margin-bottom:10px">
+      <div class="fl"><label>โปรตีน (g)</label><input type="number" id="eP" min="0"></div>
+      <div class="fl"><label>คาร์บ (g)</label><input type="number" id="eC" min="0"></div>
+      <div class="fl"><label>ไขมัน (g)</label><input type="number" id="eF" min="0"></div>
+    </div>
+    <div class="fl" style="margin-bottom:10px">
+      <label>มื้ออาหาร</label>
+      <select id="eMeal">
+        <option value="เช้า">🌅 เช้า</option>
+        <option value="กลางวัน">☀️ กลางวัน</option>
+        <option value="เย็น">🌙 เย็น</option>
+        <option value="ของว่าง">🍎 ของว่าง</option>
+      </select>
+    </div>
+    <button class="btn" onclick="saveEditedFood()">บันทึก</button>
+  </div>
+</div>
 
 <!-- AVATAR MODAL -->
 <div class="modal-bg hide" id="avatarModal">
@@ -506,7 +539,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 
 // ═══ STORAGE LAYER ═══
 const LS_PROFILE = 'calpro_profile';
@@ -656,6 +689,50 @@ function resetAllData(){
   setTimeout(()=>location.reload(), 800);
 }
 
+// ═══ EXPORT / IMPORT ═══
+function exportData(){
+  const data={
+    app:'CalPro',
+    version:APP_VERSION,
+    exported_at:new Date().toISOString(),
+    profile:userProfile,
+    entries:allEntries,
+    settings:settings,
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='calpro-backup-'+todayKey()+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast('Export สำเร็จ 📤');
+}
+function importData(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.app!=='CalPro')throw new Error('ไฟล์ไม่ใช่ของ CalPro');
+      if(!data.profile||!data.entries)throw new Error('ไฟล์ข้อมูลไม่ครบ');
+      const exportDate=data.exported_at?new Date(data.exported_at).toLocaleDateString('th-TH'):'ไม่ทราบ';
+      const numDays=Object.keys(data.entries).length;
+      const msg=`นำเข้าจากไฟล์ v${data.version||'?'} (${exportDate})\nจะแทนที่ข้อมูลปัจจุบันทั้งหมด (${numDays} วัน)\n\nต้องการดำเนินการต่อ?`;
+      if(!confirm(msg))return;
+      lsSave(LS_PROFILE,data.profile);
+      lsSave(LS_ENTRIES,data.entries);
+      if(data.settings)lsSave(LS_SETTINGS,data.settings);
+      showToast('Import สำเร็จ · กำลังโหลด...');
+      setTimeout(()=>location.reload(),800);
+    }catch(err){
+      showToast('Import ล้มเหลว: '+err.message);
+    }
+  };
+  reader.readAsText(file);
+  document.getElementById('importFile').value='';
+}
+
 // ═══ SHOW APP ═══
 function showApp(){
   const name = userProfile?.display_name || 'คุณ';
@@ -679,6 +756,20 @@ function changeDay(d){
   const nk=dateKey(dt);
   if(nk>todayKey())return;
   currentDate=nk;loadEntries();renderToday();
+}
+function openDatePicker(){
+  const dp=document.getElementById('datePicker');
+  dp.value=currentDate;dp.max=todayKey();
+  // showPicker() is the modern API; fallback to focus+click for older browsers
+  if(dp.showPicker){try{dp.showPicker();return;}catch(e){}}
+  dp.style.opacity=1;dp.style.width='auto';dp.style.height='auto';dp.style.pointerEvents='auto';
+  dp.focus();dp.click();
+}
+function pickDate(v){
+  if(!v||v>todayKey())return;
+  currentDate=v;loadEntries();renderToday();
+  const dp=document.getElementById('datePicker');
+  dp.style.opacity=0;dp.style.width=0;dp.style.height=0;dp.style.pointerEvents='none';
 }
 
 // ═══ SEARCH ═══
@@ -739,6 +830,33 @@ function delFood(id){
   saveEntries_LS();
   renderToday();
 }
+function editFood(id){
+  const e=dailyEntries.find(x=>x.id===id);if(!e)return;
+  document.getElementById('editId').value=id;
+  document.getElementById('eName').value=e.food_name;
+  document.getElementById('eCal').value=e.calories;
+  document.getElementById('eP').value=e.protein||0;
+  document.getElementById('eC').value=e.carbs||0;
+  document.getElementById('eF').value=e.fat||0;
+  document.getElementById('eMeal').value=e.meal;
+  document.getElementById('editModal').classList.remove('hide');
+}
+function closeEditModal(){document.getElementById('editModal').classList.add('hide');}
+function saveEditedFood(){
+  const id=document.getElementById('editId').value;
+  const i=dailyEntries.findIndex(x=>x.id===id);if(i<0)return;
+  const name=document.getElementById('eName').value.trim();
+  const cal=+document.getElementById('eCal').value;
+  if(!name||!cal){showToast('ใส่ชื่อและแคลอรี่');return;}
+  dailyEntries[i]={...dailyEntries[i],
+    food_name:name,calories:cal,
+    protein:+document.getElementById('eP').value||0,
+    carbs:+document.getElementById('eC').value||0,
+    fat:+document.getElementById('eF').value||0,
+    meal:document.getElementById('eMeal').value};
+  saveEntries_LS();renderToday();closeEditModal();
+  showToast('บันทึกแก้ไขแล้ว ✓');
+}
 
 // ═══ RENDER TODAY ═══
 function renderToday(){
@@ -783,7 +901,7 @@ function renderToday(){
       if(item.amount_g)meta.push(item.amount_g+'g');
       if(item.protein)meta.push('P:'+item.protein);
       if(item.carbs)meta.push('C:'+item.carbs);
-      div.innerHTML=`<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="delFood('${item.id}')">✕</button></div>`;
+      div.innerHTML=`<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="แก้ไข">✏️</button><button class="del" onclick="delFood('${item.id}')" title="ลบ">✕</button></div>`;
       g.appendChild(div);
     });
     log.appendChild(g);
@@ -1140,9 +1258,32 @@ document.querySelectorAll('.ver-tag').forEach(e=>e.textContent='v'+APP_VERSION);
 
 // ═══ PWA: Register Service Worker ═══
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(refreshing)return;refreshing=true;location.reload();
   });
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      // Detect new worker installing
+      reg.addEventListener('updatefound',()=>{
+        const nw=reg.installing;if(!nw)return;
+        nw.addEventListener('statechange',()=>{
+          if(nw.state==='installed'&&navigator.serviceWorker.controller){
+            // New version ready · prompt user to refresh
+            showUpdateToast(nw);
+          }
+        });
+      });
+    }).catch(()=>{});
+  });
+}
+function showUpdateToast(worker){
+  const t=document.getElementById('toast');
+  t.innerHTML='✨ มีเวอร์ชั่นใหม่ · <span style="color:var(--accent);text-decoration:underline">กดเพื่อรีเฟรช</span>';
+  t.style.cursor='pointer';
+  t.classList.add('show');
+  t.onclick=()=>{worker.postMessage({type:'SKIP_WAITING'});t.classList.remove('show');};
+  // Stays on screen until user clicks (no auto-dismiss)
 }
 </script>
 </body>
