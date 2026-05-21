@@ -1,0 +1,14 @@
+# Local dev / build artifacts
+.claude/err.log
+.claude/out.log
+.claude/settings.local.json
+.claude/test-listen.ps1
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
