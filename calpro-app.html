@@ -210,10 +210,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .gchip.active{border-color:var(--accent);color:var(--accent);background:rgba(255,107,107,.08);}
 .tip{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:9px;padding:10px;margin-top:9px;font-size:.75rem;line-height:1.6;}
 .tip strong{color:var(--accent);}
-.user-avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,107,107,.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:700;color:var(--accent);margin:0 auto 10px;cursor:pointer;overflow:hidden;position:relative;transition:transform .15s;user-select:none;}
-.user-avatar:hover{transform:scale(1.05);}
+.user-avatar{width:108px;height:108px;border-radius:50%;background:rgba(255,107,107,.15);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:700;color:var(--accent);margin:0 auto 14px;cursor:pointer;overflow:hidden;position:relative;transition:transform .15s;user-select:none;box-shadow:0 4px 12px rgba(0,0,0,.15);}
+.user-avatar:hover{transform:scale(1.04);}
 .user-avatar img{width:100%;height:100%;object-fit:cover;}
-.user-avatar::after{content:'✏️';position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:.65rem;}
+.user-avatar::after{content:'✏️';position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:.85rem;}
 .avatar-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:12px;}
 .av-opt{aspect-ratio:1;border-radius:50%;border:2px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;transition:all .15s;font-family:inherit;}
 .av-opt:hover{border-color:var(--accent);transform:scale(1.1);}
@@ -314,27 +314,27 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
           </svg>
           <div class="ring-ctr">
             <div class="ring-num" id="ringCal">0</div>
-            <div class="ring-lbl">แคลอรี่</div>
+            <div class="ring-lbl" data-i18n="cal_today">แคลอรี่</div>
           </div>
         </div>
         <div class="ring-sub" id="ringGoal"></div>
       </div>
       <div class="prog"><div class="prog-f" id="progFill" style="width:0%"></div></div>
       <div class="stats">
-        <div class="sc"><div class="sv" id="stRem" style="color:var(--green)">—</div><div class="sl">เหลือ</div></div>
-        <div class="sc"><div class="sv" id="stN">0</div><div class="sl">รายการ</div></div>
-        <div class="sc"><div class="sv" id="stP" style="color:var(--blue)">0g</div><div class="sl">โปรตีน</div></div>
-        <div class="sc"><div class="sv" id="stC" style="color:var(--amber)">0g</div><div class="sl">คาร์บ</div></div>
+        <div class="sc"><div class="sv" id="stRem" style="color:var(--green)">—</div><div class="sl" data-i18n="remaining">เหลือ</div></div>
+        <div class="sc"><div class="sv" id="stN">0</div><div class="sl" data-i18n="entries">รายการ</div></div>
+        <div class="sc"><div class="sv" id="stP" style="color:var(--blue)">0g</div><div class="sl" data-i18n="protein">โปรตีน</div></div>
+        <div class="sc"><div class="sv" id="stC" style="color:var(--amber)">0g</div><div class="sl" data-i18n="carbs">คาร์บ</div></div>
       </div>
       <div class="macros">
-        <div class="mc"><div class="mc-l">โปรตีน</div><div class="mc-v" id="mP" style="color:var(--blue)">0g</div><div class="mc-b"><div class="mc-bf" id="mPB" style="width:0%;background:var(--blue)"></div></div></div>
-        <div class="mc"><div class="mc-l">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--amber)">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--amber)"></div></div></div>
-        <div class="mc"><div class="mc-l">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--purple)">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--purple)"></div></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="protein">โปรตีน</div><div class="mc-v" id="mP" style="color:var(--blue)">0g</div><div class="mc-b"><div class="mc-bf" id="mPB" style="width:0%;background:var(--blue)"></div></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--amber)">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--amber)"></div></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--purple)">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--purple)"></div></div></div>
       </div>
       <div class="wwrow">
         <div class="wwcard">
-          <h4>💧 น้ำดื่ม</h4>
-          <div class="wwval"><span id="waterCount">0</span>/<span>8</span> แก้ว</div>
+          <h4>💧 <span data-i18n="water">น้ำดื่ม</span></h4>
+          <div class="wwval"><span id="waterCount">0</span>/<span>8</span> <span data-i18n="cups_unit">แก้ว</span></div>
           <div class="water-dots" id="waterDots"></div>
           <div class="water-ctrl">
             <button onclick="addWater(-1)">−</button>
@@ -342,11 +342,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
           </div>
         </div>
         <div class="wwcard">
-          <h4>⚖️ น้ำหนัก</h4>
-          <div class="wwval"><span id="weightToday">—</span> กก.</div>
+          <h4>⚖️ <span data-i18n="weight">น้ำหนัก</span></h4>
+          <div class="wwval"><span id="weightToday">—</span> <span data-i18n="kg_unit">กก.</span></div>
           <div class="weight-input">
-            <input type="number" id="weightInput" step="0.1" min="20" max="300" placeholder="กรอก...">
-            <button onclick="logWeight()">บันทึก</button>
+            <input type="number" id="weightInput" step="0.1" min="20" max="300" placeholder="กรอก..." data-i18n="enter_ph">
+            <button onclick="logWeight()" data-i18n="save">บันทึก</button>
           </div>
           <div class="weight-trend" id="weightTrend"></div>
         </div>
@@ -366,54 +366,54 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
     <div class="screen" id="pg-add">
       <div class="card" id="quickAddCard">
         <div style="display:flex;gap:5px;background:var(--surface2);border-radius:9px;padding:3px;margin-bottom:10px">
-          <button class="qtab active" data-qtab="fav" onclick="setQuickTab('fav')">⭐ ของโปรด</button>
-          <button class="qtab" data-qtab="recent" onclick="setQuickTab('recent')">🕘 ล่าสุด</button>
+          <button class="qtab active" data-qtab="fav" onclick="setQuickTab('fav')" data-i18n="quick_fav">⭐ ของโปรด</button>
+          <button class="qtab" data-qtab="recent" onclick="setQuickTab('recent')" data-i18n="quick_recent">🕘 ล่าสุด</button>
         </div>
         <div id="quickList"></div>
       </div>
       <div class="card">
-        <h3>ค้นหาอาหาร</h3>
-        <div class="sbox"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off"></div>
+        <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
+        <div class="sbox"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"></div>
         <div class="cats" id="catBtns"></div>
         <div class="sres" id="sRes"></div>
-        <div class="fl"><label>มื้ออาหาร</label>
-          <select id="mealSel"><option value="เช้า">🌅 เช้า</option><option value="กลางวัน" selected>☀️ กลางวัน</option><option value="เย็น">🌙 เย็น</option><option value="ของว่าง">🍎 ของว่าง</option></select>
+        <div class="fl"><label data-i18n="meal">มื้ออาหาร</label>
+          <select id="mealSel"><option value="เช้า" data-i18n="morning_opt">🌅 เช้า</option><option value="กลางวัน" selected data-i18n="lunch_opt">☀️ กลางวัน</option><option value="เย็น" data-i18n="dinner_opt">🌙 เย็น</option><option value="ของว่าง" data-i18n="snack_opt">🍎 ของว่าง</option></select>
         </div>
       </div>
       <div class="card">
-        <h3>กรอกเอง</h3>
+        <h3 data-i18n="manual">กรอกเอง</h3>
         <div class="fgrid g2">
-          <div class="fl"><label>ชื่ออาหาร</label><input type="text" id="fName" placeholder="ชื่อ..."></div>
-          <div class="fl"><label>แคลอรี่</label><input type="number" id="fCal" min="0" placeholder="kcal"></div>
+          <div class="fl"><label data-i18n="food_name">ชื่ออาหาร</label><input type="text" id="fName" placeholder="ชื่อ..." data-i18n="name_ph"></div>
+          <div class="fl"><label data-i18n="cal">แคลอรี่</label><input type="number" id="fCal" min="0" placeholder="kcal" data-i18n="cal_ph"></div>
         </div>
         <div class="fgrid g3" style="margin-bottom:10px">
-          <div class="fl"><label>โปรตีน (g)</label><input type="number" id="fP" min="0" placeholder="0"></div>
-          <div class="fl"><label>คาร์บ (g)</label><input type="number" id="fC" min="0" placeholder="0"></div>
-          <div class="fl"><label>ไขมัน (g)</label><input type="number" id="fF" min="0" placeholder="0"></div>
+          <div class="fl"><label data-i18n="protein_g">โปรตีน (g)</label><input type="number" id="fP" min="0" placeholder="0"></div>
+          <div class="fl"><label data-i18n="carbs_g">คาร์บ (g)</label><input type="number" id="fC" min="0" placeholder="0"></div>
+          <div class="fl"><label data-i18n="fat_g">ไขมัน (g)</label><input type="number" id="fF" min="0" placeholder="0"></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
           <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);cursor:pointer;user-select:none">
-            <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> 💾 บันทึกลงไลบรารี
+            <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> <span data-i18n="save_lib">💾 บันทึกลงไลบรารี</span>
           </label>
-          <button type="button" class="photo-btn" onclick="document.getElementById('photoUpload').click()">📷 แนบรูป</button>
+          <button type="button" class="photo-btn" onclick="document.getElementById('photoUpload').click()" data-i18n="attach_photo">📷 แนบรูป</button>
           <input type="file" id="photoUpload" accept="image/*" hidden onchange="loadPhotoForEntry(this.files[0])">
           <img id="photoPreview" class="photo-preview" alt="">
         </div>
-        <button class="btn" onclick="addManual()">+ เพิ่มอาหาร</button>
+        <button class="btn" onclick="addManual()" data-i18n="btn_add">+ เพิ่มอาหาร</button>
       </div>
     </div>
 
     <!-- ANALYSIS -->
     <div class="screen" id="pg-analysis">
-      <div class="card"><h3>แคลอรี่ 7 วัน</h3><div class="wbars" id="wBars"></div><div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div></div>
-      <div class="card"><h3>น้ำหนัก 30 วัน</h3><div class="lc-wrap" id="weightChart"></div><div id="weightSum" style="font-size:.74rem;color:var(--muted);margin-top:6px;text-align:center"></div></div>
-      <div class="card"><h3>น้ำดื่ม 7 วัน</h3><div id="waterStats"></div></div>
-      <div class="card"><h3>สรุป</h3><div id="wkSum"></div></div>
-      <div class="card"><h3>คำแนะนำ</h3><div id="insDiv"></div></div>
+      <div class="card"><h3 data-i18n="cal_7d">แคลอรี่ 7 วัน</h3><div class="wbars" id="wBars"></div><div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div></div>
+      <div class="card"><h3 data-i18n="weight_30d">น้ำหนัก 30 วัน</h3><div class="lc-wrap" id="weightChart"></div><div id="weightSum" style="font-size:.74rem;color:var(--muted);margin-top:6px;text-align:center"></div></div>
+      <div class="card"><h3 data-i18n="water_7d">น้ำดื่ม 7 วัน</h3><div id="waterStats"></div></div>
+      <div class="card"><h3 data-i18n="summary">สรุป</h3><div id="wkSum"></div></div>
+      <div class="card"><h3 data-i18n="advice">คำแนะนำ</h3><div id="insDiv"></div></div>
       <div class="card">
-        <h3>เหรียญตรา</h3>
+        <h3 data-i18n="badges">เหรียญตรา</h3>
         <div class="bdg-g" id="bdgGrid"></div>
-        <button class="btn-sec" onclick="shareAchievements()" style="width:100%;margin-top:10px">🏆 แชร์ความสำเร็จ</button>
+        <button class="btn-sec" onclick="shareAchievements()" style="width:100%;margin-top:10px" data-i18n="share_ach">🏆 แชร์ความสำเร็จ</button>
       </div>
     </div>
 
@@ -421,51 +421,50 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
     <div class="screen" id="pg-tdee">
       <div class="card" style="text-align:center;padding:18px 14px">
         <div style="font-size:2.5rem;margin-bottom:4px">🔥</div>
-        <div style="font-size:1.05rem;font-weight:700">เครื่องคำนวณ TDEE</div>
-        <div style="font-size:.74rem;color:var(--muted);margin-top:3px">Total Daily Energy Expenditure — พลังงานที่ร่างกายเผาผลาญต่อวัน</div>
+        <div style="font-size:1.05rem;font-weight:700" data-i18n="tdee_title">เครื่องคำนวณ TDEE</div>
+        <div style="font-size:.74rem;color:var(--muted);margin-top:3px" data-i18n="tdee_sub">Total Daily Energy Expenditure — พลังงานที่ร่างกายเผาผลาญต่อวัน</div>
       </div>
       <div class="card">
-        <h3>กรอกข้อมูล</h3>
+        <h3 data-i18n="fill_info">กรอกข้อมูล</h3>
         <div class="pgrid">
-          <div class="fl"><label>เพศ</label><select id="tGender" oninput="liveTDEE()"><option value="male">ชาย</option><option value="female">หญิง</option></select></div>
-          <div class="fl"><label>อายุ (ปี)</label><input type="number" id="tAge" placeholder="25" oninput="liveTDEE()"></div>
-          <div class="fl"><label>น้ำหนัก (กก.)</label><input type="number" id="tWeight" placeholder="65" oninput="liveTDEE()"></div>
-          <div class="fl"><label>ส่วนสูง (ซม.)</label><input type="number" id="tHeight" placeholder="170" oninput="liveTDEE()"></div>
+          <div class="fl"><label data-i18n="gender">เพศ</label><select id="tGender" oninput="liveTDEE()"><option value="male" data-i18n="male">ชาย</option><option value="female" data-i18n="female">หญิง</option></select></div>
+          <div class="fl"><label data-i18n="age">อายุ (ปี)</label><input type="number" id="tAge" placeholder="25" oninput="liveTDEE()"></div>
+          <div class="fl"><label data-i18n="weight_kg">น้ำหนัก (กก.)</label><input type="number" id="tWeight" placeholder="65" oninput="liveTDEE()"></div>
+          <div class="fl"><label data-i18n="height_cm">ส่วนสูง (ซม.)</label><input type="number" id="tHeight" placeholder="170" oninput="liveTDEE()"></div>
         </div>
         <div class="fl" style="margin-bottom:10px">
-          <label>ระดับกิจกรรม</label>
+          <label data-i18n="activity_lvl">ระดับกิจกรรม</label>
           <select id="tAct" oninput="liveTDEE()">
-            <option value="1.2">นั่งทำงาน · ไม่ออกกำลังกาย (×1.2)</option>
-            <option value="1.375">เบา · 1–3 วัน/สัปดาห์ (×1.375)</option>
-            <option value="1.55" selected>ปานกลาง · 3–5 วัน/สัปดาห์ (×1.55)</option>
-            <option value="1.725">หนัก · 6–7 วัน/สัปดาห์ (×1.725)</option>
-            <option value="1.9">หนักมาก · งานใช้แรง (×1.9)</option>
+            <option value="1.2" data-i18n="tact_1">นั่งทำงาน · ไม่ออกกำลังกาย (×1.2)</option>
+            <option value="1.375" data-i18n="tact_2">เบา · 1–3 วัน/สัปดาห์ (×1.375)</option>
+            <option value="1.55" selected data-i18n="tact_3">ปานกลาง · 3–5 วัน/สัปดาห์ (×1.55)</option>
+            <option value="1.725" data-i18n="tact_4">หนัก · 6–7 วัน/สัปดาห์ (×1.725)</option>
+            <option value="1.9" data-i18n="tact_5">หนักมาก · งานใช้แรง (×1.9)</option>
           </select>
         </div>
         <div>
-          <div class="sec-lbl">เป้าหมาย</div>
+          <div class="sec-lbl" data-i18n="goal_title">เป้าหมาย</div>
           <div class="gchips">
-            <button class="gchip active" data-tg="lose" onclick="pickTGoal(this)">🔥 ลดน้ำหนัก</button>
-            <button class="gchip" data-tg="maintain" onclick="pickTGoal(this)">⚖️ คงน้ำหนัก</button>
-            <button class="gchip" data-tg="gain" onclick="pickTGoal(this)">💪 เพิ่มกล้ามเนื้อ</button>
+            <button class="gchip active" data-tg="lose" onclick="pickTGoal(this)" data-i18n="goal_lose">🔥 ลดน้ำหนัก</button>
+            <button class="gchip" data-tg="maintain" onclick="pickTGoal(this)" data-i18n="goal_maintain">⚖️ คงน้ำหนัก</button>
+            <button class="gchip" data-tg="gain" onclick="pickTGoal(this)" data-i18n="goal_gain">💪 เพิ่มกล้ามเนื้อ</button>
           </div>
         </div>
       </div>
 
       <!-- BIG TDEE NUMBER -->
       <div class="card" id="tdeeBigCard" style="text-align:center;padding:20px 14px;background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,169,77,.08));border-color:rgba(255,107,107,.3)">
-        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">ค่า TDEE ของคุณ</div>
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px" data-i18n="your_tdee">ค่า TDEE ของคุณ</div>
         <div id="tdeeBig" style="font-size:2.6rem;font-weight:800;color:var(--accent);line-height:1.1">—</div>
-        <div style="font-size:.75rem;color:var(--muted);margin-top:2px">kcal / วัน</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:2px" data-i18n="kcal_per_day">kcal / วัน</div>
         <div style="height:1px;background:var(--border);margin:14px 0"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left">
           <div>
             <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">BMR</div>
             <div id="tdeeBMR" style="font-size:1rem;font-weight:700">— kcal</div>
-            <div style="font-size:.62rem;color:var(--muted)">เผาผลาญตอนพัก</div>
           </div>
           <div>
-            <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">เป้าหมาย/วัน</div>
+            <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase" data-i18n="goal_per_day">เป้าหมาย/วัน</div>
             <div id="tdeeGoal" style="font-size:1rem;font-weight:700;color:var(--green)">— kcal</div>
             <div style="font-size:.62rem;color:var(--muted)" id="tdeeGoalNote">—</div>
           </div>
@@ -474,28 +473,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 
       <!-- MACROS -->
       <div class="card">
-        <h3>โปรตีน · คาร์บ · ไขมัน แนะนำ</h3>
+        <h3 data-i18n="macros_rec">โปรตีน · คาร์บ · ไขมัน แนะนำ</h3>
         <div class="macros">
-          <div class="mc"><div class="mc-l">โปรตีน</div><div class="mc-v" id="tMP" style="color:var(--blue)">— g</div><div style="font-size:.6rem;color:var(--muted);margin-top:2px" id="tMPpct">30%</div></div>
-          <div class="mc"><div class="mc-l">คาร์บ</div><div class="mc-v" id="tMC" style="color:var(--amber)">— g</div><div style="font-size:.6rem;color:var(--muted);margin-top:2px" id="tMCpct">40%</div></div>
-          <div class="mc"><div class="mc-l">ไขมัน</div><div class="mc-v" id="tMF" style="color:var(--purple)">— g</div><div style="font-size:.6rem;color:var(--muted);margin-top:2px" id="tMFpct">30%</div></div>
+          <div class="mc"><div class="mc-l" data-i18n="protein">โปรตีน</div><div class="mc-v" id="tMP" style="color:var(--blue)">— g</div><div style="font-size:.6rem;color:var(--muted);margin-top:2px" id="tMPpct">30%</div></div>
+          <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="tMC" style="color:var(--amber)">— g</div><div style="font-size:.6rem;color:var(--muted);margin-top:2px" id="tMCpct">40%</div></div>
+          <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="tMF" style="color:var(--purple)">— g</div><div style="font-size:.6rem;color:var(--muted);margin-top:2px" id="tMFpct">30%</div></div>
         </div>
-        <div class="tip" id="tdeeTip" style="font-size:.74rem">กรอกข้อมูลด้านบนเพื่อดูคำแนะนำ</div>
+        <div class="tip" id="tdeeTip" style="font-size:.74rem"></div>
       </div>
 
-      <!-- INFO -->
-      <div class="card">
-        <h3>BMR / TDEE คืออะไร?</h3>
-        <div style="font-size:.76rem;line-height:1.7;color:var(--muted)">
-          <strong style="color:var(--text)">BMR</strong> (Basal Metabolic Rate) คือพลังงานพื้นฐานที่ร่างกายใช้ตอนนอนนิ่ง ๆ (หายใจ, สูบฉีดเลือด, ฯลฯ)<br><br>
-          <strong style="color:var(--text)">TDEE</strong> = BMR × ตัวคูณกิจกรรม คือพลังงานรวมที่คุณเผาผลาญทั้งวัน<br><br>
-          <strong style="color:var(--text)">การลดน้ำหนัก:</strong> กินน้อยกว่า TDEE ~500 kcal/วัน → ลด ~0.5 กก./สัปดาห์<br>
-          <strong style="color:var(--text)">การเพิ่มกล้ามเนื้อ:</strong> กินมากกว่า TDEE ~300 kcal/วัน + ออกกำลังกาย<br><br>
-          ใช้สูตร <em>Harris-Benedict (revised 1984)</em>
-        </div>
-      </div>
-
-      <button class="btn" onclick="applyTDEEtoProfile()" style="margin-bottom:20px">ใช้ค่านี้เป็นเป้าหมาย</button>
+      <button class="btn" onclick="applyTDEEtoProfile()" style="margin-bottom:20px" data-i18n="apply_as_goal">ใช้ค่านี้เป็นเป้าหมาย</button>
     </div>
 
     <!-- PROFILE -->
@@ -506,48 +493,48 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <div style="font-size:.75rem;color:var(--muted);margin-top:3px" id="profileEmail2">—</div>
       </div>
       <div class="card">
-        <h3>ข้อมูลส่วนตัว</h3>
+        <h3 data-i18n="personal_info">ข้อมูลส่วนตัว</h3>
         <div class="pgrid">
-          <div class="fl"><label>ชื่อ</label><input type="text" id="pName" placeholder="ชื่อ"></div>
-          <div class="fl"><label>เพศ</label><select id="pGender"><option value="male">ชาย</option><option value="female">หญิง</option></select></div>
-          <div class="fl"><label>อายุ</label><input type="number" id="pAge" placeholder="25"></div>
-          <div class="fl"><label>น้ำหนัก (กก.)</label><input type="number" id="pWeight" placeholder="65"></div>
-          <div class="fl"><label>ส่วนสูง (ซม.)</label><input type="number" id="pHeight" placeholder="170"></div>
-          <div class="fl"><label>เป้าหมาย (กก.)</label><input type="number" id="pGoalW" placeholder="60"></div>
+          <div class="fl"><label data-i18n="name">ชื่อ</label><input type="text" id="pName" placeholder="ชื่อ" data-i18n="name_ph_profile"></div>
+          <div class="fl"><label data-i18n="gender">เพศ</label><select id="pGender"><option value="male" data-i18n="male">ชาย</option><option value="female" data-i18n="female">หญิง</option></select></div>
+          <div class="fl"><label data-i18n="age">อายุ</label><input type="number" id="pAge" placeholder="25"></div>
+          <div class="fl"><label data-i18n="weight_kg">น้ำหนัก (กก.)</label><input type="number" id="pWeight" placeholder="65"></div>
+          <div class="fl"><label data-i18n="height_cm">ส่วนสูง (ซม.)</label><input type="number" id="pHeight" placeholder="170"></div>
+          <div class="fl"><label data-i18n="goal_weight_kg">เป้าหมาย (กก.)</label><input type="number" id="pGoalW" placeholder="60"></div>
         </div>
         <div class="fl" style="margin-bottom:10px">
-          <label>การออกกำลังกาย</label>
+          <label data-i18n="activity_lvl">การออกกำลังกาย</label>
           <select id="pAct">
-            <option value="1.2">ไม่ค่อยออกกำลังกาย</option>
-            <option value="1.375">เบา 1–3 วัน/สัปดาห์</option>
-            <option value="1.55" selected>ปานกลาง 3–5 วัน/สัปดาห์</option>
-            <option value="1.725">หนัก 6–7 วัน/สัปดาห์</option>
-            <option value="1.9">หนักมาก / งานใช้แรง</option>
+            <option value="1.2" data-i18n="act_1">ไม่ค่อยออกกำลังกาย</option>
+            <option value="1.375" data-i18n="act_2">เบา 1–3 วัน/สัปดาห์</option>
+            <option value="1.55" selected data-i18n="act_3">ปานกลาง 3–5 วัน/สัปดาห์</option>
+            <option value="1.725" data-i18n="act_4">หนัก 6–7 วัน/สัปดาห์</option>
+            <option value="1.9" data-i18n="act_5">หนักมาก / งานใช้แรง</option>
           </select>
         </div>
         <div style="margin-bottom:10px">
-          <div class="sec-lbl">เป้าหมาย</div>
+          <div class="sec-lbl" data-i18n="goal_title">เป้าหมาย</div>
           <div class="gchips">
-            <button class="gchip active" data-g="lose" onclick="pickGoal(this)">🔥 ลดน้ำหนัก</button>
-            <button class="gchip" data-g="maintain" onclick="pickGoal(this)">⚖️ คงน้ำหนัก</button>
-            <button class="gchip" data-g="gain" onclick="pickGoal(this)">💪 เพิ่มกล้ามเนื้อ</button>
+            <button class="gchip active" data-g="lose" onclick="pickGoal(this)" data-i18n="goal_lose">🔥 ลดน้ำหนัก</button>
+            <button class="gchip" data-g="maintain" onclick="pickGoal(this)" data-i18n="goal_maintain">⚖️ คงน้ำหนัก</button>
+            <button class="gchip" data-g="gain" onclick="pickGoal(this)" data-i18n="goal_gain">💪 เพิ่มกล้ามเนื้อ</button>
           </div>
         </div>
-        <button class="btn" onclick="saveProfile()">บันทึกและคำนวณ</button>
+        <button class="btn" onclick="saveProfile()" data-i18n="save_calc">บันทึกและคำนวณ</button>
       </div>
       <div class="card" id="resultCard" style="display:none">
-        <h3>ผลการคำนวณ</h3>
+        <h3 data-i18n="calc_result">ผลการคำนวณ</h3>
         <div class="rbox">
-          <div class="rbox-t">พลังงาน (Harris-Benedict)</div>
+          <div class="rbox-t">Harris-Benedict</div>
           <div class="rrow"><span class="rl">BMR</span><span class="rv" id="rBMR">—</span></div>
           <div class="rrow"><span class="rl">TDEE</span><span class="rv" id="rTDEE">—</span></div>
-          <div class="rrow"><span class="rl">เป้าหมาย/วัน</span><span class="rv" id="rGoal" style="color:var(--accent)">—</span></div>
+          <div class="rrow"><span class="rl" data-i18n="goal_per_day">เป้าหมาย/วัน</span><span class="rv" id="rGoal" style="color:var(--accent)">—</span></div>
         </div>
         <div class="rbox">
-          <div class="rbox-t">สุขภาพ</div>
-          <div class="rrow"><span class="rl">โปรตีน/วัน</span><span class="rv" id="rProt" style="color:var(--blue)">—</span></div>
+          <div class="rbox-t">Health</div>
+          <div class="rrow"><span class="rl" data-i18n="protein">โปรตีน</span><span class="rv" id="rProt" style="color:var(--blue)">—</span></div>
           <div class="rrow"><span class="rl">BMI</span><span class="rv" id="rBMI">—</span></div>
-          <div class="rrow"><span class="rl">ระยะเวลา</span><span class="rv" id="rWeeks">—</span></div>
+          <div class="rrow"><span class="rl">Timeline</span><span class="rv" id="rWeeks">—</span></div>
         </div>
         <div class="tip" id="tipBox"></div>
       </div>
@@ -578,7 +565,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
           <button class="btn-sec" onclick="document.getElementById('importFile').click()">📥 Import</button>
         </div>
         <input type="file" id="importFile" accept="application/json,.json" hidden onchange="importData(this.files[0])">
-        <button class="btn-danger" onclick="resetAllData()">ล้างข้อมูลทั้งหมด</button>
+        <button class="btn-danger" onclick="resetAllData()" data-i18n="reset_all">ล้างข้อมูลทั้งหมด</button>
       </div>
       <div style="text-align:center;font-size:.7rem;color:var(--muted);padding:8px 0 20px">
         CalPro <span id="appVer">v1.0.0</span> · made with 🔥
@@ -591,11 +578,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 <!-- SMART GOAL MODAL -->
 <div class="modal-bg hide" id="smartGoalModal">
   <div class="modal">
-    <div class="modal-hdr"><h3>💡 ปรับเป้าหมายอัตโนมัติ?</h3><button class="mc-close" onclick="closeSmartGoal()">✕</button></div>
+    <div class="modal-hdr"><h3 data-i18n="smart_goal">💡 ปรับเป้าหมายอัตโนมัติ?</h3><button class="mc-close" onclick="closeSmartGoal()">✕</button></div>
     <div id="smartGoalBody" style="font-size:.85rem;line-height:1.6;color:var(--text);margin-bottom:14px"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button class="btn-sec" onclick="closeSmartGoal()">ทีหลัง</button>
-      <button class="btn" id="smartGoalApply">ปรับให้เลย</button>
+      <button class="btn-sec" onclick="closeSmartGoal()" data-i18n="later">ทีหลัง</button>
+      <button class="btn" id="smartGoalApply" data-i18n="apply_now">ปรับให้เลย</button>
     </div>
   </div>
 </div>
@@ -603,9 +590,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 <!-- WEEKLY RECAP MODAL -->
 <div class="modal-bg hide" id="recapModal">
   <div class="modal">
-    <div class="modal-hdr"><h3>📅 สรุปสัปดาห์ที่แล้ว</h3><button class="mc-close" onclick="closeRecap()">✕</button></div>
+    <div class="modal-hdr"><h3 data-i18n="recap_title">📅 สรุปสัปดาห์ที่แล้ว</h3><button class="mc-close" onclick="closeRecap()">✕</button></div>
     <div id="recapBody" style="font-size:.85rem;line-height:1.7"></div>
-    <button class="btn" onclick="closeRecap()" style="margin-top:14px">รับทราบ</button>
+    <button class="btn" onclick="closeRecap()" style="margin-top:14px" data-i18n="got_it">รับทราบ</button>
   </div>
 </div>
 
@@ -613,8 +600,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 <div class="modal-bg hide" id="authModal">
   <div class="modal">
     <div class="modal-hdr"><h3>☁️ <span id="authTitle">เชื่อมต่อบัญชี</span></h3><button class="mc-close" onclick="closeAuthModal()">✕</button></div>
-    <div style="font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:12px">
-      <span data-i18n="cloud_help">เชื่อมต่อเพื่อ sync ข้อมูลข้ามเครื่อง · ฟรี · ลบบัญชีได้ตลอด</span>
+    <div style="font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:12px" data-i18n="cloud_help">
+      เชื่อมต่อเพื่อ sync ข้อมูลข้ามเครื่อง · ฟรี · ลบบัญชีได้ตลอด
     </div>
     <div style="display:flex;gap:5px;background:var(--surface2);border-radius:9px;padding:3px;margin-bottom:12px">
       <button class="qtab active" id="authTabLogin" onclick="switchAuthMode('login')" data-i18n="login">เข้าสู่ระบบ</button>
@@ -656,40 +643,40 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 <!-- EDIT FOOD MODAL -->
 <div class="modal-bg hide" id="editModal">
   <div class="modal">
-    <div class="modal-hdr"><h3>แก้ไขรายการ</h3><button class="mc-close" onclick="closeEditModal()">✕</button></div>
+    <div class="modal-hdr"><h3 data-i18n="edit_entry">แก้ไขรายการ</h3><button class="mc-close" onclick="closeEditModal()">✕</button></div>
     <input type="hidden" id="editId">
     <div class="fgrid g2">
-      <div class="fl"><label>ชื่ออาหาร</label><input type="text" id="eName"></div>
-      <div class="fl"><label>แคลอรี่</label><input type="number" id="eCal" min="0"></div>
+      <div class="fl"><label data-i18n="food_name">ชื่ออาหาร</label><input type="text" id="eName"></div>
+      <div class="fl"><label data-i18n="cal">แคลอรี่</label><input type="number" id="eCal" min="0"></div>
     </div>
     <div class="fgrid g3" style="margin-bottom:10px">
-      <div class="fl"><label>โปรตีน (g)</label><input type="number" id="eP" min="0"></div>
-      <div class="fl"><label>คาร์บ (g)</label><input type="number" id="eC" min="0"></div>
-      <div class="fl"><label>ไขมัน (g)</label><input type="number" id="eF" min="0"></div>
+      <div class="fl"><label data-i18n="protein_g">โปรตีน (g)</label><input type="number" id="eP" min="0"></div>
+      <div class="fl"><label data-i18n="carbs_g">คาร์บ (g)</label><input type="number" id="eC" min="0"></div>
+      <div class="fl"><label data-i18n="fat_g">ไขมัน (g)</label><input type="number" id="eF" min="0"></div>
     </div>
     <div class="fl" style="margin-bottom:10px">
-      <label>มื้ออาหาร</label>
+      <label data-i18n="meal">มื้ออาหาร</label>
       <select id="eMeal">
-        <option value="เช้า">🌅 เช้า</option>
-        <option value="กลางวัน">☀️ กลางวัน</option>
-        <option value="เย็น">🌙 เย็น</option>
-        <option value="ของว่าง">🍎 ของว่าง</option>
+        <option value="เช้า" data-i18n="morning_opt">🌅 เช้า</option>
+        <option value="กลางวัน" data-i18n="lunch_opt">☀️ กลางวัน</option>
+        <option value="เย็น" data-i18n="dinner_opt">🌙 เย็น</option>
+        <option value="ของว่าง" data-i18n="snack_opt">🍎 ของว่าง</option>
       </select>
     </div>
-    <button class="btn" onclick="saveEditedFood()">บันทึก</button>
+    <button class="btn" onclick="saveEditedFood()" data-i18n="save">บันทึก</button>
   </div>
 </div>
 
 <!-- AVATAR MODAL -->
 <div class="modal-bg hide" id="avatarModal">
   <div class="modal">
-    <div class="modal-hdr"><h3>เปลี่ยนรูปประจำตัว</h3><button class="mc-close" onclick="closeAvatarModal()">✕</button></div>
-    <div class="sec-lbl">เลือกอวาตาร์น่ารัก ๆ</div>
+    <div class="modal-hdr"><h3 data-i18n="change_avatar">เปลี่ยนรูปประจำตัว</h3><button class="mc-close" onclick="closeAvatarModal()">✕</button></div>
+    <div class="sec-lbl" data-i18n="cute_avatars">เลือกอวาตาร์น่ารัก ๆ</div>
     <div class="avatar-grid" id="avatarGrid"></div>
-    <div class="sec-lbl">หรือ</div>
+    <div class="sec-lbl" data-i18n="or">หรือ</div>
     <input type="file" id="avatarUpload" accept="image/*" hidden onchange="uploadAvatar(this.files[0])">
-    <button class="btn" onclick="document.getElementById('avatarUpload').click()">📷 อัพโหลดรูป</button>
-    <button class="btn-sec" onclick="resetAvatar()" style="margin-top:8px;width:100%">ใช้ตัวอักษรแรก</button>
+    <button class="btn" onclick="document.getElementById('avatarUpload').click()" data-i18n="upload_photo">📷 อัพโหลดรูป</button>
+    <button class="btn-sec" onclick="resetAvatar()" style="margin-top:8px;width:100%" data-i18n="use_initial">ใช้ตัวอักษรแรก</button>
   </div>
 </div>
 
@@ -731,7 +718,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.1.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -743,18 +730,22 @@ let syncing = false;
 // ═══ i18n ═══
 const I18N = {
   th:{
-    welcome:'ยินดีต้อนรับ',
+    welcome:'ยินดีต้อนรับ',you:'คุณ',today:'วันนี้',yesterday:'เมื่อวาน',
     home:'วันนี้',add:'เพิ่ม',analysis:'วิเคราะห์',tdee:'TDEE',profile:'โปรไฟล์',
     cal_today:'แคลอรี่',goal:'เป้าหมาย',remaining:'เหลือ',entries:'รายการ',
     protein:'โปรตีน',carbs:'คาร์บ',fat:'ไขมัน',
     morning:'เช้า',lunch:'กลางวัน',dinner:'เย็น',snack:'ของว่าง',
+    morning_opt:'🌅 เช้า',lunch_opt:'☀️ กลางวัน',dinner_opt:'🌙 เย็น',snack_opt:'🍎 ของว่าง',
     no_entries:'ยังไม่มีรายการ',press_add:'กด ➕ เพื่อบันทึกอาหาร',
     quick_fav:'⭐ ของโปรด',quick_recent:'🕘 ล่าสุด',
     search_food:'ค้นหาอาหาร',search_ph:'พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)...',
-    no_food:'ไม่พบอาหาร',meal:'มื้ออาหาร',
-    manual:'กรอกเอง',food_name:'ชื่ออาหาร',cal:'แคลอรี่',
+    no_food:'ไม่พบอาหาร',no_fav:'ยังไม่มีของโปรด · กด ⭐ ในผลค้นหา',no_recent:'ยังไม่มีรายการล่าสุด · เพิ่มอาหารดูสิ',
+    meal:'มื้ออาหาร',
+    manual:'กรอกเอง',food_name:'ชื่ออาหาร',name_ph:'ชื่อ...',cal:'แคลอรี่',cal_ph:'kcal',
+    protein_g:'โปรตีน (g)',carbs_g:'คาร์บ (g)',fat_g:'ไขมัน (g)',
     save_lib:'💾 บันทึกลงไลบรารี',attach_photo:'📷 แนบรูป',btn_add:'+ เพิ่มอาหาร',
     cal_7d:'แคลอรี่ 7 วัน',weight_30d:'น้ำหนัก 30 วัน',water_7d:'น้ำดื่ม 7 วัน',
+    days_logged:'บันทึก',avg_per_day:'เฉลี่ย/วัน',days_over:'วันเกินเป้า',days_on:'วันในเป้า',
     summary:'สรุป',advice:'คำแนะนำ',badges:'เหรียญตรา',share_today:'📤 แชร์สรุปวันนี้',share_ach:'🏆 แชร์ความสำเร็จ',
     tdee_title:'เครื่องคำนวณ TDEE',tdee_sub:'Total Daily Energy Expenditure — พลังงานที่ร่างกายเผาผลาญต่อวัน',
     fill_info:'กรอกข้อมูล',gender:'เพศ',male:'ชาย',female:'หญิง',age:'อายุ (ปี)',
@@ -766,28 +757,45 @@ const I18N = {
     save_calc:'บันทึกและคำนวณ',calc_result:'ผลการคำนวณ',
     manage_data:'จัดการข้อมูล',export:'📤 Export',import:'📥 Import',reset_all:'ล้างข้อมูลทั้งหมด',
     settings:'ตั้งค่า',theme:'ธีมสี',accent:'สีหลัก',done:'เสร็จสิ้น',language:'ภาษา',
-    water:'น้ำดื่ม',weight:'น้ำหนัก',cups:'แก้ว',save:'บันทึก',cancel:'ยกเลิก',
+    water:'น้ำดื่ม',weight:'น้ำหนัก',cups:'แก้ว',cups_unit:'แก้ว',kg_unit:'กก.',save:'บันทึก',cancel:'ยกเลิก',
+    enter_ph:'กรอก...',weight_trend_hint:'บันทึกอย่างน้อย 2 วันเพื่อดูแนวโน้ม',
+    no_workouts:'ยังไม่มีการออกกำลังกาย',
     edit:'แก้ไข',del:'ลบ',edit_entry:'แก้ไขรายการ',change_avatar:'เปลี่ยนรูปประจำตัว',
     cute_avatars:'เลือกอวาตาร์น่ารัก ๆ',or:'หรือ',upload_photo:'📷 อัพโหลดรูป',use_initial:'ใช้ตัวอักษรแรก',
     workouts:'ออกกำลังกาย',add_workout:'+ เพิ่มออกกำลังกาย',duration_min:'นาที',kcal_burned:'kcal เผาผลาญ',
     body_measurements:'สัดส่วนร่างกาย',waist:'รอบเอว',hip:'รอบสะโพก',chest:'รอบอก',neck:'รอบคอ',bodyfat:'ไขมัน %',
+    measure_history:'ครั้งล่าสุด',
+    bf_essential:'จำเป็น',bf_athlete:'นักกีฬา',bf_fitness:'ฟิตเนส',bf_average:'ค่าเฉลี่ย',bf_high:'สูง',
     cloud_sync:'Cloud Sync',cloud_help:'เชื่อมต่อเพื่อ sync ข้อมูลข้ามเครื่อง · ฟรี · ลบบัญชีได้ตลอด',
     login:'เข้าสู่ระบบ',signup:'สมัครสมาชิก',password:'รหัสผ่าน',display_name:'ชื่อที่แสดง',
-    friends:'เพื่อน + Leaderboard',
+    friends:'เพื่อน + Leaderboard',not_signed_in:'ยังไม่เชื่อมต่อ · ข้อมูลอยู่ในเบราว์เซอร์นี้เท่านั้น',
+    last_sync:'ซิงค์ล่าสุด',sync_now:'ซิงค์เลย',sign_out:'ออกจากระบบ',delete_cloud:'ลบข้อมูลใน cloud',
+    streak:'Streak',on_track:'ในเป้า',days:'วัน',
+    smart_goal:'💡 ปรับเป้าหมายอัตโนมัติ?',recap_title:'📅 สรุปสัปดาห์ที่แล้ว',
+    no_measure_yet:'กรอกรอบเอว + รอบคอ (+สะโพกสำหรับผู้หญิง) เพื่อคำนวณ % ไขมัน',
+    weekly_recap_logged:'วันที่บันทึก',weekly_recap_change:'น้ำหนัก',weekly_recap_water_avg:'น้ำดื่มเฉลี่ย',
+    add_friend:'+ เพิ่มเพื่อนด้วยอีเมล',later:'ทีหลัง',apply_now:'ปรับให้เลย',got_it:'รับทราบ',
+    act_1:'ไม่ค่อยออกกำลังกาย',act_2:'เบา 1–3 วัน/สัปดาห์',act_3:'ปานกลาง 3–5 วัน/สัปดาห์',act_4:'หนัก 6–7 วัน/สัปดาห์',act_5:'หนักมาก / งานใช้แรง',
+    tact_1:'นั่งทำงาน · ไม่ออกกำลังกาย (×1.2)',tact_2:'เบา · 1–3 วัน/สัปดาห์ (×1.375)',tact_3:'ปานกลาง · 3–5 วัน/สัปดาห์ (×1.55)',tact_4:'หนัก · 6–7 วัน/สัปดาห์ (×1.725)',tact_5:'หนักมาก · งานใช้แรง (×1.9)',
+    name_ph_profile:'ชื่อ',goal_label:'เป้าหมาย',
   },
   en:{
-    welcome:'Welcome',
+    welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
     home:'Today',add:'Add',analysis:'Analysis',tdee:'TDEE',profile:'Profile',
     cal_today:'kcal',goal:'Goal',remaining:'Left',entries:'Items',
     protein:'Protein',carbs:'Carbs',fat:'Fat',
     morning:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',
+    morning_opt:'🌅 Breakfast',lunch_opt:'☀️ Lunch',dinner_opt:'🌙 Dinner',snack_opt:'🍎 Snack',
     no_entries:'No entries yet',press_add:'Press ➕ to log food',
     quick_fav:'⭐ Favorites',quick_recent:'🕘 Recent',
     search_food:'Search Food',search_ph:'Type food name (TH/EN)...',
-    no_food:'No food found',meal:'Meal',
-    manual:'Manual Entry',food_name:'Food name',cal:'Calories',
+    no_food:'No food found',no_fav:'No favorites yet · tap ⭐ on a result',no_recent:'No recent items · log something to populate this',
+    meal:'Meal',
+    manual:'Manual Entry',food_name:'Food name',name_ph:'Name...',cal:'Calories',cal_ph:'kcal',
+    protein_g:'Protein (g)',carbs_g:'Carbs (g)',fat_g:'Fat (g)',
     save_lib:'💾 Save to my library',attach_photo:'📷 Attach photo',btn_add:'+ Add food',
     cal_7d:'7-day Calories',weight_30d:'30-day Weight',water_7d:'7-day Water',
+    days_logged:'Days logged',avg_per_day:'Avg / day',days_over:'Over goal',days_on:'On goal',
     summary:'Summary',advice:'Tips',badges:'Badges',share_today:'📤 Share today',share_ach:'🏆 Share achievements',
     tdee_title:'TDEE Calculator',tdee_sub:'Total Daily Energy Expenditure — calories your body burns per day',
     fill_info:'Your info',gender:'Gender',male:'Male',female:'Female',age:'Age (yrs)',
@@ -799,14 +807,27 @@ const I18N = {
     save_calc:'Save & calculate',calc_result:'Results',
     manage_data:'Manage data',export:'📤 Export',import:'📥 Import',reset_all:'Reset all data',
     settings:'Settings',theme:'Theme',accent:'Accent',done:'Done',language:'Language',
-    water:'Water',weight:'Weight',cups:'cups',save:'Save',cancel:'Cancel',
+    water:'Water',weight:'Weight',cups:'cups',cups_unit:'cups',kg_unit:'kg',save:'Save',cancel:'Cancel',
+    enter_ph:'Enter...',weight_trend_hint:'Log at least 2 days to see trend',
+    no_workouts:'No workouts logged yet',
     edit:'Edit',del:'Delete',edit_entry:'Edit entry',change_avatar:'Change avatar',
     cute_avatars:'Pick a cute avatar',or:'Or',upload_photo:'📷 Upload photo',use_initial:'Use initial letter',
     workouts:'Workouts',add_workout:'+ Add workout',duration_min:'min',kcal_burned:'kcal burned',
     body_measurements:'Body measurements',waist:'Waist',hip:'Hip',chest:'Chest',neck:'Neck',bodyfat:'Body fat %',
+    measure_history:'Recent measurements',
+    bf_essential:'essential',bf_athlete:'athlete',bf_fitness:'fitness',bf_average:'average',bf_high:'high',
     cloud_sync:'Cloud Sync',cloud_help:'Sync your data across devices · Free · Delete account anytime',
     login:'Sign in',signup:'Sign up',password:'Password',display_name:'Display name',
-    friends:'Friends + Leaderboard',
+    friends:'Friends + Leaderboard',not_signed_in:'Not signed in · Data stored in this browser only',
+    last_sync:'Last sync',sync_now:'Sync now',sign_out:'Sign out',delete_cloud:'Delete cloud data',
+    streak:'Streak',on_track:'On track',days:'days',
+    smart_goal:'💡 Adjust goal automatically?',recap_title:'📅 Last week summary',
+    no_measure_yet:'Enter waist + neck (+ hip for women) to calculate body fat %',
+    weekly_recap_logged:'Days logged',weekly_recap_change:'Weight',weekly_recap_water_avg:'Avg water',
+    add_friend:'+ Add friend by email',later:'Later',apply_now:'Apply',got_it:'Got it',
+    act_1:'Sedentary',act_2:'Light · 1–3 days/wk',act_3:'Moderate · 3–5 days/wk',act_4:'Active · 6–7 days/wk',act_5:'Very active / heavy labor',
+    tact_1:'Sedentary (×1.2)',tact_2:'Light · 1–3 days/wk (×1.375)',tact_3:'Moderate · 3–5 days/wk (×1.55)',tact_4:'Active · 6–7 days/wk (×1.725)',tact_5:'Very active / heavy labor (×1.9)',
+    name_ph_profile:'Name',goal_label:'Goal',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -958,13 +979,13 @@ const FOODS=[
 const CATS={thai:'🇹🇭',japanese:'🇯🇵',korean:'🇰🇷',chinese:'🇨🇳',italian:'🇮🇹',indian:'🇮🇳',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
 const MEAL_ICONS={เช้า:'🌅',กลางวัน:'☀️',เย็น:'🌙',ของว่าง:'🍎'};
 const BADGES=[
-  {id:'streak3',ico:'🔥',name:'3 วันติด',cond:u=>calcStreak(u)>=3},
-  {id:'streak7',ico:'⚡',name:'7 วันติด',cond:u=>calcStreak(u)>=7},
-  {id:'ontrack',ico:'🎯',name:'อยู่ในเป้า 5 วัน',cond:u=>daysOnTrack(u)>=5},
-  {id:'protein',ico:'💪',name:'โปรตีนครบ 3 วัน',cond:u=>protDays(u)>=3},
-  {id:'month',ico:'🏆',name:'แชมป์เดือน',cond:u=>daysOnTrack(u)>=20},
-  {id:'logged7',ico:'📝',name:'บันทึก 7 วัน',cond:u=>logDays(u)>=7},
-  {id:'master',ico:'👑',name:'Master',cond:u=>earnedBadges(u).length>=5},
+  {id:'streak3',ico:'🔥',name:'3 วันติด',name_en:'3-day streak',cond:u=>calcStreak(u)>=3},
+  {id:'streak7',ico:'⚡',name:'7 วันติด',name_en:'7-day streak',cond:u=>calcStreak(u)>=7},
+  {id:'ontrack',ico:'🎯',name:'อยู่ในเป้า 5 วัน',name_en:'5 days on track',cond:u=>daysOnTrack(u)>=5},
+  {id:'protein',ico:'💪',name:'โปรตีนครบ 3 วัน',name_en:'Protein 3 days',cond:u=>protDays(u)>=3},
+  {id:'month',ico:'🏆',name:'แชมป์เดือน',name_en:'Monthly champ',cond:u=>daysOnTrack(u)>=20},
+  {id:'logged7',ico:'📝',name:'บันทึก 7 วัน',name_en:'7 days logged',cond:u=>logDays(u)>=7},
+  {id:'master',ico:'👑',name:'Master',name_en:'Master',cond:u=>earnedBadges(u).length>=5},
 ];
 const THEMES={
   dark:{bg:'#0f0f14',s:'#1a1a24',s2:'#22222e',b:'#2e2e3e',t:'#e8e8f0',m:'#6868a0',mode:'dark'},
@@ -1022,11 +1043,12 @@ const WATER_GOAL = 8;
 function dateKey(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${da}`;}
 function todayKey(){return dateKey(new Date());}
 function fmtDate(k){
-  const d=new Date(k+'T00:00:00'),t=todayKey();
+  const d=new Date(k+'T00:00:00'),tk=todayKey();
   const y=new Date();y.setDate(y.getDate()-1);
-  if(k===t)return'วันนี้ · '+d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
-  if(k===dateKey(y))return'เมื่อวาน · '+d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
-  return d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short',year:'2-digit'});
+  const loc=settings.lang==='en'?'en-GB':'th-TH';
+  if(k===tk)return t('today')+' · '+d.toLocaleDateString(loc,{day:'numeric',month:'short'});
+  if(k===dateKey(y))return t('yesterday')+' · '+d.toLocaleDateString(loc,{day:'numeric',month:'short'});
+  return d.toLocaleDateString(loc,{weekday:'short',day:'numeric',month:'short',year:'2-digit'});
 }
 function showToast(msg, ms=2200){
   const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
@@ -1054,7 +1076,7 @@ function calcScore(ebd){return daysOnTrack(ebd)*10+calcStreak(ebd)*5+earnedBadge
 // ═══ LOAD DATA (localStorage) ═══
 function loadUserData(){
   userProfile = lsLoad(LS_PROFILE, {
-    display_name: 'คุณ', goal_cal: 1800, weight: 65, height: 170,
+    display_name: '', goal_cal: 1800, weight: 65, height: 170,
     age: 25, gender: 'male', activity: 1.55, goal_type: 'lose', goal_weight: 60
   });
   allEntries = lsLoad(LS_ENTRIES, {});
@@ -1154,9 +1176,10 @@ function importData(file){
 }
 
 // ═══ SHOW APP ═══
+function dayUnitShort(){return settings.lang==='en'?'/day':'/วัน';}
 function showApp(){
-  const name = userProfile?.display_name || 'คุณ';
-  document.getElementById('hdrSub').textContent = name + ' · ' + (userProfile?.goal_cal || 1800).toLocaleString() + ' kcal/วัน';
+  const name = userProfile?.display_name || t('you');
+  document.getElementById('hdrSub').textContent = name + ' · ' + (userProfile?.goal_cal || 1800).toLocaleString() + ' kcal' + dayUnitShort();
   renderCatBtns(); renderToday(); renderProfileUI();
 }
 
@@ -1236,18 +1259,20 @@ function setQuickTab(tab){
   document.querySelectorAll('.qtab').forEach(b=>b.classList.toggle('active',b.dataset.qtab===tab));
   renderQuickList();
 }
+function foodDisplayName(f){return settings.lang==='en'&&f.e?f.e:f.n;}
+function foodSubLine(f){return settings.lang==='en'?(f.n?f.n+' · ':'')+`P:${f.p}g C:${f.cb}g F:${f.f}g`:(f.e?f.e+' · ':'')+`P:${f.p}g C:${f.cb}g F:${f.f}g`;}
 function renderQuickList(){
   const w=document.getElementById('quickList');
   const list=activeQTab==='fav'
     ?favorites.map(n=>findFood(n)).filter(Boolean)
     :recentFoods.map(n=>findFood(n)).filter(Boolean);
   if(!list.length){
-    w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${activeQTab==='fav'?'ยังไม่มีของโปรด · กด ⭐ ในผลค้นหา':'ยังไม่มีรายการล่าสุด · เพิ่มอาหารดูสิ'}</div>`;
+    w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${activeQTab==='fav'?t('no_fav'):t('no_recent')}</div>`;
     return;
   }
   w.innerHTML='';list.slice(0,8).forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${f.n}</div><div class="sri-m">${f.e||''} · P:${f.p}g C:${f.cb}g F:${f.f}g</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}" onclick="toggleFavorite('${f.n.replace(/'/g,"\\'")}'​,event)">⭐</span></div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}" onclick="toggleFavorite('${f.n.replace(/'/g,"\\'")}'​,event)">⭐</span></div>`;
     d.onclick=()=>addFromSearch(f);
     w.appendChild(d);
   });
@@ -1259,11 +1284,11 @@ function renderCatResults(cat){
 }
 function renderResults(list){
   const w=document.getElementById('sRes');w.innerHTML='';
-  if(!list.length){w.innerHTML='<div class="sno">ไม่พบอาหาร</div>';return;}
+  if(!list.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   list.forEach(f=>{
     const d=document.createElement('div');d.className='sri';
     const star=`<span class="star ${isFav(f.n)?'on':''}" onclick="toggleFavorite('${f.n.replace(/'/g,"\\'")}'​,event)">⭐</span>`;
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${f.n}</div><div class="sri-m">${f.e||''} · P:${f.p}g C:${f.cb}g F:${f.f}g</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div>${star}</div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div>${star}</div>`;
     d.onclick=()=>addFromSearch(f);
     w.appendChild(d);
   });
@@ -1391,18 +1416,19 @@ function renderMeasurements(){
     const v=bf;
     if(g==='male'){cat=v<6?'essential':v<14?'athlete':v<18?'fitness':v<25?'average':'high';}
     else{cat=v<14?'essential':v<21?'athlete':v<25?'fitness':v<32?'average':'high';}
-    const labels=settings.lang==='en'
-      ?{essential:'essential',athlete:'athlete',fitness:'fitness',average:'average',high:'high'}
-      :{essential:'จำเป็น',athlete:'นักกีฬา',fitness:'ฟิตเนส',average:'ค่าเฉลี่ย',high:'สูง'};
-    res.innerHTML=`<div class="rbox" style="margin:0"><div class="rrow"><span class="rl">${t('bodyfat')} <small>(Navy)</small></span><span class="rv" style="color:var(--accent)">${bf.toFixed(1)}% · ${labels[cat]}</span></div></div>`;
+    const lbl=t('bf_'+cat);
+    res.innerHTML=`<div class="rbox" style="margin:0"><div class="rrow"><span class="rl">${t('bodyfat')} <small>(Navy)</small></span><span class="rv" style="color:var(--accent)">${bf.toFixed(1)}% · ${lbl}</span></div></div>`;
   }else{
-    res.innerHTML=`<div style="font-size:.72rem;color:var(--muted)">${settings.lang==='en'?'Enter waist + neck (+ hip for women) to calculate body fat %':'กรอกรอบเอว + รอบคอ (+สะโพกสำหรับผู้หญิง) เพื่อคำนวณ % ไขมัน'}</div>`;
+    res.innerHTML=`<div style="font-size:.72rem;color:var(--muted)">${t('no_measure_yet')}</div>`;
   }
   // Recent history
   const keys=Object.keys(allMeasures).sort().slice(-5).reverse();
   if(keys.length>1){
-    const rows=keys.map(k=>{const x=allMeasures[k];return `${k.slice(5)}: เอว ${x.waist||'-'} · สะโพก ${x.hip||'-'}`;}).join('<br>');
-    document.getElementById('measureHistory').innerHTML='<strong style="color:var(--text)">'+(settings.lang==='en'?'Recent measurements':'ครั้งล่าสุด')+'</strong><br>'+rows;
+    const isEn=settings.lang==='en';
+    const waistLbl=isEn?'waist':'เอว';
+    const hipLbl=isEn?'hip':'สะโพก';
+    const rows=keys.map(k=>{const x=allMeasures[k];return `${k.slice(5)}: ${waistLbl} ${x.waist||'-'} · ${hipLbl} ${x.hip||'-'}`;}).join('<br>');
+    document.getElementById('measureHistory').innerHTML='<strong style="color:var(--text)">'+t('measure_history')+'</strong><br>'+rows;
   }else{document.getElementById('measureHistory').innerHTML='';}
 }
 
@@ -1489,22 +1515,23 @@ function renderCloudStatus(){
   if(!sb){wrap.innerHTML='<div style="font-size:.78rem;color:var(--muted)">Supabase SDK โหลดไม่ได้</div>';return;}
   if(!cloudUser){
     wrap.innerHTML=
-      `<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;line-height:1.5">${settings.lang==='en'?'Not signed in · Data stored in this browser only':'ยังไม่เชื่อมต่อ · ข้อมูลอยู่ในเบราว์เซอร์นี้เท่านั้น'}</div>`+
+      `<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;line-height:1.5">${t('not_signed_in')}</div>`+
       `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">`+
-        `<button class="btn-sec" onclick="openAuthModal('login')">${settings.lang==='en'?'Sign in':'เข้าสู่ระบบ'}</button>`+
-        `<button class="btn" style="padding:8px" onclick="openAuthModal('signup')">${settings.lang==='en'?'Sign up':'สมัครสมาชิก'}</button>`+
+        `<button class="btn-sec" onclick="openAuthModal('login')">${t('login')}</button>`+
+        `<button class="btn" style="padding:8px" onclick="openAuthModal('signup')">${t('signup')}</button>`+
       `</div>`;
   }else{
     const lastSync=lsLoad('calpro_last_sync',null);
-    const lastTxt=lastSync?new Date(lastSync).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    const loc=settings.lang==='en'?'en-GB':'th-TH';
+    const lastTxt=lastSync?new Date(lastSync).toLocaleString(loc,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
     wrap.innerHTML=
       `<div style="font-size:.82rem;margin-bottom:4px">✓ <strong>${cloudUser.email}</strong></div>`+
-      `<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">${settings.lang==='en'?'Last sync':'ซิงค์ล่าสุด'}: ${lastTxt}</div>`+
+      `<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">${t('last_sync')}: ${lastTxt}</div>`+
       `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">`+
-        `<button class="btn-sec" onclick="manualSync()" ${syncing?'disabled':''}>${syncing?'⏳ ...':'🔄 '+(settings.lang==='en'?'Sync now':'ซิงค์เลย')}</button>`+
-        `<button class="btn-sec" onclick="signOutCloud()">${settings.lang==='en'?'Sign out':'ออกจากระบบ'}</button>`+
+        `<button class="btn-sec" onclick="manualSync()" ${syncing?'disabled':''}>${syncing?'⏳ ...':'🔄 '+t('sync_now')}</button>`+
+        `<button class="btn-sec" onclick="signOutCloud()">${t('sign_out')}</button>`+
       `</div>`+
-      `<button class="btn-danger" onclick="deleteCloudAccount()" style="font-size:.74rem;padding:7px">${settings.lang==='en'?'Delete cloud data':'ลบข้อมูลใน cloud'}</button>`;
+      `<button class="btn-danger" onclick="deleteCloudAccount()" style="font-size:.74rem;padding:7px">${t('delete_cloud')}</button>`;
   }
 }
 
@@ -1521,7 +1548,7 @@ async function renderFriendsCard(){
     const {data:fr}=await sb.from('friends').select('friend_id, profiles!friends_friend_id_fkey(id,display_name,avatar,goal_cal)').eq('user_id',cloudUser.id);
     const friendsList=(fr||[]).map(x=>x.profiles).filter(Boolean);
     // Build leaderboard: self + friends
-    const allUsers=[{id:cloudUser.id,display_name:userProfile?.display_name||'คุณ',avatar:userProfile?.avatar,goal_cal:userProfile?.goal_cal||1800},...friendsList];
+    const allUsers=[{id:cloudUser.id,display_name:userProfile?.display_name||t('you'),avatar:userProfile?.avatar,goal_cal:userProfile?.goal_cal||1800},...friendsList];
     const scores=[];
     for(const u of allUsers){
       const {data}=await sb.from('food_entries').select('entry_date,calories').eq('user_id',u.id);
@@ -1535,13 +1562,14 @@ async function renderFriendsCard(){
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
       const isMe=u.id===cloudUser.id;
       const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
+      const meTag=settings.lang==='en'?' (You)':' (คุณ)';
       html+=`<div class="lb-item${isMe?' me':''}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
         `<div style="width:22px;text-align:center;font-weight:700">${rank}</div>`+
         av+
-        `<div style="flex:1"><div style="font-size:.84rem;font-weight:600">${u.display_name||'?'}${isMe?' (คุณ)':''}</div><div style="font-size:.68rem;color:var(--muted)">Streak ${u.streak} · ในเป้า ${u.onTrack} วัน</div></div>`+
+        `<div style="flex:1"><div style="font-size:.84rem;font-weight:600">${u.display_name||'?'}${isMe?meTag:''}</div><div style="font-size:.68rem;color:var(--muted)">${t('streak')} ${u.streak} · ${t('on_track')} ${u.onTrack} ${t('days')}</div></div>`+
         `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div></div>`;
     });
-    body.innerHTML=html+`<button class="btn-sec" onclick="addFriendPrompt()" style="width:100%;margin-top:6px">+ ${settings.lang==='en'?'Add friend by email':'เพิ่มเพื่อนด้วยอีเมล'}</button>`;
+    body.innerHTML=html+`<button class="btn-sec" onclick="addFriendPrompt()" style="width:100%;margin-top:6px">${t('add_friend')}</button>`;
   }catch(e){body.innerHTML=`<div class="empty" style="padding:10px 0">โหลดไม่สำเร็จ: ${e.message}</div>`;}
 }
 async function addFriendPrompt(){
@@ -1714,10 +1742,10 @@ function delWorkout(id){
 function renderWorkoutsList(){
   const wrap=document.getElementById('workoutsList');if(!wrap)return;
   const list=allWorkouts[currentDate]||[];
-  if(!list.length){wrap.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${settings.lang==='en'?'No workouts yet':'ยังไม่มีการออกกำลังกาย'}</div>`;return;}
+  if(!list.length){wrap.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('no_workouts')}</div>`;return;}
   wrap.innerHTML='';
   list.forEach(w=>{
-    const name=settings.lang==='en'?w.name_en:w.name;
+    const name=settings.lang==='en'&&w.name_en?w.name_en:w.name;
     const div=document.createElement('div');div.className='fi';
     div.innerHTML=`<div class="fi-l"><div class="fi-n">${name}</div><div class="fi-m">${w.minutes} ${t('duration_min')}</div></div><div class="fi-r"><div><div class="fi-c" style="color:var(--green)">-${w.kcal}</div><div class="fi-u">kcal</div></div><button class="del" onclick="delWorkout('${w.id}')">✕</button></div>`;
     wrap.appendChild(div);
@@ -1753,17 +1781,26 @@ function checkSmartGoal(){
   const cur=userProfile.goal_cal;
   let suggested=cur;
   let reason='';
+  const isEn=settings.lang==='en';
   if(goalDir==='lose'&&perWeek>-0.1){
     suggested=Math.max(1200,cur-150);
-    reason=`น้ำหนักลดเพียง ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์ ในช่วง 4 สัปดาห์ที่ผ่านมา (เป้า −0.5) · แนะนำลด ${cur-suggested} kcal/วัน`;
+    reason=isEn
+      ?`Weight dropped only ${perWeek>0?'+':''}${perWeek.toFixed(2)} kg/wk over the past 4 weeks (goal −0.5) · Try cutting ${cur-suggested} kcal/day`
+      :`น้ำหนักลดเพียง ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์ ในช่วง 4 สัปดาห์ที่ผ่านมา (เป้า −0.5) · แนะนำลด ${cur-suggested} kcal/วัน`;
   }else if(goalDir==='lose'&&perWeek<-1){
     suggested=cur+150;
-    reason=`น้ำหนักลดเร็วเกินไป ${perWeek.toFixed(2)} กก./สัปดาห์ · แนะนำเพิ่ม ${suggested-cur} kcal/วัน เพื่อรักษากล้ามเนื้อ`;
+    reason=isEn
+      ?`Losing too fast at ${perWeek.toFixed(2)} kg/wk · Try adding ${suggested-cur} kcal/day to preserve muscle`
+      :`น้ำหนักลดเร็วเกินไป ${perWeek.toFixed(2)} กก./สัปดาห์ · แนะนำเพิ่ม ${suggested-cur} kcal/วัน เพื่อรักษากล้ามเนื้อ`;
   }else if(goalDir==='gain'&&perWeek<0.1){
     suggested=cur+200;
-    reason=`น้ำหนักเพิ่มน้อย ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์ · แนะนำเพิ่ม ${suggested-cur} kcal/วัน`;
+    reason=isEn
+      ?`Gaining slowly at ${perWeek>0?'+':''}${perWeek.toFixed(2)} kg/wk · Try adding ${suggested-cur} kcal/day`
+      :`น้ำหนักเพิ่มน้อย ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์ · แนะนำเพิ่ม ${suggested-cur} kcal/วัน`;
   }else{lsSave('calpro_smart_goal_check',now);return;}
-  document.getElementById('smartGoalBody').innerHTML=`${reason}<br><br>เป้าปัจจุบัน: <strong>${cur.toLocaleString()} kcal/วัน</strong><br>แนะนำ: <strong style="color:var(--accent)">${suggested.toLocaleString()} kcal/วัน</strong>`;
+  const lblCur=isEn?'Current goal':'เป้าปัจจุบัน';
+  const lblRec=isEn?'Recommended':'แนะนำ';
+  document.getElementById('smartGoalBody').innerHTML=`${reason}<br><br>${lblCur}: <strong>${cur.toLocaleString()} kcal${dayUnitShort()}</strong><br>${lblRec}: <strong style="color:var(--accent)">${suggested.toLocaleString()} kcal${dayUnitShort()}</strong>`;
   document.getElementById('smartGoalApply').onclick=()=>{
     userProfile.goal_cal=suggested;saveProfile_LS();
     document.getElementById('hdrSub').textContent=(userProfile.display_name||'คุณ')+' · '+suggested.toLocaleString()+' kcal/วัน';
@@ -1808,13 +1845,14 @@ function checkWeeklyRecap(){
   const waterAvg=(prevDays.reduce((s,k)=>s+(allWater[k]||0),0)/prevDays.length).toFixed(1);
   const goal=userProfile?.goal_cal||1800;
   const onTrack=calArr.filter(c=>c>0&&c<=goal).length;
+  const dayU=t('days');
   document.getElementById('recapBody').innerHTML=
     `<div style="text-align:center;margin-bottom:12px;font-size:2rem">📊</div>`+
-    `<div class="rrow"><span class="rl">วันที่บันทึก</span><span class="rv">${logged}/${prevDays.length} วัน</span></div>`+
-    `<div class="rrow"><span class="rl">เฉลี่ย/วัน</span><span class="rv">${avg.toLocaleString()} kcal</span></div>`+
-    `<div class="rrow"><span class="rl">วันในเป้า</span><span class="rv" style="color:var(--green)">${onTrack} วัน</span></div>`+
-    (wDiff!==null?`<div class="rrow"><span class="rl">น้ำหนัก</span><span class="rv" style="color:${+wDiff>0?'var(--accent)':'var(--green)'}">${+wDiff>0?'+':''}${wDiff} กก.</span></div>`:'')+
-    `<div class="rrow"><span class="rl">น้ำดื่มเฉลี่ย</span><span class="rv" style="color:var(--blue)">${waterAvg} แก้ว/วัน</span></div>`;
+    `<div class="rrow"><span class="rl">${t('weekly_recap_logged')}</span><span class="rv">${logged}/${prevDays.length} ${dayU}</span></div>`+
+    `<div class="rrow"><span class="rl">${t('avg_per_day')}</span><span class="rv">${avg.toLocaleString()} kcal</span></div>`+
+    `<div class="rrow"><span class="rl">${t('days_on')}</span><span class="rv" style="color:var(--green)">${onTrack} ${dayU}</span></div>`+
+    (wDiff!==null?`<div class="rrow"><span class="rl">${t('weekly_recap_change')}</span><span class="rv" style="color:${+wDiff>0?'var(--accent)':'var(--green)'}">${+wDiff>0?'+':''}${wDiff} ${t('kg_unit')}</span></div>`:'')+
+    `<div class="rrow"><span class="rl">${t('weekly_recap_water_avg')}</span><span class="rv" style="color:var(--blue)">${waterAvg} ${t('cups_unit')}${dayUnitShort()}</span></div>`;
   lsSave('calpro_recap_week',curWeek);
   document.getElementById('recapModal').classList.remove('hide');
 }
@@ -1837,7 +1875,12 @@ function renderReminderBanner(){
     }
   }
   if(!missed)return;
-  wrap.innerHTML=`<div class="banner"><div class="b-ico">${missed.emoji}</div><div class="b-txt">เลย${missed.hour}:00 แล้ว · ยังไม่ได้บันทึก<strong>มื้อ${missed.meal}</strong></div><button class="b-x" onclick="dismissReminder()">✕</button></div>`;
+  const mealKeys={'เช้า':'morning','กลางวัน':'lunch','เย็น':'dinner'};
+  const mealName=t(mealKeys[missed.meal]||'')||missed.meal;
+  const msg=settings.lang==='en'
+    ?`Past ${missed.hour}:00 · <strong>${mealName}</strong> not logged yet`
+    :`เลย${missed.hour}:00 แล้ว · ยังไม่ได้บันทึก<strong>มื้อ${missed.meal}</strong>`;
+  wrap.innerHTML=`<div class="banner"><div class="b-ico">${missed.emoji}</div><div class="b-txt">${msg}</div><button class="b-x" onclick="dismissReminder()">✕</button></div>`;
   wrap.querySelector('.banner').onclick=(e)=>{if(e.target.classList.contains('b-x'))return; showPage('add',document.querySelectorAll('.bnt')[1]); document.getElementById('mealSel').value=missed.meal;};
 }
 function dismissReminder(){
@@ -1886,8 +1929,8 @@ function renderWeightWidget(){
   // Trend over last 14 days
   const keys=Object.keys(allWeights).sort();
   const recent=keys.slice(-14).map(k=>({k,v:allWeights[k]}));
-  const t=document.getElementById('weightTrend');
-  if(recent.length<2){t.textContent='บันทึกอย่างน้อย 2 วันเพื่อดูแนวโน้ม';t.className='weight-trend';return;}
+  const tEl=document.getElementById('weightTrend');
+  if(recent.length<2){tEl.textContent=t('weight_trend_hint');tEl.className='weight-trend';return;}
   // Linear regression slope (kg per day)
   const n=recent.length;
   const xs=recent.map((_,i)=>i);
@@ -1900,8 +1943,10 @@ function renderWeightWidget(){
   const perWeek=slope*7;
   const cls=perWeek>0.05?'up':perWeek<-0.05?'down':'';
   const arrow=perWeek>0.05?'↑':perWeek<-0.05?'↓':'→';
-  t.textContent=`${arrow} ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์ (${n} วัน)`;
-  t.className='weight-trend '+cls;
+  const wkLabel=settings.lang==='en'?'kg/week':'กก./สัปดาห์';
+  const daysLabel=settings.lang==='en'?'days':'วัน';
+  tEl.textContent=`${arrow} ${perWeek>0?'+':''}${perWeek.toFixed(2)} ${wkLabel} (${n} ${daysLabel})`;
+  tEl.className='weight-trend '+cls;
 }
 
 function saveEditedFood(){
@@ -1953,13 +1998,14 @@ function renderToday(){
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
   renderWaterWidget();renderWeightWidget();renderReminderBanner();renderWorkoutsList();
   const log=document.getElementById('foodLog');
-  if(!E.length){log.innerHTML='<div class="empty">ยังไม่มีรายการ<br>กด ➕ เพื่อบันทึกอาหาร</div>';return;}
+  if(!E.length){log.innerHTML=`<div class="empty">${t('no_entries')}<br>${t('press_add')}</div>`;return;}
   log.innerHTML='';
+  const MEAL_KEYS={'เช้า':'morning','กลางวัน':'lunch','เย็น':'dinner','ของว่าง':'snack'};
   ['เช้า','กลางวัน','เย็น','ของว่าง'].forEach(meal=>{
     const items=E.filter(e=>e.meal===meal);if(!items.length)return;
     const mc=items.reduce((s,e)=>s+e.calories,0);
     const g=document.createElement('div');g.className='mg';
-    g.innerHTML=`<div class="mg-hdr">${MEAL_ICONS[meal]} ${meal}<span class="mg-cal">${mc} kcal</span></div>`;
+    g.innerHTML=`<div class="mg-hdr">${MEAL_ICONS[meal]} ${t(MEAL_KEYS[meal]||'')||meal}<span class="mg-cal">${mc} kcal</span></div>`;
     items.forEach(item=>{
       const div=document.createElement('div');div.className='fi';
       const meta=[];
@@ -1984,7 +2030,7 @@ function renderWeightChart(){
   const recent=keys.slice(-30).map(k=>({k,v:allWeights[k]}));
   const wrap=document.getElementById('weightChart');
   const sum=document.getElementById('weightSum');
-  if(recent.length<2){wrap.innerHTML='<div class="empty" style="padding:20px 0;font-size:.78rem">บันทึกอย่างน้อย 2 วันเพื่อดูกราฟ</div>';sum.textContent='';return;}
+  if(recent.length<2){wrap.innerHTML=`<div class="empty" style="padding:20px 0;font-size:.78rem">${settings.lang==='en'?'Log at least 2 days to see chart':'บันทึกอย่างน้อย 2 วันเพื่อดูกราฟ'}</div>`;sum.textContent='';return;}
   const W=320,H=120,PAD=8;
   const vs=recent.map(r=>r.v);
   const minV=Math.min(...vs),maxV=Math.max(...vs);
@@ -2007,23 +2053,28 @@ function renderWeightChart(){
   const trendStart=yPx(intercept);
   const trendEnd=yPx(intercept+slope*(n-1));
   const dots=pts.map(p=>`<circle class="lc-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="${accent}"/>`).join('');
+  const kgU=t('kg_unit');
   wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+
     `<line class="lc-trend" x1="${PAD}" y1="${trendStart.toFixed(1)}" x2="${PAD+(n-1)*xstep}" y2="${trendEnd.toFixed(1)}"/>`+
     `<path class="lc-line" d="${path}" stroke="${accent}"/>`+dots+`</svg>`+
-    `<div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:2px"><span>${recent[0].k.slice(5)}</span><span>${maxV.toFixed(1)}–${minV.toFixed(1)} กก.</span><span>${recent[n-1].k.slice(5)}</span></div>`;
+    `<div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:2px"><span>${recent[0].k.slice(5)}</span><span>${maxV.toFixed(1)}–${minV.toFixed(1)} ${kgU}</span><span>${recent[n-1].k.slice(5)}</span></div>`;
   const startV=recent[0].v,endV=recent[n-1].v;
   const totalDiff=endV-startV;
   const perWeek=slope*7;
   const arrow=totalDiff>0.1?'↑':totalDiff<-0.1?'↓':'→';
   const cls=totalDiff>0.1?'color:var(--accent)':totalDiff<-0.1?'color:var(--green)':'';
-  sum.innerHTML=`<span style="${cls}">${arrow} ${totalDiff>0?'+':''}${totalDiff.toFixed(1)} กก. ใน ${n} วัน</span> · เฉลี่ย ${perWeek>0?'+':''}${perWeek.toFixed(2)} กก./สัปดาห์`;
+  const inDays=settings.lang==='en'?`in ${n} days`:`ใน ${n} วัน`;
+  const wkUnit=settings.lang==='en'?'kg/wk':'กก./สัปดาห์';
+  const avgLbl=settings.lang==='en'?'avg':'เฉลี่ย';
+  sum.innerHTML=`<span style="${cls}">${arrow} ${totalDiff>0?'+':''}${totalDiff.toFixed(1)} ${kgU} ${inDays}</span> · ${avgLbl} ${perWeek>0?'+':''}${perWeek.toFixed(2)} ${wkUnit}`;
 }
 function renderWaterStats(){
   const days7=[];
+  const loc2=settings.lang==='en'?'en-GB':'th-TH';
   for(let i=6;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
     const k=dateKey(d);
-    days7.push({k,c:allWater[k]||0,label:d.toLocaleDateString('th-TH',{weekday:'short'})});
+    days7.push({k,c:allWater[k]||0,label:d.toLocaleDateString(loc2,{weekday:'short'})});
   }
   const hit=days7.filter(d=>d.c>=WATER_GOAL).length;
   const avg=days7.reduce((s,d)=>s+d.c,0)/7;
@@ -2039,19 +2090,21 @@ function renderWaterStats(){
       `<div style="font-size:.55rem;color:var(--muted)">${d.c||''}</div>`+
     `</div>`;
   }).join('');
+  const goalLbl=settings.lang==='en'?'Hit 8 cups':'บรรลุเป้า 8 แก้ว';
   wrap.innerHTML=`<div style="display:flex;gap:5px;justify-content:space-between;margin-bottom:8px">${bars}</div>`+
-    `<div class="rrow"><span class="rl">บรรลุเป้า 8 แก้ว</span><span class="rv" style="color:var(--blue)">${hit}/7 วัน</span></div>`+
-    `<div class="rrow"><span class="rl">เฉลี่ย/วัน</span><span class="rv">${avg.toFixed(1)} แก้ว</span></div>`;
+    `<div class="rrow"><span class="rl">${goalLbl}</span><span class="rv" style="color:var(--blue)">${hit}/7 ${t('days')}</span></div>`+
+    `<div class="rrow"><span class="rl">${t('avg_per_day')}</span><span class="rv">${avg.toFixed(1)} ${t('cups_unit')}</span></div>`;
 }
 function renderAnalysis(){
   renderWeightChart();renderWaterStats();
   const days=[];
+  const loc=settings.lang==='en'?'en-GB':'th-TH';
   for(let i=6;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
     const k=dateKey(d);
     const entries=allEntries[k]||[];
     const cal=entries.reduce((s,e)=>s+e.calories,0);
-    days.push({k,cal,label:d.toLocaleDateString('th-TH',{weekday:'short'})});
+    days.push({k,cal,label:d.toLocaleDateString(loc,{weekday:'short'})});
   }
   const goal=userProfile?.goal_cal||1800;
   const maxCal=Math.max(...days.map(d=>d.cal),goal,100);
@@ -2062,23 +2115,25 @@ function renderAnalysis(){
     div.innerHTML=`<div class="wb" style="height:${Math.max(p*62,2).toFixed(1)}px;background:${d.cal>goal?'var(--accent)':d.cal>0?'var(--green)':'var(--surface2)'}"></div><div class="wb-l">${d.label}</div><div class="wb-c">${d.cal||''}</div>`;
     wb.appendChild(div);
   });
-  document.getElementById('goalLine').textContent='เป้า '+goal.toLocaleString();
+  document.getElementById('goalLine').textContent=t('goal')+' '+goal.toLocaleString();
   const act=days.filter(d=>d.cal>0);
   const avg=act.length?Math.round(act.reduce((s,d)=>s+d.cal,0)/act.length):0;
   const over=days.filter(d=>d.cal>goal&&d.cal>0).length;
   const under=act.filter(d=>d.cal<=goal).length;
+  const dayUnit=t('days');
   document.getElementById('wkSum').innerHTML=`
-    <div class="rrow"><span class="rl">เฉลี่ย/วัน</span><span class="rv">${avg.toLocaleString()} kcal</span></div>
-    <div class="rrow"><span class="rl">วันเกินเป้า</span><span class="rv" style="color:${over>3?'var(--accent)':'var(--amber)'}">${over} วัน</span></div>
-    <div class="rrow"><span class="rl">วันในเป้า</span><span class="rv" style="color:var(--green)">${under} วัน</span></div>
-    <div class="rrow"><span class="rl">บันทึก</span><span class="rv">${act.length}/7 วัน</span></div>`;
+    <div class="rrow"><span class="rl">${t('avg_per_day')}</span><span class="rv">${avg.toLocaleString()} kcal</span></div>
+    <div class="rrow"><span class="rl">${t('days_over')}</span><span class="rv" style="color:${over>3?'var(--accent)':'var(--amber)'}">${over} ${dayUnit}</span></div>
+    <div class="rrow"><span class="rl">${t('days_on')}</span><span class="rv" style="color:var(--green)">${under} ${dayUnit}</span></div>
+    <div class="rrow"><span class="rl">${t('days_logged')}</span><span class="rv">${act.length}/7 ${dayUnit}</span></div>`;
   const ins=document.getElementById('insDiv');ins.innerHTML='';
   const tips=[];
-  if(avg>0&&avg<goal*0.72)tips.push({i:'⚠️',t:`เฉลี่ย <strong>${avg} kcal</strong>/วัน ต่ำเกินไป อาจส่งผลต่อกล้ามเนื้อและเมตาบอลิซึม`});
-  else if(avg>goal*1.1)tips.push({i:'🔥',t:`เฉลี่ย <strong>${avg} kcal</strong> เกินเป้า ${avg-goal} kcal/วัน ลองลดขนาดพอร์ชัน`});
-  else if(avg>0)tips.push({i:'✅',t:`เฉลี่ย <strong>${avg} kcal</strong> อยู่ในเป้าดีมาก รักษาไว้!`});
-  if(over>=4)tips.push({i:'📊',t:`เกินเป้า <strong>${over}/7 วัน</strong> ลองวางแผนมื้อล่วงหน้า`});
-  if(!act.length)tips.push({i:'👋',t:'เริ่มบันทึกอาหารวันนี้เลย!'});
+  const isEn=settings.lang==='en';
+  if(avg>0&&avg<goal*0.72)tips.push({i:'⚠️',t:isEn?`Avg <strong>${avg} kcal</strong>/day is too low — may affect muscle + metabolism`:`เฉลี่ย <strong>${avg} kcal</strong>/วัน ต่ำเกินไป อาจส่งผลต่อกล้ามเนื้อและเมตาบอลิซึม`});
+  else if(avg>goal*1.1)tips.push({i:'🔥',t:isEn?`Avg <strong>${avg} kcal</strong> exceeds goal by ${avg-goal} kcal/day — try smaller portions`:`เฉลี่ย <strong>${avg} kcal</strong> เกินเป้า ${avg-goal} kcal/วัน ลองลดขนาดพอร์ชัน`});
+  else if(avg>0)tips.push({i:'✅',t:isEn?`Avg <strong>${avg} kcal</strong> well within goal — keep it up!`:`เฉลี่ย <strong>${avg} kcal</strong> อยู่ในเป้าดีมาก รักษาไว้!`});
+  if(over>=4)tips.push({i:'📊',t:isEn?`Over goal <strong>${over}/7 days</strong> — try planning meals ahead`:`เกินเป้า <strong>${over}/7 วัน</strong> ลองวางแผนมื้อล่วงหน้า`});
+  if(!act.length)tips.push({i:'👋',t:isEn?'Start logging your meals today!':'เริ่มบันทึกอาหารวันนี้เลย!'});
   tips.forEach(item=>{
     const d=document.createElement('div');d.className='ins';
     d.innerHTML=`<div class="ins-i">${item.i}</div><div class="ins-t">${item.t}</div>`;
@@ -2092,14 +2147,21 @@ function renderAnalysis(){
     const yes=earned.includes(b.id);
     const d=document.createElement('div');
     d.className='bdg-item'+(yes?' earned':' locked');
-    d.innerHTML=`<div class="bdg-ico">${b.ico}</div><div class="bdg-name">${b.name}</div>`;
+    const bname=settings.lang==='en'&&b.name_en?b.name_en:b.name;
+    d.innerHTML=`<div class="bdg-ico">${b.ico}</div><div class="bdg-name">${bname}</div>`;
     bg.appendChild(d);
   });
 }
 
 // ═══ PROFILE ═══
 function pickGoal(btn){document.querySelectorAll('.gchip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-function bmiLabel(b){if(b<18.5)return'(ผอมเกิน)';if(b<23)return'(ปกติ)';if(b<27.5)return'(น้ำหนักเกิน)';return'(อ้วน)';}
+function bmiLabel(b){
+  const isEn=settings.lang==='en';
+  if(b<18.5)return isEn?'(underweight)':'(ผอมเกิน)';
+  if(b<23)return isEn?'(normal)':'(ปกติ)';
+  if(b<27.5)return isEn?'(overweight)':'(น้ำหนักเกิน)';
+  return isEn?'(obese)':'(อ้วน)';
+}
 function saveProfile(){
   const name=document.getElementById('pName').value||userProfile?.display_name||'คุณ';
   const gender=document.getElementById('pGender').value;
@@ -2125,10 +2187,16 @@ function saveProfile(){
   document.getElementById('rGoal').textContent=gc+' kcal';
   document.getElementById('rProt').textContent=Math.round(pt)+'g/วัน';
   document.getElementById('rBMI').textContent=bmi+' '+bmiLabel(+bmi);
-  document.getElementById('rWeeks').textContent=goalType==='maintain'?'—':Math.ceil(diff/0.45)+' สัปดาห์';
-  document.getElementById('tipBox').innerHTML=goalType==='lose'?`ลด <strong>${diff}กก.</strong> ใช้เวลา ~<strong>${Math.ceil(diff/0.45)} สัปดาห์</strong> ทานโปรตีน <strong>${Math.round(pt)}g/วัน</strong>`:goalType==='gain'?`เพิ่ม <strong>${diff}กก.</strong> ทาน +300 kcal/วัน ควบคู่ออกกำลังกาย`:`คงน้ำหนัก <strong>${weight}กก.</strong> ทานใกล้เคียง TDEE <strong>${Math.round(tdee)} kcal</strong>`;
+  const wkUnit2=settings.lang==='en'?'weeks':'สัปดาห์';
+  const isEn2=settings.lang==='en';
+  document.getElementById('rWeeks').textContent=goalType==='maintain'?'—':Math.ceil(diff/0.45)+' '+wkUnit2;
+  document.getElementById('tipBox').innerHTML=goalType==='lose'
+    ?(isEn2?`Lose <strong>${diff}kg</strong> in ~<strong>${Math.ceil(diff/0.45)} weeks</strong> · ${Math.round(pt)}g protein/day`:`ลด <strong>${diff}กก.</strong> ใช้เวลา ~<strong>${Math.ceil(diff/0.45)} สัปดาห์</strong> ทานโปรตีน <strong>${Math.round(pt)}g/วัน</strong>`)
+    :goalType==='gain'
+    ?(isEn2?`Gain <strong>${diff}kg</strong> · +300 kcal/day with resistance training`:`เพิ่ม <strong>${diff}กก.</strong> ทาน +300 kcal/วัน ควบคู่ออกกำลังกาย`)
+    :(isEn2?`Maintain <strong>${weight}kg</strong> · eat near TDEE <strong>${Math.round(tdee)} kcal</strong>`:`คงน้ำหนัก <strong>${weight}กก.</strong> ทานใกล้เคียง TDEE <strong>${Math.round(tdee)} kcal</strong>`);
   document.getElementById('resultCard').style.display='block';
-  renderProfileUI();renderToday();showToast('บันทึกโปรไฟล์แล้ว ✓');
+  renderProfileUI();renderToday();showToast(settings.lang==='en'?'Profile saved ✓':'บันทึกโปรไฟล์แล้ว ✓');
 }
 const CUTE_AVATARS=['🐱','🐶','🐻','🐼','🦊','🐰','🐯','🦁','🐨','🐭','🐹','🐮','🐷','🐸','🐵','🦄','🐧','🦉','🐺','🦝','🐢','🐬','🦋','🌸'];
 function renderProfileUI(){
@@ -2139,7 +2207,7 @@ function renderProfileUI(){
   else if(p.avatar){av.textContent=p.avatar;}
   else{av.textContent=(n[0]||'?').toUpperCase();}
   document.getElementById('profileName2').textContent=n||'—';
-  document.getElementById('profileEmail2').textContent='เป้าหมาย '+(p.goal_cal||1800).toLocaleString()+' kcal/วัน';
+  document.getElementById('profileEmail2').textContent=t('goal_label')+' '+(p.goal_cal||1800).toLocaleString()+' kcal'+dayUnitShort();
   if(n)document.getElementById('pName').value=n;
   if(p.age)document.getElementById('pAge').value=p.age;
   if(p.weight)document.getElementById('pWeight').value=p.weight;
@@ -2365,9 +2433,10 @@ function liveTDEE(){
     : 447.593 + 9.247*weight + 3.098*height - 4.330*age;
   const tdee=bmr*act;
   let goal,note,protRatio,carbRatio,fatRatio;
-  if(tdeeGoalType==='lose'){goal=tdee-500;note='ลด ~0.5 กก./สัปดาห์';protRatio=.35;carbRatio=.35;fatRatio=.30;}
-  else if(tdeeGoalType==='gain'){goal=tdee+300;note='เพิ่มกล้ามเนื้อ';protRatio=.30;carbRatio=.45;fatRatio=.25;}
-  else{goal=tdee;note='คงน้ำหนัก';protRatio=.30;carbRatio=.40;fatRatio=.30;}
+  const isEn=settings.lang==='en';
+  if(tdeeGoalType==='lose'){goal=tdee-500;note=isEn?'-0.5 kg/wk':'ลด ~0.5 กก./สัปดาห์';protRatio=.35;carbRatio=.35;fatRatio=.30;}
+  else if(tdeeGoalType==='gain'){goal=tdee+300;note=isEn?'Build muscle':'เพิ่มกล้ามเนื้อ';protRatio=.30;carbRatio=.45;fatRatio=.25;}
+  else{goal=tdee;note=isEn?'Maintain':'คงน้ำหนัก';protRatio=.30;carbRatio=.40;fatRatio=.30;}
   goal=Math.max(1200,Math.round(goal));
   // Macros (4 kcal/g for P&C, 9 kcal/g for F)
   const protG=Math.round((goal*protRatio)/4);
@@ -2386,13 +2455,20 @@ function liveTDEE(){
   // BMI
   const bmi=(weight/((height/100)**2)).toFixed(1);
   const bmiNote=bmiLabel(+bmi);
+  const dayU=dayUnitShort();
   let tip='';
   if(tdeeGoalType==='lose'){
-    tip=`คุณเผาผลาญ <strong>${Math.round(tdee).toLocaleString()} kcal</strong>/วัน · ทาน <strong>${goal.toLocaleString()} kcal</strong> เพื่อขาดดุล 500 kcal/วัน → ลด ~<strong>2 กก./เดือน</strong> · BMI ${bmi} ${bmiNote}`;
+    tip=isEn
+      ?`You burn <strong>${Math.round(tdee).toLocaleString()} kcal</strong>${dayU} · Eat <strong>${goal.toLocaleString()} kcal</strong> for a 500 kcal deficit → ~<strong>2 kg/month</strong> · BMI ${bmi} ${bmiNote}`
+      :`คุณเผาผลาญ <strong>${Math.round(tdee).toLocaleString()} kcal</strong>/วัน · ทาน <strong>${goal.toLocaleString()} kcal</strong> เพื่อขาดดุล 500 kcal/วัน → ลด ~<strong>2 กก./เดือน</strong> · BMI ${bmi} ${bmiNote}`;
   }else if(tdeeGoalType==='gain'){
-    tip=`คุณเผาผลาญ <strong>${Math.round(tdee).toLocaleString()} kcal</strong>/วัน · ทาน <strong>${goal.toLocaleString()} kcal</strong> + ฝึก resistance training 3–5 วัน/สัปดาห์ · BMI ${bmi} ${bmiNote}`;
+    tip=isEn
+      ?`You burn <strong>${Math.round(tdee).toLocaleString()} kcal</strong>${dayU} · Eat <strong>${goal.toLocaleString()} kcal</strong> + resistance training 3–5 days/wk · BMI ${bmi} ${bmiNote}`
+      :`คุณเผาผลาญ <strong>${Math.round(tdee).toLocaleString()} kcal</strong>/วัน · ทาน <strong>${goal.toLocaleString()} kcal</strong> + ฝึก resistance training 3–5 วัน/สัปดาห์ · BMI ${bmi} ${bmiNote}`;
   }else{
-    tip=`รักษาน้ำหนักปัจจุบัน · ทานใกล้ <strong>${goal.toLocaleString()} kcal</strong>/วัน · เน้นโปรตีน <strong>${protG}g</strong> เพื่อรักษากล้ามเนื้อ · BMI ${bmi} ${bmiNote}`;
+    tip=isEn
+      ?`Maintain current weight · Eat near <strong>${goal.toLocaleString()} kcal</strong>${dayU} · Focus on protein <strong>${protG}g</strong> to preserve muscle · BMI ${bmi} ${bmiNote}`
+      :`รักษาน้ำหนักปัจจุบัน · ทานใกล้ <strong>${goal.toLocaleString()} kcal</strong>/วัน · เน้นโปรตีน <strong>${protG}g</strong> เพื่อรักษากล้ามเนื้อ · BMI ${bmi} ${bmiNote}`;
   }
   document.getElementById('tdeeTip').innerHTML=tip;
 }
