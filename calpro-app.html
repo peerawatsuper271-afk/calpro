@@ -142,6 +142,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .del:hover{color:var(--accent);}
 .empty{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0;line-height:1.7;}
 
+/* ── QUICK ADD TABS ── */
+.qtab{flex:1;padding:7px;text-align:center;font-size:.78rem;border-radius:7px;cursor:pointer;color:var(--muted);border:none;background:none;font-family:inherit;transition:all .2s;}
+.qtab.active{background:var(--surface);color:var(--text);font-weight:600;}
+.sri .star{cursor:pointer;font-size:.95rem;padding:2px 4px;opacity:.4;transition:opacity .15s,transform .15s;}
+.sri .star:hover{transform:scale(1.2);}
+.sri .star.on{opacity:1;}
+
 /* ── SEARCH ── */
 .sbox{position:relative;margin-bottom:9px;}
 .sbox input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 10px 9px 33px;font-size:.87rem;outline:none;font-family:inherit;}
@@ -331,6 +338,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 
     <!-- ADD -->
     <div class="screen" id="pg-add">
+      <div class="card" id="quickAddCard">
+        <div style="display:flex;gap:5px;background:var(--surface2);border-radius:9px;padding:3px;margin-bottom:10px">
+          <button class="qtab active" data-qtab="fav" onclick="setQuickTab('fav')">⭐ ของโปรด</button>
+          <button class="qtab" data-qtab="recent" onclick="setQuickTab('recent')">🕘 ล่าสุด</button>
+        </div>
+        <div id="quickList"></div>
+      </div>
       <div class="card">
         <h3>ค้นหาอาหาร</h3>
         <div class="sbox"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off"></div>
@@ -351,6 +365,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
           <div class="fl"><label>คาร์บ (g)</label><input type="number" id="fC" min="0" placeholder="0"></div>
           <div class="fl"><label>ไขมัน (g)</label><input type="number" id="fF" min="0" placeholder="0"></div>
         </div>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);margin-bottom:10px;cursor:pointer;user-select:none">
+          <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> 💾 บันทึกลงไลบรารีของฉัน
+        </label>
         <button class="btn" onclick="addManual()">+ เพิ่มอาหาร</button>
       </div>
     </div>
@@ -588,7 +605,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 
 // ═══ STORAGE LAYER ═══
 const LS_PROFILE = 'calpro_profile';
@@ -596,6 +613,9 @@ const LS_ENTRIES = 'calpro_entries';  // { 'YYYY-MM-DD': [entry, ...] }
 const LS_SETTINGS = 'calpro_settings';
 const LS_WEIGHTS = 'calpro_weights';   // { 'YYYY-MM-DD': number }
 const LS_WATER = 'calpro_water';       // { 'YYYY-MM-DD': number (cups) }
+const LS_FAVORITES = 'calpro_favorites'; // Set of food keys (n:name)
+const LS_RECENT = 'calpro_recent';       // Array of food keys (last 10)
+const LS_CUSTOM = 'calpro_custom_foods'; // Array of {n,e,c,p,cb,f,a,cat:'custom'}
 
 function lsLoad(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
 function lsSave(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
@@ -644,8 +664,92 @@ const FOODS=[
   {n:'กาแฟดำ',e:'Black Coffee',c:5,p:0,cb:0,f:0,a:240,cat:'drink'},
   {n:'ลาเต้',e:'Latte',c:120,p:6,cb:14,f:4,a:350,cat:'drink'},
   {n:'ชาเขียวนม',e:'Milk Tea',c:180,p:2,cb:38,f:2,a:400,cat:'drink'},
+  // ─── v1.4 additions ───────────────────────────────────────
+  // Thai (expand)
+  {n:'ลาบหมู',e:'Spicy Pork Salad',c:280,p:25,cb:10,f:16,a:200,cat:'thai'},
+  {n:'แกงส้ม',e:'Sour Curry',c:180,p:18,cb:14,f:6,a:300,cat:'thai'},
+  {n:'ผัดซีอิ๊ว',e:'Pad See Ew',c:420,p:18,cb:55,f:14,a:250,cat:'thai'},
+  {n:'ทอดมัน',e:'Fish Cake',c:220,p:14,cb:18,f:10,a:100,cat:'thai'},
+  {n:'ห่อหมก',e:'Steamed Fish Curry',c:240,p:22,cb:8,f:14,a:150,cat:'thai'},
+  {n:'ขนมจีนน้ำยา',e:'Khanom Jeen',c:340,p:14,cb:50,f:9,a:300,cat:'thai'},
+  {n:'ไก่ย่าง',e:'Grilled Chicken Thai',c:240,p:32,cb:0,f:12,a:150,cat:'thai'},
+  {n:'หมูปิ้ง',e:'Pork Skewer',c:120,p:10,cb:3,f:8,a:50,cat:'thai'},
+  {n:'แกงเลียง',e:'Liang Curry',c:90,p:6,cb:14,f:2,a:250,cat:'thai'},
+  {n:'ยำวุ้นเส้น',e:'Glass Noodle Salad',c:220,p:14,cb:32,f:5,a:200,cat:'thai'},
+  // Japanese (expand)
+  {n:'เทมปุระ',e:'Tempura',c:320,p:12,cb:30,f:18,a:150,cat:'japanese'},
+  {n:'ออนิกิริ',e:'Onigiri',c:170,p:4,cb:36,f:1,a:100,cat:'japanese'},
+  {n:'ทาโกะยากิ',e:'Takoyaki',c:280,p:10,cb:30,f:12,a:120,cat:'japanese'},
+  {n:'มิโสะซุป',e:'Miso Soup',c:50,p:4,cb:6,f:2,a:200,cat:'japanese'},
+  // Korean (expand)
+  {n:'ต๊อกบกกี',e:'Tteokbokki',c:320,p:6,cb:60,f:6,a:200,cat:'korean'},
+  {n:'ซัมเกียวซัล',e:'Samgyeopsal',c:520,p:28,cb:2,f:44,a:200,cat:'korean'},
+  // Chinese (expand)
+  {n:'เป็ดย่าง',e:'Roast Duck',c:340,p:25,cb:2,f:25,a:150,cat:'chinese'},
+  {n:'หมูแดง',e:'Char Siu',c:280,p:24,cb:10,f:16,a:150,cat:'chinese'},
+  // Italian (expand)
+  {n:'ลาซานญ่า',e:'Lasagna',c:450,p:20,cb:42,f:22,a:250,cat:'italian'},
+  {n:'ริซอตโต้',e:'Risotto',c:380,p:10,cb:54,f:14,a:250,cat:'italian'},
+  // Indian (expand)
+  {n:'บริยานี',e:'Biryani',c:480,p:18,cb:62,f:18,a:300,cat:'indian'},
+  {n:'ดัล',e:'Dal',c:180,p:9,cb:28,f:4,a:200,cat:'indian'},
+  // Fast food (expand)
+  {n:'แซนด์วิช',e:'Sandwich',c:330,p:15,cb:35,f:14,a:200,cat:'fastfood'},
+  {n:'ฮอทดอก',e:'Hot Dog',c:300,p:10,cb:24,f:18,a:100,cat:'fastfood'},
+  {n:'นักเก็ตไก่',e:'Chicken Nuggets',c:280,p:14,cb:18,f:18,a:100,cat:'fastfood'},
+  {n:'ทาโก้',e:'Taco',c:250,p:12,cb:22,f:13,a:120,cat:'fastfood'},
+  // Healthy (expand)
+  {n:'ไข่ต้ม',e:'Boiled Egg',c:78,p:6,cb:1,f:5,a:50,cat:'healthy'},
+  {n:'อกไก่ต้ม',e:'Boiled Chicken Breast',c:165,p:31,cb:0,f:3,a:100,cat:'healthy'},
+  {n:'สลัดทูน่า',e:'Tuna Salad',c:180,p:22,cb:8,f:7,a:200,cat:'healthy'},
+  {n:'อะโวคาโด',e:'Avocado',c:160,p:2,cb:9,f:15,a:100,cat:'healthy'},
+  {n:'อัลมอนด์',e:'Almonds',c:160,p:6,cb:6,f:14,a:28,cat:'healthy'},
+  {n:'ควินัว',e:'Quinoa',c:222,p:8,cb:39,f:4,a:100,cat:'healthy'},
+  // Drinks (expand)
+  {n:'น้ำเปล่า',e:'Water',c:0,p:0,cb:0,f:0,a:250,cat:'drink'},
+  {n:'น้ำส้ม',e:'Orange Juice',c:110,p:2,cb:26,f:0,a:240,cat:'drink'},
+  {n:'สมูทตี้',e:'Smoothie',c:180,p:4,cb:38,f:2,a:300,cat:'drink'},
+  {n:'กาแฟเย็น',e:'Iced Coffee',c:90,p:2,cb:18,f:1,a:350,cat:'drink'},
+  {n:'น้ำอัดลม',e:'Soda',c:140,p:0,cb:39,f:0,a:330,cat:'drink'},
+  {n:'นมจืด',e:'Plain Milk',c:150,p:8,cb:12,f:8,a:250,cat:'drink'},
+  // Desserts
+  {n:'ข้าวเหนียวมะม่วง',e:'Mango Sticky Rice',c:380,p:5,cb:78,f:6,a:200,cat:'dessert'},
+  {n:'บัวลอย',e:'Bua Loy',c:240,p:4,cb:48,f:3,a:200,cat:'dessert'},
+  {n:'ทับทิมกรอบ',e:'Tub Tim Krob',c:280,p:3,cb:60,f:3,a:200,cat:'dessert'},
+  {n:'ไอติม',e:'Ice Cream',c:200,p:4,cb:24,f:11,a:100,cat:'dessert'},
+  {n:'เค้กช็อกโกแลต',e:'Chocolate Cake',c:380,p:5,cb:50,f:18,a:100,cat:'dessert'},
+  {n:'โดนัท',e:'Donut',c:260,p:4,cb:30,f:14,a:60,cat:'dessert'},
+  {n:'พุดดิ้ง',e:'Pudding',c:140,p:3,cb:24,f:4,a:100,cat:'dessert'},
+  {n:'มาการอง',e:'Macaron',c:70,p:1,cb:10,f:3,a:20,cat:'dessert'},
+  // Fruits
+  {n:'กล้วยหอม',e:'Banana',c:90,p:1,cb:23,f:0,a:120,cat:'fruit'},
+  {n:'แอปเปิ้ล',e:'Apple',c:80,p:0,cb:21,f:0,a:150,cat:'fruit'},
+  {n:'ส้ม',e:'Orange',c:60,p:1,cb:15,f:0,a:130,cat:'fruit'},
+  {n:'สับปะรด',e:'Pineapple',c:50,p:1,cb:13,f:0,a:100,cat:'fruit'},
+  {n:'มะม่วงสุก',e:'Mango',c:100,p:1,cb:25,f:0,a:165,cat:'fruit'},
+  {n:'แตงโม',e:'Watermelon',c:46,p:1,cb:11,f:0,a:150,cat:'fruit'},
+  {n:'สตรอเบอร์รี่',e:'Strawberry',c:50,p:1,cb:12,f:0,a:150,cat:'fruit'},
+  {n:'องุ่น',e:'Grapes',c:70,p:1,cb:18,f:0,a:100,cat:'fruit'},
+  {n:'มะละกอ',e:'Papaya',c:60,p:1,cb:15,f:0,a:140,cat:'fruit'},
+  // Seafood
+  {n:'กุ้งย่าง',e:'Grilled Shrimp',c:120,p:24,cb:0,f:2,a:100,cat:'seafood'},
+  {n:'ปลาหมึกย่าง',e:'Grilled Squid',c:130,p:25,cb:3,f:2,a:100,cat:'seafood'},
+  {n:'หอยแมลงภู่อบ',e:'Steamed Mussels',c:170,p:24,cb:7,f:4,a:100,cat:'seafood'},
+  {n:'ปลานึ่งมะนาว',e:'Steamed Lime Fish',c:180,p:30,cb:4,f:5,a:200,cat:'seafood'},
+  {n:'ปูผัดผงกะหรี่',e:'Curry Crab',c:340,p:24,cb:14,f:20,a:250,cat:'seafood'},
+  // Snacks
+  {n:'ป๊อปคอร์น',e:'Popcorn',c:130,p:3,cb:24,f:3,a:30,cat:'snack'},
+  {n:'มันฝรั่งทอด',e:'Potato Chips',c:160,p:2,cb:15,f:10,a:30,cat:'snack'},
+  {n:'ช็อกโกแลตบาร์',e:'Chocolate Bar',c:230,p:3,cb:26,f:13,a:45,cat:'snack'},
+  {n:'คุกกี้',e:'Cookie',c:140,p:2,cb:20,f:6,a:30,cat:'snack'},
+  {n:'บิสกิต',e:'Biscuit',c:120,p:2,cb:18,f:4,a:25,cat:'snack'},
+  // Vegetables
+  {n:'ผัดผักรวม',e:'Mixed Veggies',c:120,p:4,cb:14,f:6,a:200,cat:'veggie'},
+  {n:'สลัดผัก',e:'Garden Salad',c:80,p:3,cb:10,f:3,a:200,cat:'veggie'},
+  {n:'บล็อกโคลี่นึ่ง',e:'Steamed Broccoli',c:55,p:4,cb:11,f:1,a:150,cat:'veggie'},
+  {n:'ข้าวโพดต้ม',e:'Boiled Corn',c:130,p:5,cb:30,f:2,a:150,cat:'veggie'},
 ];
-const CATS={thai:'🇹🇭',japanese:'🇯🇵',korean:'🇰🇷',chinese:'🇨🇳',italian:'🇮🇹',indian:'🇮🇳',fastfood:'🍔',healthy:'🥗',drink:'🥤'};
+const CATS={thai:'🇹🇭',japanese:'🇯🇵',korean:'🇰🇷',chinese:'🇨🇳',italian:'🇮🇹',indian:'🇮🇳',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
 const MEAL_ICONS={เช้า:'🌅',กลางวัน:'☀️',เย็น:'🌙',ของว่าง:'🍎'};
 const BADGES=[
   {id:'streak3',ico:'🔥',name:'3 วันติด',cond:u=>calcStreak(u)>=3},
@@ -674,6 +778,9 @@ let allEntries = {};  // { 'YYYY-MM-DD': [...] }
 let dailyEntries = [];
 let allWeights = {};  // { date: kg }
 let allWater = {};    // { date: cups }
+let favorites = [];   // array of food names (n)
+let recentFoods = []; // array of food names (n), most recent first
+let customFoods = []; // user-saved foods
 let currentDate = todayKey();
 let activeCat = 'thai';
 let settings = {theme:'dark', accent:'#ff6b6b'};
@@ -722,6 +829,9 @@ function loadUserData(){
   allEntries = lsLoad(LS_ENTRIES, {});
   allWeights = lsLoad(LS_WEIGHTS, {});
   allWater = lsLoad(LS_WATER, {});
+  favorites = lsLoad(LS_FAVORITES, []);
+  recentFoods = lsLoad(LS_RECENT, []);
+  customFoods = lsLoad(LS_CUSTOM, []);
   loadEntries();
   const ls = lsLoad(LS_SETTINGS, null);
   if (ls) settings = ls;
@@ -743,6 +853,9 @@ function resetAllData(){
   localStorage.removeItem(LS_ENTRIES);
   localStorage.removeItem(LS_WEIGHTS);
   localStorage.removeItem(LS_WATER);
+  localStorage.removeItem(LS_FAVORITES);
+  localStorage.removeItem(LS_RECENT);
+  localStorage.removeItem(LS_CUSTOM);
   showToast('ล้างข้อมูลแล้ว');
   setTimeout(()=>location.reload(), 800);
 }
@@ -757,6 +870,9 @@ function exportData(){
     entries:allEntries,
     weights:allWeights,
     water:allWater,
+    favorites:favorites,
+    recent:recentFoods,
+    custom_foods:customFoods,
     settings:settings,
   };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -784,6 +900,9 @@ function importData(file){
       lsSave(LS_ENTRIES,data.entries);
       if(data.weights)lsSave(LS_WEIGHTS,data.weights);
       if(data.water)lsSave(LS_WATER,data.water);
+      if(data.favorites)lsSave(LS_FAVORITES,data.favorites);
+      if(data.recent)lsSave(LS_RECENT,data.recent);
+      if(data.custom_foods)lsSave(LS_CUSTOM,data.custom_foods);
       if(data.settings)lsSave(LS_SETTINGS,data.settings);
       showToast('Import สำเร็จ · กำลังโหลด...');
       setTimeout(()=>location.reload(),800);
@@ -810,6 +929,7 @@ function showPage(id,btn){
   if(btn)btn.classList.add('active');
   if(id==='analysis')renderAnalysis();
   if(id==='tdee')syncTDEEFromProfile();
+  if(id==='add')renderQuickList();
 }
 
 // ═══ DATE ═══
@@ -841,7 +961,7 @@ function doSearch(v){
   sTimer=setTimeout(()=>{
     const t=v.toLowerCase().trim();
     if(!t){renderCatResults(activeCat);return;}
-    renderResults(FOODS.filter(f=>f.n.includes(t)||f.e.toLowerCase().includes(t)).slice(0,20));
+    renderResults(allFoods().filter(f=>f.n.includes(t)||(f.e||'').toLowerCase().includes(t)).slice(0,25));
   },130);
 }
 function renderCatBtns(){
@@ -854,13 +974,57 @@ function renderCatBtns(){
   });
   renderCatResults(activeCat);
 }
-function renderCatResults(cat){renderResults(FOODS.filter(f=>f.cat===cat));}
+function allFoods(){return [...FOODS,...customFoods];}
+function findFood(name){return allFoods().find(f=>f.n===name);}
+function isFav(name){return favorites.includes(name);}
+function toggleFavorite(name,evt){
+  if(evt){evt.stopPropagation();}
+  const i=favorites.indexOf(name);
+  if(i>=0)favorites.splice(i,1);else favorites.unshift(name);
+  lsSave(LS_FAVORITES,favorites);
+  // Re-render whatever is currently displayed
+  if(document.querySelector('.qtab.active')?.dataset.qtab==='fav')renderQuickList();
+  const searchVal=document.getElementById('searchInput').value;
+  if(searchVal)doSearch(searchVal);else renderCatResults(activeCat);
+}
+function trackRecent(name){
+  recentFoods=[name,...recentFoods.filter(n=>n!==name)].slice(0,10);
+  lsSave(LS_RECENT,recentFoods);
+}
+let activeQTab='fav';
+function setQuickTab(tab){
+  activeQTab=tab;
+  document.querySelectorAll('.qtab').forEach(b=>b.classList.toggle('active',b.dataset.qtab===tab));
+  renderQuickList();
+}
+function renderQuickList(){
+  const w=document.getElementById('quickList');
+  const list=activeQTab==='fav'
+    ?favorites.map(n=>findFood(n)).filter(Boolean)
+    :recentFoods.map(n=>findFood(n)).filter(Boolean);
+  if(!list.length){
+    w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${activeQTab==='fav'?'ยังไม่มีของโปรด · กด ⭐ ในผลค้นหา':'ยังไม่มีรายการล่าสุด · เพิ่มอาหารดูสิ'}</div>`;
+    return;
+  }
+  w.innerHTML='';list.slice(0,8).forEach(f=>{
+    const d=document.createElement('div');d.className='sri';
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${f.n}</div><div class="sri-m">${f.e||''} · P:${f.p}g C:${f.cb}g F:${f.f}g</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}" onclick="toggleFavorite('${f.n.replace(/'/g,"\\'")}'​,event)">⭐</span></div>`;
+    d.onclick=()=>addFromSearch(f);
+    w.appendChild(d);
+  });
+}
+function renderCatResults(cat){
+  // Include user's custom foods in their own pseudo-category
+  if(cat==='custom'){renderResults(customFoods);return;}
+  renderResults(FOODS.filter(f=>f.cat===cat));
+}
 function renderResults(list){
   const w=document.getElementById('sRes');w.innerHTML='';
   if(!list.length){w.innerHTML='<div class="sno">ไม่พบอาหาร</div>';return;}
   list.forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div><div class="sri-n">${f.n}</div><div class="sri-m">${f.e} · P:${f.p}g C:${f.cb}g F:${f.f}g</div></div><div class="sri-c">${f.c}</div>`;
+    const star=`<span class="star ${isFav(f.n)?'on':''}" onclick="toggleFavorite('${f.n.replace(/'/g,"\\'")}'​,event)">⭐</span>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${f.n}</div><div class="sri-m">${f.e||''} · P:${f.p}g C:${f.cb}g F:${f.f}g</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div>${star}</div>`;
     d.onclick=()=>addFromSearch(f);
     w.appendChild(d);
   });
@@ -869,6 +1033,7 @@ function renderResults(list){
 // ═══ ADD FOOD ═══
 function addFromSearch(f){
   const meal=document.getElementById('mealSel').value;
+  trackRecent(f.n);
   insertEntry({food_name:f.n,calories:f.c,protein:f.p,carbs:f.cb,fat:f.f,amount_g:f.a,meal});
 }
 function addManual(){
@@ -876,8 +1041,21 @@ function addManual(){
   const cal=+document.getElementById('fCal').value;
   if(!name||!cal){showToast('กรอกชื่อและแคลอรี่');return;}
   const meal=document.getElementById('mealSel').value;
-  insertEntry({food_name:name,calories:cal,protein:+document.getElementById('fP').value||0,carbs:+document.getElementById('fC').value||0,fat:+document.getElementById('fF').value||0,amount_g:null,meal});
+  const p=+document.getElementById('fP').value||0;
+  const c=+document.getElementById('fC').value||0;
+  const fat=+document.getElementById('fF').value||0;
+  // Save to library if checked
+  if(document.getElementById('saveLib').checked){
+    if(!customFoods.find(x=>x.n===name)){
+      customFoods.push({n:name,e:'',c:cal,p,cb:c,f:fat,a:null,cat:'custom'});
+      lsSave(LS_CUSTOM,customFoods);
+      showToast('บันทึก '+name+' ลงไลบรารี ✓');
+    }
+  }
+  trackRecent(name);
+  insertEntry({food_name:name,calories:cal,protein:p,carbs:c,fat,amount_g:null,meal});
   ['fName','fCal','fP','fC','fF'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('saveLib').checked=false;
 }
 function insertEntry(data){
   const row={id:uid(),entry_date:currentDate,created_at:new Date().toISOString(),...data};
