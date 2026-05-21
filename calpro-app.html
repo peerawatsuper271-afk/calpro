@@ -158,7 +158,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .gchip.active{border-color:var(--accent);color:var(--accent);background:rgba(255,107,107,.08);}
 .tip{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:9px;padding:10px;margin-top:9px;font-size:.75rem;line-height:1.6;}
 .tip strong{color:var(--accent);}
-.user-avatar{width:56px;height:56px;border-radius:50%;background:rgba(255,107,107,.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:var(--accent);margin:0 auto 10px;}
+.user-avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,107,107,.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:700;color:var(--accent);margin:0 auto 10px;cursor:pointer;overflow:hidden;position:relative;transition:transform .15s;user-select:none;}
+.user-avatar:hover{transform:scale(1.05);}
+.user-avatar img{width:100%;height:100%;object-fit:cover;}
+.user-avatar::after{content:'✏️';position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:.65rem;}
+.avatar-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:12px;}
+.av-opt{aspect-ratio:1;border-radius:50%;border:2px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;transition:all .15s;font-family:inherit;}
+.av-opt:hover{border-color:var(--accent);transform:scale(1.1);}
+.av-opt.active{border-color:var(--accent);background:rgba(255,107,107,.12);}
 
 /* ── ANALYSIS ── */
 .wbars{display:flex;align-items:flex-end;gap:5px;height:68px;margin-bottom:5px;}
@@ -190,10 +197,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .win{color:var(--green);font-weight:600;}.lose{color:var(--accent);}
 
 /* ── SETTINGS ── */
-.theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:10px;}
-.th-swatch{height:38px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;position:relative;}
-.th-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;}
-.th-swatch.active{border-color:#fff;}
+.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+.th-swatch{height:42px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;position:relative;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+.th-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,255,255,.2) inset;}
 .accent-grid{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;}
 .ac-dot{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s;}
 .ac-dot.active{border-color:#fff;}
@@ -234,6 +240,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <p id="hdrSub">ยินดีต้อนรับ</p>
       </div>
       <div style="display:flex;gap:7px">
+        <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง">🌙</button>
         <button class="icon-btn" onclick="openSettings()">⚙️</button>
       </div>
     </div>
@@ -271,6 +278,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <div class="mc"><div class="mc-l">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--purple)">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--purple)"></div></div></div>
       </div>
       <div id="foodLog"></div>
+      <button class="btn-sec" onclick="shareDaily()" style="width:100%;margin-top:8px">📤 แชร์สรุปวันนี้</button>
     </div>
 
     <!-- ADD -->
@@ -304,7 +312,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
       <div class="card"><h3>7 วันล่าสุด</h3><div class="wbars" id="wBars"></div><div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div></div>
       <div class="card"><h3>สรุป</h3><div id="wkSum"></div></div>
       <div class="card"><h3>คำแนะนำ</h3><div id="insDiv"></div></div>
-      <div class="card"><h3>เหรียญตรา</h3><div class="bdg-g" id="bdgGrid"></div></div>
+      <div class="card">
+        <h3>เหรียญตรา</h3>
+        <div class="bdg-g" id="bdgGrid"></div>
+        <button class="btn-sec" onclick="shareAchievements()" style="width:100%;margin-top:10px">🏆 แชร์ความสำเร็จ</button>
+      </div>
     </div>
 
     <!-- TDEE CALCULATOR -->
@@ -391,7 +403,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
     <!-- PROFILE -->
     <div class="screen" id="pg-profile">
       <div class="card" style="text-align:center;padding:20px 14px">
-        <div class="user-avatar" id="profileAvatar">?</div>
+        <div class="user-avatar" id="profileAvatar" onclick="openAvatarModal()" title="คลิกเพื่อเปลี่ยน">?</div>
         <div style="font-size:1rem;font-weight:600" id="profileName2">—</div>
         <div style="font-size:.75rem;color:var(--muted);margin-top:3px" id="profileEmail2">—</div>
       </div>
@@ -453,6 +465,19 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
   </div><!-- end app -->
 </div><!-- end appScreen -->
 
+<!-- AVATAR MODAL -->
+<div class="modal-bg hide" id="avatarModal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>เปลี่ยนรูปประจำตัว</h3><button class="mc-close" onclick="closeAvatarModal()">✕</button></div>
+    <div class="sec-lbl">เลือกอวาตาร์น่ารัก ๆ</div>
+    <div class="avatar-grid" id="avatarGrid"></div>
+    <div class="sec-lbl">หรือ</div>
+    <input type="file" id="avatarUpload" accept="image/*" hidden onchange="uploadAvatar(this.files[0])">
+    <button class="btn" onclick="document.getElementById('avatarUpload').click()">📷 อัพโหลดรูป</button>
+    <button class="btn-sec" onclick="resetAvatar()" style="margin-top:8px;width:100%">ใช้ตัวอักษรแรก</button>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div class="modal-bg hide" id="settingsModal">
   <div class="modal">
@@ -481,7 +506,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 
 // ═══ STORAGE LAYER ═══
 const LS_PROFILE = 'calpro_profile';
@@ -548,11 +573,14 @@ const BADGES=[
   {id:'master',ico:'👑',name:'Master',cond:u=>earnedBadges(u).length>=5},
 ];
 const THEMES={
-  dark:{bg:'#0f0f14',s:'#1a1a24',s2:'#22222e',b:'#2e2e3e',t:'#e8e8f0',m:'#6868a0'},
-  night:{bg:'#080810',s:'#11111a',s2:'#191922',b:'#252530',t:'#ddddf5',m:'#5555a0'},
-  forest:{bg:'#0b120d',s:'#141e16',s2:'#1c281e',b:'#283a2a',t:'#e0eed8',m:'#5a7a5c'},
-  warm:{bg:'#120e09',s:'#1e1510',s2:'#281c14',b:'#382518',t:'#f0e8d8',m:'#8a6840'},
-  ocean:{bg:'#090e14',s:'#11181f',s2:'#182028',b:'#223040',t:'#d8eef8',m:'#4878a0'},
+  dark:{bg:'#0f0f14',s:'#1a1a24',s2:'#22222e',b:'#2e2e3e',t:'#e8e8f0',m:'#6868a0',mode:'dark'},
+  night:{bg:'#080810',s:'#11111a',s2:'#191922',b:'#252530',t:'#ddddf5',m:'#5555a0',mode:'dark'},
+  forest:{bg:'#0b120d',s:'#141e16',s2:'#1c281e',b:'#283a2a',t:'#e0eed8',m:'#5a7a5c',mode:'dark'},
+  warm:{bg:'#120e09',s:'#1e1510',s2:'#281c14',b:'#382518',t:'#f0e8d8',m:'#8a6840',mode:'dark'},
+  ocean:{bg:'#090e14',s:'#11181f',s2:'#182028',b:'#223040',t:'#d8eef8',m:'#4878a0',mode:'dark'},
+  light:{bg:'#fafafd',s:'#ffffff',s2:'#f0f0f5',b:'#e0e0ea',t:'#1a1a24',m:'#7878a0',mode:'light'},
+  cream:{bg:'#fbf6ec',s:'#ffffff',s2:'#f4ecd8',b:'#e6d8b8',t:'#3a2a14',m:'#8a7050',mode:'light'},
+  mint:{bg:'#f0f8f2',s:'#ffffff',s2:'#e2efe6',b:'#bfd6c5',t:'#0c2418',m:'#5a8870',mode:'light'},
 };
 const ACCENTS=['#ff6b6b','#ffa94d','#51cf66','#74c0fc','#b197fc','#f783ac','#ffd43b','#63e6be'];
 
@@ -849,10 +877,14 @@ function saveProfile(){
   document.getElementById('resultCard').style.display='block';
   renderProfileUI();renderToday();showToast('บันทึกโปรไฟล์แล้ว ✓');
 }
+const CUTE_AVATARS=['🐱','🐶','🐻','🐼','🦊','🐰','🐯','🦁','🐨','🐭','🐹','🐮','🐷','🐸','🐵','🦄','🐧','🦉','🐺','🦝','🐢','🐬','🦋','🌸'];
 function renderProfileUI(){
   const p=userProfile;if(!p)return;
   const n=p.display_name||'';
-  document.getElementById('profileAvatar').textContent=(n[0]||'?').toUpperCase();
+  const av=document.getElementById('profileAvatar');
+  if(p.avatar&&p.avatar.startsWith('data:')){av.innerHTML='<img src="'+p.avatar+'" alt="avatar">';}
+  else if(p.avatar){av.textContent=p.avatar;}
+  else{av.textContent=(n[0]||'?').toUpperCase();}
   document.getElementById('profileName2').textContent=n||'—';
   document.getElementById('profileEmail2').textContent='เป้าหมาย '+(p.goal_cal||1800).toLocaleString()+' kcal/วัน';
   if(n)document.getElementById('pName').value=n;
@@ -872,25 +904,142 @@ function applyTheme(){
   r.setProperty('--bg',th.bg);r.setProperty('--surface',th.s);r.setProperty('--surface2',th.s2);
   r.setProperty('--border',th.b);r.setProperty('--text',th.t);r.setProperty('--muted',th.m);
   r.setProperty('--accent',settings.accent||'#ff6b6b');
+  document.documentElement.dataset.mode=th.mode||'dark';
+  const tg=document.getElementById('modeToggle');
+  if(tg)tg.textContent=th.mode==='light'?'☀️':'🌙';
+  // Update browser theme-color meta
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta)meta.setAttribute('content',th.bg);
 }
+function toggleMode(){
+  const th=THEMES[settings.theme]||THEMES.dark;
+  // If currently dark → switch to last-used light (or 'light'); vice versa
+  if(th.mode==='dark'){settings.theme=settings.lastLight||'light';}
+  else{settings.theme=settings.lastDark||'dark';}
+  // Remember preference per mode
+  const newTh=THEMES[settings.theme];
+  if(newTh.mode==='dark')settings.lastDark=settings.theme;
+  else settings.lastLight=settings.theme;
+  lsSave(LS_SETTINGS,settings);
+  applyTheme();
+}
+const THEME_LABELS={dark:'มืด',night:'ดึก',forest:'ป่า',warm:'อุ่น',ocean:'มหาสมุทร',light:'สว่าง',cream:'ครีม',mint:'มินต์'};
 function openSettings(){
   document.getElementById('settingsModal').classList.remove('hide');
   const tg=document.getElementById('themeGrid');tg.innerHTML='';
   Object.entries(THEMES).forEach(([k,v])=>{
     const b=document.createElement('button');b.className='th-swatch'+(settings.theme===k?' active':'');
     b.style.background=v.s2;b.style.border='2px solid '+(settings.theme===k?'#fff':'transparent');
-    b.onclick=()=>{settings.theme=k;localStorage.setItem('calpro_settings',JSON.stringify(settings));applyTheme();openSettings();};
+    b.title=THEME_LABELS[k]||k;
+    b.innerHTML='<span style="font-size:.55rem;color:'+v.t+';font-weight:600">'+(THEME_LABELS[k]||k)+'</span>';
+    b.onclick=()=>{
+      settings.theme=k;
+      if(v.mode==='dark')settings.lastDark=k; else settings.lastLight=k;
+      lsSave(LS_SETTINGS,settings);applyTheme();openSettings();
+    };
     tg.appendChild(b);
   });
   const ag=document.getElementById('accentGrid');ag.innerHTML='';
   ACCENTS.forEach(ac=>{
     const b=document.createElement('button');b.className='ac-dot'+(settings.accent===ac?' active':'');
     b.style.background=ac;b.style.border='3px solid '+(settings.accent===ac?'#fff':'transparent');
-    b.onclick=()=>{settings.accent=ac;localStorage.setItem('calpro_settings',JSON.stringify(settings));applyTheme();openSettings();};
+    b.onclick=()=>{settings.accent=ac;lsSave(LS_SETTINGS,settings);applyTheme();openSettings();};
     ag.appendChild(b);
   });
 }
 function closeSettings(){document.getElementById('settingsModal').classList.add('hide');}
+
+// ═══ AVATAR PICKER ═══
+function openAvatarModal(){
+  document.getElementById('avatarModal').classList.remove('hide');
+  const g=document.getElementById('avatarGrid');g.innerHTML='';
+  CUTE_AVATARS.forEach(emoji=>{
+    const b=document.createElement('button');
+    b.className='av-opt'+(userProfile?.avatar===emoji?' active':'');
+    b.textContent=emoji;
+    b.onclick=()=>chooseAvatar(emoji);
+    g.appendChild(b);
+  });
+}
+function closeAvatarModal(){document.getElementById('avatarModal').classList.add('hide');}
+function chooseAvatar(emoji){
+  userProfile.avatar=emoji;saveProfile_LS();renderProfileUI();closeAvatarModal();
+  showToast('เปลี่ยนรูปแล้ว');
+}
+function uploadAvatar(file){
+  if(!file)return;
+  if(file.size>2*1024*1024){showToast('ไฟล์ใหญ่เกินไป (สูงสุด 2MB)');return;}
+  // Resize via canvas to keep localStorage small
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const SIZE=256;
+      const c=document.createElement('canvas');c.width=SIZE;c.height=SIZE;
+      const ctx=c.getContext('2d');
+      // Square crop center
+      const minDim=Math.min(img.width,img.height);
+      const sx=(img.width-minDim)/2,sy=(img.height-minDim)/2;
+      ctx.drawImage(img,sx,sy,minDim,minDim,0,0,SIZE,SIZE);
+      userProfile.avatar=c.toDataURL('image/jpeg',0.82);
+      saveProfile_LS();renderProfileUI();closeAvatarModal();
+      showToast('อัพโหลดรูปแล้ว');
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function resetAvatar(){
+  delete userProfile.avatar;saveProfile_LS();renderProfileUI();closeAvatarModal();
+  showToast('ใช้ตัวอักษรแรก');
+}
+
+// ═══ SHARE ═══
+const SHARE_URL='https://peerawatsuper271-afk.github.io/calpro/';
+async function shareText(text,title){
+  if(navigator.share){
+    try{await navigator.share({title,text,url:SHARE_URL});showToast('แชร์เรียบร้อย ✓');}
+    catch(e){if(e.name!=='AbortError')showToast('แชร์ไม่สำเร็จ');}
+  }else if(navigator.clipboard){
+    try{await navigator.clipboard.writeText(text+'\n'+SHARE_URL);showToast('คัดลอกแล้ว · วางได้ทุกที่ 📋');}
+    catch{showToast('คัดลอกไม่สำเร็จ');}
+  }else{showToast('เบราว์เซอร์ไม่รองรับการแชร์');}
+}
+function shareDaily(){
+  const E=dailyEntries;
+  const totCal=E.reduce((s,e)=>s+e.calories,0);
+  const totP=E.reduce((s,e)=>s+(e.protein||0),0);
+  const totC=E.reduce((s,e)=>s+(e.carbs||0),0);
+  const totF=E.reduce((s,e)=>s+(e.fat||0),0);
+  const goal=userProfile?.goal_cal||1800;
+  const av=userProfile?.avatar&&!userProfile.avatar.startsWith('data:')?userProfile.avatar+' ':'';
+  const dateStr=fmtDate(currentDate).replace(/^วันนี้ · |^เมื่อวาน · /,'');
+  const status=totCal===0?'ยังไม่ได้บันทึก':totCal>goal?'⚠️ เกินเป้า':totCal>=goal*0.85?'✅ ใกล้เป้า':'🎯 ในเป้า';
+  const text=`${av}CalPro · ${dateStr}\n`+
+    `🔥 ${totCal.toLocaleString()}/${goal.toLocaleString()} kcal ${status}\n`+
+    `💪 P:${totP}g · C:${totC}g · F:${totF}g\n`+
+    `📝 ${E.length} รายการ`;
+  shareText(text,'CalPro - สรุปประจำวัน');
+}
+function shareAchievements(){
+  // Build entries_by_day from allEntries
+  const ebd={};Object.entries(allEntries).forEach(([k,arr])=>{if(arr&&arr.length)ebd[k]=arr;});
+  const streak=calcStreak(ebd);
+  const ontrack=daysOnTrack(ebd);
+  const earned=earnedBadges(ebd);
+  const totalDays=logDays(ebd);
+  const av=userProfile?.avatar&&!userProfile.avatar.startsWith('data:')?userProfile.avatar+' ':'';
+  const name=userProfile?.display_name||'ฉัน';
+  let text=`${av}${name} · CalPro\n`+
+    `🔥 Streak: ${streak} วัน\n`+
+    `🎯 อยู่ในเป้า: ${ontrack} วัน\n`+
+    `📝 บันทึกรวม: ${totalDays} วัน`;
+  if(earned.length){
+    const badgeIcons=BADGES.filter(b=>earned.includes(b.id)).map(b=>b.ico).join(' ');
+    text+=`\n🏆 เหรียญ: ${badgeIcons}`;
+  }
+  shareText(text,'CalPro - ความสำเร็จของฉัน');
+}
 
 // ═══ TDEE LIVE CALCULATOR ═══
 function pickTGoal(btn){
