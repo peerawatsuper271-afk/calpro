@@ -41,6 +41,15 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .bnt.active{color:var(--accent);}
 .icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
+/* ── SYNC INDICATOR ── */
+.sync-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;vertical-align:middle;}
+.sync-dot.s-idle{display:none;}
+.sync-dot.s-syncing{background:var(--amber);animation:pulse 1s ease-in-out infinite;}
+.sync-dot.s-synced{background:var(--green);}
+.sync-dot.s-error{background:var(--accent);}
+.sync-dot.s-offline{background:var(--muted);}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+
 /* ── AUTH ── */
 .auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
 .auth-logo{font-size:2.2rem;font-weight:700;margin-bottom:4px;}
@@ -337,7 +346,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
         <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <div class="hdr-left">
-        <h1>Cal<span>Pro+</span></h1>
+        <h1>Cal<span>Pro+</span> <span class="sync-dot s-idle" id="syncDot" title=""></span></h1>
         <p id="hdrSub" data-i18n="welcome">ยินดีต้อนรับ</p>
       </div>
       <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง">
@@ -887,14 +896,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.3.0';
+const APP_VERSION = '2.4.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidHhzaG9kYWV6dHB0ZWdrZ3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMzM1MzgsImV4cCI6MjA5NDkwOTUzOH0.OdtByENjyyPU-NLWDftSOz4ODyMa-vmAF-7mq74St4I';
-const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,         // keep session in localStorage across reloads
+    autoRefreshToken: true,        // auto-refresh JWT before expiry
+    detectSessionInUrl: false,     // we don't use OAuth callback URLs
+    storage: localStorage,         // explicit storage (avoids cookie issues in PWA)
+    storageKey: 'calpro-sb-auth',  // namespaced key
+  }
+}) : null;
 let cloudUser = null;     // current Supabase user (null if not signed in)
 let syncing = false;
+let syncStatus = 'idle';  // idle · syncing · synced · error · offline
+let syncTimer = null;     // for debounced auto-sync
+let periodicTimer = null; // for interval-based sync
 
 // ═══ i18n ═══
 const I18N = {
@@ -1441,6 +1461,7 @@ function toggleFavorite(name,evt){
   if(document.querySelector('.qtab.active')?.dataset.qtab==='fav')renderQuickList();
   const searchVal=document.getElementById('searchInput').value;
   if(searchVal)doSearch(searchVal);else renderCatResults(activeCat);
+  scheduleAutoSync('favorites');
 }
 function trackRecent(name){
   recentFoods=[name,...recentFoods.filter(n=>n!==name)].slice(0,10);
@@ -1516,6 +1537,7 @@ function addManual(){
   insertEntry({food_name:name,calories:cal,protein:p,carbs:c,fat,amount_g:null,meal});
   ['fName','fCal','fP','fC','fF'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('saveLib').checked=false;
+  if(document.getElementById('saveLib')?.checked||customFoods.find(x=>x.n===name))scheduleAutoSync('custom_food');
 }
 let pendingPhoto=null;
 function loadPhotoForEntry(file){
@@ -1553,11 +1575,13 @@ function insertEntry(data){
   renderToday();
   showPage('today',document.querySelector('.bnt'));
   showToast('เพิ่ม '+data.food_name+' แล้ว');
+  scheduleAutoSync('insertEntry');
 }
 function delFood(id){
   dailyEntries=dailyEntries.filter(e=>e.id!==id);
   saveEntries_LS();
   renderToday();
+  scheduleAutoSync('delFood');
 }
 function editFood(id){
   const e=dailyEntries.find(x=>x.id===id);if(!e)return;
@@ -1584,6 +1608,7 @@ function saveMeasurements(){
   lsSave(LS_MEASURES,allMeasures);
   renderMeasurements();
   showToast(settings.lang==='en'?'Saved ✓':'บันทึกแล้ว ✓');
+  scheduleAutoSync('measures');
 }
 function navyBF(){
   const m=allMeasures[currentDate]||{};
@@ -1697,14 +1722,69 @@ async function deleteCloudAccount(){
 if(sb){
   sb.auth.onAuthStateChange(async (event,session)=>{
     cloudUser=session?.user||null;
-    if(cloudUser){
-      await syncFromCloud();
-      await syncToCloud();
+    if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'){
+      console.log('[auth]',event);
+      if(event==='SIGNED_IN'){
+        // First-time login on this device: pull then push (merge)
+        setSyncStatus('syncing');
+        try{await syncFromCloud();await syncToCloud();setSyncStatus('synced');}
+        catch(e){setSyncStatus('error');}
+      }
+    }else if(event==='SIGNED_OUT'){
+      console.log('[auth] SIGNED_OUT');
+      setSyncStatus('offline');
     }
     renderCloudStatus();
     renderToday();
   });
 }
+
+// ═══ AUTO-SYNC ═══
+function setSyncStatus(s){
+  syncStatus=s;
+  const ind=document.getElementById('syncDot');
+  if(!ind)return;
+  ind.className='sync-dot s-'+s;
+  const titles={idle:'',syncing:'กำลังซิงค์...',synced:'ซิงค์แล้ว ✓',error:'ซิงค์ผิดพลาด',offline:'ออฟไลน์'};
+  ind.title=titles[s]||'';
+}
+// Debounced auto-sync (called after every local mutation)
+function scheduleAutoSync(reason){
+  if(!cloudUser||!sb)return;
+  if(syncTimer)clearTimeout(syncTimer);
+  syncTimer=setTimeout(async ()=>{
+    if(syncing)return;
+    if(!navigator.onLine){setSyncStatus('offline');return;}
+    syncing=true;setSyncStatus('syncing');
+    try{await syncToCloud();setSyncStatus('synced');console.log('[auto-sync ✓]',reason);}
+    catch(e){setSyncStatus('error');console.warn('[auto-sync ✗]',reason,e.message);}
+    finally{syncing=false;}
+  },2000);  // 2s debounce
+}
+// Periodic full sync every 5 minutes
+function startPeriodicSync(){
+  if(periodicTimer)clearInterval(periodicTimer);
+  periodicTimer=setInterval(async ()=>{
+    if(!cloudUser||!navigator.onLine||syncing)return;
+    syncing=true;setSyncStatus('syncing');
+    try{await syncFromCloud();await syncToCloud();setSyncStatus('synced');}
+    catch(e){setSyncStatus('error');}
+    finally{syncing=false;}
+  },5*60*1000);
+}
+// Sync on tab focus
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&cloudUser&&!syncing&&navigator.onLine){
+    scheduleAutoSync('visibilitychange');
+  }
+});
+// Online/offline indicator
+window.addEventListener('online',()=>{setSyncStatus(cloudUser?'synced':'offline');if(cloudUser)scheduleAutoSync('online');});
+window.addEventListener('offline',()=>setSyncStatus('offline'));
+// Save before close (best-effort)
+window.addEventListener('beforeunload',()=>{
+  if(cloudUser&&syncTimer){clearTimeout(syncTimer);syncToCloud().catch(()=>{});}
+});
 
 function renderCloudStatus(){
   const wrap=document.getElementById('cloudStatus');if(!wrap)return;
@@ -1814,12 +1894,12 @@ async function syncStep(label, fn){
   }
 }
 
-// PUSH localStorage → cloud (per-table, isolated errors, with timeouts)
+// PUSH localStorage → cloud — safe upsert + diff-based delete (never destructive)
 async function syncToCloud(){
   if(!cloudUser||!sb)return;
   const uid=cloudUser.id;
   let okCount=0,failCount=0;
-  // 1. Profile
+  // 1. Profile (always upsert by id)
   if(userProfile){
     const p={...userProfile,id:uid,email:cloudUser.email,updated_at:new Date().toISOString()};
     delete p.created_at;
@@ -1829,71 +1909,97 @@ async function syncToCloud(){
     });
     ok?okCount++:failCount++;
   }
-  // 2. Food entries
+  // 2. Food entries — upsert by (user_id, client_id), then delete cloud-only orphans
   const entries=[];
   Object.entries(allEntries).forEach(([date,arr])=>(arr||[]).forEach(e=>{
-    entries.push({user_id:uid,entry_date:date,food_name:e.food_name,calories:e.calories,protein:e.protein||0,carbs:e.carbs||0,fat:e.fat||0,amount_g:e.amount_g,meal:e.meal,photo:e.photo||null,client_id:e.id});
+    entries.push({user_id:uid,entry_date:date,food_name:e.food_name,calories:e.calories,protein:e.protein||0,carbs:e.carbs||0,fat:e.fat||0,amount_g:e.amount_g,meal:e.meal,photo:e.photo||null,client_id:e.id,updated_at:new Date().toISOString()});
   }));
-  if(entries.length){
+  {
     const ok=await syncStep('food_entries', async ()=>{
-      const {error:e1}=await sb.from('food_entries').delete().eq('user_id',uid);if(e1)throw e1;
-      for(let i=0;i<entries.length;i+=50){
-        const {error:e2}=await sb.from('food_entries').insert(entries.slice(i,i+50));if(e2)throw e2;
+      if(entries.length){
+        for(let i=0;i<entries.length;i+=50){
+          const {error}=await sb.from('food_entries').upsert(entries.slice(i,i+50),{onConflict:'user_id,client_id'});if(error)throw error;
+        }
       }
+      // Delete cloud rows not in local (safe: we know local state)
+      const localIds=new Set(entries.map(e=>e.client_id));
+      const {data:cloudRows,error:e1}=await sb.from('food_entries').select('client_id').eq('user_id',uid);
+      if(e1)throw e1;
+      const toDelete=(cloudRows||[]).map(r=>r.client_id).filter(cid=>cid&&!localIds.has(cid));
+      if(toDelete.length){const {error:e2}=await sb.from('food_entries').delete().eq('user_id',uid).in('client_id',toDelete);if(e2)throw e2;}
     });
     ok?okCount++:failCount++;
   }
-  // 3. Weights
-  const weights=Object.entries(allWeights).map(([d,kg])=>({user_id:uid,entry_date:d,kg}));
+  // 3. Weights — pure upsert (composite PK)
+  const weights=Object.entries(allWeights).map(([d,kg])=>({user_id:uid,entry_date:d,kg,updated_at:new Date().toISOString()}));
   if(weights.length){
     const ok=await syncStep('weights', async ()=>{
       const {error}=await sb.from('weights').upsert(weights,{onConflict:'user_id,entry_date'});if(error)throw error;
     });
     ok?okCount++:failCount++;
   }
-  // 4. Water
-  const waters=Object.entries(allWater).map(([d,cups])=>({user_id:uid,entry_date:d,cups}));
+  // 4. Water — pure upsert
+  const waters=Object.entries(allWater).map(([d,cups])=>({user_id:uid,entry_date:d,cups,updated_at:new Date().toISOString()}));
   if(waters.length){
     const ok=await syncStep('water', async ()=>{
       const {error}=await sb.from('water').upsert(waters,{onConflict:'user_id,entry_date'});if(error)throw error;
     });
     ok?okCount++:failCount++;
   }
-  // 5. Workouts
+  // 5. Workouts — upsert + diff-delete
   const workouts=[];
   Object.entries(allWorkouts).forEach(([d,arr])=>(arr||[]).forEach(w=>{
-    workouts.push({user_id:uid,entry_date:d,name:w.name,name_en:w.name_en,met:w.met,minutes:w.minutes,kcal:w.kcal,client_id:w.id});
+    workouts.push({user_id:uid,entry_date:d,name:w.name,name_en:w.name_en,met:w.met,minutes:w.minutes,kcal:w.kcal,client_id:w.id,updated_at:new Date().toISOString()});
   }));
-  if(workouts.length){
+  {
     const ok=await syncStep('workouts', async ()=>{
-      const {error:e1}=await sb.from('workouts').delete().eq('user_id',uid);if(e1)throw e1;
-      for(let i=0;i<workouts.length;i+=50){
-        const {error:e2}=await sb.from('workouts').insert(workouts.slice(i,i+50));if(e2)throw e2;
+      if(workouts.length){
+        for(let i=0;i<workouts.length;i+=50){
+          const {error}=await sb.from('workouts').upsert(workouts.slice(i,i+50),{onConflict:'user_id,client_id'});if(error)throw error;
+        }
       }
+      const localIds=new Set(workouts.map(w=>w.client_id));
+      const {data:cloudRows,error:e1}=await sb.from('workouts').select('client_id').eq('user_id',uid);
+      if(e1)throw e1;
+      const toDelete=(cloudRows||[]).map(r=>r.client_id).filter(cid=>cid&&!localIds.has(cid));
+      if(toDelete.length){const {error:e2}=await sb.from('workouts').delete().eq('user_id',uid).in('client_id',toDelete);if(e2)throw e2;}
     });
     ok?okCount++:failCount++;
   }
-  // 6. Body measures
-  const measures=Object.entries(allMeasures).map(([d,m])=>({user_id:uid,entry_date:d,...m}));
+  // 6. Body measures — pure upsert
+  const measures=Object.entries(allMeasures).map(([d,m])=>({user_id:uid,entry_date:d,...m,updated_at:new Date().toISOString()}));
   if(measures.length){
     const ok=await syncStep('body_measures', async ()=>{
       const {error}=await sb.from('body_measures').upsert(measures,{onConflict:'user_id,entry_date'});if(error)throw error;
     });
     ok?okCount++:failCount++;
   }
-  // 7. Favorites
-  if(favorites.length){
+  // 7. Favorites — diff-based (insert new, delete removed)
+  {
     const ok=await syncStep('favorites', async ()=>{
-      const {error:e1}=await sb.from('favorites').delete().eq('user_id',uid);if(e1)throw e1;
-      const {error:e2}=await sb.from('favorites').insert(favorites.map(n=>({user_id:uid,food_name:n})));if(e2)throw e2;
+      const {data:cloudRows,error:e1}=await sb.from('favorites').select('food_name').eq('user_id',uid);
+      if(e1)throw e1;
+      const cloudSet=new Set((cloudRows||[]).map(r=>r.food_name));
+      const localSet=new Set(favorites);
+      const toAdd=favorites.filter(n=>!cloudSet.has(n));
+      const toRemove=[...cloudSet].filter(n=>!localSet.has(n));
+      if(toAdd.length){const {error:e2}=await sb.from('favorites').insert(toAdd.map(n=>({user_id:uid,food_name:n})));if(e2)throw e2;}
+      if(toRemove.length){const {error:e3}=await sb.from('favorites').delete().eq('user_id',uid).in('food_name',toRemove);if(e3)throw e3;}
     });
     ok?okCount++:failCount++;
   }
-  // 8. Custom foods
-  if(customFoods.length){
+  // 8. Custom foods — upsert by (user_id, name) + diff-delete
+  {
     const ok=await syncStep('custom_foods', async ()=>{
-      const {error:e1}=await sb.from('custom_foods').delete().eq('user_id',uid);if(e1)throw e1;
-      const {error:e2}=await sb.from('custom_foods').insert(customFoods.map(f=>({user_id:uid,name:f.n,name_en:f.e||'',calories:f.c,protein:f.p,carbs:f.cb,fat:f.f,amount_g:f.a})));if(e2)throw e2;
+      if(customFoods.length){
+        const payload=customFoods.map(f=>({user_id:uid,name:f.n,name_en:f.e||'',calories:f.c,protein:f.p,carbs:f.cb,fat:f.f,amount_g:f.a,updated_at:new Date().toISOString()}));
+        const {error}=await sb.from('custom_foods').upsert(payload,{onConflict:'user_id,name'});if(error)throw error;
+      }
+      const localNames=new Set(customFoods.map(f=>f.n));
+      const {data:cloudRows,error:e1}=await sb.from('custom_foods').select('name').eq('user_id',uid);
+      if(e1)throw e1;
+      const toDelete=(cloudRows||[]).map(r=>r.name).filter(n=>!localNames.has(n));
+      if(toDelete.length){const {error:e2}=await sb.from('custom_foods').delete().eq('user_id',uid).in('name',toDelete);if(e2)throw e2;}
     });
     ok?okCount++:failCount++;
   }
@@ -1901,49 +2007,102 @@ async function syncToCloud(){
   if(failCount>0){throw new Error(`${okCount} ok, ${failCount} failed (check console)`);}
 }
 
-// PULL cloud → localStorage (per-table, isolated errors)
+// PULL cloud → localStorage — MERGE strategy (cloud + local, cloud wins by updated_at)
+// Never wipes local if cloud is empty
 async function syncFromCloud(){
   if(!cloudUser||!sb)return;
   const uid=cloudUser.id;
   await syncStep('pull:profile', async ()=>{
     const {data:p,error}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle();
     if(error)throw error;
-    if(p){userProfile={...userProfile,...p};saveProfile_LS();}
+    // Only override local profile fields that exist in cloud (keep local for null cloud fields)
+    if(p){
+      Object.keys(p).forEach(k=>{if(p[k]!==null&&p[k]!==undefined)userProfile[k]=p[k];});
+      saveProfile_LS();
+    }
   });
   await syncStep('pull:food_entries', async ()=>{
     const {data:fe,error}=await sb.from('food_entries').select('*').eq('user_id',uid);
     if(error)throw error;
-    if(fe){const grouped={};fe.forEach(e=>{if(!grouped[e.entry_date])grouped[e.entry_date]=[];grouped[e.entry_date].push({id:e.client_id||e.id,food_name:e.food_name,calories:e.calories,protein:e.protein,carbs:e.carbs,fat:e.fat,amount_g:e.amount_g,meal:e.meal,photo:e.photo,entry_date:e.entry_date,created_at:e.created_at});});allEntries=grouped;lsSave(LS_ENTRIES,allEntries);loadEntries();}
+    if(!fe||fe.length===0)return;  // keep local if cloud empty
+    // Merge: cloud rows by client_id replace/add to local
+    const cloudById=new Map(fe.map(e=>[e.client_id||e.id,e]));
+    const merged={...allEntries};
+    // Index local by client_id for quick lookup
+    const localIds=new Set();
+    Object.values(merged).forEach(arr=>(arr||[]).forEach(e=>localIds.add(e.id)));
+    // Update existing or add new from cloud
+    cloudById.forEach((e,cid)=>{
+      const localObj={id:cid,food_name:e.food_name,calories:e.calories,protein:e.protein,carbs:e.carbs,fat:e.fat,amount_g:e.amount_g,meal:e.meal,photo:e.photo,entry_date:e.entry_date,created_at:e.created_at};
+      if(localIds.has(cid)){
+        // Replace existing
+        Object.entries(merged).forEach(([d,arr])=>{merged[d]=(arr||[]).map(le=>le.id===cid?localObj:le);});
+      }else{
+        // Add new
+        if(!merged[e.entry_date])merged[e.entry_date]=[];
+        merged[e.entry_date].push(localObj);
+      }
+    });
+    allEntries=merged;lsSave(LS_ENTRIES,allEntries);loadEntries();
   });
   await syncStep('pull:weights', async ()=>{
     const {data:wts,error}=await sb.from('weights').select('*').eq('user_id',uid);
     if(error)throw error;
-    if(wts){allWeights={};wts.forEach(w=>allWeights[w.entry_date]=+w.kg);lsSave(LS_WEIGHTS,allWeights);}
+    if(!wts||wts.length===0)return;
+    // Merge by date: cloud wins for matching dates
+    wts.forEach(w=>{allWeights[w.entry_date]=+w.kg;});
+    lsSave(LS_WEIGHTS,allWeights);
   });
   await syncStep('pull:water', async ()=>{
     const {data:wat,error}=await sb.from('water').select('*').eq('user_id',uid);
     if(error)throw error;
-    if(wat){allWater={};wat.forEach(w=>allWater[w.entry_date]=w.cups);lsSave(LS_WATER,allWater);}
+    if(!wat||wat.length===0)return;
+    wat.forEach(w=>{allWater[w.entry_date]=w.cups;});
+    lsSave(LS_WATER,allWater);
   });
   await syncStep('pull:workouts', async ()=>{
     const {data:wk,error}=await sb.from('workouts').select('*').eq('user_id',uid);
     if(error)throw error;
-    if(wk){const grp={};wk.forEach(w=>{if(!grp[w.entry_date])grp[w.entry_date]=[];grp[w.entry_date].push({id:w.client_id||w.id,name:w.name,name_en:w.name_en,met:+w.met,minutes:w.minutes,kcal:w.kcal});});allWorkouts=grp;lsSave(LS_WORKOUTS,allWorkouts);}
+    if(!wk||wk.length===0)return;
+    const localIds=new Set();
+    Object.values(allWorkouts).forEach(arr=>(arr||[]).forEach(w=>localIds.add(w.id)));
+    wk.forEach(w=>{
+      const obj={id:w.client_id||w.id,name:w.name,name_en:w.name_en,met:+w.met,minutes:w.minutes,kcal:w.kcal};
+      if(localIds.has(obj.id)){
+        Object.entries(allWorkouts).forEach(([d,arr])=>{allWorkouts[d]=(arr||[]).map(lw=>lw.id===obj.id?obj:lw);});
+      }else{
+        if(!allWorkouts[w.entry_date])allWorkouts[w.entry_date]=[];
+        allWorkouts[w.entry_date].push(obj);
+      }
+    });
+    lsSave(LS_WORKOUTS,allWorkouts);
   });
   await syncStep('pull:body_measures', async ()=>{
     const {data:bm,error}=await sb.from('body_measures').select('*').eq('user_id',uid);
     if(error)throw error;
-    if(bm){allMeasures={};bm.forEach(m=>allMeasures[m.entry_date]={waist:+m.waist||null,hip:+m.hip||null,chest:+m.chest||null,neck:+m.neck||null});lsSave(LS_MEASURES,allMeasures);}
+    if(!bm||bm.length===0)return;
+    bm.forEach(m=>{allMeasures[m.entry_date]={waist:+m.waist||null,hip:+m.hip||null,chest:+m.chest||null,neck:+m.neck||null};});
+    lsSave(LS_MEASURES,allMeasures);
   });
   await syncStep('pull:favorites', async ()=>{
     const {data:fv,error}=await sb.from('favorites').select('food_name').eq('user_id',uid);
     if(error)throw error;
-    if(fv){favorites=fv.map(f=>f.food_name);lsSave(LS_FAVORITES,favorites);}
+    if(!fv)return;
+    // Union local + cloud (don't remove items only in local)
+    const cloudSet=new Set(fv.map(f=>f.food_name));
+    const localSet=new Set(favorites);
+    const union=[...new Set([...localSet,...cloudSet])];
+    favorites=union;lsSave(LS_FAVORITES,favorites);
   });
   await syncStep('pull:custom_foods', async ()=>{
     const {data:cf,error}=await sb.from('custom_foods').select('*').eq('user_id',uid);
     if(error)throw error;
-    if(cf){customFoods=cf.map(f=>({n:f.name,e:f.name_en,c:f.calories,p:+f.protein,cb:+f.carbs,f:+f.fat,a:f.amount_g,cat:'custom'}));lsSave(LS_CUSTOM,customFoods);}
+    if(!cf||cf.length===0)return;
+    // Merge: cloud rows by name replace/add
+    const localByName=new Map(customFoods.map(f=>[f.n,f]));
+    cf.forEach(f=>{localByName.set(f.name,{n:f.name,e:f.name_en,c:f.calories,p:+f.protein,cb:+f.carbs,f:+f.fat,a:f.amount_g,cat:'custom'});});
+    customFoods=[...localByName.values()];
+    lsSave(LS_CUSTOM,customFoods);
   });
 }
 
@@ -1978,11 +2137,13 @@ function saveWorkout(){
   lsSave(LS_WORKOUTS,allWorkouts);
   closeWorkoutModal();renderToday();
   showToast('เพิ่ม '+ex.n+' (-'+kcal+' kcal) ✓');
+  scheduleAutoSync('workout');
 }
 function delWorkout(id){
   if(!allWorkouts[currentDate])return;
   allWorkouts[currentDate]=allWorkouts[currentDate].filter(w=>w.id!==id);
   lsSave(LS_WORKOUTS,allWorkouts);renderToday();
+  scheduleAutoSync('delWorkout');
 }
 function renderWorkoutsList(){
   const wrap=document.getElementById('workoutsList');if(!wrap)return;
@@ -2145,6 +2306,7 @@ function addWater(delta){
   allWater[currentDate]=next;
   lsSave(LS_WATER,allWater);
   renderWaterWidget();
+  scheduleAutoSync('water');
 }
 function renderWaterWidget(){
   const cur=allWater[currentDate]||0;
@@ -2173,6 +2335,7 @@ function logWeight(){
   document.getElementById('weightInput').value='';
   renderWeightWidget();renderProfileUI();
   showToast('บันทึกน้ำหนัก '+v+' กก. ✓');
+  scheduleAutoSync('weight');
 }
 function renderWeightWidget(){
   const w=allWeights[currentDate];
@@ -2214,6 +2377,7 @@ function saveEditedFood(){
     meal:document.getElementById('eMeal').value};
   saveEntries_LS();renderToday();closeEditModal();
   showToast('บันทึกแก้ไขแล้ว ✓');
+  scheduleAutoSync('editFood');
 }
 
 // ═══ RENDER TODAY ═══
@@ -2448,6 +2612,7 @@ function saveProfile(){
     :(isEn2?`Maintain <strong>${weight}kg</strong> · eat near TDEE <strong>${Math.round(tdee)} kcal</strong>`:`คงน้ำหนัก <strong>${weight}กก.</strong> ทานใกล้เคียง TDEE <strong>${Math.round(tdee)} kcal</strong>`);
   document.getElementById('resultCard').style.display='block';
   renderProfileUI();renderToday();showToast(settings.lang==='en'?'Profile saved ✓':'บันทึกโปรไฟล์แล้ว ✓');
+  scheduleAutoSync('profile');
 }
 const CUTE_AVATARS=['🐱','🐶','🐻','🐼','🦊','🐰','🐯','🦁','🐨','🐭','🐹','🐮','🐷','🐸','🐵','🦄','🐧','🦉','🐺','🦝','🐢','🐬','🦋','🌸'];
 function renderProfileUI(){
@@ -2877,6 +3042,21 @@ function applyTDEEtoProfile(){
 loadUserData();
 applyLang();
 showApp();
+// Initial sync status
+if(sb){
+  sb.auth.getSession().then(({data:{session}})=>{
+    if(session?.user){
+      cloudUser=session.user;
+      setSyncStatus(navigator.onLine?'synced':'offline');
+      renderCloudStatus();
+      // Pull latest on app open
+      setTimeout(()=>{if(navigator.onLine&&!syncing){scheduleAutoSync('app-open');}},1500);
+    }else{
+      setSyncStatus('idle');
+    }
+    startPeriodicSync();
+  }).catch(()=>{setSyncStatus('idle');});
+}
 // Run smart checks shortly after load (so UI is mounted)
 setTimeout(()=>{checkWeeklyRecap();},800);
 setTimeout(()=>{checkSmartGoal();},2400);
