@@ -733,7 +733,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.0</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.1</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
       <div class="card">
@@ -916,7 +916,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.0</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.1</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -933,7 +933,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.7.0';
+const APP_VERSION = '2.7.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2037,28 +2037,45 @@ async function diagnoseSync(){
   const uid=cloudUser.id;
   const tables=['profiles','food_entries','weights','water','workouts','body_measures','favorites','custom_foods'];
   const results=[];
-  let migrationWarning=false;
+  let needMigration=false;
+  let migrationReason='';
   for(const tbl of tables){
     try{
       const q=tbl==='profiles'?sb.from(tbl).select('id',{count:'exact',head:true}).eq('id',uid):sb.from(tbl).select('user_id',{count:'exact',head:true}).eq('user_id',uid);
       const {count,error}=await withTimeout(q,8000,'count '+tbl);
-      if(error){results.push(`${tbl}: ❌ ${error.message}`);if(error.code==='42P10'||/no unique/i.test(error.message))migrationWarning=true;}
+      if(error){results.push(`${tbl}: ❌ ${error.message}`);if(error.code==='42P10'||/no unique/i.test(error.message)){needMigration=true;migrationReason='unique constraint';}}
       else results.push(`${tbl}: ${count??0} rows`);
     }catch(e){results.push(`${tbl}: ❌ ${e.message}`);}
   }
-  // Test upsert constraint
+  // Test upsert constraint + column existence
   try{
     const testId='__diag_'+Date.now();
     const {error}=await sb.from('food_entries').upsert([{user_id:uid,entry_date:'1900-01-01',food_name:'__diag',calories:1,client_id:testId}],{onConflict:'user_id,client_id'});
-    if(error&&(error.code==='42P10'||/no unique/i.test(error.message))){migrationWarning=true;results.push('upsert constraint: ❌ missing');}
-    else if(!error){results.push('upsert constraint: ✓');await sb.from('food_entries').delete().eq('user_id',uid).eq('client_id',testId);}
-    else results.push('upsert constraint: ❓ '+error.message);
-  }catch(e){results.push('upsert constraint: ❌ '+e.message);}
-  // Display result
-  const msg=results.join('\n');
+    if(error){
+      const msg=error.message||'';
+      // PGRST204 (column not found) / 42703 (undefined column) / "Could not find the 'X' column"
+      if(error.code==='PGRST204'||error.code==='42703'||/could not find.*column|column.*does not exist/i.test(msg)){
+        needMigration=true;migrationReason='missing column';
+        const colMatch=msg.match(/'([^']+)'/);
+        results.push('upsert: ❌ missing column '+(colMatch?colMatch[1]:'')+' — run v2.7 migration');
+      }else if(error.code==='42P10'||/no unique|on conflict/i.test(msg)){
+        needMigration=true;migrationReason='unique constraint';
+        results.push('upsert constraint: ❌ missing unique key');
+      }else results.push('upsert: ❓ '+msg);
+    }else{
+      results.push('upsert constraint: ✓');
+      await sb.from('food_entries').delete().eq('user_id',uid).eq('client_id',testId);
+    }
+  }catch(e){results.push('upsert: ❌ '+e.message);}
+  // Display
+  const isEn=settings.lang==='en';
   let prefix='';
-  if(migrationWarning)prefix=(settings.lang==='en'?'⚠️ Migration SQL not run yet! Cloud sync will fail silently.\nRun calpro-database-v2.4-migration.sql in Supabase SQL Editor.\n\n':'⚠️ ยังไม่ได้ run migration SQL! sync จะล้มเหลวเงียบ ๆ\nRun calpro-database-v2.4-migration.sql ใน Supabase SQL Editor\n\n');
-  alert(prefix+msg);
+  if(needMigration){
+    prefix=(isEn
+      ?`⚠️ Database needs migration (${migrationReason})\n\nFix:\n1. Open https://supabase.com/dashboard/project/pbtxshodaeztptegkguy/sql/new\n2. Paste contents of calpro-database-v2.7-migration.sql\n3. Run\n4. Come back and tap "Diagnose" again\n\n`
+      :`⚠️ ต้อง run migration SQL (สาเหตุ: ${migrationReason})\n\nวิธีแก้:\n1. เปิด https://supabase.com/dashboard/project/pbtxshodaeztptegkguy/sql/new\n2. วาง calpro-database-v2.7-migration.sql (มีในโฟลเดอร์โปรเจกต์)\n3. กด Run\n4. กลับมากด "ตรวจสอบ" อีกครั้ง\n\n`);
+  }
+  alert(prefix+results.join('\n'));
 }
 
 // Helper: wrap a Supabase promise with a timeout
