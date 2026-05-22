@@ -10,7 +10,8 @@
   "android": {
     "allowMixedContent": false,
     "captureInput": true,
-    "webContentsDebuggingEnabled": true
+    "webContentsDebuggingEnabled": true,
+    "backgroundColor": "#0f0f14"
   },
   "ios": {
     "contentInset": "always",
@@ -25,8 +26,9 @@
       "showSpinner": false
     },
     "StatusBar": {
-      "style": "dark",
-      "backgroundColor": "#0f0f14"
+      "style": "DARK",
+      "backgroundColor": "#0f0f14",
+      "overlaysWebView": true
     }
   }
 }

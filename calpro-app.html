@@ -28,15 +28,25 @@
   --purple:#b197fc;--text:#e8e8f0;--muted:#6868a0;--r:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Thai',sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top);}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Thai',sans-serif;min-height:100vh;padding-top:max(env(safe-area-inset-top),24px);}
+/* Native APK: when running inside Capacitor, body padding is handled via JS; this is fallback for browsers/PWA */
+html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .app{max-width:480px;margin:0 auto;padding:0 14px 80px;padding-bottom:calc(86px + env(safe-area-inset-bottom));}
 
 /* ── SCREENS ── */
-.screen{display:none;}.screen.active{display:block;}
+.screen{display:none;}
+.screen.active{display:block;animation:scrIn .26s cubic-bezier(.2,.6,.2,1);}
+@keyframes scrIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+/* Reduce motion for users that prefer */
+@media (prefers-reduced-motion: reduce){
+  .screen.active{animation:none;}
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important;}
+}
 
 /* ── BOTTOM NAV ── */
 .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
-.bnt{flex:1;padding:10px 4px 8px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);font-size:.68rem;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s;}
+.bnt{flex:1;padding:10px 4px 8px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);font-size:.68rem;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s,transform .12s;}
+.bnt:active{transform:scale(.92);}
 .bnt svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .bnt.active{color:var(--accent);}
 .icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
@@ -116,7 +126,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .ring-cont{position:relative;width:144px;height:144px;}
 .ring-cont svg{transform:rotate(-90deg);}
 .ring-track{fill:none;stroke:var(--surface2);stroke-width:12;}
-.ring-fill{fill:none;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .6s,stroke .4s;}
+.ring-fill{fill:none;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .85s cubic-bezier(.2,.6,.2,1),stroke .4s;}
 .ring-ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .ring-num{font-size:1.55rem;font-weight:700;}
 .ring-lbl{font-size:.67rem;color:var(--muted);}
@@ -183,8 +193,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .mg{margin-bottom:12px;}
 .mg-hdr{font-size:.73rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:5px;}
 .mg-cal{font-size:.67rem;background:var(--surface2);padding:2px 7px;border-radius:99px;}
-.fi{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;animation:sli .2s ease;}
-@keyframes sli{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fi{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;animation:sli .26s cubic-bezier(.2,.6,.2,1);transition:transform .12s;}
+.fi:active{transform:scale(.98);}
+@keyframes sli{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fi-l{flex:1;}.fi-n{font-size:.83rem;font-weight:500;}.fi-m{font-size:.67rem;color:var(--muted);margin-top:1px;}
 .fi-r{display:flex;align-items:center;gap:8px;}
 .fi-c{font-size:.88rem;font-weight:700;color:var(--accent);}.fi-u{font-size:.6rem;color:var(--muted);}
@@ -238,7 +249,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 .rrow:last-child{border-bottom:none;}
 .rl{font-size:.77rem;color:var(--muted);}.rv{font-size:.83rem;font-weight:600;}
 .gchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.gchip{padding:5px 11px;border-radius:99px;border:1px solid var(--border);font-size:.74rem;cursor:pointer;background:var(--surface2);color:var(--muted);transition:all .15s;font-family:inherit;}
+.gchip{padding:5px 11px;border-radius:99px;border:1px solid var(--border);font-size:.74rem;cursor:pointer;background:var(--surface2);color:var(--muted);transition:all .18s cubic-bezier(.2,.6,.2,1);font-family:inherit;}
+.gchip:active{transform:scale(.94);}
 .gchip.active{border-color:var(--accent);color:var(--accent);background:rgba(255,107,107,.08);}
 .tip{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:9px;padding:10px;margin-top:9px;font-size:.75rem;line-height:1.6;}
 .tip strong{color:var(--accent);}
@@ -675,6 +687,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
           </div>
           <label class="switch"><input type="checkbox" id="recapToggle" onchange="toggleReminder('recap')"><span class="slider"></span></label>
         </div>
+        <button class="btn-sec" onclick="testNotification()" style="width:100%;margin-top:10px;font-size:.82rem" data-i18n="test_notif">🔔 ทดสอบส่งแจ้งเตือน</button>
+        <div id="notifStatus" style="font-size:.7rem;color:var(--muted);margin-top:6px;text-align:center"></div>
+      </div>
+      <div class="card">
+        <h3>🎛️ <span data-i18n="customize_nav">ปรับแต่งแถบล่าง</span></h3>
+        <div style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:10px" data-i18n="customize_nav_sub">เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้</div>
+        <div id="navTabsList"></div>
       </div>
       <div class="card">
         <h3>💧 <span data-i18n="water_goal_cfg">เป้าหมายน้ำดื่ม</span></h3>
@@ -865,25 +884,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
   <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.3.0</span></div>
 </aside>
 
-<!-- BOTTOM NAV -->
-<div class="bnav" id="mainNav">
-  <button class="bnt active" onclick="showPage('today',this)">
-    <svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>
-    <span data-i18n="home">วันนี้</span>
-  </button>
-  <button class="bnt" onclick="showPage('add',this)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-    <span data-i18n="add">เพิ่ม</span>
-  </button>
-  <button class="bnt" onclick="showPage('analysis',this)">
-    <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-7"/></svg>
-    <span data-i18n="analysis">วิเคราะห์</span>
-  </button>
-  <button class="bnt" onclick="showPage('tdee',this)">
-    <svg viewBox="0 0 24 24"><path d="M12 2c0 5-5 7-5 12a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 3 1-3-1-7-1-11z"/></svg>
-    <span>TDEE</span>
-  </button>
-</div>
+<!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
+<div class="bnav" id="mainNav"></div>
 
 <!-- PHOTO VIEWER -->
 <div class="photo-viewer hide" id="photoViewer" onclick="closePhotoViewer()">
@@ -896,7 +898,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Th
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.6.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -967,6 +969,7 @@ const I18N = {
     act_1:'ไม่ค่อยออกกำลังกาย',act_2:'เบา 1–3 วัน/สัปดาห์',act_3:'ปานกลาง 3–5 วัน/สัปดาห์',act_4:'หนัก 6–7 วัน/สัปดาห์',act_5:'หนักมาก / งานใช้แรง',
     tact_1:'นั่งทำงาน · ไม่ออกกำลังกาย (×1.2)',tact_2:'เบา · 1–3 วัน/สัปดาห์ (×1.375)',tact_3:'ปานกลาง · 3–5 วัน/สัปดาห์ (×1.55)',tact_4:'หนัก · 6–7 วัน/สัปดาห์ (×1.725)',tact_5:'หนักมาก · งานใช้แรง (×1.9)',
     name_ph_profile:'ชื่อ',goal_label:'เป้าหมาย',
+    test_notif:'🔔 ทดสอบส่งแจ้งเตือน',customize_nav:'ปรับแต่งแถบล่าง',customize_nav_sub:'เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้',locked:'ติดตั้งไว้',
     account_section:'บัญชี',settings_section:'การตั้งค่า',other_section:'อื่น ๆ',friends_only:'เพื่อน',about:'เกี่ยวกับ',
     appearance:'รูปลักษณ์',compact_mode:'โหมดกะทัดรัด',compact_mode_sub:'ลดช่องว่าง · เห็นข้อมูลได้มากขึ้นต่อหน้า',
     simple_mode:'โหมดใช้งานง่าย',simple_mode_sub:'เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น',
@@ -1026,6 +1029,7 @@ const I18N = {
     act_1:'Sedentary',act_2:'Light · 1–3 days/wk',act_3:'Moderate · 3–5 days/wk',act_4:'Active · 6–7 days/wk',act_5:'Very active / heavy labor',
     tact_1:'Sedentary (×1.2)',tact_2:'Light · 1–3 days/wk (×1.375)',tact_3:'Moderate · 3–5 days/wk (×1.55)',tact_4:'Active · 6–7 days/wk (×1.725)',tact_5:'Very active / heavy labor (×1.9)',
     name_ph_profile:'Name',goal_label:'Goal',
+    test_notif:'🔔 Send test notification',customize_nav:'Customize bottom bar',customize_nav_sub:'Pick up to 5 tabs · "Today" is pinned',locked:'pinned',
     account_section:'Account',settings_section:'Settings',other_section:'Other',friends_only:'Friends',about:'About',
     appearance:'Appearance',compact_mode:'Compact mode',compact_mode_sub:'Tighter spacing · more info per screen',
     simple_mode:'Simple mode',simple_mode_sub:'Focus on calorie ring + meals · larger fonts · hides other widgets',
@@ -1242,7 +1246,19 @@ const EXERCISES = [
 ];
 let currentDate = todayKey();
 let activeCat = 'thai';
-let settings = {theme:'dark', accent:'#ff6b6b', lang:'th', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8};
+let settings = {theme:'dark', accent:'#ff6b6b', lang:'th', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','tdee']};
+
+// Bottom-nav tab catalog — id → { icon SVG path, i18n key }
+const NAV_CATALOG = {
+  today:    {label_key:'home',    svg:'<path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/>'},
+  add:      {label_key:'add',     svg:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'},
+  analysis: {label_key:'analysis',svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-7"/>'},
+  tdee:     {label_key:'tdee',    svg:'<path d="M12 2c0 5-5 7-5 12a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 3 1-3-1-7-1-11z"/>',label_literal:'TDEE'},
+  profile:  {label_key:'profile', svg:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>'},
+  settings: {label_key:'settings',svg:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'},
+  friends:  {label_key:'friends_only',svg:'<circle cx="9" cy="8" r="4"/><path d="M3 21c0-3 3-6 6-6s6 3 6 6"/><circle cx="17" cy="8" r="3"/><path d="M14 13c4-2 7 1 7 5"/>'},
+  about:    {label_key:'about',   svg:'<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>'},
+};
 let tdeeGoalType = 'lose';
 function getWaterGoal(){return settings.waterGoal||8;}
 
@@ -1393,12 +1409,69 @@ function showApp(){
   renderCatBtns(); renderToday(); renderProfileUI();
 }
 
+// ═══ BOTTOM NAV ═══
+function renderBottomNav(){
+  const nav=document.getElementById('mainNav');if(!nav)return;
+  const tabs=(settings.navTabs&&settings.navTabs.length)?settings.navTabs:['today','add','analysis','tdee'];
+  // Always ensure "today" is first
+  const finalTabs=['today',...tabs.filter(t=>t!=='today')].slice(0,5);
+  nav.innerHTML='';
+  finalTabs.forEach(tabId=>{
+    const cfg=NAV_CATALOG[tabId];if(!cfg)return;
+    const btn=document.createElement('button');btn.className='bnt';
+    btn.dataset.tab=tabId;
+    btn.onclick=()=>showPage(tabId,btn);
+    const label=cfg.label_literal||t(cfg.label_key);
+    btn.innerHTML=`<svg viewBox="0 0 24 24">${cfg.svg}</svg><span>${label}</span>`;
+    nav.appendChild(btn);
+  });
+  // Highlight active
+  const activeScreen=document.querySelector('.app .screen.active')?.id?.replace('pg-','')||'today';
+  nav.querySelectorAll('.bnt').forEach(b=>b.classList.toggle('active',b.dataset.tab===activeScreen));
+}
+function renderNavTabsList(){
+  const wrap=document.getElementById('navTabsList');if(!wrap)return;
+  const active=settings.navTabs||['today','add','analysis','tdee'];
+  wrap.innerHTML='';
+  Object.entries(NAV_CATALOG).forEach(([id,cfg])=>{
+    const label=cfg.label_literal||t(cfg.label_key);
+    const isOn=active.includes(id);
+    const isLocked=id==='today';
+    const row=document.createElement('label');
+    row.className='setting-row';
+    row.style.cursor=isLocked?'not-allowed':'pointer';
+    row.innerHTML=
+      `<div class="sr-l" style="display:flex;align-items:center;gap:10px">`+
+        `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0">${cfg.svg}</svg>`+
+        `<div><div class="sr-name">${label}</div>${isLocked?'<div class="sr-sub" data-i18n="locked">ติดตั้งไว้</div>':''}</div>`+
+      `</div>`+
+      `<label class="switch"><input type="checkbox" ${isOn?'checked':''} ${isLocked?'disabled':''} data-navtab="${id}"><span class="slider"></span></label>`;
+    const input=row.querySelector('input');
+    if(input&&!isLocked)input.onchange=()=>toggleNavTab(id);
+    wrap.appendChild(row);
+  });
+}
+function toggleNavTab(id){
+  if(id==='today')return;
+  const tabs=new Set(settings.navTabs||['today','add','analysis','tdee']);
+  if(tabs.has(id))tabs.delete(id);
+  else if(tabs.size<5)tabs.add(id);
+  else{showToast(settings.lang==='en'?'Max 5 tabs':'สูงสุด 5 รายการ');renderNavTabsList();return;}
+  // Preserve order
+  const order=['today','add','analysis','tdee','profile','settings','friends','about'];
+  settings.navTabs=order.filter(t=>tabs.has(t));
+  lsSave(LS_SETTINGS,settings);
+  renderBottomNav();renderNavTabsList();
+}
+
 // ═══ PAGE NAV ═══
 function showPage(id,btn){
   document.querySelectorAll('.app .screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.bnt').forEach(b=>b.classList.remove('active'));
   document.getElementById('pg-'+id).classList.add('active');
   if(btn)btn.classList.add('active');
+  // Also highlight matching bottom-nav button if any
+  document.querySelectorAll('.bnt').forEach(b=>{if(b.dataset.tab===id)b.classList.add('active');});
   if(id==='analysis')renderAnalysis();
   if(id==='tdee')syncTDEEFromProfile();
   if(id==='add')renderQuickList();
@@ -1718,6 +1791,24 @@ async function deleteCloudAccount(){
   }catch(e){showToast('ลบไม่สำเร็จ: '+e.message);}
 }
 
+// Refresh whatever page the user is currently on (after sync, lang change, etc.)
+function refreshActivePage(){
+  const active=document.querySelector('.app .screen.active')?.id||'';
+  if(active==='pg-today')renderToday();
+  else if(active==='pg-add')renderQuickList();
+  else if(active==='pg-analysis')renderAnalysis();
+  else if(active==='pg-tdee')syncTDEEFromProfile();
+  else if(active==='pg-profile')renderProfileUI();
+  else if(active==='pg-settings')renderSettings();
+  else if(active==='pg-friends')renderFriendsCard();
+  // header always
+  const name=userProfile?.display_name||t('you');
+  const hdr=document.getElementById('hdrSub');
+  if(hdr)hdr.textContent=name+' · '+(userProfile?.goal_cal||1800).toLocaleString()+' kcal'+dayUnitShort();
+  // drawer if open
+  if(document.getElementById('drawer')?.classList.contains('open'))renderDrawerHeader();
+}
+
 // Auth state listener
 if(sb){
   sb.auth.onAuthStateChange(async (event,session)=>{
@@ -1727,15 +1818,25 @@ if(sb){
       if(event==='SIGNED_IN'){
         // First-time login on this device: pull then push (merge)
         setSyncStatus('syncing');
-        try{await syncFromCloud();await syncToCloud();setSyncStatus('synced');}
-        catch(e){setSyncStatus('error');}
+        showToast(settings.lang==='en'?'Loading your data...':'กำลังโหลดข้อมูล...',8000);
+        try{
+          await syncFromCloud();
+          await syncToCloud();
+          setSyncStatus('synced');
+          showToast(settings.lang==='en'?'Data loaded ✓':'โหลดข้อมูลแล้ว ✓');
+        }catch(e){
+          setSyncStatus('error');
+          showToast((settings.lang==='en'?'Sync error: ':'ซิงค์ผิดพลาด: ')+e.message,4000);
+        }
+        // CRITICAL: refresh whatever page is currently visible so user sees new data
+        refreshActivePage();
       }
     }else if(event==='SIGNED_OUT'){
       console.log('[auth] SIGNED_OUT');
       setSyncStatus('offline');
     }
     renderCloudStatus();
-    renderToday();
+    refreshActivePage();
   });
 }
 
@@ -1807,7 +1908,10 @@ function renderCloudStatus(){
         `<button class="btn-sec" onclick="manualSync()" ${syncing?'disabled':''}>${syncing?'⏳ ...':'🔄 '+t('sync_now')}</button>`+
         `<button class="btn-sec" onclick="signOutCloud()">${t('sign_out')}</button>`+
       `</div>`+
-      `<button class="btn-danger" onclick="deleteCloudAccount()" style="font-size:.74rem;padding:7px">${t('delete_cloud')}</button>`;
+      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">`+
+        `<button class="btn-sec" onclick="diagnoseSync()" style="font-size:.74rem;padding:7px">🔍 ${settings.lang==='en'?'Diagnose':'ตรวจสอบ'}</button>`+
+        `<button class="btn-danger" onclick="deleteCloudAccount()" style="font-size:.74rem;padding:7px">${t('delete_cloud')}</button>`+
+      `</div>`;
   }
 }
 
@@ -1870,10 +1974,41 @@ async function manualSync(){
     await syncToCloud();
   }catch(e){toastErr=e.message||'sync failed';}
   finally{
-    syncing=false;renderCloudStatus();renderToday();
+    syncing=false;renderCloudStatus();refreshActivePage();
     if(toastErr){showToast((settings.lang==='en'?'Partial sync: ':'ซิงค์ไม่ครบ: ')+toastErr,4000);}
     else{showToast(settings.lang==='en'?'Sync complete ✓':'ซิงค์เสร็จ ✓');}
   }
+}
+
+// Connection diagnostic — reports each table count and whether migration is applied
+async function diagnoseSync(){
+  if(!cloudUser||!sb){showToast('Sign in first');return;}
+  showToast(settings.lang==='en'?'Diagnosing...':'กำลังตรวจ...',3000);
+  const uid=cloudUser.id;
+  const tables=['profiles','food_entries','weights','water','workouts','body_measures','favorites','custom_foods'];
+  const results=[];
+  let migrationWarning=false;
+  for(const tbl of tables){
+    try{
+      const q=tbl==='profiles'?sb.from(tbl).select('id',{count:'exact',head:true}).eq('id',uid):sb.from(tbl).select('user_id',{count:'exact',head:true}).eq('user_id',uid);
+      const {count,error}=await withTimeout(q,8000,'count '+tbl);
+      if(error){results.push(`${tbl}: ❌ ${error.message}`);if(error.code==='42P10'||/no unique/i.test(error.message))migrationWarning=true;}
+      else results.push(`${tbl}: ${count??0} rows`);
+    }catch(e){results.push(`${tbl}: ❌ ${e.message}`);}
+  }
+  // Test upsert constraint
+  try{
+    const testId='__diag_'+Date.now();
+    const {error}=await sb.from('food_entries').upsert([{user_id:uid,entry_date:'1900-01-01',food_name:'__diag',calories:1,client_id:testId}],{onConflict:'user_id,client_id'});
+    if(error&&(error.code==='42P10'||/no unique/i.test(error.message))){migrationWarning=true;results.push('upsert constraint: ❌ missing');}
+    else if(!error){results.push('upsert constraint: ✓');await sb.from('food_entries').delete().eq('user_id',uid).eq('client_id',testId);}
+    else results.push('upsert constraint: ❓ '+error.message);
+  }catch(e){results.push('upsert constraint: ❌ '+e.message);}
+  // Display result
+  const msg=results.join('\n');
+  let prefix='';
+  if(migrationWarning)prefix=(settings.lang==='en'?'⚠️ Migration SQL not run yet! Cloud sync will fail silently.\nRun calpro-database-v2.4-migration.sql in Supabase SQL Editor.\n\n':'⚠️ ยังไม่ได้ run migration SQL! sync จะล้มเหลวเงียบ ๆ\nRun calpro-database-v2.4-migration.sql ใน Supabase SQL Editor\n\n');
+  alert(prefix+msg);
 }
 
 // Helper: wrap a Supabase promise with a timeout
@@ -2687,6 +2822,18 @@ function applyTheme(){
   document.documentElement.dataset.mode=th.mode||'dark';
   document.documentElement.dataset.compact=settings.compact?'1':'0';
   document.documentElement.dataset.simple=settings.simple?'1':'0';
+  // Capacitor native: sync status bar color with current theme
+  try{
+    const cap=window.Capacitor;
+    if(cap?.isNativePlatform?.()){
+      document.documentElement.dataset.native='1';
+      const sb=cap.Plugins?.StatusBar;
+      if(sb){
+        sb.setBackgroundColor({color:th.bg}).catch(()=>{});
+        sb.setStyle({style:th.mode==='light'?'LIGHT':'DARK'}).catch(()=>{});
+      }
+    }
+  }catch(e){}
   const mi=document.getElementById('modeIcon');
   if(mi){
     mi.innerHTML=th.mode==='light'
@@ -2774,6 +2921,40 @@ function changeMealTime(meal,hr){
   settings.mealTimes[meal]=+hr;
   lsSave(LS_SETTINGS,settings);
 }
+// ═══ NOTIFICATION TEST ═══
+async function testNotification(){
+  const status=document.getElementById('notifStatus');
+  const isEn=settings.lang==='en';
+  if(!('Notification' in window)){
+    status.textContent=isEn?'❌ Browser does not support notifications':'❌ เบราว์เซอร์ไม่รองรับ notifications';
+    return;
+  }
+  let perm=Notification.permission;
+  if(perm==='default'){
+    status.textContent=isEn?'Requesting permission...':'กำลังขออนุญาต...';
+    perm=await Notification.requestPermission();
+  }
+  if(perm==='denied'){
+    status.textContent=isEn?'❌ Permission denied — enable in browser settings':'❌ ถูกปฏิเสธ — เปิดใน Settings เบราว์เซอร์';
+    return;
+  }
+  if(perm==='granted'){
+    try{
+      const n=new Notification('CalPro+ 🔔',{
+        body:isEn?'Notifications are working! ✓':'การแจ้งเตือนทำงานปกติ ✓',
+        icon:'icon-192.png',
+        badge:'icon-192.png',
+        tag:'calpro-test',
+        requireInteraction:false,
+      });
+      n.onclick=()=>{window.focus();n.close();};
+      setTimeout(()=>n.close(),5000);
+      status.textContent=isEn?'✓ Sent! Check your notification area':'✓ ส่งแล้ว! ดูที่แถบแจ้งเตือน';
+    }catch(e){
+      status.textContent='❌ '+e.message;
+    }
+  }
+}
 function renderSettings(){
   // Themes
   const tg=document.getElementById('themeGrid');if(tg){tg.innerHTML='';
@@ -2798,6 +2979,7 @@ function renderSettings(){
   const setCk=(id,val)=>{const el=document.getElementById(id);if(el)el.checked=!!val;};
   setCk('compactToggle',settings.compact);
   setCk('simpleToggle',settings.simple);
+  renderNavTabsList();
   setCk('mealRemToggle',settings.mealReminders!==false);
   setCk('smartGoalToggle',settings.smartGoal!==false);
   setCk('recapToggle',settings.weeklyRecap!==false);
@@ -2829,13 +3011,8 @@ function setLang(lang){
 }
 function applyLang(){
   document.documentElement.lang=settings.lang||'th';
-  // Nav buttons — update only the label span, preserve SVG icon
-  const navs=document.querySelectorAll('.bnt');
-  const navKeys=['home','add','analysis','tdee'];
-  navs.forEach((b,i)=>{
-    const lbl=b.querySelector('span:not(.ico)')||b.querySelector('span');
-    if(lbl&&navKeys[i])lbl.textContent=t(navKeys[i]);
-  });
+  // Nav buttons — re-render to pick up new labels
+  if(typeof renderBottomNav==='function')renderBottomNav();
   // Static elements via data-i18n
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k=el.dataset.i18n;
@@ -3041,6 +3218,7 @@ function applyTDEEtoProfile(){
 // ═══ INIT ═══
 loadUserData();
 applyLang();
+renderBottomNav();
 showApp();
 // Initial sync status
 if(sb){
