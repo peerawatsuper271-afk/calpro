@@ -1,6 +1,6 @@
 {
   "name": "calpro-plus",
-  "version": "2.5.0",
+  "version": "2.7.0",
   "description": "CalPro+ — calorie tracking + TDEE calculator (Thai/English PWA wrapped via Capacitor)",
   "private": true,
   "scripts": {
@@ -9,18 +9,21 @@
     "cap:add-android": "cap add android",
     "cap:add-ios": "cap add ios",
     "cap:sync": "cap sync",
+    "assets:generate": "capacitor-assets generate --android",
     "build:android-debug": "npm run prepare:www && cap sync android && cd android && ./gradlew assembleDebug",
     "build:android-release": "npm run prepare:www && cap sync android && cd android && ./gradlew bundleRelease",
     "build:ios": "npm run prepare:www && cap sync ios"
-  },
-  "devDependencies": {
-    "@capacitor/cli": "^6.1.2"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",
     "@capacitor/core": "^6.1.2",
     "@capacitor/ios": "^6.1.2",
     "@capacitor/status-bar": "^6.0.2",
-    "@capacitor/splash-screen": "^6.0.2"
+    "@capacitor/splash-screen": "^6.0.2",
+    "@capacitor/local-notifications": "^6.1.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/assets": "^3.0.5"
   }
 }

@@ -54,6 +54,20 @@ jobs:
             npx cap add android
           fi
 
+      - name: Prepare resources/ for capacitor-assets
+        run: |
+          mkdir -p resources
+          # Use existing icon-512 as source (resize would be ideal but icon-512 works)
+          cp icon-512.png resources/icon.png
+          # Splash: black bg with centered icon (capacitor-assets will adapt)
+          cp icon-512.png resources/splash.png || true
+          cp icon-512.png resources/splash-dark.png || true
+          ls -lh resources/
+
+      - name: Generate native icons + splash from resources/
+        run: |
+          npx capacitor-assets generate --android --iconBackgroundColor "#0f0f14" --iconBackgroundColorDark "#0f0f14" --splashBackgroundColor "#0f0f14" --splashBackgroundColorDark "#0f0f14" || echo "[warn] asset generation had issues but continuing"
+
       - name: Patch Android app config (versionCode + label)
         run: |
           # Sync versionName from APP_VERSION constant in calpro-app.html
