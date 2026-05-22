@@ -4,6 +4,23 @@
 .claude/settings.local.json
 .claude/test-listen.ps1
 
+# Capacitor / Node
+node_modules/
+www/
+.capacitor/
+
+# Native build outputs (regenerated per build; we don't commit them)
+# Capacitor's `npx cap add android/ios` regenerates these locally;
+# in CI we let setup-java + setup-android run them fresh.
+android/
+ios/
+
+# Keystores (NEVER commit)
+*.keystore
+*.jks
+*.p12
+keystore.properties
+
 # OS
 Thumbs.db
 .DS_Store
