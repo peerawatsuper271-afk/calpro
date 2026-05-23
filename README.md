@@ -67,6 +67,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.8.2** *(web only · BETA)* — **ระบบอัปเดตในแอป**: Modal "มีเวอร์ชันใหม่" (อัปเดตเลย / ไว้ทีหลัง) เมื่อ Service Worker เจอเวอร์ชันใหม่ · "✨ มีอะไรใหม่" popup อัตโนมัติหลังอัปเดตสำเร็จ แสดงประวัติย้อนหลังครบทุกเวอร์ชันที่ข้าม · ปุ่ม **"🔄 ตรวจหาเวอร์ชันใหม่"** + **"✨ มีอะไรใหม่"** ในหน้าเกี่ยวกับ · CHANGELOG embedded ในแอป (TH/EN)
 - **v2.8.1** *(web only · BETA)* — **ปรับชุดธีม**: ลบ forest/warm/ocean ออก เพิ่ม **rose / sky / violet** ที่ทำสีตามสีหลัก (ยังคง 8 ธีมรวม: 5 dark + 3 light) · **Feedback modal** ใน drawer → อื่น ๆ → "ส่งคำแนะนำ" → เปิด mailto draft ไปที่ผู้พัฒนา (peerawat_pee123@hotmail.co.th) แนบเวอร์ชันแอป + UA อัตโนมัติ · README อัปเดตประวัติเวอร์ชั่นครบจนถึงปัจจุบัน · backward-compat: legacy theme `forest/warm/ocean` migrate อัตโนมัติเป็น sky/rose/sky
 - **v2.8.0** *(web only · BETA)* — **Collapsible health-tips card** (state saved per user) · **Portion picker modal** เลือกจำนวนเท่า 0.5×–2× + custom + live preview macros/kcal/grams · **Font picker** Sarabun/Prompt/Kanit/Mitr/IBM Plex Sans Thai (lazy Google Fonts) · **Friends BETA badge** ใน drawer + bottom nav · CSS variable `--app-font` รองรับ font override
 - **v2.7.9** *(web only · BETA)* — **คำแนะนำสุขภาพรายวัน** 10 rules วิเคราะห์ net kcal · โปรตีน · macro split · น้ำ · ข้ามมื้อเช้า · มื้อเย็นหนัก · ของว่าง · ความหลากหลาย · ของหวาน · เสนอ workout · สีขอบ severity (red/amber/blue/green) · **หน้า "วิธีใช้งาน"** 9 sections ครบ TH/EN ใน drawer → อื่น ๆ

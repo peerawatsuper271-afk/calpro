@@ -760,8 +760,11 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.8.1 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.8.2 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
+        <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
+        <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
+        <button class="btn-sec" onclick="showWhatsNew(['__current__'])" style="margin-top:10px;width:100%" data-i18n="whats_new_title">✨ มีอะไรใหม่</button>
       </div>
       <div class="card">
         <h3 data-i18n="about_links">ลิงก์</h3>
@@ -855,6 +858,31 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <button class="btn-sec" onclick="addWater(-1);renderQuickWater()" style="font-size:1.2rem">−</button>
       <button class="btn" onclick="addWater(1);renderQuickWater()" style="font-size:1.2rem">+</button>
     </div>
+  </div>
+</div>
+
+<!-- UPDATE AVAILABLE MODAL — shown when SW detects a new version -->
+<div class="modal-bg hide" id="updateModal">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:2.6rem;margin-bottom:6px">🔄</div>
+    <h3 style="margin:0 0 6px 0" data-i18n="update_title">มีเวอร์ชันใหม่</h3>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.5" data-i18n="update_body">CalPro+ เวอร์ชันใหม่พร้อมติดตั้งแล้ว · รีสตาร์ทแอปเพื่ออัปเดตทันที?</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn-sec" onclick="dismissUpdate()" data-i18n="update_later">ไว้ทีหลัง</button>
+      <button class="btn" onclick="applyUpdate()" data-i18n="update_now">อัปเดตเลย</button>
+    </div>
+  </div>
+</div>
+
+<!-- WHAT'S NEW MODAL — shown once after the user updates -->
+<div class="modal-bg hide" id="whatsNewModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 data-i18n="whats_new_title">✨ มีอะไรใหม่</h3>
+      <button class="mc-close" onclick="closeWhatsNew()">✕</button>
+    </div>
+    <div id="whatsNewBody" style="font-size:.84rem;line-height:1.7;max-height:55vh;overflow-y:auto"></div>
+    <button class="btn" style="margin-top:10px" onclick="closeWhatsNew()" data-i18n="got_it">รับทราบ</button>
   </div>
 </div>
 
@@ -988,7 +1016,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.8.1 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.8.2 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1005,7 +1033,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.8.1';
+const APP_VERSION = '2.8.2';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1091,6 +1119,8 @@ const I18N = {
     help_title:'วิธีใช้งาน',health_tips:'คำแนะนำสุขภาพวันนี้',
     portion_label:'จำนวน (เท่า)',portion_amount:'ปริมาณ',font_setting:'ฟอนต์',font_system:'ค่าเริ่มต้น',
     feedback:'ส่งคำแนะนำ',feedback_sub:'แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา',feedback_subject:'หัวเรื่อง',feedback_body:'ข้อความ',feedback_send:'📧 ส่งทางอีเมล',feedback_subj_ph:'เช่น “อยากให้เพิ่มเมนูใหม่...”',feedback_body_ph:'พิมพ์ข้อความที่นี่...',
+    update_title:'มีเวอร์ชันใหม่',update_body:'CalPro+ เวอร์ชันใหม่พร้อมติดตั้งแล้ว · รีสตาร์ทแอปเพื่ออัปเดตทันที?',update_later:'ไว้ทีหลัง',update_now:'อัปเดตเลย',
+    whats_new_title:'✨ มีอะไรใหม่',check_updates:'🔄 ตรวจหาเวอร์ชันใหม่',check_updates_sub:'ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง',checking_updates:'กำลังตรวจสอบ...',latest_version:'คุณใช้เวอร์ชันล่าสุดอยู่แล้ว ✓',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1155,6 +1185,8 @@ const I18N = {
     help_title:'How to use',health_tips:'Health insights today',
     portion_label:'Quantity (×)',portion_amount:'Amount',font_setting:'Font',font_system:'System default',
     feedback:'Send feedback',feedback_sub:'Share suggestions/bugs with the developer',feedback_subject:'Subject',feedback_body:'Message',feedback_send:'📧 Send via email',feedback_subj_ph:'e.g. "Please add more foods..."',feedback_body_ph:'Type your message here...',
+    update_title:'New version available',update_body:'A new version of CalPro+ is ready · Restart now to apply?',update_later:'Later',update_now:'Update now',
+    whats_new_title:'✨ What\'s new',check_updates:'🔄 Check for updates',check_updates_sub:'See if a new CalPro+ version is available',checking_updates:'Checking...',latest_version:'You\'re on the latest version ✓',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -4253,26 +4285,227 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('sw.js').then(reg=>{
+      // If a new SW was already installed before this page loaded, prompt straight away
+      if(reg.waiting&&navigator.serviceWorker.controller){
+        showUpdateModal(reg.waiting);
+      }
       // Detect new worker installing
       reg.addEventListener('updatefound',()=>{
         const nw=reg.installing;if(!nw)return;
         nw.addEventListener('statechange',()=>{
           if(nw.state==='installed'&&navigator.serviceWorker.controller){
-            // New version ready · prompt user to refresh
-            showUpdateToast(nw);
+            // New version ready · prompt user with the update modal
+            showUpdateModal(nw);
           }
         });
       });
     }).catch(()=>{});
   });
 }
-function showUpdateToast(worker){
-  const t=document.getElementById('toast');
-  t.innerHTML='✨ มีเวอร์ชั่นใหม่ · <span style="color:var(--accent);text-decoration:underline">กดเพื่อรีเฟรช</span>';
-  t.style.cursor='pointer';
-  t.classList.add('show');
-  t.onclick=()=>{worker.postMessage({type:'SKIP_WAITING'});t.classList.remove('show');};
-  // Stays on screen until user clicks (no auto-dismiss)
+// Show changelog popup if user just upgraded
+setTimeout(checkWhatsNew,1200);
+// ═══ APP UPDATE FLOW ═══
+// Three pieces work together:
+//   1. SW 'updatefound' → showUpdateModal(worker) — user picks update-now / later
+//   2. checkForUpdates() — manual trigger from About page
+//   3. checkWhatsNew() — on every load compare lastSeenVersion vs APP_VERSION;
+//                        if user just upgraded, pop CHANGELOG entries
+
+const CHANGELOG={
+  '2.8.2':{
+    th:[
+      '🔔 Modal แจ้งเตือนเวอร์ชันใหม่ — เลือก "อัปเดตเลย" หรือ "ไว้ทีหลัง"',
+      '✨ Auto-popup "มีอะไรใหม่" หลังอัปเดต — แสดงรายละเอียดที่เพิ่มเข้ามา',
+      '🔄 ปุ่ม "ตรวจหาเวอร์ชันใหม่" ในหน้าเกี่ยวกับ + ปุ่ม "มีอะไรใหม่" สำหรับเปิดดูซ้ำ',
+      'ระบบ migrate จากเวอร์ชันเก่าๆ — รวมข้ามหลายเวอร์ชันก็ยังแสดง changelog ครบ',
+    ],
+    en:[
+      '🔔 Update prompt modal — choose "Update now" or "Later"',
+      '✨ Auto "What\'s new" popup after every upgrade',
+      '🔄 "Check for updates" button on About page + "What\'s new" replay button',
+      'Migration: spans multiple skipped versions correctly',
+    ],
+  },
+  '2.8.1':{
+    th:[
+      '🎨 ปรับชุดธีม: ลบ ป่า / อุ่น / มหาสมุทร — เพิ่ม กุหลาบ / ฟ้า / ม่วง',
+      '📨 เพิ่ม "ส่งคำแนะนำ" ใน drawer → อื่น ๆ (mailto + แนบเวอร์ชันแอป + UA)',
+      'README ใน GitHub อัปเดตประวัติเวอร์ชันครบจนถึงปัจจุบัน',
+    ],
+    en:[
+      '🎨 Theme refresh: dropped forest/warm/ocean, added rose/sky/violet',
+      '📨 New "Send feedback" in drawer → Other (auto-includes app version + UA)',
+      'GitHub README catch-up to current version',
+    ],
+  },
+  '2.8.0':{
+    th:[
+      '💡 การ์ดคำแนะนำสุขภาพย่อ/ขยายได้ — บันทึก state ไว้',
+      '🍽️ Portion picker เลือกจำนวนเท่า (0.5×–2× + custom) ก่อนเพิ่มอาหาร',
+      '🔤 เลือกฟอนต์ได้ในตั้งค่า: System / Sarabun / Prompt / Kanit / Mitr / IBM Plex',
+      '🏷️ Badge "BETA" หลังคำว่า "เพื่อน" ทั้ง drawer + bottom nav',
+    ],
+    en:[
+      '💡 Collapsible health-tips card (state remembered)',
+      '🍽️ Portion picker (0.5×–2× quick + custom) when adding food',
+      '🔤 Font picker in Settings: System / Sarabun / Prompt / Kanit / Mitr / IBM Plex',
+      '🏷️ "BETA" badge after Friends in drawer + bottom nav',
+    ],
+  },
+  '2.7.9':{
+    th:[
+      '💡 คำแนะนำสุขภาพรายวันบนหน้าวันนี้ — 10 rules วิเคราะห์อาหาร/น้ำ/ออกกำลังกาย',
+      '📖 หน้า "วิธีใช้งาน" ใน drawer → อื่น ๆ (9 sections ครอบคลุมทุกฟีเจอร์)',
+    ],
+    en:[
+      '💡 Daily health-tips card on Today — 10 rules over food/water/workouts',
+      '📖 New "How to use" page in drawer → Other (9 sections)',
+    ],
+  },
+  '2.7.8':{
+    th:[
+      '📈 ตัดฟีเจอร์บันทึกน้ำหนักรายวันออก — แทนด้วย **กราฟแนวโน้มน้ำหนักคาดการณ์** จากแคลอรี่ + workout',
+      'พยากรณ์ 14 วันข้างหน้า + ETA "ถึงเป้าใน ~N สัปดาห์"',
+    ],
+    en:[
+      '📈 Removed daily weight log — replaced with **projected weight chart** computed from calories + workouts',
+      '14-day forecast + "Reach goal in ~N weeks" ETA',
+    ],
+  },
+  '2.7.7':{
+    th:[
+      '💧 แท่งน้ำในหน้าวิเคราะห์เติมสีฟ้าตามจำนวนแก้ว',
+      '🏆 แชร์ความสำเร็จเป็นรูปภาพ 1080×1350',
+      'ปุ่มแชร์สรุปวันนี้ยังแสดงตอน Simple Mode',
+    ],
+    en:[
+      '💧 Water bars fill blue based on cups drunk',
+      '🏆 Share achievements as 1080×1350 image card',
+      'Daily share button visible in Simple Mode',
+    ],
+  },
+  '2.7.6':{
+    th:[
+      '🏋️ Workout ลดเลขกลางวง — ring = net (อาหาร − ออกกำลังกาย)',
+      'Drawer "เครื่องมือ" แสดงเฉพาะตอน Simple Mode เปิด',
+      'แก้บั๊กเลขเวอร์ชันไม่อัปเดต (root cause: element appVer ไม่มีจริง)',
+    ],
+    en:[
+      '🏋️ Workout now reduces ring center number — ring shows net (food − workout)',
+      'Drawer "Tools" only shown when Simple Mode is ON',
+      'Fixed version-display bug (root cause: missing appVer element)',
+    ],
+  },
+};
+
+function verCmp(a,b){
+  const aa=(a||'0').split('.').map(n=>parseInt(n)||0);
+  const bb=(b||'0').split('.').map(n=>parseInt(n)||0);
+  for(let i=0;i<3;i++){if(aa[i]!==bb[i])return aa[i]-bb[i];}
+  return 0;
+}
+
+// SW update flow ---------------------------------------------------
+let _pendingWorker=null;
+function showUpdateModal(worker){
+  _pendingWorker=worker;
+  document.getElementById('updateModal').classList.remove('hide');
+}
+function applyUpdate(){
+  document.getElementById('updateModal').classList.add('hide');
+  if(_pendingWorker){
+    // SW calls skipWaiting → controllerchange listener reloads the page
+    _pendingWorker.postMessage({type:'SKIP_WAITING'});
+  }else{
+    location.reload();
+  }
+}
+function dismissUpdate(){
+  document.getElementById('updateModal').classList.add('hide');
+  // Remember user said "later" — don't nag until next session
+  _pendingWorker=null;
+}
+async function checkForUpdates(){
+  const isEn=settings.lang==='en';
+  if(!('serviceWorker' in navigator)){
+    showToast(isEn?'Not supported in this browser':'เบราว์เซอร์ไม่รองรับ');return;
+  }
+  try{
+    const reg=await navigator.serviceWorker.getRegistration();
+    if(!reg){
+      // Register on-demand so this still works on a fresh install
+      await navigator.serviceWorker.register('sw.js');
+      showToast(isEn?'Registered · refresh to use':'ลงทะเบียนแล้ว · รีเฟรชเพื่อใช้งาน');return;
+    }
+    showToast(t('checking_updates'),2000);
+    await reg.update();
+    // After update(), the browser populates installing / waiting if there's a new version
+    if(reg.waiting){
+      setTimeout(()=>showUpdateModal(reg.waiting),400);
+    }else if(reg.installing){
+      const inst=reg.installing;
+      inst.addEventListener('statechange',()=>{
+        if(inst.state==='installed'&&navigator.serviceWorker.controller){
+          showUpdateModal(inst);
+        }else if(inst.state==='installed'&&!navigator.serviceWorker.controller){
+          // First install — no current controller to upgrade from
+          showToast(t('latest_version'));
+        }
+      });
+    }else{
+      setTimeout(()=>showToast(t('latest_version')),500);
+    }
+  }catch(e){
+    showToast((isEn?'Check failed: ':'ตรวจสอบไม่สำเร็จ: ')+(e.message||e));
+  }
+}
+
+// What's-new flow --------------------------------------------------
+function showWhatsNew(versions){
+  const isEn=settings.lang==='en';
+  const body=document.getElementById('whatsNewBody');
+  // Special sentinel: '__current__' → show entries for current version (replay)
+  let entries;
+  if(versions.length===1&&versions[0]==='__current__'){
+    entries=[APP_VERSION];
+  }else{
+    entries=versions;
+  }
+  // Filter to versions that actually exist in CHANGELOG
+  entries=entries.filter(v=>CHANGELOG[v]);
+  if(!entries.length){
+    body.innerHTML=`<div style="text-align:center;color:var(--muted);padding:16px 0">${isEn?'No changelog available for this version.':'ไม่มีรายละเอียดสำหรับเวอร์ชันนี้'}</div>`;
+  }else{
+    body.innerHTML=entries.map(v=>{
+      const list=CHANGELOG[v][isEn?'en':'th']||CHANGELOG[v].th||[];
+      return `<div style="margin-bottom:14px">`+
+        `<div style="font-weight:700;color:var(--accent);margin-bottom:6px">v${v}</div>`+
+        `<ul style="margin:0;padding-left:18px;color:var(--muted)">`+
+        list.map(item=>`<li style="margin-bottom:4px">${item}</li>`).join('')+
+        `</ul>`+
+      `</div>`;
+    }).join('');
+  }
+  document.getElementById('whatsNewModal').classList.remove('hide');
+}
+function closeWhatsNew(){document.getElementById('whatsNewModal').classList.add('hide');}
+
+function checkWhatsNew(){
+  const last=lsLoad('calpro_last_seen_version',null);
+  if(!last){
+    // Fresh install or pre-tracking install: remember current but don't nag
+    lsSave('calpro_last_seen_version',APP_VERSION);return;
+  }
+  if(last===APP_VERSION)return;
+  // Show entries for every version greater than 'last' and ≤ current
+  const toShow=Object.keys(CHANGELOG)
+    .filter(v=>verCmp(v,last)>0&&verCmp(v,APP_VERSION)<=0)
+    .sort((a,b)=>verCmp(b,a));   // newest first
+  if(toShow.length){
+    // Slight delay so it lands after initial render
+    setTimeout(()=>showWhatsNew(toShow),900);
+  }
+  lsSave('calpro_last_seen_version',APP_VERSION);
 }
 </script>
 </body>
