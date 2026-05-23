@@ -789,7 +789,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.16.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.17.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -887,6 +887,18 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <button class="btn-sec" onclick="addWater(-1);renderQuickWater()" style="font-size:1.2rem">−</button>
       <button class="btn" onclick="addWater(1);renderQuickWater()" style="font-size:1.2rem">+</button>
     </div>
+  </div>
+</div>
+
+<!-- ADD FRIEND MODAL — search by email or display name -->
+<div class="modal-bg hide" id="addFriendModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-hdr"><h3 data-i18n="add_friend_title">เพิ่มเพื่อน</h3><button class="mc-close" onclick="closeAddFriend()" aria-label="Close">✕</button></div>
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="add_friend_sub">ค้นหาด้วยอีเมลหรือชื่อที่แสดง</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input type="text" id="frSearchInput" placeholder="aa@example.com / John" oninput="renderFriendSearch(this.value)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;outline:none">
+    </div>
+    <div id="frSearchResults" style="max-height:280px;overflow-y:auto"></div>
   </div>
 </div>
 
@@ -1158,7 +1170,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.16.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.17.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1175,7 +1187,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.16.0';
+const APP_VERSION = '2.17.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1291,6 +1303,7 @@ const I18N = {
     ob_goal_title:'เป้าหมายของคุณ',ob_goal_sub:'เลือกเป้าหมายเพื่อคำนวณแคลอรี่/วัน',
     ob_done_title:'พร้อมใช้งานแล้ว!',ob_done_tip:'เริ่มจากแท็บ <b>+ เพิ่ม</b> ด้านล่าง → ค้นหาอาหาร → กดเลือก → ตั้งจำนวนเท่า → เพิ่ม',
     ob_back:'ย้อนกลับ',ob_next:'ถัดไป',ob_start:'เริ่มใช้งาน',ob_skip:'ข้ามไปก่อน',ob_fillall:'กรอกข้อมูลให้ครบก่อน',
+    add_friend_title:'เพิ่มเพื่อน',add_friend_sub:'ค้นหาด้วยอีเมลหรือชื่อที่แสดง',fr_no_results:'ไม่พบผู้ใช้',fr_search_short:'พิมพ์อย่างน้อย 2 ตัวอักษร',fr_already:'มีในรายชื่อเพื่อนแล้ว',fr_self:'นี่คือคุณ',fr_added:'เพิ่ม %n เป็นเพื่อนแล้ว ✓',fr_removed:'ลบ %n ออกจากเพื่อนแล้ว',fr_confirm_remove:'ลบ "%n" ออกจากเพื่อน?',
     scan_barcode:'📷 สแกนบาร์โค้ด',barcode_hint:'หันกล้องไปที่บาร์โค้ดของสินค้า · ข้อมูลจากฐาน OpenFoodFacts',barcode_or_manual:'หรือพิมพ์รหัสเอง',barcode_lookup:'ค้นหา',barcode_starting:'กำลังเปิดกล้อง...',barcode_scanning:'ส่องบาร์โค้ดในกรอบ',barcode_no_camera:'ไม่สามารถเปิดกล้องได้ · ใช้การพิมพ์รหัสแทน',barcode_lib_fail:'โหลดตัวสแกนไม่สำเร็จ · ลองอีกครั้งเมื่อมีอินเทอร์เน็ต',barcode_found:'พบ',barcode_notfound:'ไม่พบสินค้านี้ในฐาน',barcode_lookup_err:'ค้นหาไม่สำเร็จ · ตรวจอินเทอร์เน็ตและลองใหม่',barcode_invalid:'กรอกรหัสบาร์โค้ดให้ถูกต้อง',
     recipe_title:'🍲 สร้างสูตรอาหาร',recipe_sub:'รวมหลายส่วนผสมเป็นเมนูเดียว · บันทึกลงไลบรารีเพื่อใช้ซ้ำได้',recipe_open:'+ สร้างสูตรใหม่',
     recipe_name:'ชื่อสูตร',recipe_name_ph:'เช่น ผัดไทยโฮมเมด',recipe_servings:'จำนวนเสิร์ฟ',recipe_ingredients:'ส่วนผสม',recipe_save:'💾 บันทึกสูตร',recipe_no_ing:'ยังไม่มีส่วนผสม · ค้นหาด้านบนเพื่อเพิ่ม',recipe_per_serving:'ต่อ 1 เสิร์ฟ',recipe_total:'รวมทั้งหมด',recipe_need_name:'กรุณาตั้งชื่อสูตร',recipe_need_ing:'กรุณาเพิ่มส่วนผสม',recipe_saved:'บันทึกสูตรลงไลบรารีแล้ว ✓',
@@ -1367,6 +1380,7 @@ const I18N = {
     ob_goal_title:'Your goal',ob_goal_sub:'Pick a goal to calculate your daily calorie target',
     ob_done_title:'You\'re all set!',ob_done_tip:'Start from the <b>+ Add</b> tab below → search a food → tap → pick a portion → add',
     ob_back:'Back',ob_next:'Next',ob_start:'Start using',ob_skip:'Skip for now',ob_fillall:'Please fill in all fields first',
+    add_friend_title:'Add friend',add_friend_sub:'Search by email or display name',fr_no_results:'No users found',fr_search_short:'Type at least 2 characters',fr_already:'Already in your friends list',fr_self:'That\'s you',fr_added:'Added %n as a friend ✓',fr_removed:'Removed %n from friends',fr_confirm_remove:'Remove "%n" from friends?',
     scan_barcode:'📷 Scan barcode',barcode_hint:'Aim the camera at a product\'s barcode · data from OpenFoodFacts',barcode_or_manual:'Or enter the code manually',barcode_lookup:'Lookup',barcode_starting:'Starting camera...',barcode_scanning:'Hold a barcode inside the frame',barcode_no_camera:'Camera unavailable · use manual entry',barcode_lib_fail:'Scanner library failed to load · retry when online',barcode_found:'Found',barcode_notfound:'Product not found in database',barcode_lookup_err:'Lookup failed · check internet and retry',barcode_invalid:'Enter a valid barcode',
     recipe_title:'🍲 Create recipe',recipe_sub:'Combine multiple ingredients into one item · saves to your library for reuse',recipe_open:'+ Create new recipe',
     recipe_name:'Recipe name',recipe_name_ph:'e.g. Homemade Pad Thai',recipe_servings:'Servings',recipe_ingredients:'Ingredients',recipe_save:'💾 Save recipe',recipe_no_ing:'No ingredients yet · search above to add',recipe_per_serving:'per serving',recipe_total:'Total',recipe_need_name:'Please name the recipe',recipe_need_ing:'Please add ingredients',recipe_saved:'Recipe saved to library ✓',
@@ -2577,25 +2591,90 @@ async function renderFriendsCard(){
       const isMe=u.id===cloudUser.id;
       const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
       const meTag=settings.lang==='en'?' (You)':' (คุณ)';
+      const safeName=escapeHtml(u.display_name||'?');
+      const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px">✕</button>`;
       html+=`<div class="lb-item${isMe?' me':''}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
         `<div style="width:22px;text-align:center;font-weight:700">${rank}</div>`+
         av+
-        `<div style="flex:1"><div style="font-size:.84rem;font-weight:600">${u.display_name||'?'}${isMe?meTag:''}</div><div style="font-size:.68rem;color:var(--muted)">${t('streak')} ${u.streak} · ${t('on_track')} ${u.onTrack} ${t('days')}</div></div>`+
-        `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div></div>`;
+        `<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${safeName}${isMe?meTag:''}</div><div style="font-size:.68rem;color:var(--muted)">${t('streak')} ${u.streak} · ${t('on_track')} ${u.onTrack} ${t('days')}</div></div>`+
+        `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div>${removeBtn}</div>`;
     });
     body.innerHTML=html+`<button class="btn-sec" onclick="addFriendPrompt()" style="width:100%;margin-top:6px">${t('add_friend')}</button>`;
+    // Wire up the ✕ remove buttons on each non-self leaderboard row
+    body.querySelectorAll('button[data-frid]').forEach(b=>{
+      b.onclick=()=>removeFriend(b.dataset.frid,b.dataset.frname);
+    });
   }catch(e){body.innerHTML=`<div class="empty" style="padding:10px 0">โหลดไม่สำเร็จ: ${e.message}</div>`;}
 }
+// Open the dedicated Add Friend modal (replaces the old prompt())
+let _frCurrentIds=new Set();   // cached friend ids for "already" detection
 async function addFriendPrompt(){
-  const email=prompt(settings.lang==='en'?'Friend email:':'อีเมลของเพื่อน:');
-  if(!email)return;
-  const {data:prof,error}=await sb.from('profiles').select('id,display_name').eq('email',email.trim()).maybeSingle();
-  if(error||!prof){showToast(settings.lang==='en'?'User not found':'ไม่พบผู้ใช้');return;}
-  if(prof.id===cloudUser.id){showToast(settings.lang==='en'?'Cannot add yourself':'เพิ่มตัวเองไม่ได้');return;}
-  const {error:e2}=await sb.from('friends').insert({user_id:cloudUser.id,friend_id:prof.id});
-  if(e2){showToast(e2.message);return;}
-  showToast((settings.lang==='en'?'Added ':'เพิ่ม ')+prof.display_name+' ✓');
-  renderFriendsCard();
+  if(!cloudUser){showToast(t('not_signed_in'));return;}
+  document.getElementById('frSearchInput').value='';
+  document.getElementById('frSearchResults').innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('fr_search_short')}</div>`;
+  // Cache current friends so we can show "already added" badge
+  try{
+    const {data}=await sb.from('friends').select('friend_id').eq('user_id',cloudUser.id);
+    _frCurrentIds=new Set((data||[]).map(x=>x.friend_id));
+  }catch{_frCurrentIds=new Set();}
+  document.getElementById('addFriendModal').classList.remove('hide');
+  setTimeout(()=>document.getElementById('frSearchInput').focus(),100);
+}
+function closeAddFriend(){document.getElementById('addFriendModal').classList.add('hide');}
+let _frSearchTimer=null;
+function renderFriendSearch(q){
+  if(_frSearchTimer)clearTimeout(_frSearchTimer);
+  const w=document.getElementById('frSearchResults');
+  const txt=(q||'').trim();
+  if(txt.length<2){
+    w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('fr_search_short')}</div>`;
+    return;
+  }
+  w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">…</div>`;
+  // Debounce 250ms — avoids spamming the DB while user types
+  _frSearchTimer=setTimeout(async ()=>{
+    try{
+      // Match either email exact or display_name ILIKE
+      const orExpr=`email.eq.${txt},display_name.ilike.%${txt.replace(/[%,]/g,'')}%`;
+      const {data,error}=await sb.from('profiles').select('id,display_name,email,avatar').or(orExpr).limit(20);
+      if(error)throw error;
+      const list=(data||[]).slice(0,10);
+      if(!list.length){w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('fr_no_results')}</div>`;return;}
+      w.innerHTML=list.map(u=>{
+        const isMe=u.id===cloudUser.id;
+        const isAdded=_frCurrentIds.has(u.id);
+        const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--accent)">${u.avatar||(u.display_name||u.email||'?')[0].toUpperCase()}</div>`;
+        const status=isMe?`<span style="font-size:.7rem;color:var(--muted)">${t('fr_self')}</span>`
+          :isAdded?`<span style="font-size:.7rem;color:var(--green)">✓ ${t('fr_already')}</span>`
+          :`<button class="btn-sec" style="font-size:.74rem;padding:5px 10px" data-fid="${u.id}" data-fname="${escapeHtml(u.display_name||u.email||'?')}" data-action="add">+</button>`;
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px">${av}<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(u.display_name||'—')}</div><div style="font-size:.66rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(u.email||'')}</div></div>${status}</div>`;
+      }).join('');
+      w.querySelectorAll('button[data-action="add"]').forEach(b=>b.onclick=()=>doAddFriend(b.dataset.fid,b.dataset.fname));
+    }catch(e){
+      w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem;color:var(--accent)">${e.message||e}</div>`;
+    }
+  },250);
+}
+async function doAddFriend(friendId,friendName){
+  try{
+    const {error}=await sb.from('friends').insert({user_id:cloudUser.id,friend_id:friendId});
+    if(error)throw error;
+    _frCurrentIds.add(friendId);
+    showToast(t('fr_added').replace('%n',friendName));
+    // Re-render search row to swap "+" → "✓ already"
+    renderFriendSearch(document.getElementById('frSearchInput').value);
+    // Refresh leaderboard in background
+    renderFriendsCard();
+  }catch(e){showToast(e.message||String(e));}
+}
+async function removeFriend(friendId,friendName){
+  if(!confirm(t('fr_confirm_remove').replace('%n',friendName)))return;
+  try{
+    const {error}=await sb.from('friends').delete().eq('user_id',cloudUser.id).eq('friend_id',friendId);
+    if(error)throw error;
+    showToast(t('fr_removed').replace('%n',friendName));
+    renderFriendsCard();
+  }catch(e){showToast(e.message||String(e));}
 }
 
 async function manualSync(){
@@ -5105,6 +5184,20 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.17.0':{
+    th:[
+      '👥 **ฟีเจอร์เพื่อนยกระดับ** — Modal เพิ่มเพื่อนแทน prompt() เก่า · ค้นหาด้วยอีเมล/ชื่อแสดง (debounced 250ms) · เห็น avatar + email ในผลค้นหา',
+      'แสดงสถานะ: "นี่คือคุณ" / "✓ มีอยู่แล้ว" / ปุ่ม "+" ตามสถานะของแต่ละผู้ใช้',
+      '🗑️ ปุ่ม ✕ ในแถว leaderboard สำหรับลบเพื่อน (มี confirm ก่อน)',
+      'หลังเพิ่ม/ลบ — leaderboard refresh อัตโนมัติ',
+    ],
+    en:[
+      '👥 **Friends feature leveled up** — Add Friend modal replaces the prompt() · search by email or display name (debounced 250ms) · see avatar + email in results',
+      'Status badges: "That\'s you" / "✓ Already" / "+" button',
+      '🗑️ ✕ button on each leaderboard row to remove a friend (with confirm)',
+      'After add/remove → leaderboard refreshes automatically',
+    ],
+  },
   '2.16.0':{
     th:[
       '🍱 ฐานข้อมูลอาหารขยายอีก +30 รายการ — รวมเป็น 160+ · เพิ่ม ราดหน้า/ผัดขี้เมา/ข้าวหน้าเป็ด/สุกี้/เย็นตาโฟ/แกงไตปลา + chains (Bonchon/Subway/Yayoi/MK/CP) + เครื่องดื่ม (โกโก้/เอสเปรสโซ/อเมริกาโน) + healthy (ไข่ขาว 3 ฟอง/อะโวคาโดโทสต์)',
