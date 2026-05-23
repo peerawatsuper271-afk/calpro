@@ -272,6 +272,15 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .ins{background:var(--surface2);border-radius:9px;padding:10px 12px;margin-bottom:7px;display:flex;gap:9px;}
 .ins-i{font-size:.95rem;flex-shrink:0;margin-top:1px;}
 .ins-t{font-size:.77rem;line-height:1.5;}.ins-t strong{color:var(--amber);}
+.ins.warn{border-left:3px solid var(--amber);}
+.ins.bad{border-left:3px solid var(--accent);}
+.ins.ok{border-left:3px solid var(--green);}
+.ins.info{border-left:3px solid var(--blue);}
+.help-sec{margin-bottom:14px;}
+.help-sec h4{font-size:.86rem;margin:0 0 6px 0;display:flex;align-items:center;gap:6px;}
+.help-sec ol,.help-sec ul{margin:0;padding-left:20px;font-size:.78rem;line-height:1.7;color:var(--muted);}
+.help-sec li{margin-bottom:3px;}
+.help-sec b{color:var(--fg);}
 .bdg-g{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
 .bdg-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 5px;text-align:center;}
 .bdg-item.earned{border-color:var(--amber);}
@@ -411,6 +420,10 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
             <button onclick="addWater(1)">+</button>
           </div>
         </div>
+      </div>
+      <div class="card hide" id="healthCard" style="margin-top:8px">
+        <h3 style="display:flex;align-items:center;gap:6px"><span>💡</span><span data-i18n="health_tips">คำแนะนำสุขภาพวันนี้</span></h3>
+        <div id="healthTipsList"></div>
       </div>
       <div id="foodLog"></div>
       <div class="card" style="margin-top:8px">
@@ -725,7 +738,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.8 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.9 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
       <div class="card">
@@ -743,6 +756,15 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
           • Backend: Supabase (opt-in cloud sync)
         </div>
       </div>
+    </div>
+
+    <!-- HELP / HOW TO USE -->
+    <div class="screen" id="pg-help">
+      <div class="page-hd">
+        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <h2 data-i18n="help_title">วิธีใช้งาน</h2>
+      </div>
+      <div id="helpBody"></div>
     </div>
 
   </div><!-- end app -->
@@ -893,9 +915,10 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="navTo('settings')"><span data-i18n="settings">ตั้งค่า</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
+    <button class="drawer-item" onclick="navTo('help')"><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.8 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.9 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -912,7 +935,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.7.8';
+const APP_VERSION = '2.7.9';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -995,6 +1018,7 @@ const I18N = {
     about_desc:'ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง',
     about_links:'ลิงก์',about_credits:'เครดิต',
     theme_dark:'มืด',theme_night:'ดึก',theme_forest:'ป่า',theme_warm:'อุ่น',theme_ocean:'มหาสมุทร',theme_light:'สว่าง',theme_cream:'ครีม',theme_mint:'มินต์',
+    help_title:'วิธีใช้งาน',health_tips:'คำแนะนำสุขภาพวันนี้',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1056,6 +1080,7 @@ const I18N = {
     about_desc:'Calorie tracking, TDEE calculator and weight management · Free · No login required · Data stored locally',
     about_links:'Links',about_credits:'Credits',
     theme_dark:'Dark',theme_night:'Night',theme_forest:'Forest',theme_warm:'Warm',theme_ocean:'Ocean',theme_light:'Light',theme_cream:'Cream',theme_mint:'Mint',
+    help_title:'How to use',health_tips:'Health insights today',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -1506,6 +1531,7 @@ function showPage(id,btn){
   if(id==='tdee')syncTDEEFromProfile();
   if(id==='add')renderQuickList();
   if(id==='settings')renderSettings();
+  if(id==='help')renderHelp();
   if(id==='friends')renderFriendsCard();
   if(id==='profile')renderProfileUI();
 }
@@ -1836,6 +1862,7 @@ function refreshActivePage(){
   else if(active==='pg-profile')renderProfileUI();
   else if(active==='pg-settings')renderSettings();
   else if(active==='pg-friends')renderFriendsCard();
+  else if(active==='pg-help')renderHelp();
   // header always
   const name=userProfile?.display_name||t('you');
   const hdr=document.getElementById('hdrSub');
@@ -2383,6 +2410,264 @@ function renderWorkoutsList(){
   });
 }
 
+// ═══ HEALTH TIPS (daily insights from food log) ═══
+// Sev legend: 'bad' (red) · 'warn' (amber) · 'info' (blue) · 'ok' (green)
+function getHealthTips(){
+  const tips=[];
+  const isEn=settings.lang==='en';
+  const E=dailyEntries||[];
+  if(!E.length)return tips;
+  const totCal=E.reduce((s,e)=>s+(+e.calories||0),0);
+  const totP=E.reduce((s,e)=>s+(+e.protein||0),0);
+  const totC=E.reduce((s,e)=>s+(+e.carbs||0),0);
+  const totF=E.reduce((s,e)=>s+(+e.fat||0),0);
+  const burned=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
+  const net=Math.max(0,totCal-burned);
+  const goal=+userProfile?.goal_cal||1800;
+  const weight=+userProfile?.weight||65;
+  const protGoal=Math.round(weight*1.6);     // 1.6 g/kg recommended
+  const water=allWater[currentDate]||0;
+  const waterGoal=getWaterGoal();
+  // Only "today" gets time-of-day-aware tips; older dates still get nutrition tips.
+  const isToday=currentDate===todayKey();
+  const hr=isToday?new Date().getHours():23;
+  // Meal distribution by raw meal key (db stores Thai keys)
+  const meals={'เช้า':0,'กลางวัน':0,'เย็น':0,'ของว่าง':0};
+  E.forEach(e=>{if(meals[e.meal]!==undefined)meals[e.meal]+=(+e.calories||0);});
+  // ───────────────────────────────────────────────
+  // 1. Net calories vs goal (over/under)
+  if(net>goal*1.15){
+    const over=Math.round(net-goal);
+    const walk=Math.round(over/4);            // ≈ 4 kcal/min brisk walking @ 65 kg
+    tips.push({ico:'🔥',sev:'bad',
+      msg:isEn?`Over goal by <b>${over} kcal</b>. A <b>${walk}-min walk</b> could balance it out.`
+        :`เกินเป้า <b>${over} kcal</b> · เดินอีก <b>${walk} นาที</b> จะช่วยปรับสมดุล`});
+  }else if(net>0&&net<goal*0.6&&hr>=19){
+    tips.push({ico:'⚠️',sev:'warn',
+      msg:isEn?`Only <b>${net} kcal</b> today — too low for long. Aim near <b>${goal} kcal</b>.`
+        :`วันนี้กินแค่ <b>${net} kcal</b> · น้อยเกินไปทำให้เผาผลาญตก ควรกินใกล้ <b>${goal} kcal</b>`});
+  }else if(net>=goal*0.9&&net<=goal*1.05){
+    tips.push({ico:'✅',sev:'ok',
+      msg:isEn?`On target (<b>${net}/${goal} kcal</b>). Great consistency!`
+        :`อยู่ในเป้าพอดี (<b>${net}/${goal} kcal</b>) · เก่งมาก!`});
+  }
+  // 2. Protein adequacy
+  if(totP>0&&totP<protGoal*0.6&&hr>=14){
+    tips.push({ico:'🥩',sev:'warn',
+      msg:isEn?`Protein <b>${Math.round(totP)}g</b> is low — aim for ~<b>${protGoal}g</b>/day to preserve muscle.`
+        :`โปรตีน <b>${Math.round(totP)}g</b> น้อย · ควรได้ ~<b>${protGoal}g</b>/วัน เพื่อรักษากล้ามเนื้อ`});
+  }else if(totP>=protGoal*0.95){
+    tips.push({ico:'💪',sev:'ok',
+      msg:isEn?`Protein on target (<b>${Math.round(totP)}g</b>) — supports muscle and satiety.`
+        :`โปรตีนถึงเป้า (<b>${Math.round(totP)}g</b>) · ช่วยอิ่มทนและรักษากล้ามเนื้อ`});
+  }
+  // 3. Macro balance
+  if(totCal>200){
+    const carbPct=Math.round((totC*4)/totCal*100);
+    const fatPct=Math.round((totF*9)/totCal*100);
+    if(carbPct>62){
+      tips.push({ico:'🍞',sev:'info',
+        msg:isEn?`Carbs <b>${carbPct}%</b> of intake — try adding lean protein & vegetables next meal.`
+          :`คาร์บคิดเป็น <b>${carbPct}%</b> · มื้อหน้าลองเพิ่มโปรตีนและผัก`});
+    }else if(fatPct>40){
+      tips.push({ico:'🥑',sev:'info',
+        msg:isEn?`Fat <b>${fatPct}%</b> of intake — favour grilling/steaming over deep-frying.`
+          :`ไขมัน <b>${fatPct}%</b> · ลองเปลี่ยนเป็น "ย่าง / นึ่ง / ต้ม" แทนทอด`});
+    }
+  }
+  // 4. Water status
+  if(isToday){
+    if(water>=waterGoal){
+      tips.push({ico:'🌊',sev:'ok',
+        msg:isEn?`Hydration goal met (<b>${water} cups</b>) — keep sipping!`
+          :`ดื่มน้ำครบเป้า (<b>${water} แก้ว</b>) · ทำต่อไปเรื่อยๆ นะ`});
+    }else if(hr>=14&&water<waterGoal*0.5){
+      const left=waterGoal-water;
+      tips.push({ico:'💧',sev:'warn',
+        msg:isEn?`Only <b>${water}/${waterGoal}</b> cups of water — drink <b>${left}</b> more before bed.`
+          :`น้ำดื่มแค่ <b>${water}/${waterGoal}</b> แก้ว · ดื่มอีก <b>${left}</b> ก่อนนอน`});
+    }
+  }
+  // 5. Skipped breakfast (only after 11 AM)
+  if(isToday&&hr>=11&&meals['เช้า']===0&&(meals['กลางวัน']>0||meals['เย็น']>0)){
+    tips.push({ico:'🌅',sev:'info',
+      msg:isEn?`Breakfast skipped today. Try a quick protein-rich morning meal tomorrow.`
+        :`วันนี้ข้ามมื้อเช้า · พรุ่งนี้ลองมื้อเช้าที่มีโปรตีน เช่น ไข่ต้ม + กรีกโยเกิร์ต`});
+  }
+  // 6. Heavy dinner
+  if(meals['เย็น']>goal*0.55){
+    tips.push({ico:'🌙',sev:'info',
+      msg:isEn?`Dinner is <b>${meals['เย็น']} kcal</b> — heavy late meals slow digestion. Shift more calories earlier.`
+        :`มื้อเย็น <b>${meals['เย็น']} kcal</b> · ทานหนักดึกย่อยช้า ลองกระจายไปมื้อเช้า/กลางวัน`});
+  }
+  // 7. Lots of snacking
+  if(meals['ของว่าง']>goal*0.35){
+    tips.push({ico:'🍪',sev:'info',
+      msg:isEn?`Snacks total <b>${meals['ของว่าง']} kcal</b> — often a sign your main meals lack protein/fiber.`
+        :`ของว่างรวม <b>${meals['ของว่าง']} kcal</b> · มักหมายว่ามื้อหลักโปรตีน/ใยอาหารไม่พอ`});
+  }
+  // 8. Variety check
+  const counts={};E.forEach(e=>{counts[e.food_name]=(counts[e.food_name]||0)+1;});
+  const maxRepeat=Math.max(0,...Object.values(counts));
+  if(maxRepeat>=4){
+    const dupName=Object.keys(counts).find(k=>counts[k]===maxRepeat);
+    tips.push({ico:'🌈',sev:'info',
+      msg:isEn?`Ate <b>${dupName}</b> ${maxRepeat}×. Variety widens your nutrient profile — mix it up tomorrow.`
+        :`กิน "<b>${dupName}</b>" ${maxRepeat} ครั้ง · เปลี่ยนเมนูบ้างจะได้สารอาหารหลากหลายขึ้น`});
+  }
+  // 9. Sugar/dessert flag (look up category 'dessert' or 'drink')
+  const sweetCal=E.filter(e=>{
+    const f=FOODS.find(x=>x.n===e.food_name||x.e===e.food_name);
+    return f&&(f.cat==='dessert'||(f.cat==='drink'&&(f.c||0)>=80));
+  }).reduce((s,e)=>s+(+e.calories||0),0);
+  if(sweetCal>goal*0.25){
+    tips.push({ico:'🍬',sev:'warn',
+      msg:isEn?`Sweets/sugary drinks ≈ <b>${sweetCal} kcal</b> today. Swap one for water or fruit.`
+        :`ของหวาน/เครื่องดื่มหวาน ≈ <b>${sweetCal} kcal</b> · ลองสลับสักแก้วเป็นน้ำเปล่าหรือผลไม้`});
+  }
+  // 10. Recommendation: workout when surplus
+  if(net>goal&&burned===0){
+    const extra=net-goal;
+    const min=Math.round(extra/8);             // ≈ 8 kcal/min jogging
+    tips.push({ico:'🏃',sev:'info',
+      msg:isEn?`A <b>${min}-min jog</b> would offset today's surplus of ${extra} kcal.`
+        :`วิ่งเหยาะอีก <b>${min} นาที</b> จะหักล้างส่วนเกิน ${extra} kcal ของวันนี้ได้`});
+  }
+  // Sort by severity: bad > warn > info > ok
+  const order={bad:0,warn:1,info:2,ok:3};
+  tips.sort((a,b)=>(order[a.sev]??9)-(order[b.sev]??9));
+  return tips.slice(0,4);                       // cap to top 4 most relevant
+}
+function renderHealthTips(){
+  const card=document.getElementById('healthCard');
+  const list=document.getElementById('healthTipsList');
+  if(!card||!list)return;
+  const tips=getHealthTips();
+  if(!tips.length){card.classList.add('hide');return;}
+  card.classList.remove('hide');
+  list.innerHTML=tips.map(tp=>
+    `<div class="ins ${tp.sev}"><div class="ins-i">${tp.ico}</div><div class="ins-t">${tp.msg}</div></div>`
+  ).join('');
+}
+
+// ═══ HELP / HOW TO USE ═══
+function renderHelp(){
+  const body=document.getElementById('helpBody');if(!body)return;
+  const isEn=settings.lang==='en';
+  const sections=isEn?[
+    {ico:'🚀',title:'Getting started',items:[
+      'Open <b>Profile</b> first and enter your age, weight, height, gender, and activity level.',
+      'Pick a <b>goal</b>: lose, maintain, or gain. Your daily calorie target is calculated automatically.',
+      'All data lives in this browser — no login required. Optional Cloud Sync syncs across devices.',
+    ]},
+    {ico:'🏠',title:'Today page (the ring)',items:[
+      'The big number in the ring is <b>net calories</b> (food eaten − calories burned by workouts).',
+      'Add food with the <b>+ tab</b> below, or quick-tap a favorite/recent item.',
+      'Tap <b>+ / −</b> on the water card after each glass.',
+      '<b>💡 Health tips</b> below the water card update with your day — protein, water, meal balance, etc.',
+    ]},
+    {ico:'➕',title:'Logging food',items:[
+      'Search the built-in database (110+ foods, TH + EN names).',
+      '<b>⭐ Star</b> any result to add it to your Favorites for one-tap re-logging.',
+      'Use <b>Manual entry</b> for foods not in the database; check <b>"Save to library"</b> to keep them.',
+      'Pick the meal slot (Breakfast/Lunch/Dinner/Snack) — defaults to current time-of-day.',
+      'Attach a photo (optional). Edit or delete any entry from the food log.',
+    ]},
+    {ico:'🏋️',title:'Workouts',items:[
+      'On the workouts card on Today, tap <b>+ Add</b>.',
+      'Pick an exercise type and minutes — calories burned are calculated from MET × your weight.',
+      'Burned kcal show as <b>−Y 🏋️</b> under the ring and reduce the net number above.',
+    ]},
+    {ico:'📊',title:'Analysis page',items:[
+      '<b>7-day calories</b>: bar chart of how each day compared to your goal.',
+      '<b>Projected weight trend</b>: line chart that <b>forecasts</b> your weight using only food + workout data (1 kg ≈ 7700 kcal). No daily weighing needed.',
+      'Solid line = past 14 days, dashed = next 14 days at your average pace.',
+      'Set a <b>goal weight</b> in Profile to get an ETA in weeks.',
+      '<b>7-day water</b>: blue bars fill higher when you drink more.',
+      'Tips card explains what to adjust.',
+    ]},
+    {ico:'🔥',title:'TDEE calculator',items:[
+      'Live calculator using the Harris-Benedict revised (1984) formula.',
+      'Change any input to see your BMR + TDEE recalculate instantly.',
+      'Tap <b>Use as my goal</b> to save the recommended daily target into your profile.',
+    ]},
+    {ico:'☁️',title:'Cloud Sync (optional)',items:[
+      'Go to <b>Settings → Cloud Sync</b> and sign up with email + password (no other info needed).',
+      'After login, the app syncs automatically every few minutes plus after every meal/workout edit.',
+      '<b>Diagnose</b> button shows table health — run the migration SQL it links to if needed.',
+      'You can <b>delete cloud data</b> anytime — local data stays on your device.',
+    ]},
+    {ico:'⚙️',title:'Settings & tips',items:[
+      '<b>Simple Mode</b> hides advanced widgets and shows just the ring + food log + the daily-share button.',
+      '<b>Bottom nav</b> is customizable — pick up to 5 tabs in Settings.',
+      'Switch language between Thai and English anytime.',
+      'Themes: 5 dark + 3 light. Pick an accent color separately.',
+      'Notifications: enable meal reminders, smart-goal popup, weekly recap.',
+    ]},
+    {ico:'📤',title:'Sharing',items:[
+      '<b>Share today</b> renders a 1080×1350 image card (ring + macros + invite) and shares via your system share sheet — or downloads + copies the caption if sharing files is not supported.',
+      '<b>Share achievements</b> (Analysis page) makes a similar card with streak + badges earned.',
+    ]},
+  ]:[
+    {ico:'🚀',title:'เริ่มต้นใช้งาน',items:[
+      'เปิดหน้า <b>โปรไฟล์</b> กรอกเพศ อายุ น้ำหนัก ส่วนสูง และระดับกิจกรรม',
+      'เลือก <b>เป้าหมาย</b>: ลดน้ำหนัก / คงน้ำหนัก / เพิ่มกล้าม · ระบบจะคำนวณแคลอรี่/วันให้อัตโนมัติ',
+      'ข้อมูลทั้งหมดเก็บในเครื่อง ไม่ต้องล็อกอิน · ถ้าอยากซิงค์ข้ามเครื่องเปิด Cloud Sync เพิ่มได้',
+    ]},
+    {ico:'🏠',title:'หน้าวันนี้ (วงกลม)',items:[
+      'เลขใหญ่กลางวงคือ <b>แคลอรี่สุทธิ</b> (อาหารที่กิน − แคลอรี่จากการออกกำลังกาย)',
+      'เพิ่มอาหารผ่านแถบ <b>+ เพิ่ม</b> หรือกดของโปรด/ล่าสุดได้',
+      'น้ำดื่ม: กด <b>+ / −</b> ทุกครั้งหลังดื่ม',
+      '<b>💡 คำแนะนำสุขภาพ</b> ใต้แถบน้ำ จะปรับตามข้อมูลแต่ละวัน — โปรตีน, มื้อ, น้ำ ฯลฯ',
+    ]},
+    {ico:'➕',title:'การบันทึกอาหาร',items:[
+      'ค้นหาจากฐานข้อมูล 110+ รายการ (ชื่อไทย/อังกฤษ)',
+      'กด <b>⭐</b> เพิ่มของโปรดเพื่อกดบันทึกซ้ำได้ในแตะเดียว',
+      'ใช้ <b>กรอกเอง</b> สำหรับอาหารที่ไม่มีในฐาน — ติ๊ก <b>"บันทึกลงไลบรารี"</b> เพื่อเก็บไว้ใช้ครั้งหน้า',
+      'เลือกมื้อ (เช้า/กลางวัน/เย็น/ของว่าง) — ระบบเดาให้ตามเวลาปัจจุบัน',
+      'แนบรูปได้ (ไม่บังคับ) · แก้ไข/ลบรายการจาก log ได้เลย',
+    ]},
+    {ico:'🏋️',title:'ออกกำลังกาย',items:[
+      'กด <b>+ เพิ่ม</b> ที่การ์ดออกกำลังกายในหน้าวันนี้',
+      'เลือกประเภทกิจกรรม + นาที — แคลอรี่ที่เผาคำนวณจาก MET × น้ำหนักของคุณ',
+      'แคลที่เผาจะแสดง <b>−Y 🏋️</b> ใต้วงกลม และจะหักจากเลขสุทธิด้านบนทันที',
+    ]},
+    {ico:'📊',title:'หน้าวิเคราะห์',items:[
+      '<b>แคลอรี่ 7 วัน</b>: แท่งกราฟเทียบแต่ละวันกับเป้าหมาย',
+      '<b>แนวโน้มน้ำหนักคาดการณ์</b>: เส้นกราฟ <b>พยากรณ์</b> น้ำหนักจากข้อมูลอาหาร + ออกกำลังกาย (1 kg ≈ 7700 kcal) · ไม่ต้องชั่งน้ำหนักทุกวัน',
+      'เส้นทึบ = ย้อนหลัง 14 วัน, เส้นปะ = ไปข้างหน้า 14 วันตามอัตราเฉลี่ย',
+      'ตั้ง <b>น้ำหนักเป้าหมาย</b> ในโปรไฟล์เพื่อดู ETA เป็นสัปดาห์',
+      '<b>น้ำดื่ม 7 วัน</b>: แท่งสีฟ้าสูงตามจำนวนแก้วที่ดื่ม',
+      'การ์ดคำแนะนำจะบอกว่าควรปรับอะไร',
+    ]},
+    {ico:'🔥',title:'เครื่องคำนวณ TDEE',items:[
+      'คำนวณด้วยสูตร Harris-Benedict (revised 1984) แบบ real-time',
+      'พิมพ์เปลี่ยนค่าใดๆ ตัวเลข BMR/TDEE จะอัปเดตทันที',
+      'กด <b>ใช้ค่านี้เป็นเป้าหมาย</b> เพื่อบันทึกเข้าโปรไฟล์',
+    ]},
+    {ico:'☁️',title:'Cloud Sync (เลือกเปิด)',items:[
+      'ไปที่ <b>ตั้งค่า → Cloud Sync</b> สมัครด้วยอีเมล + รหัสผ่าน (ไม่ต้องกรอกข้อมูลส่วนตัวอื่น)',
+      'หลังเข้าสู่ระบบ ข้อมูลจะ sync อัตโนมัติทุกๆ สองสามนาที + ทุกครั้งหลังเพิ่ม/แก้อาหาร',
+      'ปุ่ม <b>ตรวจสอบ</b> บอกสถานะตาราง · ถ้าเจอ migration ค้างจะมีลิงก์ให้รัน SQL',
+      '<b>ลบข้อมูลใน cloud</b> ได้ตลอดเวลา · ข้อมูลในเครื่องยังอยู่ครบ',
+    ]},
+    {ico:'⚙️',title:'การตั้งค่า + เทคนิค',items:[
+      '<b>โหมดใช้งานง่าย</b>: ซ่อนวิดเจ็ตอื่นๆ เหลือแค่วงกลม + log + ปุ่มแชร์',
+      '<b>แถบล่าง</b>: ปรับเองได้ เลือกได้สูงสุด 5 แท็บในหน้าตั้งค่า',
+      'สลับภาษาไทย/อังกฤษได้ตลอด',
+      'ธีม: มืด 5 + สว่าง 3 · เลือกสี accent แยกได้',
+      'การเตือน: เปิดเตือนมื้ออาหาร, ปรับเป้าอัตโนมัติ, สรุปรายสัปดาห์',
+    ]},
+    {ico:'📤',title:'การแชร์',items:[
+      '<b>แชร์สรุปวันนี้</b>: สร้างรูป 1080×1350 (วงแหวน + macro + คำเชิญ) แล้วแชร์ผ่าน system share — หรือดาวน์โหลด + คัดลอกข้อความถ้าระบบไม่รองรับการแชร์ไฟล์',
+      '<b>แชร์ความสำเร็จ</b> (ในหน้าวิเคราะห์): รูปคล้ายกัน แสดง streak + เหรียญที่ได้รับ',
+    ]},
+  ];
+  body.innerHTML=sections.map(s=>
+    `<div class="card help-sec"><h4>${s.ico} <span>${s.title}</span></h4><ol>${s.items.map(it=>`<li>${it}</li>`).join('')}</ol></div>`
+  ).join('');
+}
+
 // ═══ SMART GOAL ADJUSTMENT ═══
 function checkSmartGoal(){
   if(settings.smartGoal===false)return;
@@ -2615,7 +2900,7 @@ function renderToday(){
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
   document.getElementById('mCB').style.width=Math.min(totC/250*100,100).toFixed(1)+'%';
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
-  renderWaterWidget();renderReminderBanner();renderWorkoutsList();
+  renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();
   const log=document.getElementById('foodLog');
   if(!E.length){log.innerHTML=`<div class="empty">${t('no_entries')}<br>${t('press_add')}</div>`;return;}
   log.innerHTML='';
@@ -3204,6 +3489,7 @@ function setLang(lang){
   if(document.getElementById('pg-analysis')?.classList.contains('active'))renderAnalysis();
   if(document.getElementById('pg-settings')?.classList.contains('active'))renderSettings();
   if(document.getElementById('pg-friends')?.classList.contains('active'))renderFriendsCard();
+  if(document.getElementById('pg-help')?.classList.contains('active'))renderHelp();
 }
 function applyLang(){
   document.documentElement.lang=settings.lang||'th';
