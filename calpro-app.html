@@ -733,7 +733,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.4 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.6 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
       <div class="card">
@@ -904,11 +904,11 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="navTo('profile')"><span data-i18n="profile">โปรไฟล์</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span data-i18n="friends_only">เพื่อน</span><span class="di-arrow">›</span></button>
 
-    <div class="drawer-sect" data-i18n="tools_section">เครื่องมือ</div>
-    <button class="drawer-item" onclick="openQuickWater()"><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="openQuickWeight()"><span data-i18n="weight">น้ำหนัก</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="closeDrawer();openWorkoutModal()"><span data-i18n="workouts">ออกกำลังกาย</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="navTo('profile');setTimeout(()=>document.querySelector('#mWaist')?.scrollIntoView({behavior:'smooth',block:'center'}),300)"><span data-i18n="body_measurements">สัดส่วนร่างกาย</span><span class="di-arrow">›</span></button>
+    <div class="drawer-sect drawer-tools-row" data-i18n="tools_section">เครื่องมือ</div>
+    <button class="drawer-item drawer-tools-row" onclick="openQuickWater()"><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="openQuickWeight()"><span data-i18n="weight">น้ำหนัก</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="closeDrawer();openWorkoutModal()"><span data-i18n="workouts">ออกกำลังกาย</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="navTo('profile');setTimeout(()=>document.querySelector('#mWaist')?.scrollIntoView({behavior:'smooth',block:'center'}),300)"><span data-i18n="body_measurements">สัดส่วนร่างกาย</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect" data-i18n="settings_section">การตั้งค่า</div>
     <button class="drawer-item" onclick="navTo('settings')"><span data-i18n="settings">ตั้งค่า</span><span class="di-arrow">›</span></button>
@@ -916,7 +916,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.4 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.6 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -933,7 +933,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.7.5';
+const APP_VERSION = '2.7.6';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2690,18 +2690,18 @@ function renderToday(){
   const totF=E.reduce((s,e)=>s+(e.fat||0),0);
   const goal=userProfile?.goal_cal||1800;
   const burned=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+w.kcal,0);
-  const effectiveGoal=goal+burned;  // workouts add to your budget
-  const pct=Math.min(totCal/effectiveGoal,1);
-  const over=totCal>effectiveGoal;
+  const net=Math.max(0,totCal-burned);            // net kcal "absorbed" — food in minus workout out
+  const pct=Math.min(net/goal,1);
+  const over=net>goal;
   const clr=over?'#ff6b6b':pct>0.85?'#ffa94d':'#51cf66';
   document.getElementById('dateLabel').textContent=fmtDate(currentDate);
   const circ=376.99;
   document.getElementById('ringFill').style.strokeDashoffset=(circ-pct*circ).toFixed(2);
   document.getElementById('ringFill').style.stroke=clr;
-  document.getElementById('ringCal').textContent=totCal.toLocaleString();
-  document.getElementById('ringGoal').textContent=t('goal')+' '+goal.toLocaleString()+' kcal'+(burned?' · -'+burned+' 🏋️':'');
+  document.getElementById('ringCal').textContent=net.toLocaleString();
+  document.getElementById('ringGoal').textContent=t('goal')+' '+goal.toLocaleString()+' kcal'+(burned?' · −'+burned+' 🏋️':'');
   const pf=document.getElementById('progFill');pf.style.width=(pct*100).toFixed(1)+'%';pf.style.background=clr;
-  const rem=effectiveGoal-totCal;
+  const rem=goal-net;
   const sr=document.getElementById('stRem');
   sr.textContent=(rem<0?'+':'')+Math.abs(rem).toLocaleString();sr.style.color=rem<0?'var(--accent)':'var(--green)';
   document.getElementById('stN').textContent=E.length;
@@ -2975,6 +2975,8 @@ const DENSITY_CSS = `
 [data-simple="1"] .dlbl{font-size:1.05rem;}
 [data-simple="1"] .dnav button{width:38px;height:38px;font-size:1.2rem;}
 [data-simple="1"] .empty{font-size:1rem;padding:32px 0;}
+/* Drawer tools: only show when Simple Mode is on (full mode has these on Today page) */
+:root:not([data-simple="1"]) .drawer-tools-row{display:none;}
 `;
 (function(){const s=document.createElement('style');s.textContent=DENSITY_CSS;document.head.appendChild(s);})();
 
@@ -3332,16 +3334,16 @@ function buildShareCanvas(){
   const totF=Math.round(E.reduce((s,e)=>s+(e.fat||0),0));
   const goal=userProfile?.goal_cal||1800;
   const burned=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+w.kcal,0);
-  const effGoal=goal+burned;
+  const net=Math.max(0,totCal-burned);
   const dateStr=fmtDate(currentDate).replace(/^วันนี้ · |^เมื่อวาน · |^Today · |^Yesterday · /,'');
   const isEn=settings.lang==='en';
   const isLight=(THEMES[settings.theme]||THEMES.dark).mode==='light';
   const accent=settings.accent||'#ff6b6b';
-  // Determine status
+  // Determine status (based on net consumption vs goal)
   let statusLabel,statusColor;
   if(totCal===0){statusLabel=isEn?'Not logged':'ยังไม่บันทึก';statusColor='#888';}
-  else if(totCal>effGoal){statusLabel=isEn?'Over goal':'เกินเป้า';statusColor=accent;}
-  else if(totCal>=effGoal*0.85){statusLabel=isEn?'Near goal':'ใกล้เป้า';statusColor='#ffa94d';}
+  else if(net>goal){statusLabel=isEn?'Over goal':'เกินเป้า';statusColor=accent;}
+  else if(net>=goal*0.85){statusLabel=isEn?'Near goal':'ใกล้เป้า';statusColor='#ffa94d';}
   else {statusLabel=isEn?'On track':'อยู่ในเป้า';statusColor='#51cf66';}
 
   const W=1080,H=1350;
@@ -3380,7 +3382,7 @@ function buildShareCanvas(){
   ctx.lineCap='round';
   ctx.stroke();
   // Progress ring
-  const pct=Math.min(totCal/Math.max(effGoal,1),1);
+  const pct=Math.min(net/Math.max(goal,1),1);
   if(pct>0){
     ctx.beginPath();
     const startA=-Math.PI/2;
@@ -3393,10 +3395,10 @@ function buildShareCanvas(){
   // Calorie number center
   ctx.fillStyle=txt;ctx.textAlign='center';
   ctx.font=`800 150px ${fontTH}`;
-  ctx.fillText(totCal.toLocaleString(),ringCX,ringCY-70);
+  ctx.fillText(net.toLocaleString(),ringCX,ringCY-70);
   ctx.font=`500 38px ${fontTH}`;
   ctx.fillStyle=muted;
-  const goalLabel=isEn?`of ${effGoal.toLocaleString()} kcal`:`จาก ${effGoal.toLocaleString()} kcal`;
+  const goalLabel=isEn?`of ${goal.toLocaleString()} kcal`+(burned?` · −${burned}`:''):`จาก ${goal.toLocaleString()} kcal`+(burned?` · −${burned}`:'');
   ctx.fillText(goalLabel,ringCX,ringCY+90);
 
   // Macros (3 columns)
@@ -3611,8 +3613,9 @@ if(sb){
 // Run smart checks shortly after load (so UI is mounted)
 setTimeout(()=>{checkWeeklyRecap();},800);
 setTimeout(()=>{checkSmartGoal();},2400);
-document.getElementById('appVer').textContent='v'+APP_VERSION+' BETA';
-document.querySelectorAll('.ver-tag').forEach(e=>e.textContent='v'+APP_VERSION+' BETA');
+const _vTag='v'+APP_VERSION+' BETA';
+const _appVerEl=document.getElementById('appVer');if(_appVerEl)_appVerEl.textContent=_vTag;
+document.querySelectorAll('.ver-tag').forEach(e=>e.textContent=_vTag);
 
 // ═══ PWA: Register Service Worker ═══
 if('serviceWorker' in navigator){
