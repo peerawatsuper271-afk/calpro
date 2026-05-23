@@ -67,6 +67,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.11.0** *(web only · BETA)* — **🍱 +21 อาหารใหม่** Thai street food (ข้าวขาหมู/หมูแดง/หมูกรอบ/ก๋วยจั๊บ/ข้าวคลุกกะปิ/หมูสะเต๊ะ/ขนมจีบ/ผัดมาม่า/ผัดผักบุ้ง/ยำมาม่า) + chains (KFC/McDonald's/7-11/Starbucks) + healthy (อกไก่ 100g/ทูน่ากระป๋อง/เต้าหู้) · **♿ Accessibility**: กด Esc ปิด modal/drawer · ARIA labels บนปุ่ม icon (☰ · sync dot · mode toggle · water +/−)
 - **v2.10.0** *(web only · BETA)* — **🍱 Quick Presets (ชุดอาหาร)** — แท็บใหม่ในหน้าเพิ่มอาหาร · บันทึกอาหารทั้งวันเป็นชุด เช่น "มื้อเช้าปกติ" → ครั้งหน้าแตะเดียวเพิ่มได้ครบ · ลบ/ดูจำนวน kcal รวมของแต่ละชุด · รองรับ export/import
 - **v2.9.0** *(APK + web · BETA)* — **🎉 APK rebuild ครั้งแรกตั้งแต่ v2.7.1** — รวมทุก feature/fix ตั้งแต่ v2.7.2 ถึงปัจจุบัน (in-app update prompt, projection chart, health tips, portion picker, font picker, themes ใหม่, feedback, etc.) · **Smart Goal v2** ใช้แคลอรี่ projection แทน weight log · **ปุ่มลบรูปอาหารเก่า** (>30 วัน) ใน Settings → จัดการข้อมูล · ปิดท้าย i18n holdouts (TDEE apply toast)
 - **v2.8.2** *(web only · BETA)* — **ระบบอัปเดตในแอป**: Modal "มีเวอร์ชันใหม่" (อัปเดตเลย / ไว้ทีหลัง) เมื่อ Service Worker เจอเวอร์ชันใหม่ · "✨ มีอะไรใหม่" popup อัตโนมัติหลังอัปเดตสำเร็จ แสดงประวัติย้อนหลังครบทุกเวอร์ชันที่ข้าม · ปุ่ม **"🔄 ตรวจหาเวอร์ชันใหม่"** + **"✨ มีอะไรใหม่"** ในหน้าเกี่ยวกับ · CHANGELOG embedded ในแอป (TH/EN)

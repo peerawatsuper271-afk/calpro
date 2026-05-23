@@ -384,14 +384,14 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 
     <!-- HEADER -->
     <div class="hdr">
-      <button class="icon-btn" onclick="openDrawer()" title="Menu">
+      <button class="icon-btn" onclick="openDrawer()" title="Menu" aria-label="Open menu">
         <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <div class="hdr-left">
-        <h1>Cal<span>Pro+</span> <span class="sync-dot s-idle" id="syncDot" title="" onclick="navTo('settings')"></span></h1>
+        <h1>Cal<span>Pro+</span> <span class="sync-dot s-idle" id="syncDot" title="" onclick="navTo('settings')" role="button" tabindex="0" aria-label="Sync status — tap for Cloud Sync settings"></span></h1>
         <p id="hdrSub" data-i18n="welcome">ยินดีต้อนรับ</p>
       </div>
-      <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง">
+      <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง" aria-label="Toggle dark/light mode">
         <svg viewBox="0 0 24 24" id="modeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
       </button>
     </div>
@@ -436,8 +436,8 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
           <div class="wwval"><span id="waterCount">0</span>/<span id="waterGoalDisp">8</span> <span data-i18n="cups_unit">แก้ว</span></div>
           <div class="water-dots" id="waterDots"></div>
           <div class="water-ctrl">
-            <button onclick="addWater(-1)">−</button>
-            <button onclick="addWater(1)">+</button>
+            <button onclick="addWater(-1)" aria-label="Remove one cup of water">−</button>
+            <button onclick="addWater(1)" aria-label="Add one cup of water">+</button>
           </div>
         </div>
       </div>
@@ -762,7 +762,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.10.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.11.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1018,7 +1018,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.10.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.11.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1035,7 +1035,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.10.0';
+const APP_VERSION = '2.11.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1351,6 +1351,31 @@ const FOODS=[
   {n:'สลัดผัก',e:'Garden Salad',c:80,p:3,cb:10,f:3,a:200,cat:'veggie'},
   {n:'บล็อกโคลี่นึ่ง',e:'Steamed Broccoli',c:55,p:4,cb:11,f:1,a:150,cat:'veggie'},
   {n:'ข้าวโพดต้ม',e:'Boiled Corn',c:130,p:5,cb:30,f:2,a:150,cat:'veggie'},
+  // ─── v2.11 additions: popular Thai street food + chains ───
+  // Thai street/menu
+  {n:'ข้าวขาหมู',e:'Stewed Pork Leg Rice',c:520,p:30,cb:60,f:18,a:350,cat:'thai'},
+  {n:'ข้าวหมูแดง',e:'Red Pork Rice',c:480,p:25,cb:65,f:14,a:300,cat:'thai'},
+  {n:'ข้าวหมูกรอบ',e:'Crispy Pork Rice',c:580,p:25,cb:60,f:28,a:300,cat:'thai'},
+  {n:'ผัดมาม่า',e:'Stir-fried Instant Noodles',c:450,p:14,cb:55,f:18,a:200,cat:'thai'},
+  {n:'ก๋วยจั๊บ',e:'Kuay Jub',c:380,p:22,cb:42,f:14,a:350,cat:'thai'},
+  {n:'ข้าวคลุกกะปิ',e:'Shrimp Paste Rice',c:520,p:18,cb:60,f:22,a:300,cat:'thai'},
+  {n:'หมูสะเต๊ะ',e:'Pork Satay',c:280,p:24,cb:8,f:16,a:120,cat:'thai'},
+  {n:'ขนมจีบ',e:'Steamed Dumpling',c:160,p:8,cb:18,f:6,a:80,cat:'thai'},
+  {n:'ไข่เจียวหมูสับ',e:'Thai Omelet w/ Pork',c:320,p:20,cb:4,f:24,a:120,cat:'thai'},
+  {n:'ผัดผักบุ้ง',e:'Stir-fried Morning Glory',c:140,p:6,cb:10,f:8,a:200,cat:'thai'},
+  {n:'ยำมาม่า',e:'Spicy Noodle Salad',c:340,p:12,cb:42,f:14,a:250,cat:'thai'},
+  {n:'ขนมปังปิ้งสังขยา',e:'Sangkaya Toast',c:280,p:6,cb:42,f:10,a:100,cat:'dessert'},
+  // Chain restaurants — Thailand
+  {n:'KFC ไก่ทอด 1 ชิ้น',e:'KFC Fried Chicken (1pc)',c:320,p:22,cb:8,f:22,a:150,cat:'fastfood'},
+  {n:'McDonald\'s บิ๊กแม็ค',e:'McDonald\'s Big Mac',c:550,p:25,cb:45,f:30,a:220,cat:'fastfood'},
+  {n:'7-11 ไส้กรอกอีสาน',e:'7-11 Isaan Sausage',c:230,p:10,cb:14,f:14,a:80,cat:'fastfood'},
+  {n:'7-11 ข้าวกะเพราหมู',e:'7-11 Basil Pork Rice',c:480,p:18,cb:62,f:16,a:280,cat:'fastfood'},
+  {n:'Starbucks ลาเต้ Grande',e:'Starbucks Latte (Grande)',c:190,p:13,cb:18,f:7,a:473,cat:'drink'},
+  {n:'ชาไทย',e:'Thai Iced Tea',c:280,p:3,cb:48,f:8,a:400,cat:'drink'},
+  // Healthy + protein
+  {n:'อกไก่ย่าง 100g',e:'Grilled Chicken Breast 100g',c:165,p:31,cb:0,f:3.6,a:100,cat:'healthy'},
+  {n:'ปลาทูน่ากระป๋อง',e:'Canned Tuna (water)',c:99,p:22,cb:0,f:0.7,a:100,cat:'healthy'},
+  {n:'เต้าหู้ขาว',e:'Soft Tofu',c:76,p:8,cb:2,f:5,a:100,cat:'healthy'},
 ];
 const CATS={thai:'🇹🇭',japanese:'🇯🇵',korean:'🇰🇷',chinese:'🇨🇳',italian:'🇮🇹',indian:'🇮🇳',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
 const MEAL_ICONS={เช้า:'🌅',กลางวัน:'☀️',เย็น:'🌙',ของว่าง:'🍎'};
@@ -4426,6 +4451,17 @@ if('serviceWorker' in navigator){
 }
 // Show changelog popup if user just upgraded
 setTimeout(checkWhatsNew,1200);
+
+// ═══ Esc-to-close — close topmost open modal/drawer ═══
+document.addEventListener('keydown',(e)=>{
+  if(e.key!=='Escape')return;
+  // Drawer first (visible has .open)
+  const drawer=document.getElementById('drawer');
+  if(drawer&&drawer.classList.contains('open')){closeDrawer();return;}
+  // Then topmost modal-bg that's visible (no .hide). Newest-added in DOM order is "topmost"
+  const open=[...document.querySelectorAll('.modal-bg:not(.hide)')];
+  if(open.length){open[open.length-1].classList.add('hide');return;}
+});
 // ═══ APP UPDATE FLOW ═══
 // Three pieces work together:
 //   1. SW 'updatefound' → showUpdateModal(worker) — user picks update-now / later
@@ -4434,6 +4470,16 @@ setTimeout(checkWhatsNew,1200);
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.11.0':{
+    th:[
+      '🍱 ฐานข้อมูลอาหารขยาย +21 รายการ — Thai street food (ข้าวขาหมู/หมูแดง/หมูกรอบ/ก๋วยจั๊บ/ข้าวคลุกกะปิ/หมูสะเต๊ะ/ขนมจีบ/ผัดมาม่า/ไข่เจียวหมูสับ/ผัดผักบุ้ง/ยำมาม่า), chain restaurants (KFC/McDonald\'s/7-11/Starbucks), เครื่องดื่ม + อาหาร healthy',
+      '♿ Accessibility: กด **Esc** เพื่อปิด modal/drawer · ARIA labels บนปุ่ม icon (☰ menu, sync dot, ☀️/🌙 mode toggle, +/− น้ำ)',
+    ],
+    en:[
+      '🍱 Food DB +21 entries — Thai street food (Stewed Pork Leg Rice, Red Pork, Crispy Pork, Kuay Jub, Shrimp Paste Rice, Pork Satay, Steamed Dumpling, Stir-fried Instant Noodles, Thai Omelet w/ Pork, Morning Glory, Spicy Noodle Salad), chains (KFC/McDonald\'s/7-11/Starbucks), drinks + healthy options',
+      '♿ Accessibility: press **Esc** to close modal/drawer · ARIA labels on icon-only buttons (☰ menu, sync dot, ☀️/🌙 toggle, water +/−)',
+    ],
+  },
   '2.10.0':{
     th:[
       '🍱 **ชุดอาหาร (Quick Presets)** — แท็บใหม่ในหน้าเพิ่มอาหาร · กดปุ่มเดียวบันทึกอาหารทั้งวันเป็นชุด → แตะใช้ครั้งหน้าได้ทันที',
