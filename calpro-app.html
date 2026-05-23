@@ -733,7 +733,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.3 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.4 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
       <div class="card">
@@ -916,7 +916,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.3 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.4 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -933,7 +933,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.7.3';
+const APP_VERSION = '2.7.4';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -3115,37 +3115,39 @@ async function sendNotification(title, body, onProgress){
   if(perm!=='granted')throw new Error('Permission not granted');
   const opts={body,icon:'icon-192.png',badge:'icon-192.png',tag:'calpro-test',requireInteraction:false};
   // 2a) Prefer ServiceWorkerRegistration.showNotification — installed PWAs + mobile require this
+  // IMPORTANT: navigator.serviceWorker.ready waits indefinitely until the SW becomes "active +
+  // controlling". On a fresh PWA install (or after a SW version bump that's still in "waiting"
+  // state), it never resolves and the whole notification request hangs.
+  // Use getRegistration() instead — it returns the current registration synchronously-ish
+  // without waiting for activation. showNotification() works on registrations that have either
+  // an active OR a waiting worker.
+  let swReg=null;
   if('serviceWorker' in navigator){
     try{
-      log('waiting service worker');
-      // navigator.serviceWorker.ready can hang forever if SW isn't installed yet —
-      // race with a timeout so we don't lock up.
-      const reg=await withTimeout(navigator.serviceWorker.ready,4000,'sw ready');
-      if(reg&&typeof reg.showNotification==='function'){
-        log('showing via SW');
-        await withTimeout(reg.showNotification(title,opts),3000,'showNotification');
-        return 'sw';
+      log('finding service worker');
+      swReg=await withTimeout(navigator.serviceWorker.getRegistration(),2500,'getRegistration');
+      if(!swReg){
+        log('registering service worker');
+        swReg=await withTimeout(navigator.serviceWorker.register('sw.js'),6000,'register');
       }
-    }catch(e){console.warn('[notif] SW path failed:',e.message);log('SW failed — fallback');}
+    }catch(e){console.warn('[notif] SW lookup failed:',e.message);log('SW lookup failed');}
   }
-  // 2b) Fallback to Notification constructor
+  // Try showing via SW first (works on installed PWAs)
+  if(swReg&&typeof swReg.showNotification==='function'){
+    try{
+      log('showing via SW');
+      await withTimeout(swReg.showNotification(title,opts),4000,'showNotification');
+      return 'sw';
+    }catch(e){console.warn('[notif] showNotification failed:',e.message);log('SW show failed — fallback');}
+  }
+  // 2b) Fallback to Notification constructor (works in regular desktop tabs)
   try{
     log('trying constructor');
     const n=new Notification(title,opts);
     n.onclick=()=>{window.focus();n.close();};
     setTimeout(()=>{try{n.close();}catch{}},5000);
     return 'web';
-  }catch(e){
-    if(/illegal constructor/i.test(e.message||'')&&'serviceWorker' in navigator){
-      log('illegal constructor — retrying SW');
-      try{
-        const reg=await withTimeout(navigator.serviceWorker.ready,3000,'sw ready retry');
-        await withTimeout(reg.showNotification(title,opts),3000,'showNotification retry');
-        return 'sw';
-      }catch(e2){throw new Error('SW notification failed: '+e2.message);}
-    }
-    throw e;
-  }
+  }catch(e){throw new Error(e.message||'notification failed');}
 }
 async function testNotification(){
   const status=document.getElementById('notifStatus');
