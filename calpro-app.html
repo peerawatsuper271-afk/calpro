@@ -301,6 +301,16 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .font-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
 .font-chip{background:var(--surface2);border:1.5px solid transparent;color:var(--text);border-radius:9px;padding:9px;cursor:pointer;font-size:.84rem;text-align:center;transition:all .2s;}
 .font-chip.active{border-color:var(--accent);}
+/* Onboarding wizard */
+.ob-slide{animation:obIn .25s ease-out;}
+.ob-slide.hide{display:none;}
+@keyframes obIn{from{opacity:0;transform:translateX(8px);}to{opacity:1;transform:translateX(0);}}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--surface2);transition:all .2s;}
+.ob-dot.active{background:var(--accent);width:24px;border-radius:4px;}
+.ob-goal-chip{text-align:left;padding:14px;font-size:.9rem;}
+/* Focus visible — keyboard-only outline */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
+.bnt:focus-visible,.icon-btn:focus-visible{outline-offset:-2px;}
 .bdg-g{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
 .bdg-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 5px;text-align:center;}
 .bdg-item.earned{border-color:var(--amber);}
@@ -762,7 +772,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.11.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.12.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -860,6 +870,75 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <button class="btn-sec" onclick="addWater(-1);renderQuickWater()" style="font-size:1.2rem">−</button>
       <button class="btn" onclick="addWater(1);renderQuickWater()" style="font-size:1.2rem">+</button>
     </div>
+  </div>
+</div>
+
+<!-- ONBOARDING WIZARD — first-launch flow -->
+<div class="modal-bg hide" id="onboardModal">
+  <div class="modal" style="max-width:380px">
+    <div id="onboardSlides">
+      <!-- Slide 1: Welcome -->
+      <div class="ob-slide" data-step="1">
+        <div style="text-align:center">
+          <div style="font-size:3.6rem;margin-bottom:6px">🔥</div>
+          <h3 style="margin:0">Cal<span style="color:var(--accent)">Pro+</span></h3>
+          <div style="font-size:.82rem;color:var(--muted);margin:10px 0 16px;line-height:1.6" data-i18n="ob_welcome">ยินดีต้อนรับ! แอปนี้ช่วยติดตามแคลอรี่ + คำนวณ TDEE ฟรี · ไม่ต้องล็อกอิน · ทำงาน offline</div>
+          <div style="font-size:.74rem;color:var(--muted);line-height:1.6" data-i18n="ob_welcome_sub">มาตั้งค่าง่ายๆ 3 ขั้นตอนกัน</div>
+        </div>
+      </div>
+      <!-- Slide 2: Profile -->
+      <div class="ob-slide hide" data-step="2">
+        <h3 style="margin:0 0 6px 0" data-i18n="ob_profile_title">ข้อมูลพื้นฐาน</h3>
+        <div style="font-size:.74rem;color:var(--muted);margin-bottom:12px;line-height:1.5" data-i18n="ob_profile_sub">ใช้คำนวณ TDEE/BMR ที่แม่นยำ · ปรับได้ทีหลัง</div>
+        <div class="fgrid g2" style="margin-bottom:8px">
+          <div class="fl"><label data-i18n="gender">เพศ</label><select id="obGender"><option value="male" data-i18n="male">ชาย</option><option value="female" data-i18n="female">หญิง</option></select></div>
+          <div class="fl"><label data-i18n="age">อายุ (ปี)</label><input type="number" id="obAge" min="10" max="100" placeholder="25"></div>
+        </div>
+        <div class="fgrid g2" style="margin-bottom:8px">
+          <div class="fl"><label data-i18n="weight_kg">น้ำหนัก (กก.)</label><input type="number" id="obWeight" min="20" max="300" step="0.1" placeholder="65"></div>
+          <div class="fl"><label data-i18n="height_cm">ส่วนสูง (ซม.)</label><input type="number" id="obHeight" min="100" max="250" placeholder="170"></div>
+        </div>
+        <div class="fl"><label data-i18n="activity_lvl">ระดับกิจกรรม</label>
+          <select id="obAct">
+            <option value="1.2" data-i18n="tact_1">นั่งทำงาน · ไม่ออกกำลังกาย (×1.2)</option>
+            <option value="1.375" data-i18n="tact_2">เบา · 1–3 วัน/สัปดาห์ (×1.375)</option>
+            <option value="1.55" selected data-i18n="tact_3">ปานกลาง · 3–5 วัน/สัปดาห์ (×1.55)</option>
+            <option value="1.725" data-i18n="tact_4">หนัก · 6–7 วัน/สัปดาห์ (×1.725)</option>
+            <option value="1.9" data-i18n="tact_5">หนักมาก · งานใช้แรง (×1.9)</option>
+          </select>
+        </div>
+      </div>
+      <!-- Slide 3: Goal -->
+      <div class="ob-slide hide" data-step="3">
+        <h3 style="margin:0 0 6px 0" data-i18n="ob_goal_title">เป้าหมายของคุณ</h3>
+        <div style="font-size:.74rem;color:var(--muted);margin-bottom:14px;line-height:1.5" data-i18n="ob_goal_sub">เลือกเป้าหมายเพื่อคำนวณแคลอรี่/วัน</div>
+        <div style="display:grid;grid-template-columns:1fr;gap:8px">
+          <button class="gchip ob-goal-chip" data-g="lose" onclick="pickObGoal(this)" data-i18n="goal_lose">🔥 ลดน้ำหนัก</button>
+          <button class="gchip ob-goal-chip active" data-g="maintain" onclick="pickObGoal(this)" data-i18n="goal_maintain">⚖️ คงน้ำหนัก</button>
+          <button class="gchip ob-goal-chip" data-g="gain" onclick="pickObGoal(this)" data-i18n="goal_gain">💪 เพิ่มกล้ามเนื้อ</button>
+        </div>
+        <div id="obGoalPreview" style="margin-top:12px;padding:12px;background:var(--surface2);border-radius:9px;font-size:.84rem;text-align:center"></div>
+      </div>
+      <!-- Slide 4: Done -->
+      <div class="ob-slide hide" data-step="4">
+        <div style="text-align:center">
+          <div style="font-size:3rem;margin-bottom:8px">🎉</div>
+          <h3 style="margin:0 0 8px 0" data-i18n="ob_done_title">พร้อมใช้งานแล้ว!</h3>
+          <div id="obSummary" style="font-size:.86rem;color:var(--muted);line-height:1.7;margin-bottom:12px"></div>
+          <div style="font-size:.74rem;color:var(--muted);line-height:1.6" data-i18n="ob_done_tip">เริ่มจากแท็บ <b>+ เพิ่ม</b> ด้านล่าง → ค้นหาอาหาร → กดเลือก → ตั้งจำนวนเท่า → เพิ่ม</div>
+        </div>
+      </div>
+    </div>
+    <!-- Step indicators -->
+    <div style="display:flex;justify-content:center;gap:6px;margin:14px 0 10px">
+      <div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div>
+    </div>
+    <!-- Nav buttons -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn-sec" id="obBackBtn" onclick="obPrev()" data-i18n="ob_back">ย้อนกลับ</button>
+      <button class="btn" id="obNextBtn" onclick="obNext()" data-i18n="ob_next">ถัดไป</button>
+    </div>
+    <button class="btn-sec" onclick="finishOnboard(true)" style="width:100%;margin-top:8px;font-size:.74rem;padding:6px" data-i18n="ob_skip">ข้ามไปก่อน</button>
   </div>
 </div>
 
@@ -1018,7 +1097,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.11.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.12.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1035,7 +1114,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.11.0';
+const APP_VERSION = '2.12.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1125,6 +1204,11 @@ const I18N = {
     whats_new_title:'✨ มีอะไรใหม่',check_updates:'🔄 ตรวจหาเวอร์ชันใหม่',check_updates_sub:'ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง',checking_updates:'กำลังตรวจสอบ...',latest_version:'คุณใช้เวอร์ชันล่าสุดอยู่แล้ว ✓',
     clean_photos:'🧹 ลบรูปอาหารเก่า (>30 วัน)',
     quick_presets:'🍱 ชุดอาหาร',preset_save_today:'+ บันทึกอาหารวันนี้เป็นชุด',preset_name_ph:'ตั้งชื่อชุด เช่น "มื้อเช้าปกติ"',preset_no_items:'ยังไม่มีชุด · ลองเพิ่มอาหารวันนี้แล้วกด "บันทึกเป็นชุด"',preset_added:'เพิ่ม %n รายการจากชุด ✓',preset_deleted:'ลบชุดแล้ว',preset_empty_day:'ยังไม่มีอาหารที่บันทึกวันนี้',preset_saved:'บันทึกชุดแล้ว ✓',
+    ob_welcome:'ยินดีต้อนรับ! แอปนี้ช่วยติดตามแคลอรี่ + คำนวณ TDEE ฟรี · ไม่ต้องล็อกอิน · ทำงาน offline',ob_welcome_sub:'มาตั้งค่าง่ายๆ 3 ขั้นตอนกัน',
+    ob_profile_title:'ข้อมูลพื้นฐาน',ob_profile_sub:'ใช้คำนวณ TDEE/BMR ที่แม่นยำ · ปรับได้ทีหลัง',
+    ob_goal_title:'เป้าหมายของคุณ',ob_goal_sub:'เลือกเป้าหมายเพื่อคำนวณแคลอรี่/วัน',
+    ob_done_title:'พร้อมใช้งานแล้ว!',ob_done_tip:'เริ่มจากแท็บ <b>+ เพิ่ม</b> ด้านล่าง → ค้นหาอาหาร → กดเลือก → ตั้งจำนวนเท่า → เพิ่ม',
+    ob_back:'ย้อนกลับ',ob_next:'ถัดไป',ob_start:'เริ่มใช้งาน',ob_skip:'ข้ามไปก่อน',ob_fillall:'กรอกข้อมูลให้ครบก่อน',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1193,6 +1277,11 @@ const I18N = {
     whats_new_title:'✨ What\'s new',check_updates:'🔄 Check for updates',check_updates_sub:'See if a new CalPro+ version is available',checking_updates:'Checking...',latest_version:'You\'re on the latest version ✓',
     clean_photos:'🧹 Clear photos older than 30 days',
     quick_presets:'🍱 Sets',preset_save_today:'+ Save today as a set',preset_name_ph:'Name this set e.g. "Usual breakfast"',preset_no_items:'No sets yet · log some food today and tap "Save as set"',preset_added:'Added %n items from set ✓',preset_deleted:'Set deleted',preset_empty_day:'No food logged today yet',preset_saved:'Set saved ✓',
+    ob_welcome:'Welcome! Track your calories + calculate TDEE for free · No login · Works offline',ob_welcome_sub:'Let\'s set up in 3 quick steps',
+    ob_profile_title:'Your basics',ob_profile_sub:'Used for accurate TDEE/BMR · editable later',
+    ob_goal_title:'Your goal',ob_goal_sub:'Pick a goal to calculate your daily calorie target',
+    ob_done_title:'You\'re all set!',ob_done_tip:'Start from the <b>+ Add</b> tab below → search a food → tap → pick a portion → add',
+    ob_back:'Back',ob_next:'Next',ob_start:'Start using',ob_skip:'Skip for now',ob_fillall:'Please fill in all fields first',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -2897,6 +2986,126 @@ function setFont(key){
   document.querySelectorAll('.font-chip').forEach(b=>b.classList.toggle('active',b.dataset.font===key));
 }
 
+// ═══ ONBOARDING WIZARD (first-launch profile setup) ═══
+let _obStep=1,_obGoal='maintain';
+function shouldShowOnboarding(){
+  if(lsLoad('calpro_onboarded',false))return false;
+  // If user already filled in their age/weight, treat them as set up
+  if(userProfile&&userProfile.age&&userProfile.weight&&userProfile.height)return false;
+  return true;
+}
+function openOnboard(){
+  _obStep=1;_obGoal=userProfile?.goal_type||'maintain';
+  obShowStep(1);
+  // Pre-fill from any existing profile so users who tap "skip" don't lose data
+  const set=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.value=v;};
+  set('obGender',userProfile?.gender||'male');
+  set('obAge',userProfile?.age||'');
+  set('obWeight',userProfile?.weight||'');
+  set('obHeight',userProfile?.height||'');
+  set('obAct',userProfile?.activity||1.55);
+  document.querySelectorAll('.ob-goal-chip').forEach(b=>b.classList.toggle('active',b.dataset.g===_obGoal));
+  document.getElementById('onboardModal').classList.remove('hide');
+}
+function obShowStep(n){
+  _obStep=n;
+  document.querySelectorAll('#onboardSlides .ob-slide').forEach(s=>{
+    s.classList.toggle('hide',+s.dataset.step!==n);
+  });
+  document.querySelectorAll('.ob-dot').forEach((d,i)=>d.classList.toggle('active',i===n-1));
+  document.getElementById('obBackBtn').style.visibility=n===1?'hidden':'visible';
+  const nextBtn=document.getElementById('obNextBtn');
+  nextBtn.querySelector('[data-i18n]')||nextBtn;
+  // On last step the button becomes "Start using"
+  if(n===4){nextBtn.innerHTML=`<span data-i18n="ob_start">${t('ob_start')}</span>`;}
+  else{nextBtn.innerHTML=`<span data-i18n="ob_next">${t('ob_next')}</span>`;}
+  if(n===4)renderObSummary();
+}
+function obNext(){
+  const isEn=settings.lang==='en';
+  if(_obStep===2){
+    const age=+document.getElementById('obAge').value;
+    const weight=+document.getElementById('obWeight').value;
+    const height=+document.getElementById('obHeight').value;
+    if(!age||!weight||!height){showToast(t('ob_fillall'));return;}
+  }else if(_obStep===3){
+    // Goal already chosen via chip — calc + save profile
+    saveObProfile();
+  }
+  if(_obStep<4){obShowStep(_obStep+1);}
+  else{finishOnboard(false);}
+}
+function obPrev(){if(_obStep>1)obShowStep(_obStep-1);}
+function pickObGoal(btn){
+  document.querySelectorAll('.ob-goal-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  _obGoal=btn.dataset.g;
+  // Live update preview if visible
+  const prevEl=document.getElementById('obGoalPreview');
+  if(prevEl){
+    const {tdee,goalCal}=computeObTdee();
+    if(tdee){
+      const isEn=settings.lang==='en';
+      prevEl.innerHTML=`TDEE: <b>${Math.round(tdee).toLocaleString()}</b> kcal · ${isEn?'goal':'เป้า'}: <b style="color:var(--accent)">${goalCal.toLocaleString()} kcal${dayUnitShort()}</b>`;
+    }
+  }
+}
+function computeObTdee(){
+  const gender=document.getElementById('obGender').value;
+  const age=+document.getElementById('obAge').value;
+  const weight=+document.getElementById('obWeight').value;
+  const height=+document.getElementById('obHeight').value;
+  const act=+document.getElementById('obAct').value||1.55;
+  if(!age||!weight||!height)return {};
+  const bmr=gender==='male'
+    ?88.362+13.397*weight+4.799*height-5.677*age
+    :447.593+9.247*weight+3.098*height-4.330*age;
+  const tdee=bmr*act;
+  let goalCal=_obGoal==='lose'?tdee-500:_obGoal==='gain'?tdee+300:tdee;
+  goalCal=Math.max(1200,Math.round(goalCal));
+  return {bmr,tdee,goalCal};
+}
+function saveObProfile(){
+  const {tdee,goalCal}=computeObTdee();
+  if(!goalCal)return;
+  userProfile={
+    ...(userProfile||{}),
+    gender:document.getElementById('obGender').value,
+    age:+document.getElementById('obAge').value,
+    weight:+document.getElementById('obWeight').value,
+    height:+document.getElementById('obHeight').value,
+    activity:+document.getElementById('obAct').value,
+    goal_type:_obGoal,
+    goal_cal:goalCal,
+  };
+  if(!userProfile.display_name)userProfile.display_name='';
+  saveProfile_LS();
+}
+function renderObSummary(){
+  const isEn=settings.lang==='en';
+  const {bmr,tdee,goalCal}=computeObTdee();
+  const goalLbl=_obGoal==='lose'?(isEn?'Lose':'ลดน้ำหนัก'):_obGoal==='gain'?(isEn?'Gain':'เพิ่มกล้าม'):(isEn?'Maintain':'คงน้ำหนัก');
+  document.getElementById('obSummary').innerHTML=
+    `<div>${isEn?'Goal':'เป้าหมาย'}: <b>${goalLbl}</b></div>`+
+    `<div>${isEn?'Daily target':'แคลอรี่/วัน'}: <b style="color:var(--accent);font-size:1.2rem">${goalCal?goalCal.toLocaleString():'—'} kcal</b></div>`+
+    (tdee?`<div style="font-size:.74rem;opacity:.8;margin-top:4px">BMR ${Math.round(bmr)} · TDEE ${Math.round(tdee)}</div>`:'');
+}
+function finishOnboard(skipped){
+  if(!skipped){
+    // Make sure profile is saved (in case step 3 was skipped over via Next chain)
+    saveObProfile();
+  }
+  lsSave('calpro_onboarded',true);
+  document.getElementById('onboardModal').classList.add('hide');
+  // Refresh visible UI to reflect new profile
+  if(!skipped){
+    if(typeof renderProfileUI==='function')renderProfileUI();
+    if(typeof renderToday==='function')renderToday();
+    const hdr=document.getElementById('hdrSub');
+    if(hdr&&userProfile?.goal_cal)hdr.textContent=(userProfile.display_name||t('you'))+' · '+userProfile.goal_cal.toLocaleString()+' kcal'+dayUnitShort();
+  }
+}
+
 // ═══ FEEDBACK (opens a mailto draft to the developer) ═══
 const FEEDBACK_EMAIL='peerawat_pee123@hotmail.co.th';
 function openFeedback(){
@@ -4451,6 +4660,8 @@ if('serviceWorker' in navigator){
 }
 // Show changelog popup if user just upgraded
 setTimeout(checkWhatsNew,1200);
+// First-launch onboarding (only if profile is empty + flag not set)
+setTimeout(()=>{if(shouldShowOnboarding())openOnboard();},700);
 
 // ═══ Esc-to-close — close topmost open modal/drawer ═══
 document.addEventListener('keydown',(e)=>{
@@ -4470,6 +4681,20 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.12.0':{
+    th:[
+      '👋 **First-launch Onboarding Wizard** — 4 ขั้นตอน: ทักทาย → กรอกข้อมูล (เพศ/อายุ/น้ำหนัก/ส่วนสูง/กิจกรรม) → เลือกเป้าหมาย → สรุป TDEE',
+      'แสดงผลแคลอรี่/วัน แนะนำแบบ real-time ก่อนกด "เริ่มใช้งาน"',
+      'ปุ่ม "ข้ามไปก่อน" สำหรับผู้ใช้ที่อยากสำรวจเอง',
+      '♿ Focus visible — outline สีเด่นเมื่อกด Tab navigate ผ่านปุ่ม',
+    ],
+    en:[
+      '👋 **First-launch Onboarding Wizard** — 4 steps: welcome → basics (gender/age/weight/height/activity) → goal → TDEE summary',
+      'Real-time TDEE preview before tapping "Start using"',
+      '"Skip for now" button for users who want to explore freely',
+      '♿ Focus-visible — accent outline when navigating buttons via keyboard',
+    ],
+  },
   '2.11.0':{
     th:[
       '🍱 ฐานข้อมูลอาหารขยาย +21 รายการ — Thai street food (ข้าวขาหมู/หมูแดง/หมูกรอบ/ก๋วยจั๊บ/ข้าวคลุกกะปิ/หมูสะเต๊ะ/ขนมจีบ/ผัดมาม่า/ไข่เจียวหมูสับ/ผัดผักบุ้ง/ยำมาม่า), chain restaurants (KFC/McDonald\'s/7-11/Starbucks), เครื่องดื่ม + อาหาร healthy',
