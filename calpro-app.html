@@ -506,6 +506,11 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         </div>
         <button class="btn" onclick="addManual()" data-i18n="btn_add">+ เพิ่มอาหาร</button>
       </div>
+      <div class="card">
+        <h3 data-i18n="recipe_title">🍲 สร้างสูตรอาหาร</h3>
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="recipe_sub">รวมหลายส่วนผสมเป็นเมนูเดียว · บันทึกลงไลบรารีเพื่อใช้ซ้ำได้</div>
+        <button class="btn-sec" onclick="openRecipeModal()" style="width:100%" data-i18n="recipe_open">+ สร้างสูตรใหม่</button>
+      </div>
     </div>
 
     <!-- ANALYSIS -->
@@ -772,7 +777,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.12.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.13.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -870,6 +875,28 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <button class="btn-sec" onclick="addWater(-1);renderQuickWater()" style="font-size:1.2rem">−</button>
       <button class="btn" onclick="addWater(1);renderQuickWater()" style="font-size:1.2rem">+</button>
     </div>
+  </div>
+</div>
+
+<!-- RECIPE BUILDER MODAL — composite custom food from multiple ingredients -->
+<div class="modal-bg hide" id="recipeModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hdr">
+      <h3 data-i18n="recipe_title">🍲 สร้างสูตรอาหาร</h3>
+      <button class="mc-close" onclick="closeRecipeModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="fgrid g2" style="margin-bottom:8px">
+      <div class="fl"><label data-i18n="recipe_name">ชื่อสูตร</label><input type="text" id="rcpName" placeholder="เช่น ผัดไทยโฮมเมด" data-i18n="recipe_name_ph"></div>
+      <div class="fl"><label data-i18n="recipe_servings">จำนวนเสิร์ฟ</label><input type="number" id="rcpServings" min="1" max="20" step="1" value="1" oninput="renderRcpTotals()"></div>
+    </div>
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:6px" data-i18n="recipe_ingredients">ส่วนผสม</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <input type="text" id="rcpSearch" placeholder="ค้นหาอาหาร..." data-i18n="search_ph" oninput="renderRcpSearch(this.value)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;outline:none">
+    </div>
+    <div id="rcpSearchResults" style="max-height:140px;overflow-y:auto;margin-bottom:10px"></div>
+    <div id="rcpIngredients"></div>
+    <div id="rcpTotals" style="background:var(--surface2);border-radius:9px;padding:10px;margin:10px 0;font-size:.84rem"></div>
+    <button class="btn" onclick="saveRecipe()"><span data-i18n="recipe_save">💾 บันทึกสูตร</span></button>
   </div>
 </div>
 
@@ -1097,7 +1124,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.12.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.13.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1114,7 +1141,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.12.0';
+const APP_VERSION = '2.13.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1209,6 +1236,8 @@ const I18N = {
     ob_goal_title:'เป้าหมายของคุณ',ob_goal_sub:'เลือกเป้าหมายเพื่อคำนวณแคลอรี่/วัน',
     ob_done_title:'พร้อมใช้งานแล้ว!',ob_done_tip:'เริ่มจากแท็บ <b>+ เพิ่ม</b> ด้านล่าง → ค้นหาอาหาร → กดเลือก → ตั้งจำนวนเท่า → เพิ่ม',
     ob_back:'ย้อนกลับ',ob_next:'ถัดไป',ob_start:'เริ่มใช้งาน',ob_skip:'ข้ามไปก่อน',ob_fillall:'กรอกข้อมูลให้ครบก่อน',
+    recipe_title:'🍲 สร้างสูตรอาหาร',recipe_sub:'รวมหลายส่วนผสมเป็นเมนูเดียว · บันทึกลงไลบรารีเพื่อใช้ซ้ำได้',recipe_open:'+ สร้างสูตรใหม่',
+    recipe_name:'ชื่อสูตร',recipe_name_ph:'เช่น ผัดไทยโฮมเมด',recipe_servings:'จำนวนเสิร์ฟ',recipe_ingredients:'ส่วนผสม',recipe_save:'💾 บันทึกสูตร',recipe_no_ing:'ยังไม่มีส่วนผสม · ค้นหาด้านบนเพื่อเพิ่ม',recipe_per_serving:'ต่อ 1 เสิร์ฟ',recipe_total:'รวมทั้งหมด',recipe_need_name:'กรุณาตั้งชื่อสูตร',recipe_need_ing:'กรุณาเพิ่มส่วนผสม',recipe_saved:'บันทึกสูตรลงไลบรารีแล้ว ✓',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1282,6 +1311,8 @@ const I18N = {
     ob_goal_title:'Your goal',ob_goal_sub:'Pick a goal to calculate your daily calorie target',
     ob_done_title:'You\'re all set!',ob_done_tip:'Start from the <b>+ Add</b> tab below → search a food → tap → pick a portion → add',
     ob_back:'Back',ob_next:'Next',ob_start:'Start using',ob_skip:'Skip for now',ob_fillall:'Please fill in all fields first',
+    recipe_title:'🍲 Create recipe',recipe_sub:'Combine multiple ingredients into one item · saves to your library for reuse',recipe_open:'+ Create new recipe',
+    recipe_name:'Recipe name',recipe_name_ph:'e.g. Homemade Pad Thai',recipe_servings:'Servings',recipe_ingredients:'Ingredients',recipe_save:'💾 Save recipe',recipe_no_ing:'No ingredients yet · search above to add',recipe_per_serving:'per serving',recipe_total:'Total',recipe_need_name:'Please name the recipe',recipe_need_ing:'Please add ingredients',recipe_saved:'Recipe saved to library ✓',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -2986,6 +3017,107 @@ function setFont(key){
   document.querySelectorAll('.font-chip').forEach(b=>b.classList.toggle('active',b.dataset.font===key));
 }
 
+// ═══ RECIPE BUILDER — compose a custom food from multiple ingredients ═══
+let _recipeIngs=[];     // [{f:foodObj, qty:Number}]
+function openRecipeModal(){
+  _recipeIngs=[];
+  document.getElementById('rcpName').value='';
+  document.getElementById('rcpServings').value=1;
+  document.getElementById('rcpSearch').value='';
+  document.getElementById('rcpSearchResults').innerHTML='';
+  renderRcpIngredients();
+  document.getElementById('recipeModal').classList.remove('hide');
+}
+function closeRecipeModal(){document.getElementById('recipeModal').classList.add('hide');}
+function renderRcpSearch(q){
+  const w=document.getElementById('rcpSearchResults');
+  const txt=(q||'').trim().toLowerCase();
+  if(!txt){w.innerHTML='';return;}
+  const matches=allFoods().filter(f=>f.n.includes(txt)||(f.e||'').toLowerCase().includes(txt)).slice(0,6);
+  if(!matches.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
+  w.innerHTML=matches.map(f=>{
+    return `<div class="sri" data-fn="${escapeHtml(f.n)}" style="cursor:pointer;padding:6px 8px"><div style="flex:1"><div class="sri-n" style="font-size:.84rem">${foodDisplayName(f)}</div><div class="sri-m" style="font-size:.66rem">${f.c} kcal</div></div><div style="color:var(--accent);font-weight:600">+</div></div>`;
+  }).join('');
+  w.querySelectorAll('.sri').forEach(el=>{
+    el.onclick=()=>{
+      const f=findFood(el.dataset.fn);if(!f)return;
+      _recipeIngs.push({f,qty:1});
+      // Clear search after adding
+      document.getElementById('rcpSearch').value='';
+      w.innerHTML='';
+      renderRcpIngredients();
+    };
+  });
+}
+function renderRcpIngredients(){
+  const w=document.getElementById('rcpIngredients');
+  if(!_recipeIngs.length){
+    w.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.74rem">${t('recipe_no_ing')}</div>`;
+    renderRcpTotals();return;
+  }
+  w.innerHTML=_recipeIngs.map((ing,i)=>{
+    const cal=Math.round(ing.f.c*ing.qty);
+    return `<div class="sri" style="padding:6px 8px;gap:6px">`+
+      `<div style="flex:1;min-width:0"><div class="sri-n" style="font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${foodDisplayName(ing.f)}</div><div class="sri-m" style="font-size:.66rem">${cal} kcal</div></div>`+
+      `<input type="number" min="0.1" max="20" step="0.1" value="${ing.qty}" data-idx="${i}" class="rcp-qty" style="width:55px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px;font-family:inherit;font-size:.78rem;text-align:center">`+
+      `<button class="del" data-rem="${i}" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:4px 6px">✕</button>`+
+    `</div>`;
+  }).join('');
+  w.querySelectorAll('.rcp-qty').forEach(el=>{
+    el.oninput=()=>{
+      const i=+el.dataset.idx;
+      _recipeIngs[i].qty=Math.max(0.1,Math.min(20,+el.value||1));
+      renderRcpTotals();
+    };
+  });
+  w.querySelectorAll('[data-rem]').forEach(el=>{
+    el.onclick=()=>{_recipeIngs.splice(+el.dataset.rem,1);renderRcpIngredients();};
+  });
+  renderRcpTotals();
+}
+function renderRcpTotals(){
+  const isEn=settings.lang==='en';
+  const servings=Math.max(1,+document.getElementById('rcpServings').value||1);
+  let totC=0,totP=0,totCb=0,totF=0;
+  _recipeIngs.forEach(({f,qty})=>{
+    totC+=f.c*qty;totP+=(f.p||0)*qty;totCb+=(f.cb||0)*qty;totF+=(f.f||0)*qty;
+  });
+  const perC=Math.round(totC/servings),perP=+(totP/servings).toFixed(1),perCb=+(totCb/servings).toFixed(1),perF=+(totF/servings).toFixed(1);
+  document.getElementById('rcpTotals').innerHTML=
+    `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">${t('recipe_total')}</span><span style="font-weight:600">${Math.round(totC)} kcal</span></div>`+
+    `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">${t('recipe_per_serving')}</span><span style="font-weight:600;color:var(--accent)">${perC} kcal</span></div>`+
+    `<div style="display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted)"><span>P:${perP}g · C:${perCb}g · F:${perF}g</span><span>${servings} ${isEn?'serving(s)':'เสิร์ฟ'}</span></div>`;
+}
+function saveRecipe(){
+  const isEn=settings.lang==='en';
+  const name=document.getElementById('rcpName').value.trim();
+  if(!name){showToast(t('recipe_need_name'));return;}
+  if(!_recipeIngs.length){showToast(t('recipe_need_ing'));return;}
+  const servings=Math.max(1,+document.getElementById('rcpServings').value||1);
+  let totC=0,totP=0,totCb=0,totF=0;
+  _recipeIngs.forEach(({f,qty})=>{
+    totC+=f.c*qty;totP+=(f.p||0)*qty;totCb+=(f.cb||0)*qty;totF+=(f.f||0)*qty;
+  });
+  // Custom food stores per-serving values (matches FOODS schema)
+  const newFood={
+    n:name,
+    e:'',
+    c:Math.round(totC/servings),
+    p:+(totP/servings).toFixed(1),
+    cb:+(totCb/servings).toFixed(1),
+    f:+(totF/servings).toFixed(1),
+    a:null,
+    cat:'custom',
+  };
+  // Replace by name if exists (lets user iterate on a recipe)
+  const exIdx=customFoods.findIndex(x=>x.n===name);
+  if(exIdx>=0)customFoods[exIdx]=newFood;else customFoods.push(newFood);
+  lsSave(LS_CUSTOM,customFoods);
+  closeRecipeModal();
+  showToast(t('recipe_saved'));
+  scheduleAutoSync?.('saveRecipe');
+}
+
 // ═══ ONBOARDING WIZARD (first-launch profile setup) ═══
 let _obStep=1,_obGoal='maintain';
 function shouldShowOnboarding(){
@@ -4681,6 +4813,20 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.13.0':{
+    th:[
+      '🍲 **Recipe Builder (สร้างสูตรอาหาร)** — รวมหลายส่วนผสมเป็นเมนูเดียวบันทึกลงไลบรารี',
+      'ค้นหาส่วนผสม → กดเพิ่ม → ปรับจำนวนเท่าได้ละเอียด · ลบส่วนผสมได้',
+      'แสดง kcal/macros **ต่อเสิร์ฟ** + รวมทั้งหมด แบบ real-time',
+      'บันทึกชื่อซ้ำ = อัปเดตสูตรเดิม (ปรับสูตรง่าย)',
+    ],
+    en:[
+      '🍲 **Recipe Builder** — combine multiple ingredients into one library entry',
+      'Search → tap to add → fine-tune each ingredient\'s quantity · remove any line',
+      'Live **per-serving** kcal/macros + grand total',
+      'Saving with an existing name updates the previous recipe (easy iteration)',
+    ],
+  },
   '2.12.0':{
     th:[
       '👋 **First-launch Onboarding Wizard** — 4 ขั้นตอน: ทักทาย → กรอกข้อมูล (เพศ/อายุ/น้ำหนัก/ส่วนสูง/กิจกรรม) → เลือกเป้าหมาย → สรุป TDEE',

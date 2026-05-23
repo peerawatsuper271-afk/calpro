@@ -67,6 +67,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.13.0** *(web only · BETA)* — **🍲 Recipe Builder** ในหน้าเพิ่มอาหาร — สร้างสูตรจากหลายส่วนผสม · ปรับจำนวนเท่าได้ละเอียด · per-serving + total live preview · บันทึกซ้ำชื่อ = อัปเดต
 - **v2.12.0** *(web only · BETA)* — **👋 Onboarding Wizard** ครั้งแรกที่เปิดแอป — 4 ขั้นตอน (ทักทาย → กรอกข้อมูล → เลือกเป้า → สรุป TDEE) · live TDEE preview ก่อนเริ่มใช้งาน · "ข้ามไปก่อน" ก็ได้ · ♿ focus-visible outline ตอนกด Tab navigation
 - **v2.11.0** *(web only · BETA)* — **🍱 +21 อาหารใหม่** Thai street food (ข้าวขาหมู/หมูแดง/หมูกรอบ/ก๋วยจั๊บ/ข้าวคลุกกะปิ/หมูสะเต๊ะ/ขนมจีบ/ผัดมาม่า/ผัดผักบุ้ง/ยำมาม่า) + chains (KFC/McDonald's/7-11/Starbucks) + healthy (อกไก่ 100g/ทูน่ากระป๋อง/เต้าหู้) · **♿ Accessibility**: กด Esc ปิด modal/drawer · ARIA labels บนปุ่ม icon (☰ · sync dot · mode toggle · water +/−)
 - **v2.10.0** *(web only · BETA)* — **🍱 Quick Presets (ชุดอาหาร)** — แท็บใหม่ในหน้าเพิ่มอาหาร · บันทึกอาหารทั้งวันเป็นชุด เช่น "มื้อเช้าปกติ" → ครั้งหน้าแตะเดียวเพิ่มได้ครบ · ลบ/ดูจำนวน kcal รวมของแต่ละชุด · รองรับ export/import
