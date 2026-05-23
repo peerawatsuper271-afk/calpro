@@ -67,6 +67,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.15.0** *(web only · BETA)* — **🖼️ Meal photos → IndexedDB** — เลิกใช้ localStorage 5MB · ความจุระดับ GB+ · sentinel `idb:<id>` · cloud sync resolve เป็น data URL ก่อนอัปโหลด · ลบ/clean/reset cascade ลง IDB · backward-compat กับรูปเก่า inline
 - **v2.14.0** *(web only · BETA)* — **📷 Barcode Scanner** ในหน้าเพิ่มอาหาร — สแกนบาร์โค้ดสินค้าด้วยกล้อง (ZXing lazy-load) · ดึงข้อมูลโภชนาการจาก OpenFoodFacts (ฟรี ไม่ต้องสมัคร) · พิมพ์รหัสเองได้เมื่อกล้องใช้ไม่ได้ · ต่อเข้า Portion Picker เพื่อเลือกจำนวนก่อนเพิ่ม
 - **v2.13.0** *(web only · BETA)* — **🍲 Recipe Builder** ในหน้าเพิ่มอาหาร — สร้างสูตรจากหลายส่วนผสม · ปรับจำนวนเท่าได้ละเอียด · per-serving + total live preview · บันทึกซ้ำชื่อ = อัปเดต
 - **v2.12.0** *(web only · BETA)* — **👋 Onboarding Wizard** ครั้งแรกที่เปิดแอป — 4 ขั้นตอน (ทักทาย → กรอกข้อมูล → เลือกเป้า → สรุป TDEE) · live TDEE preview ก่อนเริ่มใช้งาน · "ข้ามไปก่อน" ก็ได้ · ♿ focus-visible outline ตอนกด Tab navigation

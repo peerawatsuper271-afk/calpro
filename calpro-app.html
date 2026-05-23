@@ -778,7 +778,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.14.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.15.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1147,7 +1147,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.14.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.15.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1164,7 +1164,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.14.0';
+const APP_VERSION = '2.15.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1354,6 +1354,41 @@ const LS_CUSTOM = 'calpro_custom_foods'; // Array of {n,e,c,p,cb,f,a,cat:'custom
 const LS_WORKOUTS = 'calpro_workouts';   // { date: [{id,name,minutes,kcal}] }
 const LS_MEASURES = 'calpro_measures';   // { date: {waist,hip,chest,neck,bf} }
 const LS_PRESETS = 'calpro_presets';     // Array of {id, name, foods:[entry-shape], created}
+
+// ═══ IndexedDB — store meal photos out of localStorage (5MB quota → ~GBs) ═══
+// Photos stored here keyed by entry.id. entry.photo === 'idb:'+entry.id is the sentinel.
+// Falls back to data-URL inline if IDB ever fails (no breakage).
+const IDB_NAME='calpro-idb',IDB_VER=1,IDB_PHOTOS='photos';
+let _idbPromise=null;
+function idbOpen(){
+  if(_idbPromise)return _idbPromise;
+  _idbPromise=new Promise((res,rej)=>{
+    if(!('indexedDB' in window))return rej(new Error('no IDB'));
+    const r=indexedDB.open(IDB_NAME,IDB_VER);
+    r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains(IDB_PHOTOS))db.createObjectStore(IDB_PHOTOS);};
+    r.onsuccess=()=>res(r.result);
+    r.onerror=()=>rej(r.error);
+  });
+  return _idbPromise.catch(e=>{_idbPromise=null;throw e;});
+}
+async function idbPut(key,val){
+  try{const db=await idbOpen();return new Promise((res,rej)=>{const tx=db.transaction(IDB_PHOTOS,'readwrite');tx.objectStore(IDB_PHOTOS).put(val,key);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error);});}catch(e){return Promise.reject(e);}
+}
+async function idbGet(key){
+  try{const db=await idbOpen();return new Promise((res,rej)=>{const tx=db.transaction(IDB_PHOTOS,'readonly');const r=tx.objectStore(IDB_PHOTOS).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}catch(e){return null;}
+}
+async function idbDelete(key){
+  try{const db=await idbOpen();return new Promise((res)=>{const tx=db.transaction(IDB_PHOTOS,'readwrite');tx.objectStore(IDB_PHOTOS).delete(key);tx.oncomplete=()=>res();tx.onerror=()=>res();});}catch(e){return null;}
+}
+async function idbClear(){
+  try{const db=await idbOpen();return new Promise((res)=>{const tx=db.transaction(IDB_PHOTOS,'readwrite');tx.objectStore(IDB_PHOTOS).clear();tx.oncomplete=()=>res();tx.onerror=()=>res();});}catch(e){return null;}
+}
+// Returns a usable <img> src for an entry's photo field (data URL or idb:key)
+async function resolvePhotoSrc(p){
+  if(!p)return '';
+  if(p.startsWith('idb:'))return (await idbGet(p.slice(4)))||'';
+  return p;
+}
 
 function lsLoad(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
 function lsSave(key, val){
@@ -1675,7 +1710,10 @@ function cleanOldPhotos(){
   Object.keys(allEntries).forEach(k=>{
     if(k>=cutoffKey)return;            // newer than cutoff — keep photo
     (allEntries[k]||[]).forEach(e=>{
-      if(e.photo){delete e.photo;removed++;}
+      if(e.photo){
+        if(e.photo.startsWith('idb:'))idbDelete(e.id);
+        delete e.photo;removed++;
+      }
     });
   });
   if(!removed){
@@ -1703,6 +1741,7 @@ function resetAllData(){
   localStorage.removeItem(LS_WORKOUTS);
   localStorage.removeItem(LS_MEASURES);
   localStorage.removeItem(LS_PRESETS);
+  idbClear();   // wipe IDB-stored meal photos too
   showToast(settings.lang==='en'?'Data cleared':'ล้างข้อมูลแล้ว');
   setTimeout(()=>location.reload(), 800);
 }
@@ -2143,14 +2182,24 @@ function loadPhotoForEntry(file){
   };
   reader.readAsDataURL(file);
 }
-function openPhotoViewer(src){
-  document.getElementById('photoViewerImg').src=src;
+async function openPhotoViewer(src){
+  const resolved=await resolvePhotoSrc(src);
+  document.getElementById('photoViewerImg').src=resolved;
   document.getElementById('photoViewer').classList.remove('hide');
 }
 function closePhotoViewer(){document.getElementById('photoViewer').classList.add('hide');}
 function insertEntry(data){
   const row={id:uid(),entry_date:currentDate,created_at:new Date().toISOString(),...data};
-  if(pendingPhoto){row.photo=pendingPhoto;pendingPhoto=null;
+  if(pendingPhoto){
+    // Try IDB first (keeps localStorage tiny); fall back to inline data URL on failure
+    const dataUrl=pendingPhoto;pendingPhoto=null;
+    idbPut(row.id,dataUrl).then(()=>{
+      row.photo='idb:'+row.id;saveEntries_LS();
+    }).catch(()=>{
+      row.photo=dataUrl;saveEntries_LS();
+    });
+    // Temporarily mark so render won't drop the preview before IDB finishes
+    row.photo='idb:'+row.id;
     const prev=document.getElementById('photoPreview');if(prev){prev.src='';prev.style.display='none';}
   }
   dailyEntries.push(row);
@@ -2161,7 +2210,10 @@ function insertEntry(data){
   scheduleAutoSync('insertEntry');
 }
 function delFood(id){
+  const gone=dailyEntries.find(e=>e.id===id);
   dailyEntries=dailyEntries.filter(e=>e.id!==id);
+  // Clean up IDB photo if any (cheap, fire-and-forget)
+  if(gone?.photo&&gone.photo.startsWith('idb:'))idbDelete(gone.id);
   saveEntries_LS();
   renderToday();
   scheduleAutoSync('delFood');
@@ -2616,9 +2668,14 @@ async function syncToCloud(){
   }
   // 2. Food entries — upsert by (user_id, client_id), then delete cloud-only orphans
   const entries=[];
-  Object.entries(allEntries).forEach(([date,arr])=>(arr||[]).forEach(e=>{
-    entries.push({user_id:uid,entry_date:date,food_name:e.food_name,calories:e.calories,protein:e.protein||0,carbs:e.carbs||0,fat:e.fat||0,amount_g:e.amount_g,meal:e.meal,photo:e.photo||null,client_id:e.id,updated_at:new Date().toISOString()});
-  }));
+  // Resolve idb: photo sentinels to real data URLs before push (Supabase column is text)
+  for(const [date,arr] of Object.entries(allEntries)){
+    for(const e of (arr||[])){
+      let photo=e.photo||null;
+      if(photo&&photo.startsWith('idb:'))photo=(await idbGet(e.id))||null;
+      entries.push({user_id:uid,entry_date:date,food_name:e.food_name,calories:e.calories,protein:e.protein||0,carbs:e.carbs||0,fat:e.fat||0,amount_g:e.amount_g,meal:e.meal,photo,client_id:e.id,updated_at:new Date().toISOString()});
+    }
+  }
   {
     const ok=await syncStep('food_entries', async ()=>{
       if(entries.length){
@@ -3759,11 +3816,18 @@ function renderToday(){
       if(item.amount_g)meta.push(item.amount_g+'g');
       if(item.protein)meta.push('P:'+item.protein);
       if(item.carbs)meta.push('C:'+item.carbs);
-      const photoHtml=item.photo?`<img src="${item.photo}" class="fi-photo" onclick="openPhotoViewer('${item.id}_photo')" data-id="${item.id}" alt="">`:'';
+      // For IDB-backed photos, omit src up-front and fill async (no broken image flash)
+      const isIdbPhoto=item.photo&&item.photo.startsWith('idb:');
+      const inlineSrc=item.photo&&!isIdbPhoto?` src="${item.photo}"`:'';
+      const photoHtml=item.photo?`<img${inlineSrc} class="fi-photo" data-id="${item.id}" alt="">`:'';
       div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="${t('edit')}">✏️</button><button class="del" onclick="delFood('${item.id}')" title="${t('del')}">✕</button></div>`;
       if(item.photo){
         const imgEl=div.querySelector('.fi-photo');
         imgEl.onclick=()=>openPhotoViewer(item.photo);
+        if(isIdbPhoto){
+          // Defer load — first paint stays fast, photo fills when IDB resolves
+          idbGet(item.id).then(src=>{if(src&&imgEl.isConnected)imgEl.src=src;});
+        }
       }
       g.appendChild(div);
     });
@@ -4936,6 +5000,22 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.15.0':{
+    th:[
+      '🖼️ **รูปอาหารย้ายไป IndexedDB** — แทนที่จะใส่ใน localStorage 5MB · ตอนนี้เก็บได้รูประดับ GB+',
+      'ถ่ายรูปอาหารได้เยอะกว่าเดิมหลายเท่าโดยไม่กระทบความเร็ว',
+      'ลบรูปอาหาร/ล้างข้อมูล/ลบรูปเก่า ก็เคลียร์ IDB ให้ครบ',
+      'Cloud sync แปลง IDB photo → data URL อัตโนมัติก่อนอัปโหลด (ใช้กับ schema เดิมได้)',
+      'รูปเก่าที่อยู่ใน localStorage ยังใช้ได้ปกติ (auto-fallback)',
+    ],
+    en:[
+      '🖼️ **Meal photos moved to IndexedDB** — instead of the 5MB localStorage cap · now capacity is GBs',
+      'Take many more meal photos without slowing the app',
+      'Delete/reset/clean-photos paths all clear IDB too',
+      'Cloud sync transparently resolves IDB photos to data URLs at upload',
+      'Existing inline photos still load (graceful fallback)',
+    ],
+  },
   '2.14.0':{
     th:[
       '📷 **Barcode Scanner** — สแกนบาร์โค้ดสินค้าด้วยกล้อง · ดึงข้อมูลโภชนาการจากฐาน OpenFoodFacts (ฟรี ไม่ต้องสมัคร)',
