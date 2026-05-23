@@ -790,7 +790,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     </div>
     <div id="signupNameWrap" class="fl" style="margin-bottom:10px;display:none">
       <label data-i18n="display_name">ชื่อที่แสดง</label>
-      <input type="text" id="authName" placeholder="ชื่อของคุณ">
+      <input type="text" id="authName" placeholder="ชื่อของคุณ" data-i18n="name_ph_profile">
     </div>
     <div class="fl" style="margin-bottom:10px">
       <label>Email</label>
@@ -933,7 +933,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.7.4';
+const APP_VERSION = '2.7.5';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1015,6 +1015,7 @@ const I18N = {
     water_goal_cfg:'เป้าหมายน้ำดื่ม',
     about_desc:'ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง',
     about_links:'ลิงก์',about_credits:'เครดิต',
+    theme_dark:'มืด',theme_night:'ดึก',theme_forest:'ป่า',theme_warm:'อุ่น',theme_ocean:'มหาสมุทร',theme_light:'สว่าง',theme_cream:'ครีม',theme_mint:'มินต์',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1075,6 +1076,7 @@ const I18N = {
     water_goal_cfg:'Water goal',
     about_desc:'Calorie tracking, TDEE calculator and weight management · Free · No login required · Data stored locally',
     about_links:'Links',about_credits:'Credits',
+    theme_dark:'Dark',theme_night:'Night',theme_forest:'Forest',theme_warm:'Warm',theme_ocean:'Ocean',theme_light:'Light',theme_cream:'Cream',theme_mint:'Mint',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -1375,7 +1377,7 @@ function saveEntries_LS(){
   lsSave(LS_ENTRIES, allEntries);
 }
 function resetAllData(){
-  if (!confirm('ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหาร + น้ำหนัก + น้ำดื่ม)? ไม่สามารถกู้คืนได้')) return;
+  if (!confirm(settings.lang==='en'?'Reset ALL data (profile + food + weight + water)? This cannot be undone.':'ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหาร + น้ำหนัก + น้ำดื่ม)? ไม่สามารถกู้คืนได้')) return;
   localStorage.removeItem(LS_PROFILE);
   localStorage.removeItem(LS_ENTRIES);
   localStorage.removeItem(LS_WEIGHTS);
@@ -1385,7 +1387,7 @@ function resetAllData(){
   localStorage.removeItem(LS_CUSTOM);
   localStorage.removeItem(LS_WORKOUTS);
   localStorage.removeItem(LS_MEASURES);
-  showToast('ล้างข้อมูลแล้ว');
+  showToast(settings.lang==='en'?'Data cleared':'ล้างข้อมูลแล้ว');
   setTimeout(()=>location.reload(), 800);
 }
 
@@ -1413,7 +1415,7 @@ function exportData(){
   a.download='calpro-backup-'+todayKey()+'.json';
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
-  showToast('Export สำเร็จ 📤');
+  showToast(settings.lang==='en'?'Export complete':'Export สำเร็จ');
 }
 function importData(file){
   if(!file)return;
@@ -1421,11 +1423,14 @@ function importData(file){
   reader.onload=(e)=>{
     try{
       const data=JSON.parse(e.target.result);
-      if(data.app!=='CalPro'&&data.app!=='CalPro+')throw new Error('ไฟล์ไม่ใช่ของ CalPro+');
-      if(!data.profile||!data.entries)throw new Error('ไฟล์ข้อมูลไม่ครบ');
-      const exportDate=data.exported_at?new Date(data.exported_at).toLocaleDateString('th-TH'):'ไม่ทราบ';
+      if(data.app!=='CalPro'&&data.app!=='CalPro+')throw new Error(settings.lang==='en'?'Not a CalPro+ file':'ไฟล์ไม่ใช่ของ CalPro+');
+      if(!data.profile||!data.entries)throw new Error(settings.lang==='en'?'Incomplete file':'ไฟล์ข้อมูลไม่ครบ');
+      const loc=settings.lang==='en'?'en-GB':'th-TH';
+      const exportDate=data.exported_at?new Date(data.exported_at).toLocaleDateString(loc):(settings.lang==='en'?'unknown':'ไม่ทราบ');
       const numDays=Object.keys(data.entries).length;
-      const msg=`นำเข้าจากไฟล์ v${data.version||'?'} (${exportDate})\nจะแทนที่ข้อมูลปัจจุบันทั้งหมด (${numDays} วัน)\n\nต้องการดำเนินการต่อ?`;
+      const msg=settings.lang==='en'
+        ?`Import from v${data.version||'?'} (${exportDate})\nThis will replace all current data (${numDays} days)\n\nContinue?`
+        :`นำเข้าจากไฟล์ v${data.version||'?'} (${exportDate})\nจะแทนที่ข้อมูลปัจจุบันทั้งหมด (${numDays} วัน)\n\nต้องการดำเนินการต่อ?`;
       if(!confirm(msg))return;
       lsSave(LS_PROFILE,data.profile);
       lsSave(LS_ENTRIES,data.entries);
@@ -1437,10 +1442,10 @@ function importData(file){
       if(data.workouts)lsSave(LS_WORKOUTS,data.workouts);
       if(data.measures)lsSave(LS_MEASURES,data.measures);
       if(data.settings)lsSave(LS_SETTINGS,data.settings);
-      showToast('Import สำเร็จ · กำลังโหลด...');
+      showToast(settings.lang==='en'?'Import complete · loading...':'Import สำเร็จ · กำลังโหลด...');
       setTimeout(()=>location.reload(),800);
     }catch(err){
-      showToast('Import ล้มเหลว: '+err.message);
+      showToast((settings.lang==='en'?'Import failed: ':'Import ล้มเหลว: ')+err.message);
     }
   };
   reader.readAsText(file);
@@ -1639,7 +1644,7 @@ function addFromSearch(f){
 function addManual(){
   const name=document.getElementById('fName').value.trim();
   const cal=+document.getElementById('fCal').value;
-  if(!name||!cal){showToast('กรอกชื่อและแคลอรี่');return;}
+  if(!name||!cal){showToast(settings.lang==='en'?'Enter name and calories':'กรอกชื่อและแคลอรี่');return;}
   const meal=document.getElementById('mealSel').value;
   const p=+document.getElementById('fP').value||0;
   const c=+document.getElementById('fC').value||0;
@@ -1649,7 +1654,7 @@ function addManual(){
     if(!customFoods.find(x=>x.n===name)){
       customFoods.push({n:name,e:'',c:cal,p,cb:c,f:fat,a:null,cat:'custom'});
       lsSave(LS_CUSTOM,customFoods);
-      showToast('บันทึก '+name+' ลงไลบรารี ✓');
+      showToast(settings.lang==='en'?('Saved '+name+' to library ✓'):('บันทึก '+name+' ลงไลบรารี ✓'));
     }
   }
   trackRecent(name);
@@ -1697,7 +1702,7 @@ function insertEntry(data){
   saveEntries_LS();
   renderToday();
   showPage('today',document.querySelector('.bnt'));
-  showToast('เพิ่ม '+data.food_name+' แล้ว');
+  showToast((settings.lang==='en'?'Added ':'เพิ่ม ')+data.food_name+(settings.lang==='en'?'':' แล้ว'));
   scheduleAutoSync('insertEntry');
 }
 function delFood(id){
@@ -1796,27 +1801,28 @@ function switchAuthMode(mode){
   document.getElementById('authSubmit').textContent=mode==='login'?(settings.lang==='en'?'Sign in':'เข้าสู่ระบบ'):(settings.lang==='en'?'Create account':'สร้างบัญชี');
 }
 async function submitAuth(){
-  if(!sb){showToast('Supabase ไม่พร้อม');return;}
+  const isEn=settings.lang==='en';
+  if(!sb){showToast(isEn?'Supabase not ready':'Supabase ไม่พร้อม');return;}
   const email=document.getElementById('authEmail').value.trim();
   const pass=document.getElementById('authPass').value;
   const msgEl=document.getElementById('authMsg');
-  if(!email||!pass){msgEl.style.color='var(--accent)';msgEl.textContent='ใส่อีเมล + รหัสผ่าน';return;}
-  msgEl.style.color='var(--muted)';msgEl.textContent='กำลังดำเนินการ...';
+  if(!email||!pass){msgEl.style.color='var(--accent)';msgEl.textContent=isEn?'Enter email + password':'ใส่อีเมล + รหัสผ่าน';return;}
+  msgEl.style.color='var(--muted)';msgEl.textContent=isEn?'Processing...':'กำลังดำเนินการ...';
   try{
     if(authMode==='login'){
       const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
       if(error)throw error;
-      msgEl.style.color='var(--green)';msgEl.textContent='เข้าสู่ระบบสำเร็จ ✓';
+      msgEl.style.color='var(--green)';msgEl.textContent=isEn?'Signed in ✓':'เข้าสู่ระบบสำเร็จ ✓';
     }else{
       const name=document.getElementById('authName').value.trim()||email.split('@')[0];
       const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{display_name:name}}});
       if(error)throw error;
       msgEl.style.color='var(--green)';
-      msgEl.textContent=data.session?'สมัครสำเร็จ ✓':'สมัครสำเร็จ! กรุณายืนยันอีเมล (ถ้าเปิด confirm email)';
+      msgEl.textContent=data.session?(isEn?'Signed up ✓':'สมัครสำเร็จ ✓'):(isEn?'Signed up! Please confirm your email (if enabled)':'สมัครสำเร็จ! กรุณายืนยันอีเมล (ถ้าเปิด confirm email)');
     }
     setTimeout(()=>closeAuthModal(),700);
   }catch(e){
-    msgEl.style.color='var(--accent)';msgEl.textContent=e.message||'ผิดพลาด';
+    msgEl.style.color='var(--accent)';msgEl.textContent=e.message||(isEn?'Error':'ผิดพลาด');
   }
 }
 async function signOutCloud(){
@@ -1837,8 +1843,8 @@ async function deleteCloudAccount(){
       sb.from('custom_foods').delete().eq('user_id',uid),
       sb.from('friends').delete().eq('user_id',uid),
     ]);
-    showToast('ลบข้อมูลใน cloud แล้ว');
-  }catch(e){showToast('ลบไม่สำเร็จ: '+e.message);}
+    showToast(settings.lang==='en'?'Cloud data deleted':'ลบข้อมูลใน cloud แล้ว');
+  }catch(e){showToast((settings.lang==='en'?'Delete failed: ':'ลบไม่สำเร็จ: ')+e.message);}
 }
 
 // Refresh whatever page the user is currently on (after sync, lang change, etc.)
@@ -2348,7 +2354,7 @@ async function syncFromCloud(){
 // ═══ WORKOUTS ═══
 function openWorkoutModal(){
   const sel=document.getElementById('wkType');sel.innerHTML='';
-  EXERCISES.forEach((ex,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`${ex.n} · ${ex.e}`;sel.appendChild(o);});
+  EXERCISES.forEach((ex,i)=>{const o=document.createElement('option');o.value=i;o.textContent=settings.lang==='en'?`${ex.e} · ${ex.n}`:`${ex.n} · ${ex.e}`;sel.appendChild(o);});
   document.getElementById('wkMin').value=30;
   recalcWorkoutKcal();
   sel.oninput=recalcWorkoutKcal;
@@ -2370,12 +2376,13 @@ function saveWorkout(){
   const mins=+document.getElementById('wkMin').value;
   const kcal=+document.getElementById('wkKcal').value;
   const ex=EXERCISES[idx];
-  if(!ex||!mins||!kcal){showToast('กรอกข้อมูล/Fill in info');return;}
+  if(!ex||!mins||!kcal){showToast(settings.lang==='en'?'Fill in all fields':'กรอกข้อมูลให้ครบ');return;}
   if(!allWorkouts[currentDate])allWorkouts[currentDate]=[];
   allWorkouts[currentDate].push({id:uid(),name:ex.n,name_en:ex.e,minutes:mins,kcal,met:ex.met});
   lsSave(LS_WORKOUTS,allWorkouts);
   closeWorkoutModal();renderToday();
-  showToast('เพิ่ม '+ex.n+' (-'+kcal+' kcal) ✓');
+  const exName=settings.lang==='en'?(ex.e||ex.n):ex.n;
+  showToast((settings.lang==='en'?'Added ':'เพิ่ม ')+exName+' (-'+kcal+' kcal) ✓');
   scheduleAutoSync('workout');
 }
 function delWorkout(id){
@@ -2449,11 +2456,11 @@ function checkSmartGoal(){
   document.getElementById('smartGoalBody').innerHTML=`${reason}<br><br>${lblCur}: <strong>${cur.toLocaleString()} kcal${dayUnitShort()}</strong><br>${lblRec}: <strong style="color:var(--accent)">${suggested.toLocaleString()} kcal${dayUnitShort()}</strong>`;
   document.getElementById('smartGoalApply').onclick=()=>{
     userProfile.goal_cal=suggested;saveProfile_LS();
-    document.getElementById('hdrSub').textContent=(userProfile.display_name||'คุณ')+' · '+suggested.toLocaleString()+' kcal/วัน';
+    document.getElementById('hdrSub').textContent=(userProfile.display_name||t('you'))+' · '+suggested.toLocaleString()+' kcal/'+(settings.lang==='en'?'day':'วัน');
     renderToday();
     lsSave('calpro_smart_goal_check',now);
     closeSmartGoal();
-    showToast('ปรับเป้าเป็น '+suggested.toLocaleString()+' kcal ✓');
+    showToast((settings.lang==='en'?'Goal adjusted to ':'ปรับเป้าเป็น ')+suggested.toLocaleString()+' kcal ✓');
   };
   lsSave('calpro_smart_goal_check',now);
   document.getElementById('smartGoalModal').classList.remove('hide');
@@ -2618,7 +2625,7 @@ function renderWaterWidget(){
 // ═══ WEIGHT ═══
 function logWeight(){
   const v=+document.getElementById('weightInput').value;
-  if(!v||v<20||v>300){showToast('กรอกน้ำหนักเป็นกก. (20-300)');return;}
+  if(!v||v<20||v>300){showToast(settings.lang==='en'?'Enter kg (20-300)':'กรอกน้ำหนักเป็นกก. (20-300)');return;}
   allWeights[currentDate]=v;
   lsSave(LS_WEIGHTS,allWeights);
   // Auto-sync profile weight if logging today
@@ -2628,7 +2635,7 @@ function logWeight(){
   }
   document.getElementById('weightInput').value='';
   renderWeightWidget();renderProfileUI();
-  showToast('บันทึกน้ำหนัก '+v+' กก. ✓');
+  showToast((settings.lang==='en'?'Saved ':'บันทึก ')+v+' '+t('kg_unit')+' ✓');
   scheduleAutoSync('weight');
 }
 function renderWeightWidget(){
@@ -2662,7 +2669,7 @@ function saveEditedFood(){
   const i=dailyEntries.findIndex(x=>x.id===id);if(i<0)return;
   const name=document.getElementById('eName').value.trim();
   const cal=+document.getElementById('eCal').value;
-  if(!name||!cal){showToast('ใส่ชื่อและแคลอรี่');return;}
+  if(!name||!cal){showToast(settings.lang==='en'?'Enter name and calories':'ใส่ชื่อและแคลอรี่');return;}
   dailyEntries[i]={...dailyEntries[i],
     food_name:name,calories:cal,
     protein:+document.getElementById('eP').value||0,
@@ -2670,7 +2677,7 @@ function saveEditedFood(){
     fat:+document.getElementById('eF').value||0,
     meal:document.getElementById('eMeal').value};
   saveEntries_LS();renderToday();closeEditModal();
-  showToast('บันทึกแก้ไขแล้ว ✓');
+  showToast(settings.lang==='en'?'Edit saved ✓':'บันทึกแก้ไขแล้ว ✓');
   scheduleAutoSync('editFood');
 }
 
@@ -2722,7 +2729,7 @@ function renderToday(){
       if(item.protein)meta.push('P:'+item.protein);
       if(item.carbs)meta.push('C:'+item.carbs);
       const photoHtml=item.photo?`<img src="${item.photo}" class="fi-photo" onclick="openPhotoViewer('${item.id}_photo')" data-id="${item.id}" alt="">`:'';
-      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="แก้ไข">✏️</button><button class="del" onclick="delFood('${item.id}')" title="ลบ">✕</button></div>`;
+      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="${t('edit')}">✏️</button><button class="del" onclick="delFood('${item.id}')" title="${t('del')}">✕</button></div>`;
       if(item.photo){
         const imgEl=div.querySelector('.fi-photo');
         imgEl.onclick=()=>openPhotoViewer(item.photo);
@@ -2880,7 +2887,7 @@ function saveProfile(){
   const goalW=+document.getElementById('pGoalW').value;
   const act=+document.getElementById('pAct').value;
   const goalType=document.querySelector('#pg-profile .gchip.active').dataset.g;
-  if(!age||!weight||!height){showToast('กรอกข้อมูลให้ครบ');return;}
+  if(!age||!weight||!height){showToast(settings.lang==='en'?'Fill in all fields':'กรอกข้อมูลให้ครบ');return;}
   let bmr=gender==='male'?88.362+13.397*weight+4.799*height-5.677*age:447.593+9.247*weight+3.098*height-4.330*age;
   const tdee=bmr*act;
   let gc=goalType==='lose'?tdee-500:goalType==='gain'?tdee+300:tdee;
@@ -3179,8 +3186,9 @@ function renderSettings(){
     Object.entries(THEMES).forEach(([k,v])=>{
       const b=document.createElement('button');b.className='th-swatch'+(settings.theme===k?' active':'');
       b.style.background=v.s2;b.style.border='2px solid '+(settings.theme===k?'var(--accent)':'transparent');
-      b.title=THEME_LABELS[k]||k;
-      b.innerHTML='<span style="font-size:.55rem;color:'+v.t+';font-weight:600">'+(THEME_LABELS[k]||k)+'</span>';
+      const lbl=t('theme_'+k)||THEME_LABELS[k]||k;
+      b.title=lbl;
+      b.innerHTML='<span style="font-size:.55rem;color:'+v.t+';font-weight:600">'+lbl+'</span>';
       b.onclick=()=>{settings.theme=k;if(v.mode==='dark')settings.lastDark=k;else settings.lastLight=k;lsSave(LS_SETTINGS,settings);applyTheme();renderSettings();};
       tg.appendChild(b);
     });
@@ -3257,11 +3265,11 @@ function openAvatarModal(){
 function closeAvatarModal(){document.getElementById('avatarModal').classList.add('hide');}
 function chooseAvatar(emoji){
   userProfile.avatar=emoji;saveProfile_LS();renderProfileUI();closeAvatarModal();
-  showToast('เปลี่ยนรูปแล้ว');
+  showToast(settings.lang==='en'?'Avatar changed':'เปลี่ยนรูปแล้ว');
 }
 function uploadAvatar(file){
   if(!file)return;
-  if(file.size>2*1024*1024){showToast('ไฟล์ใหญ่เกินไป (สูงสุด 2MB)');return;}
+  if(file.size>2*1024*1024){showToast(settings.lang==='en'?'File too large (max 2MB)':'ไฟล์ใหญ่เกินไป (สูงสุด 2MB)');return;}
   // Resize via canvas to keep localStorage small
   const reader=new FileReader();
   reader.onload=(e)=>{
@@ -3276,7 +3284,7 @@ function uploadAvatar(file){
       ctx.drawImage(img,sx,sy,minDim,minDim,0,0,SIZE,SIZE);
       userProfile.avatar=c.toDataURL('image/jpeg',0.82);
       saveProfile_LS();renderProfileUI();closeAvatarModal();
-      showToast('อัพโหลดรูปแล้ว');
+      showToast(settings.lang==='en'?'Photo uploaded':'อัพโหลดรูปแล้ว');
     };
     img.src=e.target.result;
   };
@@ -3284,7 +3292,7 @@ function uploadAvatar(file){
 }
 function resetAvatar(){
   delete userProfile.avatar;saveProfile_LS();renderProfileUI();closeAvatarModal();
-  showToast('ใช้ตัวอักษรแรก');
+  showToast(settings.lang==='en'?'Using initial letter':'ใช้ตัวอักษรแรก');
 }
 
 // ═══ SHARE ═══
@@ -3306,13 +3314,14 @@ function pickInvite(){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 async function shareText(text,title){
+  const isEn=settings.lang==='en';
   if(navigator.share){
-    try{await navigator.share({title,text,url:SHARE_URL});showToast('แชร์เรียบร้อย ✓');}
-    catch(e){if(e.name!=='AbortError')showToast('แชร์ไม่สำเร็จ');}
+    try{await navigator.share({title,text,url:SHARE_URL});showToast(isEn?'Shared ✓':'แชร์เรียบร้อย ✓');}
+    catch(e){if(e.name!=='AbortError')showToast(isEn?'Share failed':'แชร์ไม่สำเร็จ');}
   }else if(navigator.clipboard){
-    try{await navigator.clipboard.writeText(text+'\n'+SHARE_URL);showToast('คัดลอกแล้ว · วางได้ทุกที่ 📋');}
-    catch{showToast('คัดลอกไม่สำเร็จ');}
-  }else{showToast('เบราว์เซอร์ไม่รองรับการแชร์');}
+    try{await navigator.clipboard.writeText(text+'\n'+SHARE_URL);showToast(isEn?'Copied · paste anywhere':'คัดลอกแล้ว · วางได้ทุกที่');}
+    catch{showToast(isEn?'Copy failed':'คัดลอกไม่สำเร็จ');}
+  }else{showToast(isEn?'Browser does not support sharing':'เบราว์เซอร์ไม่รองรับการแชร์');}
 }
 // Build daily-summary share card as canvas (1080×1350 — Instagram 4:5)
 function buildShareCanvas(){
