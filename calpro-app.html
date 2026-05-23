@@ -733,7 +733,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.6 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.7 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
       <div class="card">
@@ -916,7 +916,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.6 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.7 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -933,7 +933,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.7.6';
+const APP_VERSION = '2.7.7';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2797,10 +2797,13 @@ function renderWaterStats(){
   const wrap=document.getElementById('waterStats');
   const bars=days7.map(d=>{
     const pct=Math.min(d.c/getWaterGoal(),1);
-    const hue=d.c>=getWaterGoal()?'var(--blue)':'var(--surface2)';
+    // Any cups drunk → fill blue (matches color of cup icons on Today).
+    // Saturate slightly when hitting the daily goal for visual feedback.
+    const hue=d.c>=getWaterGoal()?'var(--blue)':d.c>0?'var(--blue)':'var(--surface2)';
+    const op=d.c>=getWaterGoal()?'1':d.c>0?'.78':'1';
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">`+
       `<div style="width:14px;height:48px;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden">`+
-        `<div style="position:absolute;bottom:0;left:0;right:0;height:${(pct*100).toFixed(1)}%;background:${hue};transition:height .3s"></div>`+
+        `<div style="position:absolute;bottom:0;left:0;right:0;height:${(pct*100).toFixed(1)}%;background:${hue};opacity:${op};transition:height .3s"></div>`+
       `</div>`+
       `<div style="font-size:.58rem;color:var(--muted)">${d.label}</div>`+
       `<div style="font-size:.55rem;color:var(--muted)">${d.c||''}</div>`+
@@ -2958,8 +2961,8 @@ const DENSITY_CSS = `
 [data-simple="1"] .stats,
 [data-simple="1"] .macros,
 [data-simple="1"] .wwrow,
-[data-simple="1"] #pg-today .card:has(#workoutsList),
-[data-simple="1"] #pg-today > button.btn-sec{display:none;}
+[data-simple="1"] #pg-today .card:has(#workoutsList){display:none;}
+/* Keep the daily-share button visible even in Simple Mode */
 [data-simple="1"] .ring-cont{width:200px;height:200px;}
 [data-simple="1"] .ring-cont svg{width:200px;height:200px;}
 [data-simple="1"] .ring-num{font-size:2.4rem;}
@@ -3471,24 +3474,171 @@ async function shareDaily(){
     shareText(text,'CalPro+');
   }
 }
-function shareAchievements(){
-  // Build entries_by_day from allEntries
+// Build achievement card as canvas (1080×1350) — mirrors shareDaily style
+function buildAchievementCanvas(){
   const ebd={};Object.entries(allEntries).forEach(([k,arr])=>{if(arr&&arr.length)ebd[k]=arr;});
   const streak=calcStreak(ebd);
   const ontrack=daysOnTrack(ebd);
   const earned=earnedBadges(ebd);
   const totalDays=logDays(ebd);
-  const av=userProfile?.avatar&&!userProfile.avatar.startsWith('data:')?userProfile.avatar+' ':'';
-  const name=userProfile?.display_name||'ฉัน';
-  let text=`${av}${name} · CalPro+\n`+
-    `🔥 Streak: ${streak} วัน\n`+
-    `🎯 อยู่ในเป้า: ${ontrack} วัน\n`+
-    `📝 บันทึกรวม: ${totalDays} วัน`;
+  const isEn=settings.lang==='en';
+  const isLight=(THEMES[settings.theme]||THEMES.dark).mode==='light';
+  const accent=settings.accent||'#ff6b6b';
+
+  const W=1080,H=1350;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  // Background gradient
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  if(isLight){bg.addColorStop(0,'#ffffff');bg.addColorStop(1,'#f5f5f7');}
+  else{bg.addColorStop(0,'#16161e');bg.addColorStop(1,'#0c0c12');}
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // Accent glow corner
+  const glow=ctx.createRadialGradient(W,0,0,W,0,800);
+  glow.addColorStop(0,accent+'33');glow.addColorStop(1,'transparent');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+
+  const txt=isLight?'#1a1a24':'#e8e8f0';
+  const muted=isLight?'#6868a0':'#888aa0';
+  const fontTH='"Segoe UI","Noto Sans Thai","Apple SD Gothic Neo",sans-serif';
+
+  // Header — "CalPro+" left
+  ctx.fillStyle=txt;
+  ctx.font=`700 64px ${fontTH}`;
+  ctx.textBaseline='top';
+  ctx.fillText('Cal',80,80);
+  const calW=ctx.measureText('Cal').width;
+  ctx.fillStyle=accent;
+  ctx.fillText('Pro+',80+calW,80);
+
+  // Subheader — achievement label
+  ctx.fillStyle=muted;ctx.font=`500 32px ${fontTH}`;
+  ctx.fillText(isEn?'My Achievements':'ความสำเร็จของฉัน',80,170);
+
+  // Big STREAK display centered
+  const streakCY=420;
+  ctx.textAlign='center';
+  ctx.fillStyle=accent;
+  ctx.font=`700 100px ${fontTH}`;
+  ctx.fillText('🔥',W/2,streakCY-130);
+  ctx.fillStyle=txt;
+  ctx.font=`800 200px ${fontTH}`;
+  ctx.fillText(streak.toString(),W/2,streakCY-20);
+  ctx.fillStyle=muted;
+  ctx.font=`500 40px ${fontTH}`;
+  const streakLbl=isEn?(streak===1?'day streak':'day streak'):'วันติดต่อกัน';
+  ctx.fillText(streakLbl,W/2,streakCY+200);
+
+  // 3 stat boxes
+  const statsY=820;
+  const boxW=280,boxH=180,gap=30;
+  const totalW=boxW*3+gap*2;
+  const startX=(W-totalW)/2;
+  const stats=[
+    {label:isEn?'On track':'อยู่ในเป้า',value:ontrack,unit:isEn?'days':'วัน',color:'#51cf66'},
+    {label:isEn?'Logged':'บันทึก',value:totalDays,unit:isEn?'days':'วัน',color:'#74c0fc'},
+    {label:isEn?'Badges':'เหรียญ',value:earned.length,unit:'/'+BADGES.length,color:'#ffd43b'},
+  ];
+  stats.forEach((s,i)=>{
+    const bx=startX+i*(boxW+gap);
+    // Box background
+    ctx.fillStyle=isLight?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.04)';
+    const r=20;
+    ctx.beginPath();
+    ctx.moveTo(bx+r,statsY);
+    ctx.lineTo(bx+boxW-r,statsY);
+    ctx.quadraticCurveTo(bx+boxW,statsY,bx+boxW,statsY+r);
+    ctx.lineTo(bx+boxW,statsY+boxH-r);
+    ctx.quadraticCurveTo(bx+boxW,statsY+boxH,bx+boxW-r,statsY+boxH);
+    ctx.lineTo(bx+r,statsY+boxH);
+    ctx.quadraticCurveTo(bx,statsY+boxH,bx,statsY+boxH-r);
+    ctx.lineTo(bx,statsY+r);
+    ctx.quadraticCurveTo(bx,statsY,bx+r,statsY);
+    ctx.closePath();
+    ctx.fill();
+    // Label
+    ctx.fillStyle=muted;ctx.font=`500 28px ${fontTH}`;ctx.textAlign='center';
+    ctx.fillText(s.label,bx+boxW/2,statsY+30);
+    // Value
+    ctx.fillStyle=s.color;ctx.font=`700 78px ${fontTH}`;
+    ctx.fillText(s.value+'',bx+boxW/2,statsY+72);
+    // Unit
+    ctx.fillStyle=muted;ctx.font=`500 26px ${fontTH}`;
+    ctx.fillText(s.unit,bx+boxW/2,statsY+155);
+  });
+
+  // Earned badge icons row
   if(earned.length){
-    const badgeIcons=BADGES.filter(b=>earned.includes(b.id)).map(b=>b.ico).join(' ');
-    text+=`\n🏆 เหรียญ: ${badgeIcons}`;
+    const earnedList=BADGES.filter(b=>earned.includes(b.id));
+    const bdgY=1080;
+    ctx.fillStyle=muted;ctx.font=`500 28px ${fontTH}`;ctx.textAlign='center';
+    ctx.fillText(isEn?'🏆 Earned':'🏆 ได้รับแล้ว',W/2,bdgY-44);
+    ctx.font=`500 56px ${fontTH}`;
+    const icons=earnedList.map(b=>b.ico).join('   ');
+    ctx.fillStyle=txt;
+    ctx.fillText(icons,W/2,bdgY);
   }
-  shareText(text,'CalPro+ - ความสำเร็จของฉัน');
+
+  // Invite message at bottom
+  ctx.fillStyle=txt;
+  ctx.font=`600 42px ${fontTH}`;
+  const invite=pickInvite();
+  const wrapText=(text,maxW)=>{
+    const words=text.split(' ');const lines=[];let line='';
+    for(const w of words){const test=line+w+' ';if(ctx.measureText(test).width>maxW&&line){lines.push(line.trim());line=w+' ';}else line=test;}
+    if(line)lines.push(line.trim());return lines;
+  };
+  const lines=wrapText(invite,W-160);
+  const startY=H-160-(lines.length-1)*54;
+  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,startY+i*54));
+
+  ctx.textAlign='left';ctx.textBaseline='top';
+  return {canvas:cv,invite};
+}
+async function shareAchievements(){
+  const isEn=settings.lang==='en';
+  showToast(isEn?'Creating share image...':'กำลังสร้างรูป...',3000);
+  try{
+    const {canvas,invite}=buildAchievementCanvas();
+    const blob=await new Promise(r=>canvas.toBlob(r,'image/png',0.95));
+    if(!blob)throw new Error('canvas to blob failed');
+    const file=new File([blob],'calpro-achievements.png',{type:'image/png'});
+    const caption=`${invite}\n\n${SHARE_URL}`;
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file],text:caption,title:'CalPro+'});
+        showToast(isEn?'Shared ✓':'แชร์เรียบร้อย ✓');
+        return;
+      }catch(e){if(e.name==='AbortError')return;}
+    }
+    // Fallback: download + copy caption
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='calpro-achievements-'+todayKey()+'.png';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    if(navigator.clipboard){try{await navigator.clipboard.writeText(caption);}catch{}}
+    showToast(isEn?'Image downloaded + caption copied ✓':'ดาวน์โหลดรูป + คัดลอกข้อความแล้ว ✓',3500);
+  }catch(e){
+    console.warn('[share-ach] image failed, falling back to text:',e);
+    // Last-resort fallback: text-only
+    const ebd={};Object.entries(allEntries).forEach(([k,arr])=>{if(arr&&arr.length)ebd[k]=arr;});
+    const streak=calcStreak(ebd);
+    const ontrack=daysOnTrack(ebd);
+    const earned=earnedBadges(ebd);
+    const totalDays=logDays(ebd);
+    const dayU=isEn?' days':' วัน';
+    const streakLbl=isEn?'Streak':'Streak';
+    const ontrackLbl=isEn?'On track':'อยู่ในเป้า';
+    const logLbl=isEn?'Logged':'บันทึกรวม';
+    const bdgLbl=isEn?'Badges':'เหรียญ';
+    let text=`CalPro+\n🔥 ${streakLbl}: ${streak}${dayU}\n🎯 ${ontrackLbl}: ${ontrack}${dayU}\n📝 ${logLbl}: ${totalDays}${dayU}`;
+    if(earned.length){
+      const badgeIcons=BADGES.filter(b=>earned.includes(b.id)).map(b=>b.ico).join(' ');
+      text+=`\n🏆 ${bdgLbl}: ${badgeIcons}`;
+    }
+    shareText(text,'CalPro+');
+  }
 }
 
 // ═══ TDEE LIVE CALCULATOR ═══
