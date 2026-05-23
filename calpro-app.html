@@ -3081,10 +3081,12 @@ function changeMealTime(meal,hr){
   lsSave(LS_SETTINGS,settings);
 }
 // ═══ NOTIFICATION TEST ═══
-// Unified helper: tries Capacitor LocalNotifications on native APK, falls back to Web Notification API on browser
+// Unified helper: tries Capacitor → ServiceWorker showNotification → Notification constructor
+// Order matters: installed PWAs and mobile Chrome block `new Notification(...)` ("Illegal constructor")
+// and require ServiceWorkerRegistration.showNotification() instead.
 async function sendNotification(title, body){
   const cap=window.Capacitor;
-  // Native (APK): use LocalNotifications plugin
+  // 1) Native (APK): use LocalNotifications plugin
   if(cap?.isNativePlatform?.()){
     const LN=cap.Plugins?.LocalNotifications;
     if(!LN)throw new Error('LocalNotifications plugin not available');
@@ -3104,16 +3106,37 @@ async function sendNotification(title, body){
     });
     return 'native';
   }
-  // Web: use Notification API
+  // 2) Web: must have Notification API at all
   if(!('Notification' in window))throw new Error('Browser does not support notifications');
   let perm=Notification.permission;
   if(perm==='default')perm=await Notification.requestPermission();
   if(perm==='denied')throw new Error('Permission denied');
-  if(perm==='granted'){
-    const n=new Notification(title,{body,icon:'icon-192.png',badge:'icon-192.png',tag:'calpro-test',requireInteraction:false});
+  if(perm!=='granted')throw new Error('Permission not granted');
+  const opts={body,icon:'icon-192.png',badge:'icon-192.png',tag:'calpro-test',requireInteraction:false};
+  // 2a) Prefer ServiceWorkerRegistration.showNotification — works on installed PWAs + mobile
+  if('serviceWorker' in navigator){
+    try{
+      const reg=await navigator.serviceWorker.ready;
+      if(reg&&typeof reg.showNotification==='function'){
+        await reg.showNotification(title,opts);
+        return 'sw';
+      }
+    }catch(e){console.warn('[notif] SW path failed, trying constructor:',e.message);}
+  }
+  // 2b) Fallback to Notification constructor (works in regular tab on desktop)
+  try{
+    const n=new Notification(title,opts);
     n.onclick=()=>{window.focus();n.close();};
-    setTimeout(()=>n.close(),5000);
+    setTimeout(()=>{try{n.close();}catch{}},5000);
     return 'web';
+  }catch(e){
+    // Illegal constructor: re-attempt SW path even if first attempt above failed silently
+    if(/illegal constructor/i.test(e.message||'')&&'serviceWorker' in navigator){
+      const reg=await navigator.serviceWorker.ready;
+      await reg.showNotification(title,opts);
+      return 'sw';
+    }
+    throw e;
   }
 }
 async function testNotification(){
@@ -3245,6 +3268,22 @@ function resetAvatar(){
 
 // ═══ SHARE ═══
 const SHARE_URL='https://peerawatsuper271-afk.github.io/calpro/';
+const INVITE_TH=[
+  'ลองมาดูแลสุขภาพไปด้วยกันใน CalPro+ นะ 🌿',
+  'นับแคล นับชัยชนะของวันนี้ ด้วย CalPro+ 💚',
+  'เริ่มต้นใส่ใจตัวเองง่ายๆ กับ CalPro+ ✨',
+  'มาบันทึกอาหารและดูแลตัวเองด้วยกันที่ CalPro+ นะ 🌸',
+];
+const INVITE_EN=[
+  'Track your day with us on CalPro+ 🌿',
+  'Eat well, live well — join CalPro+ 💚',
+  'Self-care, simplified · CalPro+ ✨',
+  'Log meals + see your progress on CalPro+ 🌸',
+];
+function pickInvite(){
+  const arr=settings.lang==='en'?INVITE_EN:INVITE_TH;
+  return arr[Math.floor(Math.random()*arr.length)];
+}
 async function shareText(text,title){
   if(navigator.share){
     try{await navigator.share({title,text,url:SHARE_URL});showToast('แชร์เรียบร้อย ✓');}
@@ -3254,21 +3293,171 @@ async function shareText(text,title){
     catch{showToast('คัดลอกไม่สำเร็จ');}
   }else{showToast('เบราว์เซอร์ไม่รองรับการแชร์');}
 }
-function shareDaily(){
+// Build daily-summary share card as canvas (1080×1350 — Instagram 4:5)
+function buildShareCanvas(){
   const E=dailyEntries;
   const totCal=E.reduce((s,e)=>s+e.calories,0);
-  const totP=E.reduce((s,e)=>s+(e.protein||0),0);
-  const totC=E.reduce((s,e)=>s+(e.carbs||0),0);
-  const totF=E.reduce((s,e)=>s+(e.fat||0),0);
+  const totP=Math.round(E.reduce((s,e)=>s+(e.protein||0),0));
+  const totC=Math.round(E.reduce((s,e)=>s+(e.carbs||0),0));
+  const totF=Math.round(E.reduce((s,e)=>s+(e.fat||0),0));
   const goal=userProfile?.goal_cal||1800;
-  const av=userProfile?.avatar&&!userProfile.avatar.startsWith('data:')?userProfile.avatar+' ':'';
-  const dateStr=fmtDate(currentDate).replace(/^วันนี้ · |^เมื่อวาน · /,'');
-  const status=totCal===0?'ยังไม่ได้บันทึก':totCal>goal?'⚠️ เกินเป้า':totCal>=goal*0.85?'✅ ใกล้เป้า':'🎯 ในเป้า';
-  const text=`${av}CalPro+ · ${dateStr}\n`+
-    `🔥 ${totCal.toLocaleString()}/${goal.toLocaleString()} kcal ${status}\n`+
-    `💪 P:${totP}g · C:${totC}g · F:${totF}g\n`+
-    `📝 ${E.length} รายการ`;
-  shareText(text,'CalPro+ - สรุปประจำวัน');
+  const burned=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+w.kcal,0);
+  const effGoal=goal+burned;
+  const dateStr=fmtDate(currentDate).replace(/^วันนี้ · |^เมื่อวาน · |^Today · |^Yesterday · /,'');
+  const isEn=settings.lang==='en';
+  const isLight=(THEMES[settings.theme]||THEMES.dark).mode==='light';
+  const accent=settings.accent||'#ff6b6b';
+  // Determine status
+  let statusLabel,statusColor;
+  if(totCal===0){statusLabel=isEn?'Not logged':'ยังไม่บันทึก';statusColor='#888';}
+  else if(totCal>effGoal){statusLabel=isEn?'Over goal':'เกินเป้า';statusColor=accent;}
+  else if(totCal>=effGoal*0.85){statusLabel=isEn?'Near goal':'ใกล้เป้า';statusColor='#ffa94d';}
+  else {statusLabel=isEn?'On track':'อยู่ในเป้า';statusColor='#51cf66';}
+
+  const W=1080,H=1350;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  // Background gradient
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  if(isLight){bg.addColorStop(0,'#ffffff');bg.addColorStop(1,'#f5f5f7');}
+  else{bg.addColorStop(0,'#16161e');bg.addColorStop(1,'#0c0c12');}
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // Accent glow corner
+  const glow=ctx.createRadialGradient(W,0,0,W,0,800);
+  glow.addColorStop(0,accent+'33');glow.addColorStop(1,'transparent');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+
+  const txt=isLight?'#1a1a24':'#e8e8f0';
+  const muted=isLight?'#6868a0':'#888aa0';
+  const fontTH='"Segoe UI","Noto Sans Thai","Apple SD Gothic Neo",sans-serif';
+
+  // Header — "CalPro+" left, date right
+  ctx.fillStyle=txt;
+  ctx.font=`700 64px ${fontTH}`;
+  ctx.textBaseline='top';
+  ctx.fillText('Cal',80,80);
+  const calW=ctx.measureText('Cal').width;
+  ctx.fillStyle=accent;
+  ctx.fillText('Pro+',80+calW,80);
+  // Date right-aligned
+  ctx.fillStyle=muted;
+  ctx.font=`500 36px ${fontTH}`;
+  ctx.textAlign='right';
+  ctx.fillText(dateStr,W-80,100);
+  ctx.textAlign='left';
+
+  // Big calorie ring (center upper portion)
+  const ringCX=W/2,ringCY=520,ringR=210;
+  // Background ring
+  ctx.beginPath();
+  ctx.arc(ringCX,ringCY,ringR,-Math.PI/2,Math.PI*1.5);
+  ctx.lineWidth=42;
+  ctx.strokeStyle=isLight?'#e8e8ee':'#22222e';
+  ctx.lineCap='round';
+  ctx.stroke();
+  // Progress ring
+  const pct=Math.min(totCal/Math.max(effGoal,1),1);
+  if(pct>0){
+    ctx.beginPath();
+    const startA=-Math.PI/2;
+    const endA=startA+pct*Math.PI*2;
+    ctx.arc(ringCX,ringCY,ringR,startA,endA);
+    ctx.lineWidth=42;
+    ctx.strokeStyle=statusColor;
+    ctx.stroke();
+  }
+  // Calorie number center
+  ctx.fillStyle=txt;ctx.textAlign='center';
+  ctx.font=`800 140px ${fontTH}`;
+  ctx.fillText(totCal.toLocaleString(),ringCX,ringCY-90);
+  ctx.font=`500 36px ${fontTH}`;
+  ctx.fillStyle=muted;
+  const goalLabel=isEn?`of ${effGoal.toLocaleString()} kcal`:`จาก ${effGoal.toLocaleString()} kcal`;
+  ctx.fillText(goalLabel,ringCX,ringCY+60);
+  // Status pill
+  ctx.fillStyle=statusColor;
+  const pillW=300,pillH=60,pillX=ringCX-pillW/2,pillY=ringCY+110;
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(pillX,pillY,pillW,pillH,30);
+  else ctx.rect(pillX,pillY,pillW,pillH);
+  ctx.fill();
+  ctx.fillStyle='#fff';ctx.font=`700 32px ${fontTH}`;
+  ctx.textBaseline='middle';
+  ctx.fillText(statusLabel,ringCX,pillY+pillH/2);
+  ctx.textBaseline='top';
+
+  // Macros (3 columns)
+  const macroY=900;
+  ctx.textAlign='center';
+  const macros=[
+    {l:isEn?'Protein':'โปรตีน',v:totP,color:'#74c0fc'},
+    {l:isEn?'Carbs':'คาร์บ',v:totC,color:'#ffa94d'},
+    {l:isEn?'Fat':'ไขมัน',v:totF,color:'#b197fc'},
+  ];
+  macros.forEach((m,i)=>{
+    const x=180+i*360;
+    ctx.fillStyle=muted;ctx.font=`500 30px ${fontTH}`;
+    ctx.fillText(m.l,x,macroY);
+    ctx.fillStyle=m.color;ctx.font=`700 64px ${fontTH}`;
+    ctx.fillText(m.v+'g',x,macroY+44);
+  });
+
+  // Entry count line
+  ctx.fillStyle=muted;ctx.font=`500 30px ${fontTH}`;
+  const entriesLbl=isEn?`${E.length} food items logged`:`${E.length} รายการอาหารที่บันทึก`;
+  ctx.fillText(entriesLbl,W/2,1060);
+
+  // Invite message
+  ctx.fillStyle=txt;
+  ctx.font=`600 38px ${fontTH}`;
+  const invite=pickInvite();
+  // Word-wrap if too wide
+  const wrapText=(text,maxW)=>{
+    const words=text.split(' ');const lines=[];let line='';
+    for(const w of words){const test=line+w+' ';if(ctx.measureText(test).width>maxW&&line){lines.push(line.trim());line=w+' ';}else line=test;}
+    if(line)lines.push(line.trim());return lines;
+  };
+  const lines=wrapText(invite,W-160);
+  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,1140+i*48));
+
+  // Footer URL
+  ctx.fillStyle=accent;ctx.font=`600 28px ${fontTH}`;
+  ctx.fillText('peerawatsuper271-afk.github.io/calpro',W/2,H-70);
+
+  ctx.textAlign='left';ctx.textBaseline='top';
+  return {canvas:cv,invite};
+}
+async function shareDaily(){
+  showToast(settings.lang==='en'?'Creating share image...':'กำลังสร้างรูป...',3000);
+  try{
+    const {canvas,invite}=buildShareCanvas();
+    const blob=await new Promise(r=>canvas.toBlob(r,'image/png',0.95));
+    if(!blob)throw new Error('canvas to blob failed');
+    const file=new File([blob],'calpro-summary.png',{type:'image/png'});
+    const caption=`${invite}\n\n${SHARE_URL}`;
+    // Web Share Level 2: try sharing files
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file],text:caption,title:'CalPro+'});
+        showToast(settings.lang==='en'?'Shared ✓':'แชร์เรียบร้อย ✓');
+        return;
+      }catch(e){if(e.name==='AbortError')return;/* fall through */}
+    }
+    // Fallback A: download + copy text
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='calpro-summary-'+todayKey()+'.png';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    if(navigator.clipboard){try{await navigator.clipboard.writeText(caption);}catch{}}
+    showToast(settings.lang==='en'?'Image downloaded + caption copied ✓':'ดาวน์โหลดรูป + คัดลอกข้อความแล้ว ✓',3500);
+  }catch(e){
+    console.warn('[share] image failed, falling back to text:',e);
+    // Last-resort fallback: text-only share
+    const invite=pickInvite();
+    const text=`${invite}\n\n${SHARE_URL}`;
+    shareText(text,'CalPro+');
+  }
 }
 function shareAchievements(){
   // Build entries_by_day from allEntries
