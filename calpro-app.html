@@ -778,7 +778,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.15.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.15.1 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1147,7 +1147,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.15.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.15.1 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1164,7 +1164,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.15.0';
+const APP_VERSION = '2.15.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -3100,46 +3100,62 @@ function setFont(key){
 }
 
 // ═══ BARCODE SCANNER — lazy-loads ZXing + OpenFoodFacts lookup ═══
-let _bcReader=null,_bcControls=null;
-const ZXING_CDN='https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js';
+// @zxing/browser has no UMD bundle, so its CDN script tag 404s. Use
+// @zxing/library 0.20.0 — last version with the browser API + UMD bundle.
+// Global is `ZXing`, scan stops via `reader.reset()` (no controls object).
+let _bcReader=null;
+const ZXING_PRIMARY='https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js';
+const ZXING_FALLBACK='https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js';
 function loadZxing(){
-  if(window.ZXingBrowser)return Promise.resolve(window.ZXingBrowser);
-  return new Promise((resolve,reject)=>{
+  if(window.ZXing&&window.ZXing.BrowserMultiFormatReader)return Promise.resolve(window.ZXing);
+  const tryUrl=(url)=>new Promise((resolve,reject)=>{
     const s=document.createElement('script');
-    s.src=ZXING_CDN;
-    s.onload=()=>window.ZXingBrowser?resolve(window.ZXingBrowser):reject(new Error('zxing global missing'));
-    s.onerror=()=>reject(new Error('zxing CDN fail'));
+    s.src=url;s.async=true;
+    s.onload=()=>{
+      if(window.ZXing&&window.ZXing.BrowserMultiFormatReader)resolve(window.ZXing);
+      else reject(new Error('zxing loaded but BrowserMultiFormatReader missing'));
+    };
+    s.onerror=()=>reject(new Error('script load failed: '+url));
     document.head.appendChild(s);
   });
+  // Fall over to jsDelivr if unpkg ever flakes
+  return tryUrl(ZXING_PRIMARY).catch(e=>{console.warn('[barcode] unpkg failed, trying jsDelivr',e);return tryUrl(ZXING_FALLBACK);});
 }
 async function openBarcodeModal(){
   document.getElementById('bcManualInput').value='';
   document.getElementById('bcResult').innerHTML='';
+  document.getElementById('bcVideo').style.display='';
   document.getElementById('barcodeModal').classList.remove('hide');
   const status=document.getElementById('bcVideoStatus');
   status.textContent=t('barcode_starting');
   // Try camera scan — graceful if anything fails
   try{
-    const ZB=await loadZxing();
-    if(!_bcReader)_bcReader=new ZB.BrowserMultiFormatReader();
+    const ZX=await loadZxing();
+    if(!_bcReader)_bcReader=new ZX.BrowserMultiFormatReader();
     const video=document.getElementById('bcVideo');
-    _bcControls=await _bcReader.decodeFromVideoDevice(undefined,video,(result,err,controls)=>{
+    // @zxing/library callback gets (result, err) — no controls; stop via reader.reset()
+    _bcReader.decodeFromVideoDevice(undefined,video,(result,err)=>{
       if(result){
-        controls.stop();_bcControls=null;
+        try{_bcReader.reset();}catch{}
         handleBarcode(result.getText());
       }
       // err is normally NotFoundException — frame-by-frame, ignore
+    }).catch(e=>{
+      // decodeFromVideoDevice itself rejecting means camera/permission failed
+      console.warn('[barcode] decode init fail',e);
+      status.textContent=t('barcode_no_camera');
+      document.getElementById('bcVideo').style.display='none';
     });
     status.textContent=t('barcode_scanning');
   }catch(e){
     console.warn('[barcode] camera/zxing fail',e);
     document.getElementById('bcVideo').style.display='none';
-    status.textContent=String(e?.message||'').includes('zxing')?t('barcode_lib_fail'):t('barcode_no_camera');
+    status.textContent=/zxing|script load|BrowserMultiFormat/i.test(String(e?.message||''))?t('barcode_lib_fail'):t('barcode_no_camera');
   }
 }
 function closeBarcodeModal(){
   document.getElementById('barcodeModal').classList.add('hide');
-  if(_bcControls){try{_bcControls.stop();}catch{} _bcControls=null;}
+  if(_bcReader){try{_bcReader.reset();}catch{}}
   // Show video element back for next open
   document.getElementById('bcVideo').style.display='';
 }
@@ -3150,7 +3166,7 @@ function lookupManualBarcode(){
 }
 async function handleBarcode(code){
   // Stop the camera the moment we have a code (avoid double-fires)
-  if(_bcControls){try{_bcControls.stop();}catch{} _bcControls=null;}
+  if(_bcReader){try{_bcReader.reset();}catch{}}
   const status=document.getElementById('bcVideoStatus');
   const result=document.getElementById('bcResult');
   status.textContent=`📊 ${code}`;
@@ -5000,6 +5016,18 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.15.1':{
+    th:[
+      '🐞 แก้บั๊ก Barcode Scanner โหลด library ไม่ได้ — เปลี่ยน CDN จาก `@zxing/browser` (ไม่มี UMD bundle, 404) เป็น `@zxing/library@0.20.0` (มี UMD + พร้อม browser API)',
+      'เพิ่ม CDN fallback (unpkg → jsDelivr) ป้องกัน single-CDN outage',
+      'ปรับ scan-stop ให้ใช้ `reader.reset()` ตาม API ของ @zxing/library',
+    ],
+    en:[
+      '🐞 Fix barcode scanner library load — swapped CDN from `@zxing/browser` (no UMD, 404\'d) to `@zxing/library@0.20.0` (UMD + browser API)',
+      'Added CDN fallback (unpkg → jsDelivr) to survive single-CDN outage',
+      'Adjusted stop logic to call `reader.reset()` per @zxing/library API',
+    ],
+  },
   '2.15.0':{
     th:[
       '🖼️ **รูปอาหารย้ายไป IndexedDB** — แทนที่จะใส่ใน localStorage 5MB · ตอนนี้เก็บได้รูประดับ GB+',
