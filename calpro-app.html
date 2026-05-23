@@ -736,6 +736,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
           <button class="btn-sec" onclick="document.getElementById('importFile').click()">📥 Import</button>
         </div>
         <input type="file" id="importFile" accept="application/json,.json" hidden onchange="importData(this.files[0])">
+        <button class="btn-sec" onclick="cleanOldPhotos()" style="width:100%;margin-bottom:8px" data-i18n="clean_photos">🧹 ลบรูปอาหารเก่า (>30 วัน)</button>
         <button class="btn-danger" onclick="resetAllData()" data-i18n="reset_all">ล้างข้อมูลทั้งหมด</button>
       </div>
     </div>
@@ -760,7 +761,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.8.2 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.9.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1016,7 +1017,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.8.2 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.9.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1033,7 +1034,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.8.2';
+const APP_VERSION = '2.9.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1121,6 +1122,7 @@ const I18N = {
     feedback:'ส่งคำแนะนำ',feedback_sub:'แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา',feedback_subject:'หัวเรื่อง',feedback_body:'ข้อความ',feedback_send:'📧 ส่งทางอีเมล',feedback_subj_ph:'เช่น “อยากให้เพิ่มเมนูใหม่...”',feedback_body_ph:'พิมพ์ข้อความที่นี่...',
     update_title:'มีเวอร์ชันใหม่',update_body:'CalPro+ เวอร์ชันใหม่พร้อมติดตั้งแล้ว · รีสตาร์ทแอปเพื่ออัปเดตทันที?',update_later:'ไว้ทีหลัง',update_now:'อัปเดตเลย',
     whats_new_title:'✨ มีอะไรใหม่',check_updates:'🔄 ตรวจหาเวอร์ชันใหม่',check_updates_sub:'ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง',checking_updates:'กำลังตรวจสอบ...',latest_version:'คุณใช้เวอร์ชันล่าสุดอยู่แล้ว ✓',
+    clean_photos:'🧹 ลบรูปอาหารเก่า (>30 วัน)',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1187,6 +1189,7 @@ const I18N = {
     feedback:'Send feedback',feedback_sub:'Share suggestions/bugs with the developer',feedback_subject:'Subject',feedback_body:'Message',feedback_send:'📧 Send via email',feedback_subj_ph:'e.g. "Please add more foods..."',feedback_body_ph:'Type your message here...',
     update_title:'New version available',update_body:'A new version of CalPro+ is ready · Restart now to apply?',update_later:'Later',update_now:'Update now',
     whats_new_title:'✨ What\'s new',check_updates:'🔄 Check for updates',check_updates_sub:'See if a new CalPro+ version is available',checking_updates:'Checking...',latest_version:'You\'re on the latest version ✓',
+    clean_photos:'🧹 Clear photos older than 30 days',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -1487,6 +1490,31 @@ function saveEntries_LS(){
   allEntries[currentDate] = dailyEntries;
   lsSave(LS_ENTRIES, allEntries);
 }
+// Clear meal photos older than 30 days — frees localStorage quota
+function cleanOldPhotos(){
+  const isEn=settings.lang==='en';
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+  const cutoffKey=dateKey(cutoff);
+  let removed=0;
+  Object.keys(allEntries).forEach(k=>{
+    if(k>=cutoffKey)return;            // newer than cutoff — keep photo
+    (allEntries[k]||[]).forEach(e=>{
+      if(e.photo){delete e.photo;removed++;}
+    });
+  });
+  if(!removed){
+    showToast(isEn?'No old photos to remove':'ไม่มีรูปเก่าที่ต้องลบ');return;
+  }
+  if(!confirm((isEn?`Remove ${removed} photo(s) older than 30 days?`:`ลบรูป ${removed} รายการที่เก่ากว่า 30 วัน?`)))return;
+  // Re-run delete since user might have added/changed between (idempotent)
+  lsSave(LS_ENTRIES,allEntries);
+  // Reload current day entries reference
+  dailyEntries=allEntries[currentDate]||[];
+  if(document.getElementById('pg-today')?.classList.contains('active'))renderToday();
+  showToast((isEn?'Removed ':'ลบแล้ว ')+removed+(isEn?' photos ✓':' รูป ✓'));
+  scheduleAutoSync?.('cleanPhotos');
+}
+
 function resetAllData(){
   if (!confirm(settings.lang==='en'?'Reset ALL data (profile + food + weight + water)? This cannot be undone.':'ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหาร + น้ำหนัก + น้ำดื่ม)? ไม่สามารถกู้คืนได้')) return;
   localStorage.removeItem(LS_PROFILE);
@@ -2908,19 +2936,25 @@ function checkSmartGoal(){
   const now=Date.now();
   const FOUR_WEEKS=28*24*60*60*1000;
   if(now-lastCheck<FOUR_WEEKS)return;
-  // Need at least 14 weight entries
-  const keys=Object.keys(allWeights).sort();
-  if(keys.length<14)return;
-  const recent=keys.slice(-28).map(k=>({k,v:allWeights[k]}));
-  const n=recent.length;if(n<14)return;
-  // Linear regression slope
-  const xs=recent.map((_,i)=>i);
-  const ys=recent.map(r=>r.v);
-  const mx=xs.reduce((a,b)=>a+b,0)/n;
-  const my=ys.reduce((a,b)=>a+b,0)/n;
-  let num=0,den=0;
-  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);den+=(xs[i]-mx)**2;}
-  const perWeek=(den?num/den:0)*7;
+  // v2.9: project weight change from calorie deficit/surplus over last 28 days
+  // (no daily weighing required — uses food + workout history)
+  const calGoal=+userProfile.goal_cal||1800;
+  const today=new Date();
+  const deltas=[];
+  for(let i=27;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const k=dateKey(d);
+    const entries=allEntries[k]||[];
+    if(!entries.length)continue;
+    const food=entries.reduce((s,e)=>s+(+e.calories||0),0);
+    const burned=(allWorkouts[k]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
+    const net=Math.max(0,food-burned);
+    deltas.push(calGoal-net);          // positive = deficit
+  }
+  // Need at least 14 logged days for a meaningful slope
+  if(deltas.length<14)return;
+  const avgDelta=deltas.reduce((s,x)=>s+x,0)/deltas.length;
+  const perWeek=-(avgDelta*7/7700);     // kg/wk (negative = losing)
   const goalDir=userProfile.goal_type;  // 'lose' or 'gain'
   // Expected: lose ~0.5/week, gain ~0.3/week
   const expected=goalDir==='lose'?-0.5:0.3;
@@ -4236,7 +4270,7 @@ function applyTDEEtoProfile(){
   const weight=+document.getElementById('tWeight').value;
   const height=+document.getElementById('tHeight').value;
   const act=+document.getElementById('tAct').value;
-  if(!age||!weight||!height){showToast('กรอกข้อมูลให้ครบก่อน');return;}
+  if(!age||!weight||!height){showToast(settings.lang==='en'?'Fill in all fields first':'กรอกข้อมูลให้ครบก่อน');return;}
   const bmr=gender==='male'?88.362+13.397*weight+4.799*height-5.677*age:447.593+9.247*weight+3.098*height-4.330*age;
   const tdee=bmr*act;
   let gc=tdeeGoalType==='lose'?tdee-500:tdeeGoalType==='gain'?tdee+300:tdee;
@@ -4246,7 +4280,7 @@ function applyTDEEtoProfile(){
   const name=userProfile.display_name||'คุณ';
   document.getElementById('hdrSub').textContent=name+' · '+gc.toLocaleString()+' kcal/วัน';
   renderProfileUI();renderToday();
-  showToast('ตั้งเป้าหมาย '+gc.toLocaleString()+' kcal/วัน แล้ว ✓');
+  showToast((settings.lang==='en'?'Goal set to ':'ตั้งเป้าหมาย ')+gc.toLocaleString()+' kcal'+dayUnitShort()+' ✓');
 }
 
 // ═══ INIT ═══
@@ -4312,6 +4346,20 @@ setTimeout(checkWhatsNew,1200);
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.9.0':{
+    th:[
+      '📱 **APK rebuild ครั้งแรกตั้งแต่ v2.7.1** — APK รวมทุก feature/fix ตั้งแต่ v2.7.2 ถึงปัจจุบัน',
+      '🤖 Smart Goal v2 — ใช้แคลอรี่ projection แทน weight log (ไม่ต้องชั่งน้ำหนัก)',
+      '🧹 ปุ่ม "ลบรูปอาหารเก่า (>30 วัน)" ในตั้งค่า → จัดการข้อมูล · ช่วยให้พื้นที่ localStorage',
+      '🌐 ปิดท้าย i18n holdouts — TDEE apply toast แสดงตามภาษา',
+    ],
+    en:[
+      '📱 **First APK rebuild since v2.7.1** — packages every feature/fix from v2.7.2 onwards',
+      '🤖 Smart Goal v2 — uses calorie projection (no daily weighing required)',
+      '🧹 "Clear photos older than 30 days" button in Settings → Data',
+      '🌐 Closed remaining i18n holdouts (TDEE apply toast)',
+    ],
+  },
   '2.8.2':{
     th:[
       '🔔 Modal แจ้งเตือนเวอร์ชันใหม่ — เลือก "อัปเดตเลย" หรือ "ไว้ทีหลัง"',
