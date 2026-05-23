@@ -479,6 +479,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card">
         <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
         <div class="sbox"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"></div>
+        <button class="btn-sec" onclick="openBarcodeModal()" style="width:100%;margin-bottom:8px;font-size:.84rem" data-i18n="scan_barcode">📷 สแกนบาร์โค้ด</button>
         <div class="cats" id="catBtns"></div>
         <div class="sres" id="sRes"></div>
         <div class="fl"><label data-i18n="meal">มื้ออาหาร</label>
@@ -777,7 +778,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.13.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.14.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -875,6 +876,28 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <button class="btn-sec" onclick="addWater(-1);renderQuickWater()" style="font-size:1.2rem">−</button>
       <button class="btn" onclick="addWater(1);renderQuickWater()" style="font-size:1.2rem">+</button>
     </div>
+  </div>
+</div>
+
+<!-- BARCODE SCANNER MODAL — camera scan or manual entry, OpenFoodFacts lookup -->
+<div class="modal-bg hide" id="barcodeModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-hdr">
+      <h3 data-i18n="scan_barcode">📷 สแกนบาร์โค้ด</h3>
+      <button class="mc-close" onclick="closeBarcodeModal()" aria-label="Close">✕</button>
+    </div>
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="barcode_hint">หันกล้องไปที่บาร์โค้ดของสินค้า · ข้อมูลจากฐาน OpenFoodFacts</div>
+    <div style="position:relative;background:#000;border-radius:9px;overflow:hidden;aspect-ratio:4/3;margin-bottom:8px">
+      <video id="bcVideo" playsinline autoplay muted style="width:100%;height:100%;object-fit:cover"></video>
+      <div style="position:absolute;inset:20% 15%;border:2px solid var(--accent);border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none"></div>
+      <div id="bcVideoStatus" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#fff;font-size:.74rem;text-shadow:0 1px 2px rgba(0,0,0,.6)"></div>
+    </div>
+    <div style="font-size:.74rem;color:var(--muted);text-align:center;margin:4px 0" data-i18n="barcode_or_manual">หรือพิมพ์รหัสเอง</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input type="text" id="bcManualInput" inputmode="numeric" pattern="[0-9]*" placeholder="8851234567890" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;outline:none">
+      <button class="btn-sec" onclick="lookupManualBarcode()" style="white-space:nowrap" data-i18n="barcode_lookup">ค้นหา</button>
+    </div>
+    <div id="bcResult"></div>
   </div>
 </div>
 
@@ -1124,7 +1147,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.13.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.14.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1141,7 +1164,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.13.0';
+const APP_VERSION = '2.14.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1236,6 +1259,7 @@ const I18N = {
     ob_goal_title:'เป้าหมายของคุณ',ob_goal_sub:'เลือกเป้าหมายเพื่อคำนวณแคลอรี่/วัน',
     ob_done_title:'พร้อมใช้งานแล้ว!',ob_done_tip:'เริ่มจากแท็บ <b>+ เพิ่ม</b> ด้านล่าง → ค้นหาอาหาร → กดเลือก → ตั้งจำนวนเท่า → เพิ่ม',
     ob_back:'ย้อนกลับ',ob_next:'ถัดไป',ob_start:'เริ่มใช้งาน',ob_skip:'ข้ามไปก่อน',ob_fillall:'กรอกข้อมูลให้ครบก่อน',
+    scan_barcode:'📷 สแกนบาร์โค้ด',barcode_hint:'หันกล้องไปที่บาร์โค้ดของสินค้า · ข้อมูลจากฐาน OpenFoodFacts',barcode_or_manual:'หรือพิมพ์รหัสเอง',barcode_lookup:'ค้นหา',barcode_starting:'กำลังเปิดกล้อง...',barcode_scanning:'ส่องบาร์โค้ดในกรอบ',barcode_no_camera:'ไม่สามารถเปิดกล้องได้ · ใช้การพิมพ์รหัสแทน',barcode_lib_fail:'โหลดตัวสแกนไม่สำเร็จ · ลองอีกครั้งเมื่อมีอินเทอร์เน็ต',barcode_found:'พบ',barcode_notfound:'ไม่พบสินค้านี้ในฐาน',barcode_lookup_err:'ค้นหาไม่สำเร็จ · ตรวจอินเทอร์เน็ตและลองใหม่',barcode_invalid:'กรอกรหัสบาร์โค้ดให้ถูกต้อง',
     recipe_title:'🍲 สร้างสูตรอาหาร',recipe_sub:'รวมหลายส่วนผสมเป็นเมนูเดียว · บันทึกลงไลบรารีเพื่อใช้ซ้ำได้',recipe_open:'+ สร้างสูตรใหม่',
     recipe_name:'ชื่อสูตร',recipe_name_ph:'เช่น ผัดไทยโฮมเมด',recipe_servings:'จำนวนเสิร์ฟ',recipe_ingredients:'ส่วนผสม',recipe_save:'💾 บันทึกสูตร',recipe_no_ing:'ยังไม่มีส่วนผสม · ค้นหาด้านบนเพื่อเพิ่ม',recipe_per_serving:'ต่อ 1 เสิร์ฟ',recipe_total:'รวมทั้งหมด',recipe_need_name:'กรุณาตั้งชื่อสูตร',recipe_need_ing:'กรุณาเพิ่มส่วนผสม',recipe_saved:'บันทึกสูตรลงไลบรารีแล้ว ✓',
   },
@@ -1311,6 +1335,7 @@ const I18N = {
     ob_goal_title:'Your goal',ob_goal_sub:'Pick a goal to calculate your daily calorie target',
     ob_done_title:'You\'re all set!',ob_done_tip:'Start from the <b>+ Add</b> tab below → search a food → tap → pick a portion → add',
     ob_back:'Back',ob_next:'Next',ob_start:'Start using',ob_skip:'Skip for now',ob_fillall:'Please fill in all fields first',
+    scan_barcode:'📷 Scan barcode',barcode_hint:'Aim the camera at a product\'s barcode · data from OpenFoodFacts',barcode_or_manual:'Or enter the code manually',barcode_lookup:'Lookup',barcode_starting:'Starting camera...',barcode_scanning:'Hold a barcode inside the frame',barcode_no_camera:'Camera unavailable · use manual entry',barcode_lib_fail:'Scanner library failed to load · retry when online',barcode_found:'Found',barcode_notfound:'Product not found in database',barcode_lookup_err:'Lookup failed · check internet and retry',barcode_invalid:'Enter a valid barcode',
     recipe_title:'🍲 Create recipe',recipe_sub:'Combine multiple ingredients into one item · saves to your library for reuse',recipe_open:'+ Create new recipe',
     recipe_name:'Recipe name',recipe_name_ph:'e.g. Homemade Pad Thai',recipe_servings:'Servings',recipe_ingredients:'Ingredients',recipe_save:'💾 Save recipe',recipe_no_ing:'No ingredients yet · search above to add',recipe_per_serving:'per serving',recipe_total:'Total',recipe_need_name:'Please name the recipe',recipe_need_ing:'Please add ingredients',recipe_saved:'Recipe saved to library ✓',
   }
@@ -3015,6 +3040,104 @@ function setFont(key){
   applyFont(key);
   // Refresh chip highlight
   document.querySelectorAll('.font-chip').forEach(b=>b.classList.toggle('active',b.dataset.font===key));
+}
+
+// ═══ BARCODE SCANNER — lazy-loads ZXing + OpenFoodFacts lookup ═══
+let _bcReader=null,_bcControls=null;
+const ZXING_CDN='https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js';
+function loadZxing(){
+  if(window.ZXingBrowser)return Promise.resolve(window.ZXingBrowser);
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=ZXING_CDN;
+    s.onload=()=>window.ZXingBrowser?resolve(window.ZXingBrowser):reject(new Error('zxing global missing'));
+    s.onerror=()=>reject(new Error('zxing CDN fail'));
+    document.head.appendChild(s);
+  });
+}
+async function openBarcodeModal(){
+  document.getElementById('bcManualInput').value='';
+  document.getElementById('bcResult').innerHTML='';
+  document.getElementById('barcodeModal').classList.remove('hide');
+  const status=document.getElementById('bcVideoStatus');
+  status.textContent=t('barcode_starting');
+  // Try camera scan — graceful if anything fails
+  try{
+    const ZB=await loadZxing();
+    if(!_bcReader)_bcReader=new ZB.BrowserMultiFormatReader();
+    const video=document.getElementById('bcVideo');
+    _bcControls=await _bcReader.decodeFromVideoDevice(undefined,video,(result,err,controls)=>{
+      if(result){
+        controls.stop();_bcControls=null;
+        handleBarcode(result.getText());
+      }
+      // err is normally NotFoundException — frame-by-frame, ignore
+    });
+    status.textContent=t('barcode_scanning');
+  }catch(e){
+    console.warn('[barcode] camera/zxing fail',e);
+    document.getElementById('bcVideo').style.display='none';
+    status.textContent=String(e?.message||'').includes('zxing')?t('barcode_lib_fail'):t('barcode_no_camera');
+  }
+}
+function closeBarcodeModal(){
+  document.getElementById('barcodeModal').classList.add('hide');
+  if(_bcControls){try{_bcControls.stop();}catch{} _bcControls=null;}
+  // Show video element back for next open
+  document.getElementById('bcVideo').style.display='';
+}
+function lookupManualBarcode(){
+  const code=(document.getElementById('bcManualInput').value||'').trim();
+  if(!/^\d{6,14}$/.test(code)){showToast(t('barcode_invalid'));return;}
+  handleBarcode(code);
+}
+async function handleBarcode(code){
+  // Stop the camera the moment we have a code (avoid double-fires)
+  if(_bcControls){try{_bcControls.stop();}catch{} _bcControls=null;}
+  const status=document.getElementById('bcVideoStatus');
+  const result=document.getElementById('bcResult');
+  status.textContent=`📊 ${code}`;
+  result.innerHTML=`<div style="text-align:center;padding:10px;color:var(--muted);font-size:.84rem">⏳ ${code}</div>`;
+  try{
+    const food=await lookupBarcodeOFF(code);
+    if(!food){result.innerHTML=`<div style="text-align:center;padding:12px;color:var(--accent);font-size:.84rem">${t('barcode_notfound')}<br><span style="color:var(--muted);font-size:.7rem">${code}</span></div>`;return;}
+    // Preview + Add button
+    const isEn=settings.lang==='en';
+    result.innerHTML=
+      `<div style="background:var(--surface2);border-radius:9px;padding:10px;margin-bottom:8px">`+
+        `<div style="font-weight:600;margin-bottom:2px">${escapeHtml(food.n)}</div>`+
+        (food.brand?`<div style="font-size:.7rem;color:var(--muted);margin-bottom:6px">${escapeHtml(food.brand)}</div>`:'')+
+        `<div style="font-size:.82rem"><b>${food.c}</b> kcal${food.a?` / ${food.a}g`:''} · P:${food.p}g C:${food.cb}g F:${food.f}g</div>`+
+      `</div>`+
+      `<button class="btn" id="bcAddBtn">${t('barcode_found')} → ${t('btn_add')}</button>`;
+    document.getElementById('bcAddBtn').onclick=()=>{
+      // Hand off to existing portion picker for quantity control
+      closeBarcodeModal();
+      // food shape matches FOODS; portion picker reads .c .p .cb .f .a .n .e
+      openPortionModal(food);
+    };
+  }catch(e){
+    result.innerHTML=`<div style="text-align:center;padding:12px;color:var(--accent);font-size:.84rem">${t('barcode_lookup_err')}<br><span style="color:var(--muted);font-size:.7rem">${escapeHtml(String(e?.message||e))}</span></div>`;
+  }
+}
+// OpenFoodFacts v2 API — free, no key. Prefer per-serving, fall back to per-100g.
+async function lookupBarcodeOFF(code){
+  const url=`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=product_name,product_name_th,brands,nutriments,serving_size,serving_quantity`;
+  const r=await withTimeout(fetch(url),8000,'barcode lookup');
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const data=await r.json();
+  if(data.status!==1||!data.product)return null;
+  const p=data.product;const n=p.nutriments||{};
+  // Prefer per-serving when both serving fields + qty exist
+  const sQty=+p.serving_quantity||0;
+  const haveServ=sQty>0&&(n['energy-kcal_serving']!=null||n.energy_serving!=null);
+  const cal=Math.round(haveServ?(n['energy-kcal_serving']||0):(n['energy-kcal_100g']||0));
+  const prot=+(haveServ?(n.proteins_serving||0):(n.proteins_100g||0)).toFixed(1);
+  const carb=+(haveServ?(n.carbohydrates_serving||0):(n.carbohydrates_100g||0)).toFixed(1);
+  const fat=+(haveServ?(n.fat_serving||0):(n.fat_100g||0)).toFixed(1);
+  const amt=haveServ?sQty:100;
+  const name=(settings.lang==='th'?(p.product_name_th||p.product_name):(p.product_name||p.product_name_th))||p.product_name||'—';
+  return {n:name,e:p.product_name||'',c:cal,p:prot,cb:carb,f:fat,a:amt,cat:'scanned',brand:p.brands||''};
 }
 
 // ═══ RECIPE BUILDER — compose a custom food from multiple ingredients ═══
@@ -4813,6 +4936,20 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.14.0':{
+    th:[
+      '📷 **Barcode Scanner** — สแกนบาร์โค้ดสินค้าด้วยกล้อง · ดึงข้อมูลโภชนาการจากฐาน OpenFoodFacts (ฟรี ไม่ต้องสมัคร)',
+      'ถ้าไม่มีกล้องหรือสแกนไม่สำเร็จ พิมพ์รหัสบาร์โค้ดเองได้',
+      'ZXing library โหลด **lazy** เฉพาะตอนเปิดสแกนเนอร์ — ไม่หน่วงตอนเปิดแอป',
+      'พบสินค้าแล้วต่อเข้า Portion Picker ตามปกติ — ปรับจำนวนได้ก่อนเพิ่ม',
+    ],
+    en:[
+      '📷 **Barcode Scanner** — point your camera at a product barcode · nutrition pulled from OpenFoodFacts (free, no signup)',
+      'No camera or scan failing? Type the barcode manually',
+      'ZXing library lazy-loaded only when scanner opens — no startup cost',
+      'On found → feeds the existing Portion Picker so you can pick a quantity',
+    ],
+  },
   '2.13.0':{
     th:[
       '🍲 **Recipe Builder (สร้างสูตรอาหาร)** — รวมหลายส่วนผสมเป็นเมนูเดียวบันทึกลงไลบรารี',
