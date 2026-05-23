@@ -149,6 +149,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 
 /* ── WATER / WEIGHT WIDGETS ── */
 .wwrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.wwrow:has(.wwcard-full){grid-template-columns:1fr;}
 .wwcard{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 12px;}
 .wwcard h4{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
 .wwval{font-size:1rem;font-weight:700;}
@@ -401,7 +402,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--purple)">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--purple)"></div></div></div>
       </div>
       <div class="wwrow">
-        <div class="wwcard">
+        <div class="wwcard wwcard-full">
           <h4><span data-i18n="water">น้ำดื่ม</span></h4>
           <div class="wwval"><span id="waterCount">0</span>/<span id="waterGoalDisp">8</span> <span data-i18n="cups_unit">แก้ว</span></div>
           <div class="water-dots" id="waterDots"></div>
@@ -409,15 +410,6 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
             <button onclick="addWater(-1)">−</button>
             <button onclick="addWater(1)">+</button>
           </div>
-        </div>
-        <div class="wwcard">
-          <h4><span data-i18n="weight">น้ำหนัก</span></h4>
-          <div class="wwval"><span id="weightToday">—</span> <span data-i18n="kg_unit">กก.</span></div>
-          <div class="weight-input">
-            <input type="number" id="weightInput" step="0.1" min="20" max="300" placeholder="กรอก..." data-i18n="enter_ph">
-            <button onclick="logWeight()" data-i18n="save">บันทึก</button>
-          </div>
-          <div class="weight-trend" id="weightTrend"></div>
         </div>
       </div>
       <div id="foodLog"></div>
@@ -475,7 +467,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <!-- ANALYSIS -->
     <div class="screen" id="pg-analysis">
       <div class="card"><h3 data-i18n="cal_7d">แคลอรี่ 7 วัน</h3><div class="wbars" id="wBars"></div><div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div></div>
-      <div class="card"><h3 data-i18n="weight_30d">น้ำหนัก 30 วัน</h3><div class="lc-wrap" id="weightChart"></div><div id="weightSum" style="font-size:.74rem;color:var(--muted);margin-top:6px;text-align:center"></div></div>
+      <div class="card"><h3 data-i18n="projection_title">แนวโน้มน้ำหนัก (คาดการณ์)</h3><div class="lc-wrap" id="projChart"></div><div id="projSum" style="font-size:.74rem;color:var(--muted);margin-top:6px;text-align:center;line-height:1.5"></div></div>
       <div class="card"><h3 data-i18n="water_7d">น้ำดื่ม 7 วัน</h3><div id="waterStats"></div></div>
       <div class="card"><h3 data-i18n="summary">สรุป</h3><div id="wkSum"></div></div>
       <div class="card"><h3 data-i18n="advice">คำแนะนำ</h3><div id="insDiv"></div></div>
@@ -733,7 +725,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.7 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.8 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
       <div class="card">
@@ -822,18 +814,6 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
   </div>
 </div>
 
-<!-- QUICK WEIGHT MODAL -->
-<div class="modal-bg hide" id="quickWeightModal">
-  <div class="modal">
-    <div class="modal-hdr"><h3 data-i18n="weight">น้ำหนัก</h3><button class="mc-close" onclick="closeQuickWeight()">✕</button></div>
-    <div style="font-size:.74rem;color:var(--muted);margin-bottom:6px;text-align:center" id="quickWeightDate">—</div>
-    <div style="text-align:center;font-size:2rem;font-weight:700;margin-bottom:10px"><span id="quickWeightToday">—</span> <span data-i18n="kg_unit">กก.</span></div>
-    <div class="fl" style="margin-bottom:10px"><label data-i18n="weight_kg">น้ำหนัก (กก.)</label><input type="number" id="quickWeightInput" step="0.1" min="20" max="300" placeholder="65"></div>
-    <button class="btn" onclick="saveQuickWeight()" data-i18n="save">บันทึก</button>
-    <div class="weight-trend" id="quickWeightTrend" style="margin-top:10px;text-align:center"></div>
-  </div>
-</div>
-
 <!-- WORKOUT MODAL -->
 <div class="modal-bg hide" id="workoutModal">
   <div class="modal">
@@ -906,7 +886,6 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 
     <div class="drawer-sect drawer-tools-row" data-i18n="tools_section">เครื่องมือ</div>
     <button class="drawer-item drawer-tools-row" onclick="openQuickWater()"><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item drawer-tools-row" onclick="openQuickWeight()"><span data-i18n="weight">น้ำหนัก</span><span class="di-arrow">›</span></button>
     <button class="drawer-item drawer-tools-row" onclick="closeDrawer();openWorkoutModal()"><span data-i18n="workouts">ออกกำลังกาย</span><span class="di-arrow">›</span></button>
     <button class="drawer-item drawer-tools-row" onclick="navTo('profile');setTimeout(()=>document.querySelector('#mWaist')?.scrollIntoView({behavior:'smooth',block:'center'}),300)"><span data-i18n="body_measurements">สัดส่วนร่างกาย</span><span class="di-arrow">›</span></button>
 
@@ -916,7 +895,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.7 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.8 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -933,7 +912,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.7.7';
+const APP_VERSION = '2.7.8';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -971,7 +950,7 @@ const I18N = {
     manual:'กรอกเอง',food_name:'ชื่ออาหาร',name_ph:'ชื่อ...',cal:'แคลอรี่',cal_ph:'kcal',
     protein_g:'โปรตีน (g)',carbs_g:'คาร์บ (g)',fat_g:'ไขมัน (g)',
     save_lib:'💾 บันทึกลงไลบรารี',attach_photo:'📷 แนบรูป',btn_add:'+ เพิ่มอาหาร',
-    cal_7d:'แคลอรี่ 7 วัน',weight_30d:'น้ำหนัก 30 วัน',water_7d:'น้ำดื่ม 7 วัน',
+    cal_7d:'แคลอรี่ 7 วัน',weight_30d:'น้ำหนัก 30 วัน',water_7d:'น้ำดื่ม 7 วัน',projection_title:'แนวโน้มน้ำหนัก (คาดการณ์)',
     days_logged:'บันทึก',avg_per_day:'เฉลี่ย/วัน',days_over:'วันเกินเป้า',days_on:'วันในเป้า',
     summary:'สรุป',advice:'คำแนะนำ',badges:'เหรียญตรา',share_today:'📤 แชร์สรุปวันนี้',share_ach:'🏆 แชร์ความสำเร็จ',
     tdee_title:'เครื่องคำนวณ TDEE',tdee_sub:'Total Daily Energy Expenditure — พลังงานที่ร่างกายเผาผลาญต่อวัน',
@@ -1032,7 +1011,7 @@ const I18N = {
     manual:'Manual Entry',food_name:'Food name',name_ph:'Name...',cal:'Calories',cal_ph:'kcal',
     protein_g:'Protein (g)',carbs_g:'Carbs (g)',fat_g:'Fat (g)',
     save_lib:'💾 Save to my library',attach_photo:'📷 Attach photo',btn_add:'+ Add food',
-    cal_7d:'7-day Calories',weight_30d:'30-day Weight',water_7d:'7-day Water',
+    cal_7d:'7-day Calories',weight_30d:'30-day Weight',water_7d:'7-day Water',projection_title:'Projected weight trend',
     days_logged:'Days logged',avg_per_day:'Avg / day',days_over:'Over goal',days_on:'On goal',
     summary:'Summary',advice:'Tips',badges:'Badges',share_today:'📤 Share today',share_ach:'🏆 Share achievements',
     tdee_title:'TDEE Calculator',tdee_sub:'Total Daily Energy Expenditure — calories your body burns per day',
@@ -2575,40 +2554,6 @@ function renderQuickWater(){
     dots.appendChild(d);
   }
 }
-function openQuickWeight(){
-  closeDrawer();
-  const w=allWeights[currentDate];
-  document.getElementById('quickWeightToday').textContent=w?w.toFixed(1):'—';
-  document.getElementById('quickWeightDate').textContent=fmtDate(currentDate);
-  document.getElementById('quickWeightInput').value='';
-  // Show trend
-  const tEl=document.getElementById('quickWeightTrend');
-  const keys=Object.keys(allWeights).sort().slice(-14);
-  if(keys.length<2){tEl.textContent=t('weight_trend_hint');tEl.className='weight-trend';}
-  else{
-    const ys=keys.map(k=>allWeights[k]);
-    const n=ys.length,mx=(n-1)/2,my=ys.reduce((a,b)=>a+b,0)/n;
-    let num=0,den=0;for(let i=0;i<n;i++){num+=(i-mx)*(ys[i]-my);den+=(i-mx)**2;}
-    const perWeek=(den?num/den:0)*7;
-    const cls=perWeek>0.05?'up':perWeek<-0.05?'down':'';
-    const arrow=perWeek>0.05?'↑':perWeek<-0.05?'↓':'→';
-    const wkU=settings.lang==='en'?'kg/wk':'กก./สัปดาห์';
-    tEl.textContent=`${arrow} ${perWeek>0?'+':''}${perWeek.toFixed(2)} ${wkU}`;
-    tEl.className='weight-trend '+cls;
-  }
-  document.getElementById('quickWeightModal').classList.remove('hide');
-}
-function closeQuickWeight(){document.getElementById('quickWeightModal').classList.add('hide');}
-function saveQuickWeight(){
-  const v=+document.getElementById('quickWeightInput').value;
-  if(!v||v<20||v>300){showToast(settings.lang==='en'?'Enter kg (20-300)':'กรอกน้ำหนักเป็นกก. (20-300)');return;}
-  allWeights[currentDate]=v;
-  lsSave(LS_WEIGHTS,allWeights);
-  if(currentDate===todayKey()){userProfile.weight=v;saveProfile_LS();}
-  closeQuickWeight();renderToday();renderProfileUI?.();
-  showToast((settings.lang==='en'?'Saved ':'บันทึก ')+v+' '+t('kg_unit')+' ✓');
-  scheduleAutoSync('weight');
-}
 function renderWaterWidget(){
   const cur=allWater[currentDate]||0;
   document.getElementById('waterCount').textContent=cur;
@@ -2620,48 +2565,6 @@ function renderWaterWidget(){
     d.onclick=()=>{allWater[currentDate]=i+1;lsSave(LS_WATER,allWater);renderWaterWidget();};
     dots.appendChild(d);
   }
-}
-
-// ═══ WEIGHT ═══
-function logWeight(){
-  const v=+document.getElementById('weightInput').value;
-  if(!v||v<20||v>300){showToast(settings.lang==='en'?'Enter kg (20-300)':'กรอกน้ำหนักเป็นกก. (20-300)');return;}
-  allWeights[currentDate]=v;
-  lsSave(LS_WEIGHTS,allWeights);
-  // Auto-sync profile weight if logging today
-  if(currentDate===todayKey()){
-    userProfile.weight=v;
-    saveProfile_LS();
-  }
-  document.getElementById('weightInput').value='';
-  renderWeightWidget();renderProfileUI();
-  showToast((settings.lang==='en'?'Saved ':'บันทึก ')+v+' '+t('kg_unit')+' ✓');
-  scheduleAutoSync('weight');
-}
-function renderWeightWidget(){
-  const w=allWeights[currentDate];
-  document.getElementById('weightToday').textContent=w?w.toFixed(1):'—';
-  // Trend over last 14 days
-  const keys=Object.keys(allWeights).sort();
-  const recent=keys.slice(-14).map(k=>({k,v:allWeights[k]}));
-  const tEl=document.getElementById('weightTrend');
-  if(recent.length<2){tEl.textContent=t('weight_trend_hint');tEl.className='weight-trend';return;}
-  // Linear regression slope (kg per day)
-  const n=recent.length;
-  const xs=recent.map((_,i)=>i);
-  const ys=recent.map(r=>r.v);
-  const mx=xs.reduce((a,b)=>a+b,0)/n;
-  const my=ys.reduce((a,b)=>a+b,0)/n;
-  let num=0,den=0;
-  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);den+=(xs[i]-mx)**2;}
-  const slope=den?num/den:0;
-  const perWeek=slope*7;
-  const cls=perWeek>0.05?'up':perWeek<-0.05?'down':'';
-  const arrow=perWeek>0.05?'↑':perWeek<-0.05?'↓':'→';
-  const wkLabel=settings.lang==='en'?'kg/week':'กก./สัปดาห์';
-  const daysLabel=settings.lang==='en'?'days':'วัน';
-  tEl.textContent=`${arrow} ${perWeek>0?'+':''}${perWeek.toFixed(2)} ${wkLabel} (${n} ${daysLabel})`;
-  tEl.className='weight-trend '+cls;
 }
 
 function saveEditedFood(){
@@ -2712,7 +2615,7 @@ function renderToday(){
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
   document.getElementById('mCB').style.width=Math.min(totC/250*100,100).toFixed(1)+'%';
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
-  renderWaterWidget();renderWeightWidget();renderReminderBanner();renderWorkoutsList();
+  renderWaterWidget();renderReminderBanner();renderWorkoutsList();
   const log=document.getElementById('foodLog');
   if(!E.length){log.innerHTML=`<div class="empty">${t('no_entries')}<br>${t('press_add')}</div>`;return;}
   log.innerHTML='';
@@ -2741,48 +2644,110 @@ function renderToday(){
 }
 
 // ═══ ANALYSIS ═══
-function renderWeightChart(){
-  const keys=Object.keys(allWeights).sort();
-  const recent=keys.slice(-30).map(k=>({k,v:allWeights[k]}));
-  const wrap=document.getElementById('weightChart');
-  const sum=document.getElementById('weightSum');
-  if(recent.length<2){wrap.innerHTML=`<div class="empty" style="padding:20px 0;font-size:.78rem">${settings.lang==='en'?'Log at least 2 days to see chart':'บันทึกอย่างน้อย 2 วันเพื่อดูกราฟ'}</div>`;sum.textContent='';return;}
-  const W=320,H=120,PAD=8;
-  const vs=recent.map(r=>r.v);
-  const minV=Math.min(...vs),maxV=Math.max(...vs);
-  const range=Math.max(0.5,maxV-minV);
-  const yMin=minV-range*0.1,yMax=maxV+range*0.1;
-  const n=recent.length;
-  const xstep=(W-PAD*2)/(n-1||1);
-  // Linear regression for trend line
-  const xs=recent.map((_,i)=>i);
-  const mx=xs.reduce((a,b)=>a+b,0)/n;
-  const my=vs.reduce((a,b)=>a+b,0)/n;
-  let num=0,den=0;
-  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(vs[i]-my);den+=(xs[i]-mx)**2;}
-  const slope=den?num/den:0;
-  const intercept=my-slope*mx;
-  const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#ff6b6b';
-  const yPx=v=>PAD+(H-PAD*2)*(1-(v-yMin)/(yMax-yMin));
-  const pts=recent.map((r,i)=>[PAD+i*xstep,yPx(r.v)]);
-  const path=pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
-  const trendStart=yPx(intercept);
-  const trendEnd=yPx(intercept+slope*(n-1));
-  const dots=pts.map(p=>`<circle class="lc-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="${accent}"/>`).join('');
+// Project weight trend from calorie data (no daily weighing required).
+// Past 14 days: cumulative actual deficit/surplus from logged food vs goal.
+// Next 14 days: extrapolated at the average rate observed.
+// Reference: ~7700 kcal ≈ 1 kg of body fat.
+function renderProjectionChart(){
+  const wrap=document.getElementById('projChart');
+  const sum=document.getElementById('projSum');
+  const isEn=settings.lang==='en';
+  const startW=+userProfile?.weight||0;
+  const goalW=+userProfile?.goal_weight_kg||0;
+  const calGoal=+userProfile?.goal_cal||1800;
   const kgU=t('kg_unit');
-  wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+
-    `<line class="lc-trend" x1="${PAD}" y1="${trendStart.toFixed(1)}" x2="${PAD+(n-1)*xstep}" y2="${trendEnd.toFixed(1)}"/>`+
-    `<path class="lc-line" d="${path}" stroke="${accent}"/>`+dots+`</svg>`+
-    `<div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:2px"><span>${recent[0].k.slice(5)}</span><span>${maxV.toFixed(1)}–${minV.toFixed(1)} ${kgU}</span><span>${recent[n-1].k.slice(5)}</span></div>`;
-  const startV=recent[0].v,endV=recent[n-1].v;
-  const totalDiff=endV-startV;
-  const perWeek=slope*7;
-  const arrow=totalDiff>0.1?'↑':totalDiff<-0.1?'↓':'→';
-  const cls=totalDiff>0.1?'color:var(--accent)':totalDiff<-0.1?'color:var(--green)':'';
-  const inDays=settings.lang==='en'?`in ${n} days`:`ใน ${n} วัน`;
-  const wkUnit=settings.lang==='en'?'kg/wk':'กก./สัปดาห์';
-  const avgLbl=settings.lang==='en'?'avg':'เฉลี่ย';
-  sum.innerHTML=`<span style="${cls}">${arrow} ${totalDiff>0?'+':''}${totalDiff.toFixed(1)} ${kgU} ${inDays}</span> · ${avgLbl} ${perWeek>0?'+':''}${perWeek.toFixed(2)} ${wkUnit}`;
+  if(!startW){
+    wrap.innerHTML=`<div class="empty" style="padding:20px 0;font-size:.78rem">${isEn?'Enter your weight in Profile to see projection':'กรอกน้ำหนักในโปรไฟล์เพื่อดูแนวโน้ม'}</div>`;
+    sum.textContent='';return;
+  }
+  // Gather past HISTORY days
+  const HISTORY=14,FUTURE=14;
+  const today=new Date();
+  const days=[];
+  for(let i=HISTORY-1;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const k=dateKey(d);
+    const entries=allEntries[k]||[];
+    if(!entries.length){days.push({k,hasData:false});continue;}
+    const food=entries.reduce((s,e)=>s+(+e.calories||0),0);
+    const burned=(allWorkouts[k]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
+    const net=Math.max(0,food-burned);
+    const delta=calGoal-net;          // positive = calorie deficit = lose weight
+    days.push({k,hasData:true,delta});
+  }
+  const logged=days.filter(d=>d.hasData);
+  if(!logged.length){
+    wrap.innerHTML=`<div class="empty" style="padding:20px 0;font-size:.78rem">${isEn?'Log meals to see weight projection':'บันทึกอาหารเพื่อดูแนวโน้มน้ำหนัก'}</div>`;
+    sum.textContent='';return;
+  }
+  // Cumulative weight history (kg)
+  let cum=0;
+  const pastPts=days.map(d=>{
+    if(d.hasData)cum-=d.delta/7700;   // -delta/7700 = weight change (negative delta = surplus → gain)
+    return startW+cum;
+  });
+  const avgDelta=logged.reduce((s,d)=>s+d.delta,0)/logged.length;
+  const kgPerDay=avgDelta/7700;       // positive = losing weight
+  const kgPerWeek=kgPerDay*7;
+  const lastW=pastPts[pastPts.length-1];
+  const futurePts=[];
+  for(let i=1;i<=FUTURE;i++)futurePts.push(lastW-kgPerDay*i);
+  // Chart geometry
+  const W=320,H=130,PT=10,PB=14,PL=4,PR=4;
+  const allW=[...pastPts,...futurePts];
+  if(goalW)allW.push(goalW);
+  const minV=Math.min(...allW),maxV=Math.max(...allW);
+  const range=Math.max(0.5,maxV-minV);
+  const yMin=minV-range*0.12,yMax=maxV+range*0.12;
+  const N=pastPts.length+futurePts.length;
+  const xstep=(W-PL-PR)/(N-1);
+  const yPx=w=>PT+(H-PT-PB)*(1-(w-yMin)/(yMax-yMin));
+  const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#ff6b6b';
+  const lineColor=kgPerDay>0?'#51cf66':kgPerDay<0?accent:'#888aa0';
+  // Past path (solid)
+  const pastPath=pastPts.map((w,i)=>`${i===0?'M':'L'}${(PL+i*xstep).toFixed(1)},${yPx(w).toFixed(1)}`).join(' ');
+  // Future path (dashed) — starts where past ends
+  const futurePath=[lastW,...futurePts].map((w,i)=>`${i===0?'M':'L'}${(PL+(pastPts.length-1+i)*xstep).toFixed(1)},${yPx(w).toFixed(1)}`).join(' ');
+  // Goal line
+  let goalLine='';
+  if(goalW&&goalW>=yMin&&goalW<=yMax){
+    const gy=yPx(goalW).toFixed(1);
+    goalLine=`<line x1="${PL}" y1="${gy}" x2="${(W-PR).toFixed(1)}" y2="${gy}" stroke="#888aa0" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/>`+
+      `<text x="${(W-PR).toFixed(1)}" y="${(+gy-3).toFixed(1)}" text-anchor="end" font-size="9" fill="#888aa0">${isEn?'Goal':'เป้า'} ${goalW.toFixed(1)}</text>`;
+  }
+  // Today divider
+  const todayX=(PL+(pastPts.length-1)*xstep).toFixed(1);
+  const todayDiv=`<line x1="${todayX}" y1="${PT}" x2="${todayX}" y2="${H-PB}" stroke="#888aa0" stroke-width="1" stroke-dasharray="2 2" opacity=".4"/>`;
+  const todayDot=`<circle cx="${todayX}" cy="${yPx(lastW).toFixed(1)}" r="3.5" fill="${accent}"/>`;
+  wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="overflow:visible">`+
+    goalLine+todayDiv+
+    `<path d="${pastPath}" fill="none" stroke="${lineColor}" stroke-width="2"/>`+
+    `<path d="${futurePath}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/>`+
+    todayDot+
+    `<text x="${PL}" y="${(H-2).toFixed(1)}" font-size="9" fill="#888aa0">−${HISTORY}${isEn?'d':'ว'}</text>`+
+    `<text x="${todayX}" y="${(H-2).toFixed(1)}" text-anchor="middle" font-size="9" fill="#888aa0">${isEn?'today':'วันนี้'}</text>`+
+    `<text x="${(W-PR).toFixed(1)}" y="${(H-2).toFixed(1)}" text-anchor="end" font-size="9" fill="#888aa0">+${FUTURE}${isEn?'d':'ว'}</text>`+
+    `</svg>`;
+  // Summary text
+  const projW=lastW-kgPerDay*FUTURE;
+  const arrow=kgPerWeek>0.05?'↓':kgPerWeek<-0.05?'↑':'→';
+  const clr=kgPerWeek>0.05?'color:var(--green)':kgPerWeek<-0.05?'color:var(--accent)':'color:var(--muted)';
+  const wkUnit=isEn?'kg/wk':'กก./สัปดาห์';
+  const inDays=isEn?'in 14 days':'ใน 14 วัน';
+  const sign=kgPerWeek>0?'-':kgPerWeek<0?'+':'';
+  let out=`<span style="${clr}">${arrow} ${sign}${Math.abs(kgPerWeek).toFixed(2)} ${wkUnit}</span> · ${isEn?'projected':'คาดว่า'} ${projW.toFixed(1)} ${kgU} ${inDays}`;
+  if(goalW&&Math.abs(kgPerDay)>0.0005){
+    const diff=lastW-goalW;
+    if((diff>0&&kgPerDay>0)||(diff<0&&kgPerDay<0)){
+      const weeks=Math.round(Math.abs(diff/kgPerDay)/7);
+      out+=`<br><span style="color:var(--green)">🎯 ${isEn?'Reach goal in ~':'ถึงเป้าใน ~'}${weeks} ${isEn?'wks':'สัปดาห์'}</span>`;
+    }else if(Math.abs(diff)>0.2){
+      out+=`<br><span style="color:var(--amber)">⚠️ ${isEn?'Trend going opposite to goal':'แนวโน้มสวนทางกับเป้า'}</span>`;
+    }
+  }else if(!goalW){
+    out+=`<br><span style="color:var(--muted)">${isEn?'Tip: set a goal weight in Profile to see ETA':'เคล็ด: ตั้งเป้าหมายน้ำหนักในโปรไฟล์เพื่อดูเวลาถึงเป้า'}</span>`;
+  }
+  sum.innerHTML=out;
 }
 function renderWaterStats(){
   const days7=[];
@@ -2815,7 +2780,7 @@ function renderWaterStats(){
     `<div class="rrow"><span class="rl">${t('avg_per_day')}</span><span class="rv">${avg.toFixed(1)} ${t('cups_unit')}</span></div>`;
 }
 function renderAnalysis(){
-  renderWeightChart();renderWaterStats();
+  renderProjectionChart();renderWaterStats();
   const days=[];
   const loc=settings.lang==='en'?'en-GB':'th-TH';
   for(let i=6;i>=0;i--){
