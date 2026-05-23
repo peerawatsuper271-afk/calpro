@@ -760,7 +760,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.8.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.8.1 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
       <div class="card">
@@ -855,6 +855,24 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <button class="btn-sec" onclick="addWater(-1);renderQuickWater()" style="font-size:1.2rem">−</button>
       <button class="btn" onclick="addWater(1);renderQuickWater()" style="font-size:1.2rem">+</button>
     </div>
+  </div>
+</div>
+
+<!-- FEEDBACK MODAL — opens an email draft to the developer -->
+<div class="modal-bg hide" id="feedbackModal">
+  <div class="modal">
+    <div class="modal-hdr"><h3 data-i18n="feedback">ส่งคำแนะนำ</h3><button class="mc-close" onclick="closeFeedback()">✕</button></div>
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:10px;line-height:1.5" data-i18n="feedback_sub">แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา</div>
+    <div class="fl" style="margin-bottom:8px">
+      <label data-i18n="feedback_subject">หัวเรื่อง</label>
+      <input type="text" id="fbSubject" placeholder="เช่น “อยากให้เพิ่มเมนูใหม่...”" data-i18n="feedback_subj_ph">
+    </div>
+    <div class="fl" style="margin-bottom:10px">
+      <label data-i18n="feedback_body">ข้อความ</label>
+      <textarea id="fbBody" rows="6" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:10px 12px;font-size:.88rem;outline:none;font-family:inherit;resize:vertical;min-height:100px" placeholder="พิมพ์ข้อความที่นี่..." data-i18n="feedback_body_ph"></textarea>
+    </div>
+    <button class="btn" onclick="sendFeedback()"><span data-i18n="feedback_send">📧 ส่งทางอีเมล</span></button>
+    <div style="font-size:.66rem;color:var(--muted);margin-top:8px;text-align:center">peerawat_pee123@hotmail.co.th</div>
   </div>
 </div>
 
@@ -967,9 +985,10 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
     <button class="drawer-item" onclick="navTo('help')"><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.8.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.8.1 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -986,7 +1005,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.8.0';
+const APP_VERSION = '2.8.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1068,9 +1087,10 @@ const I18N = {
     water_goal_cfg:'เป้าหมายน้ำดื่ม',
     about_desc:'ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง',
     about_links:'ลิงก์',about_credits:'เครดิต',
-    theme_dark:'มืด',theme_night:'ดึก',theme_forest:'ป่า',theme_warm:'อุ่น',theme_ocean:'มหาสมุทร',theme_light:'สว่าง',theme_cream:'ครีม',theme_mint:'มินต์',
+    theme_dark:'มืด',theme_night:'ดึก',theme_rose:'กุหลาบ',theme_sky:'ฟ้า',theme_violet:'ม่วง',theme_light:'สว่าง',theme_cream:'ครีม',theme_mint:'มินต์',
     help_title:'วิธีใช้งาน',health_tips:'คำแนะนำสุขภาพวันนี้',
     portion_label:'จำนวน (เท่า)',portion_amount:'ปริมาณ',font_setting:'ฟอนต์',font_system:'ค่าเริ่มต้น',
+    feedback:'ส่งคำแนะนำ',feedback_sub:'แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา',feedback_subject:'หัวเรื่อง',feedback_body:'ข้อความ',feedback_send:'📧 ส่งทางอีเมล',feedback_subj_ph:'เช่น “อยากให้เพิ่มเมนูใหม่...”',feedback_body_ph:'พิมพ์ข้อความที่นี่...',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1131,9 +1151,10 @@ const I18N = {
     water_goal_cfg:'Water goal',
     about_desc:'Calorie tracking, TDEE calculator and weight management · Free · No login required · Data stored locally',
     about_links:'Links',about_credits:'Credits',
-    theme_dark:'Dark',theme_night:'Night',theme_forest:'Forest',theme_warm:'Warm',theme_ocean:'Ocean',theme_light:'Light',theme_cream:'Cream',theme_mint:'Mint',
+    theme_dark:'Dark',theme_night:'Night',theme_rose:'Rose',theme_sky:'Sky',theme_violet:'Violet',theme_light:'Light',theme_cream:'Cream',theme_mint:'Mint',
     help_title:'How to use',health_tips:'Health insights today',
     portion_label:'Quantity (×)',portion_amount:'Amount',font_setting:'Font',font_system:'System default',
+    feedback:'Send feedback',feedback_sub:'Share suggestions/bugs with the developer',feedback_subject:'Subject',feedback_body:'Message',feedback_send:'📧 Send via email',feedback_subj_ph:'e.g. "Please add more foods..."',feedback_body_ph:'Type your message here...',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -1306,9 +1327,10 @@ const BADGES=[
 const THEMES={
   dark:{bg:'#0f0f14',s:'#1a1a24',s2:'#22222e',b:'#2e2e3e',t:'#e8e8f0',m:'#6868a0',mode:'dark'},
   night:{bg:'#080810',s:'#11111a',s2:'#191922',b:'#252530',t:'#ddddf5',m:'#5555a0',mode:'dark'},
-  forest:{bg:'#0b120d',s:'#141e16',s2:'#1c281e',b:'#283a2a',t:'#e0eed8',m:'#5a7a5c',mode:'dark'},
-  warm:{bg:'#120e09',s:'#1e1510',s2:'#281c14',b:'#382518',t:'#f0e8d8',m:'#8a6840',mode:'dark'},
-  ocean:{bg:'#090e14',s:'#11181f',s2:'#182028',b:'#223040',t:'#d8eef8',m:'#4878a0',mode:'dark'},
+  // Accent-tinted dark themes (replace forest/warm/ocean)
+  rose:{bg:'#140b0e',s:'#1f1217',s2:'#2a181d',b:'#3a2027',t:'#f5d8de',m:'#a06070',mode:'dark'},
+  sky:{bg:'#0b1018',s:'#141c25',s2:'#1c2632',b:'#28384a',t:'#d8e4f0',m:'#6080a8',mode:'dark'},
+  violet:{bg:'#110b18',s:'#1a1428',s2:'#251c36',b:'#322650',t:'#e0d8f0',m:'#7868a8',mode:'dark'},
   light:{bg:'#fafafd',s:'#ffffff',s2:'#f0f0f5',b:'#e0e0ea',t:'#1a1a24',m:'#7878a0',mode:'light'},
   cream:{bg:'#fbf6ec',s:'#ffffff',s2:'#f4ecd8',b:'#e6d8b8',t:'#3a2a14',m:'#8a7050',mode:'light'},
   mint:{bg:'#f0f8f2',s:'#ffffff',s2:'#e2efe6',b:'#bfd6c5',t:'#0c2418',m:'#5a8870',mode:'light'},
@@ -2702,6 +2724,32 @@ function setFont(key){
   document.querySelectorAll('.font-chip').forEach(b=>b.classList.toggle('active',b.dataset.font===key));
 }
 
+// ═══ FEEDBACK (opens a mailto draft to the developer) ═══
+const FEEDBACK_EMAIL='peerawat_pee123@hotmail.co.th';
+function openFeedback(){
+  closeDrawer();
+  document.getElementById('fbSubject').value='';
+  document.getElementById('fbBody').value='';
+  document.getElementById('feedbackModal').classList.remove('hide');
+}
+function closeFeedback(){document.getElementById('feedbackModal').classList.add('hide');}
+function sendFeedback(){
+  const isEn=settings.lang==='en';
+  const subj=document.getElementById('fbSubject').value.trim();
+  const body=document.getElementById('fbBody').value.trim();
+  if(!body){showToast(isEn?'Please write a message':'กรุณาพิมพ์ข้อความ');return;}
+  // Add app-context footer so the developer knows the version + platform
+  const ua=(navigator.userAgent||'').slice(0,120);
+  const footer=`\n\n— —\nApp: CalPro+ v${APP_VERSION}\nLang: ${settings.lang||'th'}\nUA: ${ua}`;
+  const subject=encodeURIComponent(subj||(isEn?'CalPro+ feedback':'คำแนะนำสำหรับ CalPro+'));
+  const mailtoBody=encodeURIComponent(body+footer);
+  const href=`mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${mailtoBody}`;
+  // Open mail client (most platforms accept window.location for mailto)
+  window.location.href=href;
+  closeFeedback();
+  showToast(isEn?'Opening email app...':'กำลังเปิดแอปอีเมล...');
+}
+
 // ═══ HELP / HOW TO USE ═══
 function renderHelp(){
   const body=document.getElementById('helpBody');if(!body)return;
@@ -3387,6 +3435,10 @@ const DENSITY_CSS = `
 
 // ═══ SETTINGS / THEME ═══
 function applyTheme(){
+  // Migrate retired themes (forest/warm/ocean) to nearest replacement
+  const LEGACY_MIGRATE={forest:'sky',warm:'rose',ocean:'sky'};
+  if(settings.theme&&LEGACY_MIGRATE[settings.theme]){settings.theme=LEGACY_MIGRATE[settings.theme];lsSave(LS_SETTINGS,settings);}
+  if(settings.lastDark&&LEGACY_MIGRATE[settings.lastDark]){settings.lastDark=LEGACY_MIGRATE[settings.lastDark];lsSave(LS_SETTINGS,settings);}
   const th=THEMES[settings.theme]||THEMES.dark;
   const r=document.documentElement.style;
   r.setProperty('--bg',th.bg);r.setProperty('--surface',th.s);r.setProperty('--surface2',th.s2);
@@ -3429,7 +3481,7 @@ function toggleMode(){
   lsSave(LS_SETTINGS,settings);
   applyTheme();
 }
-const THEME_LABELS={dark:'มืด',night:'ดึก',forest:'ป่า',warm:'อุ่น',ocean:'มหาสมุทร',light:'สว่าง',cream:'ครีม',mint:'มินต์'};
+const THEME_LABELS={dark:'มืด',night:'ดึก',rose:'กุหลาบ',sky:'ฟ้า',violet:'ม่วง',light:'สว่าง',cream:'ครีม',mint:'มินต์'};
 // openSettings deprecated — use navTo('settings') instead
 // ═══ DRAWER ═══
 function openDrawer(){
