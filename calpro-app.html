@@ -462,6 +462,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         <div style="display:flex;gap:5px;background:var(--surface2);border-radius:9px;padding:3px;margin-bottom:10px">
           <button class="qtab active" data-qtab="fav" onclick="setQuickTab('fav')" data-i18n="quick_fav">⭐ ของโปรด</button>
           <button class="qtab" data-qtab="recent" onclick="setQuickTab('recent')" data-i18n="quick_recent">🕘 ล่าสุด</button>
+          <button class="qtab" data-qtab="presets" onclick="setQuickTab('presets')" data-i18n="quick_presets">🍱 ชุดอาหาร</button>
         </div>
         <div id="quickList"></div>
       </div>
@@ -761,7 +762,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.9.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.10.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1017,7 +1018,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.9.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.10.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1034,7 +1035,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.9.0';
+const APP_VERSION = '2.10.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1123,6 +1124,7 @@ const I18N = {
     update_title:'มีเวอร์ชันใหม่',update_body:'CalPro+ เวอร์ชันใหม่พร้อมติดตั้งแล้ว · รีสตาร์ทแอปเพื่ออัปเดตทันที?',update_later:'ไว้ทีหลัง',update_now:'อัปเดตเลย',
     whats_new_title:'✨ มีอะไรใหม่',check_updates:'🔄 ตรวจหาเวอร์ชันใหม่',check_updates_sub:'ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง',checking_updates:'กำลังตรวจสอบ...',latest_version:'คุณใช้เวอร์ชันล่าสุดอยู่แล้ว ✓',
     clean_photos:'🧹 ลบรูปอาหารเก่า (>30 วัน)',
+    quick_presets:'🍱 ชุดอาหาร',preset_save_today:'+ บันทึกอาหารวันนี้เป็นชุด',preset_name_ph:'ตั้งชื่อชุด เช่น "มื้อเช้าปกติ"',preset_no_items:'ยังไม่มีชุด · ลองเพิ่มอาหารวันนี้แล้วกด "บันทึกเป็นชุด"',preset_added:'เพิ่ม %n รายการจากชุด ✓',preset_deleted:'ลบชุดแล้ว',preset_empty_day:'ยังไม่มีอาหารที่บันทึกวันนี้',preset_saved:'บันทึกชุดแล้ว ✓',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1190,6 +1192,7 @@ const I18N = {
     update_title:'New version available',update_body:'A new version of CalPro+ is ready · Restart now to apply?',update_later:'Later',update_now:'Update now',
     whats_new_title:'✨ What\'s new',check_updates:'🔄 Check for updates',check_updates_sub:'See if a new CalPro+ version is available',checking_updates:'Checking...',latest_version:'You\'re on the latest version ✓',
     clean_photos:'🧹 Clear photos older than 30 days',
+    quick_presets:'🍱 Sets',preset_save_today:'+ Save today as a set',preset_name_ph:'Name this set e.g. "Usual breakfast"',preset_no_items:'No sets yet · log some food today and tap "Save as set"',preset_added:'Added %n items from set ✓',preset_deleted:'Set deleted',preset_empty_day:'No food logged today yet',preset_saved:'Set saved ✓',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -1205,6 +1208,7 @@ const LS_RECENT = 'calpro_recent';       // Array of food keys (last 10)
 const LS_CUSTOM = 'calpro_custom_foods'; // Array of {n,e,c,p,cb,f,a,cat:'custom'}
 const LS_WORKOUTS = 'calpro_workouts';   // { date: [{id,name,minutes,kcal}] }
 const LS_MEASURES = 'calpro_measures';   // { date: {waist,hip,chest,neck,bf} }
+const LS_PRESETS = 'calpro_presets';     // Array of {id, name, foods:[entry-shape], created}
 
 function lsLoad(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
 function lsSave(key, val){
@@ -1383,6 +1387,7 @@ let recentFoods = []; // array of food names (n), most recent first
 let customFoods = []; // user-saved foods
 let allWorkouts = {}; // { date: [{id,name,minutes,kcal}] }
 let allMeasures = {}; // { date: {waist,hip,chest,neck,bf} }
+let presets = [];      // 1-tap food sets — list of {id,name,foods:[{food_name,calories,...}]}
 // Exercise MET database (kcal/hour ≈ MET × weight_kg)
 const EXERCISES = [
   {n:'เดิน',e:'Walking',met:3.5},
@@ -1475,6 +1480,7 @@ function loadUserData(){
   customFoods = lsLoad(LS_CUSTOM, []);
   allWorkouts = lsLoad(LS_WORKOUTS, {});
   allMeasures = lsLoad(LS_MEASURES, {});
+  presets = lsLoad(LS_PRESETS, []);
   loadEntries();
   const ls = lsLoad(LS_SETTINGS, null);
   if (ls) settings = ls;
@@ -1526,6 +1532,7 @@ function resetAllData(){
   localStorage.removeItem(LS_CUSTOM);
   localStorage.removeItem(LS_WORKOUTS);
   localStorage.removeItem(LS_MEASURES);
+  localStorage.removeItem(LS_PRESETS);
   showToast(settings.lang==='en'?'Data cleared':'ล้างข้อมูลแล้ว');
   setTimeout(()=>location.reload(), 800);
 }
@@ -1545,6 +1552,7 @@ function exportData(){
     custom_foods:customFoods,
     workouts:allWorkouts,
     measures:allMeasures,
+    presets:presets,
     settings:settings,
   };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -1580,6 +1588,7 @@ function importData(file){
       if(data.custom_foods)lsSave(LS_CUSTOM,data.custom_foods);
       if(data.workouts)lsSave(LS_WORKOUTS,data.workouts);
       if(data.measures)lsSave(LS_MEASURES,data.measures);
+      if(data.presets)lsSave(LS_PRESETS,data.presets);
       if(data.settings)lsSave(LS_SETTINGS,data.settings);
       showToast(settings.lang==='en'?'Import complete · loading...':'Import สำเร็จ · กำลังโหลด...');
       setTimeout(()=>location.reload(),800);
@@ -1742,6 +1751,7 @@ function foodDisplayName(f){return settings.lang==='en'&&f.e?f.e:f.n;}
 function foodSubLine(f){return settings.lang==='en'?(f.n?f.n+' · ':'')+`P:${f.p}g C:${f.cb}g F:${f.f}g`:(f.e?f.e+' · ':'')+`P:${f.p}g C:${f.cb}g F:${f.f}g`;}
 function renderQuickList(){
   const w=document.getElementById('quickList');
+  if(activeQTab==='presets'){renderPresetsTab(w);return;}
   const list=activeQTab==='fav'
     ?favorites.map(n=>findFood(n)).filter(Boolean)
     :recentFoods.map(n=>findFood(n)).filter(Boolean);
@@ -1757,6 +1767,84 @@ function renderQuickList(){
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
     w.appendChild(d);
   });
+}
+// ═══ MEAL PRESETS — 1-tap "save today as a set" + "apply set" ═══
+function renderPresetsTab(w){
+  const isEn=settings.lang==='en';
+  // Top: save-today button (only enabled when there's food on the current day)
+  const todayCount=dailyEntries.length;
+  const saveBtn=`<div style="display:flex;gap:6px;margin-bottom:10px"><input type="text" id="presetNameInput" placeholder="${t('preset_name_ph')}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;outline:none"><button class="btn-sec" onclick="savePresetFromToday()" style="white-space:nowrap;font-size:.78rem;padding:0 12px" ${todayCount?'':'disabled style="opacity:.5"'}>${t('preset_save_today')}</button></div>`;
+  if(!presets.length){
+    w.innerHTML=saveBtn+`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('preset_no_items')}</div>`;
+    return;
+  }
+  // Sort newest first
+  const sorted=[...presets].sort((a,b)=>(b.created||0)-(a.created||0));
+  w.innerHTML=saveBtn+sorted.map(p=>{
+    const totCal=p.foods.reduce((s,f)=>s+(+f.calories||0),0);
+    const totP=Math.round(p.foods.reduce((s,f)=>s+(+f.protein||0),0));
+    return `<div class="sri" data-pid="${p.id}" style="cursor:pointer">`+
+      `<div style="flex:1"><div class="sri-n">${escapeHtml(p.name)}</div><div class="sri-m">${p.foods.length} ${isEn?'items':'รายการ'} · P:${totP}g</div></div>`+
+      `<div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${totCal}</div><button class="del" data-action="del" title="${t('del')}" style="background:none;border:none;color:var(--muted);font-size:.9rem;cursor:pointer;padding:4px 6px">✕</button></div>`+
+    `</div>`;
+  }).join('');
+  // Wire events
+  w.querySelectorAll('.sri[data-pid]').forEach(el=>{
+    const pid=el.dataset.pid;
+    el.onclick=(e)=>{
+      if(e.target.dataset.action==='del'){e.stopPropagation();deletePreset(pid);return;}
+      applyPreset(pid);
+    };
+  });
+}
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function savePresetFromToday(){
+  const isEn=settings.lang==='en';
+  if(!dailyEntries.length){showToast(t('preset_empty_day'));return;}
+  const nameEl=document.getElementById('presetNameInput');
+  const name=(nameEl?.value||'').trim()||(isEn?`Set ${presets.length+1}`:`ชุดที่ ${presets.length+1}`);
+  // Snapshot food fields only — drop id/photo so applying makes new ids and stays small
+  const foods=dailyEntries.map(e=>({
+    food_name:e.food_name,
+    calories:+e.calories||0,
+    protein:+e.protein||0,
+    carbs:+e.carbs||0,
+    fat:+e.fat||0,
+    amount_g:e.amount_g||null,
+    meal:e.meal||'กลางวัน',
+  }));
+  presets.push({id:uid(),name,foods,created:Date.now()});
+  lsSave(LS_PRESETS,presets);
+  if(nameEl)nameEl.value='';
+  renderQuickList();
+  showToast(t('preset_saved'));
+}
+function deletePreset(id){
+  const p=presets.find(x=>x.id===id);if(!p)return;
+  const isEn=settings.lang==='en';
+  if(!confirm(isEn?`Delete set "${p.name}"?`:`ลบชุด "${p.name}"?`))return;
+  presets=presets.filter(x=>x.id!==id);
+  lsSave(LS_PRESETS,presets);
+  renderQuickList();
+  showToast(t('preset_deleted'));
+}
+function applyPreset(id){
+  const p=presets.find(x=>x.id===id);if(!p||!p.foods.length)return;
+  // Bulk-insert directly into dailyEntries to avoid per-item toast + render
+  p.foods.forEach(f=>{
+    dailyEntries.push({
+      id:uid(),entry_date:currentDate,created_at:new Date().toISOString(),
+      food_name:f.food_name,
+      calories:+f.calories||0,protein:+f.protein||0,
+      carbs:+f.carbs||0,fat:+f.fat||0,
+      amount_g:f.amount_g||null,meal:f.meal||'กลางวัน',
+    });
+    trackRecent(f.food_name);
+  });
+  saveEntries_LS();
+  showPage('today',document.querySelector('.bnt'));
+  showToast(t('preset_added').replace('%n',p.foods.length));
+  scheduleAutoSync?.('applyPreset');
 }
 function renderCatResults(cat){
   // Include user's custom foods in their own pseudo-category
@@ -4346,6 +4434,20 @@ setTimeout(checkWhatsNew,1200);
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.10.0':{
+    th:[
+      '🍱 **ชุดอาหาร (Quick Presets)** — แท็บใหม่ในหน้าเพิ่มอาหาร · กดปุ่มเดียวบันทึกอาหารทั้งวันเป็นชุด → แตะใช้ครั้งหน้าได้ทันที',
+      'สร้างชุดได้ไม่จำกัด เช่น "มื้อเช้าปกติ" "อาหารคลีน" "วันออกกำลังกาย"',
+      'ลบชุดได้ · บันทึกพร้อม meal slot ของแต่ละรายการ',
+      'รวมในไฟล์ export/import เพื่อย้ายข้ามเครื่อง',
+    ],
+    en:[
+      '🍱 **Meal Sets (Quick Presets)** — new tab on Add Food · save the whole day as a set in one tap → re-apply later in one tap',
+      'Unlimited sets — e.g. "Usual breakfast", "Clean eating day", "Workout day"',
+      'Delete sets · meal slots preserved per item',
+      'Included in JSON export / import',
+    ],
+  },
   '2.9.0':{
     th:[
       '📱 **APK rebuild ครั้งแรกตั้งแต่ v2.7.1** — APK รวมทุก feature/fix ตั้งแต่ v2.7.2 ถึงปัจจุบัน',
