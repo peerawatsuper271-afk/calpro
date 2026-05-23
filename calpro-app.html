@@ -28,7 +28,7 @@
   --purple:#b197fc;--text:#e8e8f0;--muted:#6868a0;--r:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Noto Sans Thai',sans-serif;min-height:100vh;padding-top:max(env(safe-area-inset-top),24px);}
+body{background:var(--bg);color:var(--text);font-family:var(--app-font,'Segoe UI','Noto Sans Thai',sans-serif);min-height:100vh;padding-top:max(env(safe-area-inset-top),24px);}
 /* Native APK: when running inside Capacitor, body padding is handled via JS; this is fallback for browsers/PWA */
 html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .app{max-width:480px;margin:0 auto;padding:0 14px 80px;padding-bottom:calc(86px + env(safe-area-inset-bottom));}
@@ -281,6 +281,26 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .help-sec ol,.help-sec ul{margin:0;padding-left:20px;font-size:.78rem;line-height:1.7;color:var(--muted);}
 .help-sec li{margin-bottom:3px;}
 .help-sec b{color:var(--fg);}
+/* BETA badge (used after Friends label) */
+.beta-badge{display:inline-block;background:var(--accent);color:#fff;font-size:.55rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.5px;margin-left:6px;vertical-align:middle;line-height:1;}
+/* Collapsible card chevron */
+.collapse-hdr{cursor:pointer;user-select:none;}
+.collapse-chev{transition:transform .25s;font-size:.7rem;color:var(--muted);margin-left:auto;}
+.card.collapsed .collapse-chev{transform:rotate(-90deg);}
+.card.collapsed .collapse-body{display:none;}
+/* Portion modal qty chips */
+.qty-chips{display:flex;gap:5px;margin:8px 0;}
+.qty-chips button{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px;font-size:.84rem;cursor:pointer;font-family:inherit;transition:all .2s;}
+.qty-chips button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.portion-preview{background:var(--surface2);border-radius:8px;padding:10px;margin:8px 0;font-size:.82rem;}
+.portion-preview .pp-row{display:flex;justify-content:space-between;margin-bottom:3px;}
+.portion-preview .pp-row:last-child{margin-bottom:0;}
+.portion-preview .pp-l{color:var(--muted);}
+.portion-preview .pp-v{font-weight:600;}
+/* Font picker chips in Settings */
+.font-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
+.font-chip{background:var(--surface2);border:1.5px solid transparent;color:var(--text);border-radius:9px;padding:9px;cursor:pointer;font-size:.84rem;text-align:center;transition:all .2s;}
+.font-chip.active{border-color:var(--accent);}
 .bdg-g{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
 .bdg-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 5px;text-align:center;}
 .bdg-item.earned{border-color:var(--amber);}
@@ -422,8 +442,8 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         </div>
       </div>
       <div class="card hide" id="healthCard" style="margin-top:8px">
-        <h3 style="display:flex;align-items:center;gap:6px"><span>💡</span><span data-i18n="health_tips">คำแนะนำสุขภาพวันนี้</span></h3>
-        <div id="healthTipsList"></div>
+        <h3 class="collapse-hdr" onclick="toggleHealthCard()" style="display:flex;align-items:center;gap:6px"><span>💡</span><span data-i18n="health_tips">คำแนะนำสุขภาพวันนี้</span><span class="collapse-chev">▼</span></h3>
+        <div class="collapse-body" id="healthTipsList"></div>
       </div>
       <div id="foodLog"></div>
       <div class="card" style="margin-top:8px">
@@ -646,6 +666,8 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         <div class="theme-grid" id="themeGrid"></div>
         <div class="sec-lbl" data-i18n="accent">สีหลัก</div>
         <div class="accent-grid" id="accentGrid"></div>
+        <div class="sec-lbl" data-i18n="font_setting">ฟอนต์</div>
+        <div class="font-grid" id="fontGrid"></div>
         <div class="setting-row">
           <div class="sr-l">
             <div class="sr-name" data-i18n="simple_mode">โหมดใช้งานง่าย</div>
@@ -738,7 +760,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.7.9 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.8.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
       </div>
       <div class="card">
@@ -836,6 +858,35 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
   </div>
 </div>
 
+<!-- PORTION MODAL — lets the user pick a quantity before adding a food -->
+<div class="modal-bg hide" id="portionModal">
+  <div class="modal">
+    <div class="modal-hdr"><h3 id="portionName">—</h3><button class="mc-close" onclick="closePortionModal()">✕</button></div>
+    <div id="portionBase" style="font-size:.74rem;color:var(--muted);text-align:center;margin-bottom:8px">—</div>
+    <div class="qty-chips" id="portionChips">
+      <button data-q="0.5" onclick="setPortion(0.5)">0.5×</button>
+      <button data-q="1" class="active" onclick="setPortion(1)">1×</button>
+      <button data-q="1.5" onclick="setPortion(1.5)">1.5×</button>
+      <button data-q="2" onclick="setPortion(2)">2×</button>
+    </div>
+    <div class="fl" style="margin-bottom:8px">
+      <label><span data-i18n="portion_label">จำนวน (เท่า)</span></label>
+      <input type="number" id="portionQty" step="0.1" min="0.1" max="20" value="1" oninput="recalcPortion()">
+    </div>
+    <div class="portion-preview" id="portionPreview"></div>
+    <div class="fl" style="margin-bottom:10px">
+      <label data-i18n="meal">มื้ออาหาร</label>
+      <select id="portionMeal">
+        <option value="เช้า" data-i18n="morning_opt">🌅 เช้า</option>
+        <option value="กลางวัน" data-i18n="lunch_opt">☀️ กลางวัน</option>
+        <option value="เย็น" data-i18n="dinner_opt">🌙 เย็น</option>
+        <option value="ของว่าง" data-i18n="snack_opt">🍎 ของว่าง</option>
+      </select>
+    </div>
+    <button class="btn" onclick="confirmPortion()"><span data-i18n="btn_add">+ เพิ่มอาหาร</span></button>
+  </div>
+</div>
+
 <!-- WORKOUT MODAL -->
 <div class="modal-bg hide" id="workoutModal">
   <div class="modal">
@@ -904,7 +955,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
   <nav class="drawer-nav">
     <div class="drawer-sect" data-i18n="account_section">บัญชี</div>
     <button class="drawer-item" onclick="navTo('profile')"><span data-i18n="profile">โปรไฟล์</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span data-i18n="friends_only">เพื่อน</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span><span data-i18n="friends_only">เพื่อน</span><span class="beta-badge">BETA</span></span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect drawer-tools-row" data-i18n="tools_section">เครื่องมือ</div>
     <button class="drawer-item drawer-tools-row" onclick="openQuickWater()"><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
@@ -918,7 +969,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="navTo('help')"><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.7.9 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.8.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -935,7 +986,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.7.9';
+const APP_VERSION = '2.8.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1019,6 +1070,7 @@ const I18N = {
     about_links:'ลิงก์',about_credits:'เครดิต',
     theme_dark:'มืด',theme_night:'ดึก',theme_forest:'ป่า',theme_warm:'อุ่น',theme_ocean:'มหาสมุทร',theme_light:'สว่าง',theme_cream:'ครีม',theme_mint:'มินต์',
     help_title:'วิธีใช้งาน',health_tips:'คำแนะนำสุขภาพวันนี้',
+    portion_label:'จำนวน (เท่า)',portion_amount:'ปริมาณ',font_setting:'ฟอนต์',font_system:'ค่าเริ่มต้น',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -1081,6 +1133,7 @@ const I18N = {
     about_links:'Links',about_credits:'Credits',
     theme_dark:'Dark',theme_night:'Night',theme_forest:'Forest',theme_warm:'Warm',theme_ocean:'Ocean',theme_light:'Light',theme_cream:'Cream',theme_mint:'Mint',
     help_title:'How to use',health_tips:'Health insights today',
+    portion_label:'Quantity (×)',portion_amount:'Amount',font_setting:'Font',font_system:'System default',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -1477,7 +1530,8 @@ function renderBottomNav(){
     btn.dataset.tab=tabId;
     btn.onclick=()=>showPage(tabId,btn);
     const label=cfg.label_literal||t(cfg.label_key);
-    btn.innerHTML=`<svg viewBox="0 0 24 24">${cfg.svg}</svg><span>${label}</span>`;
+    const beta=tabId==='friends'?'<span class="beta-badge" style="font-size:.45rem;padding:1px 4px;margin-left:3px">BETA</span>':'';
+    btn.innerHTML=`<svg viewBox="0 0 24 24">${cfg.svg}</svg><span>${label}${beta}</span>`;
     nav.appendChild(btn);
   });
   // Highlight active
@@ -1641,10 +1695,66 @@ function renderResults(list){
 }
 
 // ═══ ADD FOOD ═══
+let _portionFood=null;
 function addFromSearch(f){
-  const meal=document.getElementById('mealSel').value;
+  // Open the portion picker — user can choose quantity before adding
+  openPortionModal(f);
+}
+function openPortionModal(f){
+  _portionFood=f;
+  const isEn=settings.lang==='en';
+  document.getElementById('portionName').textContent=foodDisplayName(f);
+  const baseAmt=f.a?` · ${f.a}g`:'';
+  const baseSub=`${f.c} kcal${baseAmt} · P:${f.p} C:${f.cb} F:${f.f}`;
+  document.getElementById('portionBase').textContent=(isEn?'1× = ':'1× = ')+baseSub;
+  // Reset chips + qty input
+  document.querySelectorAll('#portionChips button').forEach(b=>b.classList.toggle('active',b.dataset.q==='1'));
+  document.getElementById('portionQty').value=1;
+  // Pre-fill meal from the top mealSel (or current time)
+  const ms=document.getElementById('mealSel')?.value||'กลางวัน';
+  document.getElementById('portionMeal').value=ms;
+  recalcPortion();
+  document.getElementById('portionModal').classList.remove('hide');
+}
+function closePortionModal(){document.getElementById('portionModal').classList.add('hide');_portionFood=null;}
+function setPortion(q){
+  document.getElementById('portionQty').value=q;
+  document.querySelectorAll('#portionChips button').forEach(b=>b.classList.toggle('active',+b.dataset.q===q));
+  recalcPortion();
+}
+function recalcPortion(){
+  if(!_portionFood)return;
+  const isEn=settings.lang==='en';
+  const q=Math.max(0.1,Math.min(20,+document.getElementById('portionQty').value||1));
+  const f=_portionFood;
+  const cal=Math.round(f.c*q);
+  const p=+(f.p*q).toFixed(1);
+  const c=+(f.cb*q).toFixed(1);
+  const fat=+(f.f*q).toFixed(1);
+  const amt=f.a?Math.round(f.a*q)+'g':(isEn?'—':'—');
+  // Sync chip highlight if qty matches a preset
+  document.querySelectorAll('#portionChips button').forEach(b=>b.classList.toggle('active',+b.dataset.q===q));
+  document.getElementById('portionPreview').innerHTML=
+    `<div class="pp-row"><span class="pp-l">${t('cal')}</span><span class="pp-v">${cal} kcal</span></div>`+
+    `<div class="pp-row"><span class="pp-l">${t('protein')} · ${t('carbs')} · ${t('fat')}</span><span class="pp-v">${p}g · ${c}g · ${fat}g</span></div>`+
+    `<div class="pp-row"><span class="pp-l">${t('portion_amount')}</span><span class="pp-v">${amt}</span></div>`;
+}
+function confirmPortion(){
+  if(!_portionFood){closePortionModal();return;}
+  const q=Math.max(0.1,Math.min(20,+document.getElementById('portionQty').value||1));
+  const f=_portionFood;
+  const meal=document.getElementById('portionMeal').value;
   trackRecent(f.n);
-  insertEntry({food_name:f.n,calories:f.c,protein:f.p,carbs:f.cb,fat:f.f,amount_g:f.a,meal});
+  insertEntry({
+    food_name:f.n,
+    calories:Math.round(f.c*q),
+    protein:+(f.p*q).toFixed(1),
+    carbs:+(f.cb*q).toFixed(1),
+    fat:+(f.f*q).toFixed(1),
+    amount_g:f.a?Math.round(f.a*q):null,
+    meal,
+  });
+  closePortionModal();
 }
 function addManual(){
   const name=document.getElementById('fName').value.trim();
@@ -2545,9 +2655,51 @@ function renderHealthTips(){
   const tips=getHealthTips();
   if(!tips.length){card.classList.add('hide');return;}
   card.classList.remove('hide');
+  // Honour user's saved collapse preference
+  card.classList.toggle('collapsed',settings.healthCollapsed===true);
   list.innerHTML=tips.map(tp=>
     `<div class="ins ${tp.sev}"><div class="ins-i">${tp.ico}</div><div class="ins-t">${tp.msg}</div></div>`
   ).join('');
+}
+function toggleHealthCard(){
+  const card=document.getElementById('healthCard');if(!card)return;
+  const willCollapse=!card.classList.contains('collapsed');
+  card.classList.toggle('collapsed',willCollapse);
+  settings.healthCollapsed=willCollapse;
+  lsSave(LS_SETTINGS,settings);
+}
+
+// ═══ FONT PICKER ═══
+const FONT_OPTIONS={
+  system:{label_th:'ค่าเริ่มต้น',label_en:'System default',stack:null},
+  sarabun:{label_th:'Sarabun',label_en:'Sarabun',stack:'Sarabun',google:'Sarabun'},
+  prompt:{label_th:'Prompt',label_en:'Prompt',stack:'Prompt',google:'Prompt'},
+  kanit:{label_th:'Kanit',label_en:'Kanit',stack:'Kanit',google:'Kanit'},
+  mitr:{label_th:'Mitr',label_en:'Mitr',stack:'Mitr',google:'Mitr'},
+  ibm:{label_th:'IBM Plex',label_en:'IBM Plex',stack:'IBM Plex Sans Thai',google:'IBM Plex Sans Thai'},
+};
+function applyFont(key){
+  const opt=FONT_OPTIONS[key]||FONT_OPTIONS.system;
+  if(!opt.stack){
+    document.documentElement.style.removeProperty('--app-font');
+    return;
+  }
+  // Lazy-load Google Fonts stylesheet once per font
+  const linkId='fontlink-'+key;
+  if(opt.google&&!document.getElementById(linkId)){
+    const link=document.createElement('link');
+    link.id=linkId;link.rel='stylesheet';
+    link.href=`https://fonts.googleapis.com/css2?family=${opt.google.replace(/ /g,'+')}:wght@400;500;600;700&display=swap`;
+    document.head.appendChild(link);
+  }
+  document.documentElement.style.setProperty('--app-font',
+    `"${opt.stack}","Segoe UI","Noto Sans Thai","Apple SD Gothic Neo",sans-serif`);
+}
+function setFont(key){
+  settings.font=key;lsSave(LS_SETTINGS,settings);
+  applyFont(key);
+  // Refresh chip highlight
+  document.querySelectorAll('.font-chip').forEach(b=>b.classList.toggle('active',b.dataset.font===key));
 }
 
 // ═══ HELP / HOW TO USE ═══
@@ -3456,6 +3608,28 @@ function renderSettings(){
       ag.appendChild(b);
     });
   }
+  // Font picker — preview each option in its own font
+  const fg=document.getElementById('fontGrid');if(fg){fg.innerHTML='';
+    const cur=settings.font||'system';
+    Object.entries(FONT_OPTIONS).forEach(([k,opt])=>{
+      const b=document.createElement('button');b.className='font-chip'+(cur===k?' active':'');
+      b.dataset.font=k;
+      const lbl=k==='system'?t('font_system'):(settings.lang==='en'?opt.label_en:opt.label_th);
+      b.textContent=lbl;
+      // Preview style — load + render label in target font
+      if(opt.stack){
+        if(opt.google&&!document.getElementById('fontlink-'+k)){
+          const link=document.createElement('link');
+          link.id='fontlink-'+k;link.rel='stylesheet';
+          link.href=`https://fonts.googleapis.com/css2?family=${opt.google.replace(/ /g,'+')}:wght@400;600&display=swap`;
+          document.head.appendChild(link);
+        }
+        b.style.fontFamily=`"${opt.stack}",sans-serif`;
+      }
+      b.onclick=()=>setFont(k);
+      fg.appendChild(b);
+    });
+  }
   // Toggles
   const setCk=(id,val)=>{const el=document.getElementById(id);if(el)el.checked=!!val;};
   setCk('compactToggle',settings.compact);
@@ -3993,6 +4167,7 @@ function applyTDEEtoProfile(){
 
 // ═══ INIT ═══
 loadUserData();
+applyFont(settings.font||'system');
 applyLang();
 renderBottomNav();
 showApp();
