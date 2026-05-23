@@ -7,7 +7,8 @@
 <title>CalPro+</title>
 
 <!-- Supabase SDK (optional · used only when cloud sync enabled) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase JS — kept on the network non-blocking via `defer`. sb client is lazy-init'd. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -311,6 +312,16 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 /* Focus visible — keyboard-only outline */
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
 .bnt:focus-visible,.icon-btn:focus-visible{outline-offset:-2px;}
+/* High-contrast mode — thicker borders, brighter focus */
+[data-hc="1"] .card,[data-hc="1"] .modal,[data-hc="1"] .drawer-item,[data-hc="1"] .sri,[data-hc="1"] .ins{border:2px solid var(--border)!important;}
+[data-hc="1"] :focus-visible{outline-width:3px;outline-offset:3px;}
+[data-hc="1"] .btn,[data-hc="1"] .btn-sec{border:2px solid var(--text);}
+[data-hc="1"] .sync-dot{box-shadow:0 0 0 2px var(--text);}
+/* Respect prefers-reduced-motion across animations */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
+  .ob-slide{animation:none!important;}
+}
 .bdg-g{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
 .bdg-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 5px;text-align:center;}
 .bdg-item.earned{border-color:var(--amber);}
@@ -778,7 +789,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.15.1 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.16.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1147,7 +1158,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.15.1 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.16.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1164,20 +1175,41 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.15.1';
+const APP_VERSION = '2.16.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBidHhzaG9kYWV6dHB0ZWdrZ3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMzM1MzgsImV4cCI6MjA5NDkwOTUzOH0.OdtByENjyyPU-NLWDftSOz4ODyMa-vmAF-7mq74St4I';
-const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: true,         // keep session in localStorage across reloads
-    autoRefreshToken: true,        // auto-refresh JWT before expiry
-    detectSessionInUrl: false,     // we don't use OAuth callback URLs
-    storage: localStorage,         // explicit storage (avoids cookie issues in PWA)
-    storageKey: 'calpro-sb-auth',  // namespaced key
-  }
-}) : null;
+// Supabase client is lazy-init — the SDK loads via deferred <script>, so the
+// global isn't available during inline-script parse. initSupabaseClient runs
+// from window 'load' (and as a guard at the top of every cloud function).
+let sb = null;
+function initSupabaseClient(){
+  if(sb||typeof supabase==='undefined')return sb;
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+    auth:{
+      persistSession:true,         // keep session in localStorage across reloads
+      autoRefreshToken:true,        // auto-refresh JWT before expiry
+      detectSessionInUrl:false,     // we don't use OAuth callback URLs
+      storage:localStorage,         // explicit storage (avoids cookie issues in PWA)
+      storageKey:'calpro-sb-auth',  // namespaced key
+    }
+  });
+  return sb;
+}
+// Wait for the SDK to finish loading — used by cloud actions that fire early
+function ensureSupabase(timeoutMs=8000){
+  if(initSupabaseClient())return Promise.resolve(sb);
+  return new Promise((resolve,reject)=>{
+    const t0=Date.now();
+    (function poll(){
+      if(initSupabaseClient())return resolve(sb);
+      if(Date.now()-t0>timeoutMs)return reject(new Error('Supabase SDK load timeout'));
+      setTimeout(poll,80);
+    })();
+  });
+}
+window.addEventListener('load',()=>{initSupabaseClient();});
 let cloudUser = null;     // current Supabase user (null if not signed in)
 let syncing = false;
 let syncStatus = 'idle';  // idle · syncing · synced · error · offline
@@ -1246,7 +1278,7 @@ const I18N = {
     water_goal_cfg:'เป้าหมายน้ำดื่ม',
     about_desc:'ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง',
     about_links:'ลิงก์',about_credits:'เครดิต',
-    theme_dark:'มืด',theme_night:'ดึก',theme_rose:'กุหลาบ',theme_sky:'ฟ้า',theme_violet:'ม่วง',theme_light:'สว่าง',theme_cream:'ครีม',theme_mint:'มินต์',
+    theme_dark:'มืด',theme_night:'ดึก',theme_rose:'กุหลาบ',theme_sky:'ฟ้า',theme_violet:'ม่วง',theme_light:'สว่าง',theme_cream:'ครีม',theme_mint:'มินต์',theme_contrast:'คมชัด',
     help_title:'วิธีใช้งาน',health_tips:'คำแนะนำสุขภาพวันนี้',
     portion_label:'จำนวน (เท่า)',portion_amount:'ปริมาณ',font_setting:'ฟอนต์',font_system:'ค่าเริ่มต้น',
     feedback:'ส่งคำแนะนำ',feedback_sub:'แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา',feedback_subject:'หัวเรื่อง',feedback_body:'ข้อความ',feedback_send:'📧 ส่งทางอีเมล',feedback_subj_ph:'เช่น “อยากให้เพิ่มเมนูใหม่...”',feedback_body_ph:'พิมพ์ข้อความที่นี่...',
@@ -1322,7 +1354,7 @@ const I18N = {
     water_goal_cfg:'Water goal',
     about_desc:'Calorie tracking, TDEE calculator and weight management · Free · No login required · Data stored locally',
     about_links:'Links',about_credits:'Credits',
-    theme_dark:'Dark',theme_night:'Night',theme_rose:'Rose',theme_sky:'Sky',theme_violet:'Violet',theme_light:'Light',theme_cream:'Cream',theme_mint:'Mint',
+    theme_dark:'Dark',theme_night:'Night',theme_rose:'Rose',theme_sky:'Sky',theme_violet:'Violet',theme_light:'Light',theme_cream:'Cream',theme_mint:'Mint',theme_contrast:'Contrast',
     help_title:'How to use',health_tips:'Health insights today',
     portion_label:'Quantity (×)',portion_amount:'Amount',font_setting:'Font',font_system:'System default',
     feedback:'Send feedback',feedback_sub:'Share suggestions/bugs with the developer',feedback_subject:'Subject',feedback_body:'Message',feedback_send:'📧 Send via email',feedback_subj_ph:'e.g. "Please add more foods..."',feedback_body_ph:'Type your message here...',
@@ -1556,6 +1588,42 @@ const FOODS=[
   {n:'อกไก่ย่าง 100g',e:'Grilled Chicken Breast 100g',c:165,p:31,cb:0,f:3.6,a:100,cat:'healthy'},
   {n:'ปลาทูน่ากระป๋อง',e:'Canned Tuna (water)',c:99,p:22,cb:0,f:0.7,a:100,cat:'healthy'},
   {n:'เต้าหู้ขาว',e:'Soft Tofu',c:76,p:8,cb:2,f:5,a:100,cat:'healthy'},
+  // ─── v2.16 additions: more Thai + chains + healthier options ───
+  // Thai
+  {n:'ราดหน้า',e:'Rad Na',c:430,p:18,cb:55,f:14,a:280,cat:'thai'},
+  {n:'ผัดขี้เมา',e:'Drunken Noodles',c:450,p:22,cb:50,f:16,a:250,cat:'thai'},
+  {n:'ข้าวหน้าเป็ด',e:'Duck Rice',c:520,p:28,cb:60,f:18,a:300,cat:'thai'},
+  {n:'สุกี้น้ำ',e:'Suki (soup)',c:280,p:22,cb:24,f:8,a:350,cat:'thai'},
+  {n:'สุกี้แห้ง',e:'Suki (dry)',c:420,p:24,cb:40,f:18,a:300,cat:'thai'},
+  {n:'เย็นตาโฟ',e:'Yen Ta Fo',c:380,p:18,cb:48,f:12,a:350,cat:'thai'},
+  {n:'แกงไตปลา',e:'Tai Pla Curry',c:240,p:22,cb:14,f:10,a:300,cat:'thai'},
+  {n:'ขนมจีนน้ำพริก',e:'Khanom Jeen Nam Prik',c:360,p:14,cb:54,f:8,a:300,cat:'thai'},
+  {n:'ทอดมันปลา',e:'Fish Cake (Thai)',c:240,p:18,cb:14,f:12,a:120,cat:'thai'},
+  {n:'ปาท่องโก๋',e:'Pa Tong Ko',c:160,p:3,cb:18,f:9,a:50,cat:'thai'},
+  {n:'ขนมครก',e:'Khanom Krok',c:90,p:1,cb:14,f:3,a:40,cat:'thai'},
+  {n:'หมูทอดกระเทียม',e:'Garlic Fried Pork',c:320,p:24,cb:6,f:22,a:150,cat:'thai'},
+  // Chain restaurants
+  {n:'Bonchon ไก่ทอด 4 ชิ้น',e:'Bonchon Wings 4pc',c:380,p:22,cb:18,f:24,a:160,cat:'fastfood'},
+  {n:'Subway 6-inch Turkey',e:'Subway 6" Turkey',c:280,p:18,cb:46,f:3.5,a:230,cat:'fastfood'},
+  {n:'Yayoi ไก่ทอดเทอริยากิ',e:'Yayoi Chicken Teriyaki Set',c:680,p:32,cb:88,f:18,a:450,cat:'fastfood'},
+  {n:'MK สุกี้ลูกชิ้นกุ้ง 1 ลูก',e:'MK Shrimp Ball (1pc)',c:35,p:3,cb:2,f:1.5,a:15,cat:'fastfood'},
+  {n:'CP ไส้กรอกหมู 1 อัน',e:'CP Pork Sausage (1pc)',c:130,p:6,cb:4,f:10,a:50,cat:'fastfood'},
+  // Drinks
+  {n:'โกโก้ร้อน',e:'Hot Cocoa',c:190,p:6,cb:30,f:5,a:240,cat:'drink'},
+  {n:'เอสเปรสโซ่',e:'Espresso (single)',c:5,p:0,cb:1,f:0,a:30,cat:'drink'},
+  {n:'อเมริกาโน่',e:'Americano',c:10,p:0,cb:2,f:0,a:240,cat:'drink'},
+  {n:'น้ำมะนาว',e:'Limeade',c:90,p:0,cb:22,f:0,a:300,cat:'drink'},
+  {n:'น้ำเก็กฮวย',e:'Chrysanthemum Tea',c:60,p:0,cb:15,f:0,a:300,cat:'drink'},
+  // Healthy / breakfast
+  {n:'ไข่ขาว 3 ฟอง',e:'Egg Whites (3)',c:51,p:11,cb:1,f:0,a:100,cat:'healthy'},
+  {n:'อะโวคาโดโทสต์',e:'Avocado Toast',c:280,p:8,cb:32,f:14,a:130,cat:'healthy'},
+  {n:'สโมว์ที่โบว์ล',e:'Smoothie Bowl',c:320,p:8,cb:58,f:7,a:300,cat:'healthy'},
+  {n:'มูสลี่ + นม',e:'Muesli with Milk',c:280,p:10,cb:48,f:6,a:200,cat:'healthy'},
+  {n:'พาเนีย เคก',e:'Banana Cake',c:230,p:4,cb:36,f:9,a:80,cat:'dessert'},
+  // Snacks
+  {n:'ถั่วลิสงคั่ว',e:'Roasted Peanuts',c:170,p:7,cb:6,f:14,a:30,cat:'snack'},
+  {n:'งาดำคั่ว',e:'Black Sesame Roasted',c:160,p:5,cb:7,f:13,a:30,cat:'snack'},
+  {n:'แครกเกอร์โฮลวีต',e:'Whole Wheat Crackers',c:130,p:3,cb:22,f:3,a:30,cat:'snack'},
 ];
 const CATS={thai:'🇹🇭',japanese:'🇯🇵',korean:'🇰🇷',chinese:'🇨🇳',italian:'🇮🇹',indian:'🇮🇳',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
 const MEAL_ICONS={เช้า:'🌅',กลางวัน:'☀️',เย็น:'🌙',ของว่าง:'🍎'};
@@ -1578,6 +1646,8 @@ const THEMES={
   light:{bg:'#fafafd',s:'#ffffff',s2:'#f0f0f5',b:'#e0e0ea',t:'#1a1a24',m:'#7878a0',mode:'light'},
   cream:{bg:'#fbf6ec',s:'#ffffff',s2:'#f4ecd8',b:'#e6d8b8',t:'#3a2a14',m:'#8a7050',mode:'light'},
   mint:{bg:'#f0f8f2',s:'#ffffff',s2:'#e2efe6',b:'#bfd6c5',t:'#0c2418',m:'#5a8870',mode:'light'},
+  // ♿ High-contrast — WCAG AAA-style · pure black bg + white text + thick borders
+  contrast:{bg:'#000000',s:'#0c0c0c',s2:'#181818',b:'#ffffff',t:'#ffffff',m:'#cccccc',mode:'dark',hc:true},
 };
 const ACCENTS=['#ff6b6b','#ffa94d','#51cf66','#74c0fc','#b197fc','#f783ac','#ffd43b','#63e6be'];
 
@@ -2373,8 +2443,8 @@ function refreshActivePage(){
   if(document.getElementById('drawer')?.classList.contains('open'))renderDrawerHeader();
 }
 
-// Auth state listener
-if(sb){
+// Auth state listener — set up once Supabase SDK is loaded
+ensureSupabase().then(()=>{
   sb.auth.onAuthStateChange(async (event,session)=>{
     cloudUser=session?.user||null;
     if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'){
@@ -2402,7 +2472,7 @@ if(sb){
     renderCloudStatus();
     refreshActivePage();
   });
-}
+}).catch(e=>{console.warn('[auth] Supabase SDK not available:',e?.message||e);});
 
 // ═══ AUTO-SYNC ═══
 function setSyncStatus(s){
@@ -4168,6 +4238,7 @@ function applyTheme(){
   r.setProperty('--border',th.b);r.setProperty('--text',th.t);r.setProperty('--muted',th.m);
   r.setProperty('--accent',settings.accent||'#ff6b6b');
   document.documentElement.dataset.mode=th.mode||'dark';
+  document.documentElement.dataset.hc=th.hc?'1':'0';
   document.documentElement.dataset.compact=settings.compact?'1':'0';
   document.documentElement.dataset.simple=settings.simple?'1':'0';
   // Capacitor native: sync status bar color with current theme
@@ -4204,7 +4275,7 @@ function toggleMode(){
   lsSave(LS_SETTINGS,settings);
   applyTheme();
 }
-const THEME_LABELS={dark:'มืด',night:'ดึก',rose:'กุหลาบ',sky:'ฟ้า',violet:'ม่วง',light:'สว่าง',cream:'ครีม',mint:'มินต์'};
+const THEME_LABELS={dark:'มืด',night:'ดึก',rose:'กุหลาบ',sky:'ฟ้า',violet:'ม่วง',light:'สว่าง',cream:'ครีม',mint:'มินต์',contrast:'คมชัด'};
 // openSettings deprecated — use navTo('settings') instead
 // ═══ DRAWER ═══
 function openDrawer(){
@@ -4946,8 +5017,8 @@ applyFont(settings.font||'system');
 applyLang();
 renderBottomNav();
 showApp();
-// Initial sync status
-if(sb){
+// Initial sync status — await deferred Supabase SDK first
+ensureSupabase().then(()=>{
   sb.auth.getSession().then(({data:{session}})=>{
     if(session?.user){
       cloudUser=session.user;
@@ -4960,7 +5031,7 @@ if(sb){
     }
     startPeriodicSync();
   }).catch(()=>{setSyncStatus('idle');});
-}
+}).catch(e=>{console.warn('[sync] Supabase SDK not available:',e?.message||e);setSyncStatus('idle');});
 // Run smart checks shortly after load (so UI is mounted)
 setTimeout(()=>{checkWeeklyRecap();},800);
 setTimeout(()=>{checkSmartGoal();},2400);
@@ -4998,15 +5069,33 @@ setTimeout(checkWhatsNew,1200);
 // First-launch onboarding (only if profile is empty + flag not set)
 setTimeout(()=>{if(shouldShowOnboarding())openOnboard();},700);
 
-// ═══ Esc-to-close — close topmost open modal/drawer ═══
-document.addEventListener('keydown',(e)=>{
-  if(e.key!=='Escape')return;
-  // Drawer first (visible has .open)
-  const drawer=document.getElementById('drawer');
-  if(drawer&&drawer.classList.contains('open')){closeDrawer();return;}
-  // Then topmost modal-bg that's visible (no .hide). Newest-added in DOM order is "topmost"
+// ═══ Esc-to-close + Tab-trap for open modals ═══
+function _topmostModal(){
   const open=[...document.querySelectorAll('.modal-bg:not(.hide)')];
-  if(open.length){open[open.length-1].classList.add('hide');return;}
+  return open[open.length-1]||null;
+}
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){
+    const drawer=document.getElementById('drawer');
+    if(drawer&&drawer.classList.contains('open')){closeDrawer();return;}
+    const m=_topmostModal();
+    if(m){m.classList.add('hide');return;}
+    return;
+  }
+  // Tab-trap: keep focus inside an open modal — a11y win for keyboard users
+  if(e.key==='Tab'){
+    const m=_topmostModal();if(!m)return;
+    const focusables=[...m.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+      .filter(el=>el.offsetParent!==null);
+    if(!focusables.length)return;
+    const first=focusables[0],last=focusables[focusables.length-1];
+    const active=document.activeElement;
+    if(e.shiftKey){
+      if(active===first||!m.contains(active)){last.focus();e.preventDefault();}
+    }else{
+      if(active===last){first.focus();e.preventDefault();}
+    }
+  }
 });
 // ═══ APP UPDATE FLOW ═══
 // Three pieces work together:
@@ -5016,6 +5105,22 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.16.0':{
+    th:[
+      '🍱 ฐานข้อมูลอาหารขยายอีก +30 รายการ — รวมเป็น 160+ · เพิ่ม ราดหน้า/ผัดขี้เมา/ข้าวหน้าเป็ด/สุกี้/เย็นตาโฟ/แกงไตปลา + chains (Bonchon/Subway/Yayoi/MK/CP) + เครื่องดื่ม (โกโก้/เอสเปรสโซ/อเมริกาโน) + healthy (ไข่ขาว 3 ฟอง/อะโวคาโดโทสต์)',
+      '♿ **ธีมใหม่ "คมชัด" (High Contrast)** — สำหรับผู้ที่สายตาไม่ดี/ต้องการ contrast สูง (WCAG AAA-style: ดำสนิท + ขาวล้วน + ขอบหนา 2px)',
+      '♿ **Tab-trap ใน modal** — กด Tab จะวนอยู่ใน modal ที่เปิดอยู่ (a11y for keyboard users)',
+      '♿ Reduced-motion: ตามค่า prefers-reduced-motion ของระบบ (ปิด animation ทั้งหมดถ้าเปิดไว้)',
+      '⚡ **Lazy-load Supabase SDK** — script tag เปลี่ยนเป็น `defer` · ลดเวลา first paint · client init รอ SDK ก่อน',
+    ],
+    en:[
+      '🍱 Food DB +30 more entries — total 160+ · added Rad Na, Drunken Noodles, Duck Rice, Suki, Yen Ta Fo, Tai Pla Curry + chains (Bonchon/Subway/Yayoi/MK/CP) + drinks (cocoa/espresso/americano) + healthy (egg whites/avocado toast)',
+      '♿ **New "Contrast" theme** — WCAG AAA-style for users who need stronger visual contrast (pure black + white text + 2px borders)',
+      '♿ **Tab-trap in modals** — Tab cycles within the open modal (a11y for keyboard users)',
+      '♿ Reduced-motion: respects prefers-reduced-motion (kills animations system-wide)',
+      '⚡ **Lazy-load Supabase SDK** — script tag now `defer` · faster first paint · client init waits for SDK',
+    ],
+  },
   '2.15.1':{
     th:[
       '🐞 แก้บั๊ก Barcode Scanner โหลด library ไม่ได้ — เปลี่ยน CDN จาก `@zxing/browser` (ไม่มี UMD bundle, 404) เป็น `@zxing/library@0.20.0` (มี UMD + พร้อม browser API)',
