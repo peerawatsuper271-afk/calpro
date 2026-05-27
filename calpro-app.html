@@ -29,7 +29,12 @@
   --purple:#b197fc;--text:#e8e8f0;--muted:#6868a0;--r:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:var(--app-font,'Segoe UI','Noto Sans Thai',sans-serif);min-height:100vh;padding-top:max(env(safe-area-inset-top),24px);}
+/* iOS Safari: kill double-tap zoom + 300ms click delay on interactive UI,
+   while keeping pinch-zoom available (a11y). manipulation = single touch
+   gestures allowed (tap/pan), double-tap/long-press zoom disabled. */
+html{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+button,input,select,textarea,a,label,.bnt,.icon-btn,.sri,.fi,.drawer-item,.qtab,.gchip,.ac-dot,.th-swatch,.font-chip,.ob-goal-chip,.ob-dot,.wd,.water-ctrl button{touch-action:manipulation;}
+body{background:var(--bg);color:var(--text);font-family:var(--app-font,'Segoe UI','Noto Sans Thai',sans-serif);min-height:100vh;padding-top:max(env(safe-area-inset-top),24px);-webkit-text-size-adjust:100%;}
 /* Native APK: when running inside Capacitor, body padding is handled via JS; this is fallback for browsers/PWA */
 html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .app{max-width:480px;margin:0 auto;padding:0 14px 80px;padding-bottom:calc(86px + env(safe-area-inset-bottom));}
@@ -134,7 +139,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .ring-sub{font-size:.73rem;color:var(--muted);margin-top:5px;}
 
 /* ── STATS ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:12px;}
 .sc{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 5px;text-align:center;}
 .sv{font-size:.92rem;font-weight:700;}.sl{font-size:.62rem;color:var(--muted);margin-top:1px;}
 .prog{background:var(--surface2);border-radius:99px;height:4px;margin-bottom:12px;overflow:hidden;}
@@ -282,6 +287,13 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .help-sec ol,.help-sec ul{margin:0;padding-left:20px;font-size:.78rem;line-height:1.7;color:var(--muted);}
 .help-sec li{margin-bottom:3px;}
 .help-sec b{color:var(--fg);}
+/* Developer Mode rows */
+.dev-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;font-size:.78rem;border-bottom:1px solid var(--border);gap:14px;}
+.dev-row:last-child{border-bottom:none;}
+.dev-row > span:first-child{color:var(--muted);flex-shrink:0;}
+.dev-row > span:last-child{text-align:right;word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.74rem;}
+.dev-pre{font-size:.66rem;background:var(--surface2);padding:9px;border-radius:6px;overflow:auto;max-height:220px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.4;}
+.dev-badge{display:inline-block;background:var(--surface2);color:var(--muted);font-size:.6rem;padding:2px 6px;border-radius:4px;margin-left:6px;font-family:ui-monospace,Menlo,Consolas,monospace;}
 /* BETA badge (used after Friends label) */
 .beta-badge{display:inline-block;background:var(--accent);color:#fff;font-size:.55rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.5px;margin-left:6px;vertical-align:middle;line-height:1;}
 /* Collapsible card chevron */
@@ -395,6 +407,79 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .loading{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px;color:var(--muted);font-size:.85rem;}
 .spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Floating Action Button — quick-add food from Today page */
+.fab{
+  position:fixed;
+  right:18px;
+  bottom:calc(86px + env(safe-area-inset-bottom) + 12px);
+  width:58px;height:58px;border-radius:50%;
+  background:var(--accent);color:#fff;border:none;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 22px rgba(0,0,0,.28);
+  cursor:pointer;z-index:40;
+  transition:transform .15s cubic-bezier(.2,.6,.2,1),box-shadow .25s;
+}
+.fab svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;}
+.fab:active{transform:scale(.94);}
+@media (hover:hover){.fab:hover{transform:scale(1.06);box-shadow:0 10px 28px rgba(0,0,0,.34);}}
+/* ───── Desktop / tablet polish (placed last so it overrides earlier base rules) ───── */
+@media (min-width:768px){
+  .app{max-width:560px;padding:0 18px;padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  .bnav{max-width:560px;}
+  body{padding-top:28px;}
+  .stats .sv{font-size:1.05rem;}
+  /* Bigger ring on tablet+ — applies unless Simple Mode forces its own size */
+  :root:not([data-simple="1"]) .ring-cont{width:240px;height:240px;}
+  :root:not([data-simple="1"]) .ring-cont svg{width:240px;height:240px;}
+  :root:not([data-simple="1"]) .ring-num{font-size:2.6rem;}
+  :root:not([data-simple="1"]) .ring-track,
+  :root:not([data-simple="1"]) .ring-fill{stroke-width:14;}
+}
+@media (min-width:1024px){
+  body{padding:32px 0;background:linear-gradient(135deg,var(--bg) 0%,var(--surface) 100%);}
+  .app{
+    max-width:720px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:18px 26px;
+    padding-bottom:calc(110px + env(safe-area-inset-bottom));
+    box-shadow:0 12px 48px rgba(0,0,0,.15);
+    min-height:calc(100vh - 64px);
+  }
+  .bnav{
+    max-width:720px;
+    bottom:32px;
+    /* IMPORTANT: keep mobile centering — left:0, right:0, margin:0 auto inherited
+       from the base rule. Don't switch to left:50%+translateX because that
+       collapses the nav to content-width (140px instead of 720px). */
+    border-radius:0 0 22px 22px;
+    border:1px solid var(--border);
+  }
+  .hdr h1{font-size:1.25rem;}
+  .ins-t,.fi-n{font-size:.88rem;}
+  .card{padding:16px 18px;}
+  /* Mouse-only hover affordances */
+  @media (hover:hover){
+    .sri:hover,.fi:hover,.drawer-item:hover{background:var(--surface2);}
+    .bnt:hover{color:var(--text);}
+  }
+  .btn,.btn-sec,.btn-danger{padding:13px;}
+  /* Soft gradient bg in light themes too */
+  [data-mode="light"] body{background:linear-gradient(135deg,#f5f5fa 0%,#ffffff 100%);}
+  /* Bigger ring on real desktop */
+  :root:not([data-simple="1"]) .ring-cont,
+  :root:not([data-simple="1"]) .ring-cont svg{width:280px;height:280px;}
+  :root:not([data-simple="1"]) .ring-num{font-size:3rem;}
+  /* FAB sits clear of the floating bottom-nav (bnav has bottom:32px on desktop) */
+  .fab{
+    bottom:calc(110px + env(safe-area-inset-bottom));
+    /* Anchor near the right edge of the .app card so it doesn't get lost in the gutter */
+    right:max(20px,calc((100vw - 720px)/2 - 70px));
+    width:62px;height:62px;
+  }
+  .fab svg{width:28px;height:28px;}
+}
 </style>
 </head>
 <body>
@@ -412,6 +497,10 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         <h1>Cal<span>Pro+</span> <span class="sync-dot s-idle" id="syncDot" title="" onclick="navTo('settings')" role="button" tabindex="0" aria-label="Sync status — tap for Cloud Sync settings"></span></h1>
         <p id="hdrSub" data-i18n="welcome">ยินดีต้อนรับ</p>
       </div>
+      <!-- iOS-only refresh button. Shown by JS init when UA is iOS and we're not inside Capacitor. -->
+      <button class="icon-btn hide" id="iosRefreshBtn" onclick="iosRefresh()" title="Refresh" aria-label="Refresh page">
+        <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+      </button>
       <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง" aria-label="Toggle dark/light mode">
         <svg viewBox="0 0 24 24" id="modeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
       </button>
@@ -443,8 +532,6 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="stats">
         <div class="sc"><div class="sv" id="stRem" style="color:var(--green)">—</div><div class="sl" data-i18n="remaining">เหลือ</div></div>
         <div class="sc"><div class="sv" id="stN">0</div><div class="sl" data-i18n="entries">รายการ</div></div>
-        <div class="sc"><div class="sv" id="stP" style="color:var(--blue)">0g</div><div class="sl" data-i18n="protein">โปรตีน</div></div>
-        <div class="sc"><div class="sv" id="stC" style="color:var(--amber)">0g</div><div class="sl" data-i18n="carbs">คาร์บ</div></div>
       </div>
       <div class="macros">
         <div class="mc"><div class="mc-l" data-i18n="protein">โปรตีน</div><div class="mc-v" id="mP" style="color:var(--blue)">0g</div><div class="mc-b"><div class="mc-bf" id="mPB" style="width:0%;background:var(--blue)"></div></div></div>
@@ -475,6 +562,10 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         <div id="workoutsList"></div>
       </div>
       <button class="btn-sec" onclick="shareDaily()" style="width:100%;margin-top:8px" data-i18n="share_today">📤 แชร์สรุปวันนี้</button>
+      <!-- Floating Add-Food button — visible only on Today (parent .screen toggles display) -->
+      <button class="fab" id="addFoodFab" onclick="goToAddFood()" aria-label="Add food" title="เพิ่มอาหาร">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
     </div>
 
     <!-- ADD -->
@@ -789,7 +880,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.17.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.18.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -810,6 +901,15 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
           • Backend: Supabase (opt-in cloud sync)
         </div>
       </div>
+    </div>
+
+    <!-- DEVELOPER MODE (password-gated · session-only unlock) -->
+    <div class="screen" id="pg-dev">
+      <div class="page-hd">
+        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <h2>🔧 Developer Mode</h2>
+      </div>
+      <div id="devBody"></div>
     </div>
 
     <!-- HELP / HOW TO USE -->
@@ -1168,9 +1268,10 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
     <button class="drawer-item" onclick="navTo('help')"><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.17.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.18.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1187,7 +1288,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.17.0';
+const APP_VERSION = '2.18.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1970,6 +2071,7 @@ function showPage(id,btn){
   if(id==='add')renderQuickList();
   if(id==='settings')renderSettings();
   if(id==='help')renderHelp();
+  if(id==='dev')renderDev();
   if(id==='friends')renderFriendsCard();
   if(id==='profile')renderProfileUI();
 }
@@ -2041,7 +2143,10 @@ function setQuickTab(tab){
   renderQuickList();
 }
 function foodDisplayName(f){return settings.lang==='en'&&f.e?f.e:f.n;}
-function foodSubLine(f){return settings.lang==='en'?(f.n?f.n+' · ':'')+`P:${f.p}g C:${f.cb}g F:${f.f}g`:(f.e?f.e+' · ':'')+`P:${f.p}g C:${f.cb}g F:${f.f}g`;}
+function foodSubLine(f){
+  const macros=`${t('protein')} ${f.p}g · ${t('carbs')} ${f.cb}g · ${t('fat')} ${f.f}g`;
+  return settings.lang==='en'?(f.n?f.n+' · ':'')+macros:(f.e?f.e+' · ':'')+macros;
+}
 function renderQuickList(){
   const w=document.getElementById('quickList');
   if(activeQTab==='presets'){renderPresetsTab(w);return;}
@@ -2077,7 +2182,7 @@ function renderPresetsTab(w){
     const totCal=p.foods.reduce((s,f)=>s+(+f.calories||0),0);
     const totP=Math.round(p.foods.reduce((s,f)=>s+(+f.protein||0),0));
     return `<div class="sri" data-pid="${p.id}" style="cursor:pointer">`+
-      `<div style="flex:1"><div class="sri-n">${escapeHtml(p.name)}</div><div class="sri-m">${p.foods.length} ${isEn?'items':'รายการ'} · P:${totP}g</div></div>`+
+      `<div style="flex:1"><div class="sri-n">${escapeHtml(p.name)}</div><div class="sri-m">${p.foods.length} ${isEn?'items':'รายการ'} · ${t('protein')} ${totP}g</div></div>`+
       `<div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${totCal}</div><button class="del" data-action="del" title="${t('del')}" style="background:none;border:none;color:var(--muted);font-size:.9rem;cursor:pointer;padding:4px 6px">✕</button></div>`+
     `</div>`;
   }).join('');
@@ -2168,7 +2273,7 @@ function openPortionModal(f){
   const isEn=settings.lang==='en';
   document.getElementById('portionName').textContent=foodDisplayName(f);
   const baseAmt=f.a?` · ${f.a}g`:'';
-  const baseSub=`${f.c} kcal${baseAmt} · P:${f.p} C:${f.cb} F:${f.f}`;
+  const baseSub=`${f.c} kcal${baseAmt} · ${t('protein')} ${f.p} · ${t('carbs')} ${f.cb} · ${t('fat')} ${f.f}`;
   document.getElementById('portionBase').textContent=(isEn?'1× = ':'1× = ')+baseSub;
   // Reset chips + qty input
   document.querySelectorAll('#portionChips button').forEach(b=>b.classList.toggle('active',b.dataset.q==='1'));
@@ -3329,7 +3434,7 @@ async function handleBarcode(code){
       `<div style="background:var(--surface2);border-radius:9px;padding:10px;margin-bottom:8px">`+
         `<div style="font-weight:600;margin-bottom:2px">${escapeHtml(food.n)}</div>`+
         (food.brand?`<div style="font-size:.7rem;color:var(--muted);margin-bottom:6px">${escapeHtml(food.brand)}</div>`:'')+
-        `<div style="font-size:.82rem"><b>${food.c}</b> kcal${food.a?` / ${food.a}g`:''} · P:${food.p}g C:${food.cb}g F:${food.f}g</div>`+
+        `<div style="font-size:.82rem"><b>${food.c}</b> kcal${food.a?` / ${food.a}g`:''} · ${t('protein')} ${food.p}g · ${t('carbs')} ${food.cb}g · ${t('fat')} ${food.f}g</div>`+
       `</div>`+
       `<button class="btn" id="bcAddBtn">${t('barcode_found')} → ${t('btn_add')}</button>`;
     document.getElementById('bcAddBtn').onclick=()=>{
@@ -3431,7 +3536,7 @@ function renderRcpTotals(){
   document.getElementById('rcpTotals').innerHTML=
     `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">${t('recipe_total')}</span><span style="font-weight:600">${Math.round(totC)} kcal</span></div>`+
     `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">${t('recipe_per_serving')}</span><span style="font-weight:600;color:var(--accent)">${perC} kcal</span></div>`+
-    `<div style="display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted)"><span>P:${perP}g · C:${perCb}g · F:${perF}g</span><span>${servings} ${isEn?'serving(s)':'เสิร์ฟ'}</span></div>`;
+    `<div style="display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted)"><span>${t('protein')} ${perP}g · ${t('carbs')} ${perCb}g · ${t('fat')} ${perF}g</span><span>${servings} ${isEn?'serving(s)':'เสิร์ฟ'}</span></div>`;
 }
 function saveRecipe(){
   const isEn=settings.lang==='en';
@@ -3958,8 +4063,6 @@ function renderToday(){
   const sr=document.getElementById('stRem');
   sr.textContent=(rem<0?'+':'')+Math.abs(rem).toLocaleString();sr.style.color=rem<0?'var(--accent)':'var(--green)';
   document.getElementById('stN').textContent=E.length;
-  document.getElementById('stP').textContent=totP+'g';
-  document.getElementById('stC').textContent=totC+'g';
   const pg=(userProfile?.weight||60)*1.6;
   document.getElementById('mP').textContent=totP+'g';document.getElementById('mC').textContent=totC+'g';document.getElementById('mF').textContent=totF+'g';
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
@@ -3979,8 +4082,8 @@ function renderToday(){
       const div=document.createElement('div');div.className='fi';
       const meta=[];
       if(item.amount_g)meta.push(item.amount_g+'g');
-      if(item.protein)meta.push('P:'+item.protein);
-      if(item.carbs)meta.push('C:'+item.carbs);
+      if(item.protein)meta.push(t('protein')+' '+item.protein+'g');
+      if(item.carbs)meta.push(t('carbs')+' '+item.carbs+'g');
       // For IDB-backed photos, omit src up-front and fill async (no broken image flash)
       const isIdbPhoto=item.photo&&item.photo.startsWith('idb:');
       const inlineSrc=item.photo&&!isIdbPhoto?` src="${item.photo}"`:'';
@@ -4589,6 +4692,7 @@ function setLang(lang){
   if(document.getElementById('pg-settings')?.classList.contains('active'))renderSettings();
   if(document.getElementById('pg-friends')?.classList.contains('active'))renderFriendsCard();
   if(document.getElementById('pg-help')?.classList.contains('active'))renderHelp();
+  if(document.getElementById('pg-dev')?.classList.contains('active'))renderDev();
 }
 function applyLang(){
   document.documentElement.lang=settings.lang||'th';
@@ -4624,20 +4728,23 @@ function chooseAvatar(emoji){
 }
 function uploadAvatar(file){
   if(!file)return;
-  if(file.size>2*1024*1024){showToast(settings.lang==='en'?'File too large (max 2MB)':'ไฟล์ใหญ่เกินไป (สูงสุด 2MB)');return;}
-  // Resize via canvas to keep localStorage small
+  // Bumped 2 MB → 8 MB so phone-camera shots aren't rejected
+  if(file.size>8*1024*1024){showToast(settings.lang==='en'?'File too large (max 8MB)':'ไฟล์ใหญ่เกินไป (สูงสุด 8MB)');return;}
   const reader=new FileReader();
   reader.onload=(e)=>{
     const img=new Image();
     img.onload=()=>{
-      const SIZE=256;
+      // Output 512×512 (was 256) — sharper avatar on retina/desktop displays.
+      // Quality 0.88 (was 0.82) for better skin-tone gradients without much size cost.
+      const SIZE=512;
       const c=document.createElement('canvas');c.width=SIZE;c.height=SIZE;
       const ctx=c.getContext('2d');
+      ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
       // Square crop center
       const minDim=Math.min(img.width,img.height);
       const sx=(img.width-minDim)/2,sy=(img.height-minDim)/2;
       ctx.drawImage(img,sx,sy,minDim,minDim,0,0,SIZE,SIZE);
-      userProfile.avatar=c.toDataURL('image/jpeg',0.82);
+      userProfile.avatar=c.toDataURL('image/jpeg',0.88);
       saveProfile_LS();renderProfileUI();closeAvatarModal();
       showToast(settings.lang==='en'?'Photo uploaded':'อัพโหลดรูปแล้ว');
     };
@@ -4776,21 +4883,46 @@ function buildShareCanvas(){
   ctx.fillText(entriesLbl,W/2,1060);
 
   // Invite message (no URL on the image — URL goes to caption text)
+  // iOS Safari renders Thai + emoji wider than measureText reports; smaller
+  // font + tighter padding + hard char-break keeps the line inside the frame.
   ctx.fillStyle=txt;
-  ctx.font=`600 42px ${fontTH}`;
+  ctx.font=`600 34px ${fontTH}`;        // was 42 — safer for iOS Thai metrics
+  ctx.textAlign='center';                // re-affirm in case earlier draws changed it
   const invite=pickInvite();
-  // Word-wrap if too wide
-  const wrapText=(text,maxW)=>{
-    const words=text.split(' ');const lines=[];let line='';
-    for(const w of words){const test=line+w+' ';if(ctx.measureText(test).width>maxW&&line){lines.push(line.trim());line=w+' ';}else line=test;}
-    if(line)lines.push(line.trim());return lines;
-  };
-  const lines=wrapText(invite,W-160);
-  const startY=H-160-(lines.length-1)*54;
-  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,startY+i*54));
+  const lines=wrapInviteText(ctx,invite,W-200);   // was W-160 — extra side padding
+  const startY=H-150-(lines.length-1)*46;
+  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,startY+i*46));
 
   ctx.textAlign='left';ctx.textBaseline='top';
   return {canvas:cv,invite};
+}
+// Shared helper used by both share cards. Falls back to character break when
+// a single token (long Thai phrase, emoji cluster) is wider than the frame.
+function wrapInviteText(ctx,text,maxW){
+  const tokens=String(text||'').split(' ');
+  const lines=[];let line='';
+  const push=(s)=>{if(s)lines.push(s);};
+  for(const tok of tokens){
+    if(ctx.measureText(tok).width>maxW){
+      // Single token overflows — flush current line, then char-break
+      if(line){push(line.trim());line='';}
+      let buf='';
+      for(const ch of [...tok]){
+        if(ctx.measureText(buf+ch).width>maxW&&buf){push(buf);buf=ch;}
+        else buf+=ch;
+      }
+      line=buf+' ';
+      continue;
+    }
+    const test=line+tok+' ';
+    if(ctx.measureText(test).width>maxW&&line){
+      push(line.trim());line=tok+' ';
+    }else{
+      line=test;
+    }
+  }
+  push(line.trim());
+  return lines;
 }
 async function shareDaily(){
   showToast(settings.lang==='en'?'Creating share image...':'กำลังสร้างรูป...',3000);
@@ -4931,16 +5063,12 @@ function buildAchievementCanvas(){
 
   // Invite message at bottom
   ctx.fillStyle=txt;
-  ctx.font=`600 42px ${fontTH}`;
+  ctx.font=`600 34px ${fontTH}`;        // match shareDaily — safer for iOS
+  ctx.textAlign='center';
   const invite=pickInvite();
-  const wrapText=(text,maxW)=>{
-    const words=text.split(' ');const lines=[];let line='';
-    for(const w of words){const test=line+w+' ';if(ctx.measureText(test).width>maxW&&line){lines.push(line.trim());line=w+' ';}else line=test;}
-    if(line)lines.push(line.trim());return lines;
-  };
-  const lines=wrapText(invite,W-160);
-  const startY=H-160-(lines.length-1)*54;
-  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,startY+i*54));
+  const lines=wrapInviteText(ctx,invite,W-200);
+  const startY=H-150-(lines.length-1)*46;
+  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,startY+i*46));
 
   ctx.textAlign='left';ctx.textBaseline='top';
   return {canvas:cv,invite};
@@ -5096,6 +5224,181 @@ applyFont(settings.font||'system');
 applyLang();
 renderBottomNav();
 showApp();
+// iOS-only refresh button — Android browser + Capacitor APK don't get it
+(function showIosRefreshIfApplicable(){
+  const ua=navigator.userAgent||'';
+  // iPad on iPadOS 13+ pretends to be Mac → also check touch points
+  const isIOS=/iPad|iPhone|iPod/.test(ua)||(ua.includes('Mac')&&navigator.maxTouchPoints>1);
+  const isCapacitor=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+  if(isIOS&&!isCapacitor){
+    document.getElementById('iosRefreshBtn')?.classList.remove('hide');
+  }
+})();
+// ═══ DEVELOPER MODE (password-gated, session-scoped) ═══
+// Soft gate — client-side only, can be bypassed via DevTools. Intended as a
+// "for developer use" sign, not a security boundary.
+const DEV_PASSWORD='75315946';
+function enterDevMode(){
+  closeDrawer();
+  // Already unlocked this session → jump straight in
+  if(sessionStorage.getItem('calpro_dev_unlocked')==='1'){
+    navTo('dev');return;
+  }
+  const pw=prompt('Developer password:');
+  if(pw==null)return;                 // user cancelled
+  if(pw===DEV_PASSWORD){
+    sessionStorage.setItem('calpro_dev_unlocked','1');
+    showToast('🔧 Developer mode unlocked');
+    navTo('dev');
+  }else{
+    showToast('Wrong password');
+  }
+}
+function lockDevMode(){
+  sessionStorage.removeItem('calpro_dev_unlocked');
+  showToast('Developer mode locked');
+  navTo('today');
+}
+async function renderDev(){
+  const body=document.getElementById('devBody');
+  if(!body)return;
+  // Re-verify gate (in case route was reached without going through prompt)
+  if(sessionStorage.getItem('calpro_dev_unlocked')!=='1'){
+    navTo('today');enterDevMode();return;
+  }
+  body.innerHTML='<div class="empty" style="padding:20px 0;font-size:.84rem">Collecting diagnostics...</div>';
+  // ── Device ──
+  const ua=navigator.userAgent||'';
+  const isIOS=/iPad|iPhone|iPod/.test(ua)||(ua.includes('Mac')&&navigator.maxTouchPoints>1);
+  const isAndroid=/Android/.test(ua);
+  const isCap=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+  const platform=isCap?'Native APK (Capacitor)':isIOS?'iOS browser':isAndroid?'Android browser':'Desktop browser';
+  // ── Storage ──
+  let lsSize=0;
+  try{for(const key in localStorage){if(key.startsWith('calpro')||key.startsWith('CalPro')){lsSize+=(localStorage.getItem(key)||'').length;}}}catch{}
+  let idbCount=0,idbSize=0;
+  try{
+    const db=await idbOpen();
+    const keys=await new Promise(r=>{
+      const tx=db.transaction(IDB_PHOTOS,'readonly');
+      const req=tx.objectStore(IDB_PHOTOS).getAllKeys();
+      req.onsuccess=()=>r(req.result||[]);
+      req.onerror=()=>r([]);
+    });
+    idbCount=keys.length;
+    for(const k of keys){const v=await idbGet(k);idbSize+=(v||'').length;}
+  }catch{}
+  // ── Local counts ──
+  const totalEntries=Object.values(allEntries).reduce((s,arr)=>s+(arr?.length||0),0);
+  const totalWorkouts=Object.values(allWorkouts).reduce((s,arr)=>s+(arr?.length||0),0);
+  // ── Cloud probe ──
+  let cloudUsers='—',cloudFoodEntries='—',cloudErr='';
+  try{
+    const sbRef=sb||await ensureSupabase(3000).catch(()=>null);
+    if(sbRef){
+      const {count:uc,error:e1}=await sbRef.from('profiles').select('id',{count:'exact',head:true});
+      if(e1)cloudErr+='profiles: '+e1.message+'; ';else cloudUsers=uc??'—';
+      if(cloudUser){
+        const {count:fc,error:e2}=await sbRef.from('food_entries').select('id',{count:'exact',head:true});
+        if(e2)cloudErr+='food_entries: '+e2.message;else cloudFoodEntries=fc??'—';
+      }
+    }
+  }catch(e){cloudErr=e.message||String(e);}
+  // ── SW info ──
+  let swState='—',swCacheName='—';
+  try{
+    const reg=await navigator.serviceWorker?.getRegistration?.();
+    if(reg){
+      swState=(reg.active?'active':'')+(reg.waiting?' · waiting':'')+(reg.installing?' · installing':'');
+      const cs=await caches?.keys?.();
+      const cp=cs?.find(c=>c.startsWith('calpro-v'));
+      swCacheName=cp||'(none)';
+    }
+  }catch{}
+  // Build the row helper
+  const row=(k,v)=>`<div class="dev-row"><span>${escapeHtml(k)}</span><span>${escapeHtml(String(v))}</span></div>`;
+  body.innerHTML=
+    `<div class="card"><h3>📱 Device</h3>`+
+      row('Platform',platform)+
+      row('Online',navigator.onLine?'yes':'no (offline)')+
+      row('Screen',`${screen.width}×${screen.height} @ ${window.devicePixelRatio}x`)+
+      row('Viewport',`${window.innerWidth}×${window.innerHeight}`)+
+      row('Language',navigator.language||'?')+
+      row('CPU cores',navigator.hardwareConcurrency||'?')+
+      row('Memory (GB)',navigator.deviceMemory||'?')+
+      row('Touch points',navigator.maxTouchPoints||0)+
+      row('Capacitor',isCap?'yes':'no')+
+      `<div class="dev-row"><span>User Agent</span><span style="max-width:60%">${escapeHtml(ua)}</span></div>`+
+    `</div>`+
+    `<div class="card"><h3>📊 App data (this device)</h3>`+
+      row('App version',APP_VERSION)+
+      row('SW state',swState)+
+      row('SW cache',swCacheName)+
+      row('Days logged',Object.keys(allEntries).length)+
+      row('Food entries (total)',totalEntries)+
+      row('Custom foods',customFoods.length)+
+      row('Presets',presets.length)+
+      row('Favorites',favorites.length)+
+      row('Recent foods',recentFoods.length)+
+      row('Workouts',totalWorkouts)+
+      row('localStorage usage',`${(lsSize/1024).toFixed(1)} KB`)+
+      row('IDB meal photos',`${idbCount} files · ${(idbSize/1024).toFixed(1)} KB`)+
+    `</div>`+
+    `<div class="card"><h3>☁️ Supabase cloud</h3>`+
+      row('Sync status',(typeof syncStatus!=='undefined'?syncStatus:'?'))+
+      row('Signed in',cloudUser?'yes':'no')+
+      (cloudUser?row('Account',cloudUser.email||cloudUser.id):'')+
+      row('Total users (Supabase)',cloudUsers)+
+      (cloudUser?row('My food_entries rows',cloudFoodEntries):'')+
+      (cloudErr?`<div class="dev-row"><span style="color:var(--accent)">Error</span><span style="color:var(--accent)">${escapeHtml(cloudErr.slice(0,200))}</span></div>`:'')+
+    `</div>`+
+    `<div class="card"><h3>⚙️ Settings (raw)</h3>`+
+      `<pre class="dev-pre">${escapeHtml(JSON.stringify(settings,null,2))}</pre>`+
+    `</div>`+
+    `<div class="card"><h3>👤 Profile (raw)</h3>`+
+      `<pre class="dev-pre">${escapeHtml(JSON.stringify(userProfile,null,2))}</pre>`+
+    `</div>`+
+    `<div class="card"><h3>🛠️ Actions</h3>`+
+      `<button class="btn-sec" onclick="devLogToConsole()" style="width:100%;margin-bottom:6px">📋 Dump full state to console</button>`+
+      `<button class="btn-sec" onclick="renderDev()" style="width:100%;margin-bottom:6px">🔄 Refresh diagnostics</button>`+
+      `<button class="btn-sec" onclick="checkForUpdates()" style="width:100%;margin-bottom:6px">🔍 Check for app update</button>`+
+      `<button class="btn-danger" onclick="lockDevMode()" style="width:100%">🔒 Lock developer mode</button>`+
+    `</div>`;
+}
+function devLogToConsole(){
+  console.group('CalPro+ '+APP_VERSION+' — state dump');
+  console.log('settings',settings);
+  console.log('userProfile',userProfile);
+  console.log('cloudUser',cloudUser);
+  console.log('counts',{
+    days:Object.keys(allEntries).length,
+    customFoods:customFoods.length,
+    presets:presets.length,
+    workouts:Object.keys(allWorkouts).length,
+    favorites:favorites.length,
+    recent:recentFoods.length,
+  });
+  console.log('Supabase client',sb);
+  console.groupEnd();
+  showToast('Dumped to console');
+}
+
+// Quick-add: jump to Add tab + focus the search box so the keyboard pops on mobile
+function goToAddFood(){
+  showPage('add',document.querySelector('.bnt[data-tab="add"]'));
+  setTimeout(()=>{
+    const el=document.getElementById('searchInput');
+    if(el){el.focus();el.select?.();}
+  },200);
+}
+async function iosRefresh(){
+  // Try to nudge SW to the freshest cached HTML before reloading, but never block.
+  try{
+    const reg=await navigator.serviceWorker?.getRegistration?.();
+    if(reg)await Promise.race([reg.update(),new Promise(r=>setTimeout(r,800))]);
+  }catch{}
+  location.reload();
+}
 // Initial sync status — await deferred Supabase SDK first
 ensureSupabase().then(()=>{
   sb.auth.getSession().then(({data:{session}})=>{
@@ -5184,6 +5487,32 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.18.0':{
+    th:[
+      '➕ **ปุ่ม FAB เพิ่มอาหาร** ที่มุมขวาล่างของหน้าวันนี้ · กดเดียวกระโดดไป Add tab + คีย์บอร์ดเด้งทันที',
+      '🖥️ **Desktop UI ใหม่** — 3 breakpoints (mobile 480 / tablet 560 / desktop 720) · card frame + shadow + gradient bg · ring ใหญ่ขึ้น',
+      '🔧 **Developer Mode** ใน drawer → อื่น ๆ (รหัส 75315946) — ดูสถิติ users, อุปกรณ์, settings, IDB usage',
+      '🍱 **ลบหัวข้อสารอาหารซ้ำ** ในหน้าวันนี้ + ใช้ชื่อเต็ม "โปรตีน/คาร์บ/ไขมัน" แทน P/C/F ทุกที่',
+      '📷 **อัปโหลดรูปโปรไฟล์ใหญ่ขึ้น** — รับไฟล์ถึง 8MB (เดิม 2MB), output 512×512 (เดิม 256), JPEG q=0.88',
+      '📤 **Share card iOS** — invite font ลด 42→34, hard char-break, +40px padding (ตัวหนังสือไม่ล้นกรอบบน iPhone)',
+      '🔄 **ปุ่ม Refresh ใน iOS browser** เท่านั้น (Android + Capacitor ไม่มี)',
+      '🤳 **iOS — ปิด double-tap zoom** ใช้ touch-action: manipulation (ยังคง pinch-zoom สำหรับ a11y)',
+      '♿ Reduced-motion media query · text-size-adjust lock · tap-highlight transparent',
+      '🐞 แก้บั๊ค bottom nav กว้าง 140px บน desktop (ควรเป็น 720) · กลับมาใช้ centering pattern ของ mobile',
+    ],
+    en:[
+      '➕ **FAB Add-Food button** at bottom-right of Today · one tap → Add tab + keyboard pops on mobile',
+      '🖥️ **Desktop UI overhaul** — 3 breakpoints (mobile 480 / tablet 560 / desktop 720) · card frame + shadow + gradient bg · bigger ring',
+      '🔧 **Developer Mode** in drawer → Other (password 75315946) — show user count, device info, settings, IDB usage',
+      '🍱 **Removed duplicate macro labels** on Today + full names (Protein/Carbs/Fat) everywhere instead of P/C/F',
+      '📷 **Larger profile photo upload** — accepts up to 8MB (was 2MB), output 512×512 (was 256), JPEG q=0.88',
+      '📤 **Share card iOS fix** — invite font 42→34, hard char-break, +40px padding (text no longer clipped on iPhone)',
+      '🔄 **Refresh button on iOS browser only** (hidden on Android + Capacitor APK)',
+      '🤳 **iOS — disabled double-tap zoom** via touch-action: manipulation (pinch-zoom kept for a11y)',
+      '♿ Reduced-motion media query · text-size-adjust lock · tap-highlight transparent',
+      '🐞 Fix: bottom nav was 140px on desktop (should be 720) · reverted to mobile centering pattern',
+    ],
+  },
   '2.17.0':{
     th:[
       '👥 **ฟีเจอร์เพื่อนยกระดับ** — Modal เพิ่มเพื่อนแทน prompt() เก่า · ค้นหาด้วยอีเมล/ชื่อแสดง (debounced 250ms) · เห็น avatar + email ในผลค้นหา',
