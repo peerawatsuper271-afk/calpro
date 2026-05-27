@@ -67,7 +67,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
-- **v2.18.3** *(APK + web · BETA)* — 🤝 **เปิดใช้งานลิงก์ Affiliate จริง** (Lazada + Shopee) · เพิ่มสินค้าใหม่ 2 ตัว: **กล่องเตรียมอาหาร 7 ช่อง** · **มัลติวิตามิน + แร่ธาตุ** (รวม 8 สินค้า)
+- **v2.18.3** *(APK + web · BETA)* — 🤝 **เปิดใช้งานลิงก์ Affiliate จริง** (Lazada + Shopee) · ปรับชื่อสินค้าให้ตรงกับลิงก์จริง: เวย์ · เชือกกระโดดถ่วงน้ำหนัก · ทดแทนมื้อ · อาหารคลีน · โปรตีนซีเรียล · ผักเคลกรอบ · ธัญพืชรวม · CP อกไก่ (รวม 8 สินค้า)
 - **v2.18.2** *(APK + web · BETA)* — 📺 **โฆษณา Affiliate Phase 1** — banner ในหน้าวันนี้ + หน้าวิเคราะห์ · สนับสนุนการพัฒนาแอป · กด × เพื่อปิดในแต่ละ session · escape hatch ผ่าน `settings.adsHidden` · `rel="nofollow sponsored"`
 - **v2.18.1** *(web only · BETA)* — 🔐 ปรับปรุงระบบรักษาความปลอดภัย Developer Mode
 - **v2.18.0** *(APK + web · BETA)* — **🚀 Mega-release** · **➕ FAB เพิ่มอาหารหน้าแรก** · **🖥️ Desktop UI** 3 breakpoints + card frame + shadow + gradient · **🔧 Developer Mode** ใน drawer → อื่น ๆ (ต้องใส่รหัสผ่าน) ดูสถิติผู้ใช้/อุปกรณ์/settings · **🍱 ลบ stats ซ้ำ** + ตัวเต็มสารอาหาร (โปรตีน/คาร์บ/ไขมัน) · **📷 อัปโหลดรูปโปรไฟล์** 256→512px, 2→8MB · **iOS fixes**: share card overflow, ปิด double-tap zoom, ปุ่ม refresh · **🐞 Bottom nav width fix** desktop

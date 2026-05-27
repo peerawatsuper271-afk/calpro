@@ -5249,21 +5249,21 @@ window._adsDismissed=window._adsDismissed||new Set();
 window._adsCurrent=window._adsCurrent||{};
 // Replace .url with real Lazada/Shopee affiliate links once you've signed up.
 const ADS=[
-  {id:'whey-1',icon:'💪',title:'เวย์โปรตีน Isolate',sub:'โปรตีนสะอาด · พร้อมส่งฟรี',cta:'ดูร้านค้า',color:'#74c0fc',
+  {id:'whey-1',icon:'💪',title:'เวย์โปรตีน Isolate',sub:'QiuMi · BCAA · รสวานิลลา 2LB',cta:'ดูร้านค้า',color:'#74c0fc',
    url:'https://s.lazada.co.th/s.Z6yNlp?c=b&t=p-i5qwta7-sOsjkD6'},
-  {id:'scale-1',icon:'⚖️',title:'เครื่องชั่งอาหาร Smart Scale',sub:'ชั่งแม่นยำ · ดูแคลอรี่ผ่านแอป',cta:'ดูสินค้า',color:'#51cf66',
+  {id:'jumprope-weight-1',icon:'🥊',title:'เชือกกระโดดถ่วงน้ำหนัก',sub:'ลูกปืนเหล็ก · ฝึกชกมวย/คาร์ดิโอ',cta:'ดูสินค้า',color:'#ff8a3d',
    url:'https://s.lazada.co.th/s.Z6yNsW?c=a&t=p-i5d82OL-sNnnsUk'},
-  {id:'bands-1',icon:'🏋️',title:'ยางยืดออกกำลังกาย Resistance Bands',sub:'เซ็ต 5 ระดับ · ใช้ที่บ้านได้',cta:'ดูชุดอุปกรณ์',color:'#ffa94d',
+  {id:'mealrep-1',icon:'🥤',title:'BAT™ ทดแทนมื้ออาหาร',sub:'1 กล่อง · 14 ซอง · คุมน้ำหนัก ลดหิว',cta:'ดูสินค้า',color:'#b197fc',
    url:'https://s.shopee.co.th/809pvvowGR'},
-  {id:'shaker-1',icon:'🥤',title:'แก้วเชค Pro Shaker',sub:'ขีดบอกปริมาณ · ปลอด BPA',cta:'ดูสินค้า',color:'#b197fc',
+  {id:'cleanmeal-1',icon:'🥗',title:'อาหารคลีน Pack 3 วัน 9 มื้อ',sub:'อกไก่นุ่ม · เพื่อการลดน้ำหนัก',cta:'ดูแพ็คเกจ',color:'#63e6be',
    url:'https://s.shopee.co.th/1Lcvzh4ls0'},
-  {id:'jumprope-1',icon:'⏱️',title:'เชือกกระโดดดิจิทัล',sub:'นับครั้ง+แคลฯ อัตโนมัติ',cta:'ดูสินค้า',color:'#f783ac',
+  {id:'proteincereal-1',icon:'🥣',title:'Proove Protein Crunch',sub:'รสออริจินอล/ดาร์กช็อก · โปรตีนซีเรียล 210g',cta:'ดูสินค้า',color:'#f783ac',
    url:'https://s.shopee.co.th/3VhQZjhQug'},
-  {id:'mealkit-1',icon:'🥗',title:'อาหารคลีนส่งถึงบ้าน',sub:'มื้อสุขภาพรายสัปดาห์ · ลด 15%',cta:'ดูแพ็คเกจ',color:'#63e6be',
+  {id:'kale-1',icon:'🥬',title:'ผักเคลอบกรอบ ออร์แกนิก',sub:'ไม่ทอด · ไขมันต่ำ · กรอบ กินเพลิน',cta:'ดูสินค้า',color:'#51cf66',
    url:'https://s.shopee.co.th/8fPWjIazt4'},
-  {id:'mealprep-1',icon:'🍱',title:'กล่องเตรียมอาหาร 7 ช่อง',sub:'พกง่าย · ใช้ซ้ำได้ · ไมโครเวฟได้',cta:'ดูสินค้า',color:'#ffd43b',
+  {id:'grains-1',icon:'🌾',title:'ธัญพืชรวม 9 เซียน 500g',sub:'คีโต · ไม่มีน้ำตาล · ไม่มีเนย · อบสด',cta:'ดูสินค้า',color:'#ffd43b',
    url:'https://s.lazada.co.th/s.Z6ynop?c=a&t=p-i5Jxpzu-sMJtxZp'},
-  {id:'vitamin-1',icon:'💊',title:'มัลติวิตามิน + แร่ธาตุ',sub:'ครบทุกวันใน 1 เม็ด · ส่งฟรี',cta:'ดูร้านค้า',color:'#ff6b6b',
+  {id:'chicken-1',icon:'🍗',title:'CP อกไก่เนื้อนุ่ม 1kg',sub:'พร้อมทาน · ไมโครเวฟ 3 นาที',cta:'ดูสินค้า',color:'#ff6b6b',
    url:'https://s.lazada.co.th/s.Z6ynIy?c=a&t=p-i5ehypP-sO0P0Og'},
 ];
 function renderAdSlot(slotId,container){
@@ -5574,21 +5574,19 @@ const CHANGELOG={
   '2.18.3':{
     th:[
       '🤝 **เปิดใช้งานลิงก์ Affiliate จริง** (Lazada + Shopee) — แตะการ์ดโฆษณาแล้วไปร้านค้าจริงได้ทันที',
-      '🛒 เพิ่มสินค้าใหม่ 2 ตัว: **กล่องเตรียมอาหาร 7 ช่อง** · **มัลติวิตามิน + แร่ธาตุ** (รวมเป็น 8 สินค้า)',
     ],
     en:[
       '🤝 **Real Lazada + Shopee affiliate links live** — tap an ad card to open the actual store',
-      '🛒 2 new products added: **7-compartment meal-prep box** · **multivitamin + minerals** (total 8 items)',
     ],
   },
   '2.18.2':{
     th:[
       '📺 **โฆษณา Affiliate** ในหน้าวันนี้และหน้าวิเคราะห์ — สนับสนุนการพัฒนาแอป (กด × เพื่อปิดในแต่ละ session)',
-      '🛒 รวมสินค้า fitness/health 8 ตัว: เวย์โปรตีน · เครื่องชั่งอาหาร · ยางยืด · แก้วเชค · เชือกกระโดดดิจิทัล · อาหารคลีน · กล่องเตรียมอาหาร · มัลติวิตามิน',
+      '🛒 รวมสินค้า fitness/health 8 ตัว: เวย์โปรตีน · เชือกกระโดดถ่วงน้ำหนัก · ทดแทนมื้ออาหาร · อาหารคลีน · โปรตีนซีเรียล · ผักเคลอบกรอบ · ธัญพืชรวม · CP อกไก่นุ่ม',
     ],
     en:[
       '📺 **Affiliate ads** on Today + Analysis pages — supports app development (× to dismiss per session)',
-      '🛒 Curated fitness/health products (8): whey, kitchen scale, resistance bands, shaker, smart jump rope, clean food, meal-prep box, multivitamin',
+      '🛒 Curated fitness/health products (8): whey protein, weighted jump rope, meal replacement, clean meal pack, protein cereal, kale chips, 9-grain mix, CP chicken breast',
     ],
   },
   '2.18.1':{
