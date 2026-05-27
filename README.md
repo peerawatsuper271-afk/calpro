@@ -67,6 +67,9 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.18.0** *(APK + web · BETA)* — **🚀 Mega-release** · **➕ FAB เพิ่มอาหารหน้าแรก** · **🖥️ Desktop UI** 3 breakpoints + card frame + shadow + gradient · **🔧 Developer Mode** ใน drawer → อื่น ๆ (รหัส 75315946) ดูสถิติผู้ใช้/อุปกรณ์/settings · **🍱 ลบ stats ซ้ำ** + ตัวเต็มสารอาหาร (โปรตีน/คาร์บ/ไขมัน) · **📷 อัปโหลดรูปโปรไฟล์** 256→512px, 2→8MB · **iOS fixes**: share card overflow, ปิด double-tap zoom, ปุ่ม refresh · **🐞 Bottom nav width fix** desktop
+- **v2.17.0** *(web only · BETA)* — **👥 Friends ออกจาก placeholder** — Modal เพิ่มเพื่อนแบบใหม่ (แทน prompt) · ค้นหา debounced 250ms ด้วยอีเมล/display_name · status pills · ✕ ปุ่มลบเพื่อนในแต่ละแถว leaderboard · escapeHtml ป้องกัน XSS
+- **v2.16.0** *(web only · BETA)* — **🍱 Food DB +30** (160+ รวม) — Rad Na/Drunken Noodles/Duck Rice/Suki/Yen Ta Fo + chains (Bonchon/Subway/Yayoi/MK) + drinks · **♿ ธีม "คมชัด" (Contrast)** · **♿ Modal Tab-trap** + reduced-motion media query · **⚡ Lazy-load Supabase SDK** (script defer + ensureSupabase polling)
 - **v2.15.0** *(web only · BETA)* — **🖼️ Meal photos → IndexedDB** — เลิกใช้ localStorage 5MB · ความจุระดับ GB+ · sentinel `idb:<id>` · cloud sync resolve เป็น data URL ก่อนอัปโหลด · ลบ/clean/reset cascade ลง IDB · backward-compat กับรูปเก่า inline
 - **v2.14.0** *(web only · BETA)* — **📷 Barcode Scanner** ในหน้าเพิ่มอาหาร — สแกนบาร์โค้ดสินค้าด้วยกล้อง (ZXing lazy-load) · ดึงข้อมูลโภชนาการจาก OpenFoodFacts (ฟรี ไม่ต้องสมัคร) · พิมพ์รหัสเองได้เมื่อกล้องใช้ไม่ได้ · ต่อเข้า Portion Picker เพื่อเลือกจำนวนก่อนเพิ่ม
 - **v2.13.0** *(web only · BETA)* — **🍲 Recipe Builder** ในหน้าเพิ่มอาหาร — สร้างสูตรจากหลายส่วนผสม · ปรับจำนวนเท่าได้ละเอียด · per-serving + total live preview · บันทึกซ้ำชื่อ = อัปเดต
