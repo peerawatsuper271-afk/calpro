@@ -880,7 +880,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.18.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.18.1 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1271,7 +1271,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.18.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.18.1 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1288,7 +1288,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.18.0';
+const APP_VERSION = '2.18.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -5237,7 +5237,7 @@ showApp();
 // ═══ DEVELOPER MODE (password-gated, session-scoped) ═══
 // Soft gate — client-side only, can be bypassed via DevTools. Intended as a
 // "for developer use" sign, not a security boundary.
-const DEV_PASSWORD='75315946';
+const DEV_PASSWORD='8757044175';
 function enterDevMode(){
   closeDrawer();
   // Already unlocked this session → jump straight in
@@ -5487,10 +5487,15 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.18.1':{
+    th:['🔐 ปรับปรุงระบบรักษาความปลอดภัย Developer Mode'],
+    en:['🔐 Hardened Developer Mode access'],
+  },
   '2.18.0':{
     th:[
       '➕ **ปุ่ม FAB เพิ่มอาหาร** ที่มุมขวาล่างของหน้าวันนี้ · กดเดียวกระโดดไป Add tab + คีย์บอร์ดเด้งทันที',
       '🖥️ **Desktop UI ใหม่** — 3 breakpoints (mobile 480 / tablet 560 / desktop 720) · card frame + shadow + gradient bg · ring ใหญ่ขึ้น',
+      '🔐 ปรับปรุงระบบรักษาความปลอดภัย Developer Mode',
       '🔧 **Developer Mode** ใน drawer → อื่น ๆ (ต้องใส่รหัสผ่าน) — ดูสถิติ users, อุปกรณ์, settings, IDB usage',
       '🍱 **ลบหัวข้อสารอาหารซ้ำ** ในหน้าวันนี้ + ใช้ชื่อเต็ม "โปรตีน/คาร์บ/ไขมัน" แทน P/C/F ทุกที่',
       '📷 **อัปโหลดรูปโปรไฟล์ใหญ่ขึ้น** — รับไฟล์ถึง 8MB (เดิม 2MB), output 512×512 (เดิม 256), JPEG q=0.88',
@@ -5503,6 +5508,7 @@ const CHANGELOG={
     en:[
       '➕ **FAB Add-Food button** at bottom-right of Today · one tap → Add tab + keyboard pops on mobile',
       '🖥️ **Desktop UI overhaul** — 3 breakpoints (mobile 480 / tablet 560 / desktop 720) · card frame + shadow + gradient bg · bigger ring',
+      '🔐 Hardened Developer Mode access',
       '🔧 **Developer Mode** in drawer → Other (password required) — show user count, device info, settings, IDB usage',
       '🍱 **Removed duplicate macro labels** on Today + full names (Protein/Carbs/Fat) everywhere instead of P/C/F',
       '📷 **Larger profile photo upload** — accepts up to 8MB (was 2MB), output 512×512 (was 256), JPEG q=0.88',
