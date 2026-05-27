@@ -900,7 +900,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.18.2 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.18.3 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1291,7 +1291,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.18.2 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.18.3 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1308,7 +1308,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.18.2';
+const APP_VERSION = '2.18.3';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -5250,17 +5250,21 @@ window._adsCurrent=window._adsCurrent||{};
 // Replace .url with real Lazada/Shopee affiliate links once you've signed up.
 const ADS=[
   {id:'whey-1',icon:'💪',title:'เวย์โปรตีน Isolate',sub:'โปรตีนสะอาด · พร้อมส่งฟรี',cta:'ดูร้านค้า',color:'#74c0fc',
-   url:'https://www.lazada.co.th/catalog/?q=whey+protein+isolate'},
+   url:'https://s.lazada.co.th/s.Z6yNlp?c=b&t=p-i5qwta7-sOsjkD6'},
   {id:'scale-1',icon:'⚖️',title:'เครื่องชั่งอาหาร Smart Scale',sub:'ชั่งแม่นยำ · ดูแคลอรี่ผ่านแอป',cta:'ดูสินค้า',color:'#51cf66',
-   url:'https://shopee.co.th/search?keyword=food%20scale%20kitchen'},
+   url:'https://s.lazada.co.th/s.Z6yNsW?c=a&t=p-i5d82OL-sNnnsUk'},
   {id:'bands-1',icon:'🏋️',title:'ยางยืดออกกำลังกาย Resistance Bands',sub:'เซ็ต 5 ระดับ · ใช้ที่บ้านได้',cta:'ดูชุดอุปกรณ์',color:'#ffa94d',
-   url:'https://www.lazada.co.th/catalog/?q=resistance+bands'},
+   url:'https://s.shopee.co.th/809pvvowGR'},
   {id:'shaker-1',icon:'🥤',title:'แก้วเชค Pro Shaker',sub:'ขีดบอกปริมาณ · ปลอด BPA',cta:'ดูสินค้า',color:'#b197fc',
-   url:'https://shopee.co.th/search?keyword=protein%20shaker'},
+   url:'https://s.shopee.co.th/1Lcvzh4ls0'},
   {id:'jumprope-1',icon:'⏱️',title:'เชือกกระโดดดิจิทัล',sub:'นับครั้ง+แคลฯ อัตโนมัติ',cta:'ดูสินค้า',color:'#f783ac',
-   url:'https://www.lazada.co.th/catalog/?q=smart+jump+rope'},
+   url:'https://s.shopee.co.th/3VhQZjhQug'},
   {id:'mealkit-1',icon:'🥗',title:'อาหารคลีนส่งถึงบ้าน',sub:'มื้อสุขภาพรายสัปดาห์ · ลด 15%',cta:'ดูแพ็คเกจ',color:'#63e6be',
-   url:'https://shopee.co.th/search?keyword=clean%20food%20meal'},
+   url:'https://s.shopee.co.th/8fPWjIazt4'},
+  {id:'mealprep-1',icon:'🍱',title:'กล่องเตรียมอาหาร 7 ช่อง',sub:'พกง่าย · ใช้ซ้ำได้ · ไมโครเวฟได้',cta:'ดูสินค้า',color:'#ffd43b',
+   url:'https://s.lazada.co.th/s.Z6ynop?c=a&t=p-i5Jxpzu-sMJtxZp'},
+  {id:'vitamin-1',icon:'💊',title:'มัลติวิตามิน + แร่ธาตุ',sub:'ครบทุกวันใน 1 เม็ด · ส่งฟรี',cta:'ดูร้านค้า',color:'#ff6b6b',
+   url:'https://s.lazada.co.th/s.Z6ynIy?c=a&t=p-i5ehypP-sO0P0Og'},
 ];
 function renderAdSlot(slotId,container){
   if(!container)return;
@@ -5567,14 +5571,24 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.18.3':{
+    th:[
+      '🤝 **เปิดใช้งานลิงก์ Affiliate จริง** (Lazada + Shopee) — แตะการ์ดโฆษณาแล้วไปร้านค้าจริงได้ทันที',
+      '🛒 เพิ่มสินค้าใหม่ 2 ตัว: **กล่องเตรียมอาหาร 7 ช่อง** · **มัลติวิตามิน + แร่ธาตุ** (รวมเป็น 8 สินค้า)',
+    ],
+    en:[
+      '🤝 **Real Lazada + Shopee affiliate links live** — tap an ad card to open the actual store',
+      '🛒 2 new products added: **7-compartment meal-prep box** · **multivitamin + minerals** (total 8 items)',
+    ],
+  },
   '2.18.2':{
     th:[
       '📺 **โฆษณา Affiliate** ในหน้าวันนี้และหน้าวิเคราะห์ — สนับสนุนการพัฒนาแอป (กด × เพื่อปิดในแต่ละ session)',
-      '🛒 รวมสินค้า fitness/health 6 ตัว: เวย์โปรตีน · เครื่องชั่งอาหาร · ยางยืด · แก้วเชค · เชือกกระโดดดิจิทัล · อาหารคลีน',
+      '🛒 รวมสินค้า fitness/health 8 ตัว: เวย์โปรตีน · เครื่องชั่งอาหาร · ยางยืด · แก้วเชค · เชือกกระโดดดิจิทัล · อาหารคลีน · กล่องเตรียมอาหาร · มัลติวิตามิน',
     ],
     en:[
       '📺 **Affiliate ads** on Today + Analysis pages — supports app development (× to dismiss per session)',
-      '🛒 Curated fitness/health products: whey, kitchen scale, resistance bands, shaker, smart jump rope, clean food',
+      '🛒 Curated fitness/health products (8): whey, kitchen scale, resistance bands, shaker, smart jump rope, clean food, meal-prep box, multivitamin',
     ],
   },
   '2.18.1':{
