@@ -1016,7 +1016,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.20.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.21.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1460,7 +1460,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.20.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.21.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1477,7 +1477,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.20.0';
+const APP_VERSION = '2.21.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -4085,11 +4085,29 @@ function renderHelp(){
       '<b>💡 Health tips</b> below the water card update with your day — protein, water, meal balance, etc.',
     ]},
     {ico:'➕',title:'Logging food',items:[
-      'Search the built-in database (110+ foods, TH + EN names).',
+      'Search the built-in database (<b>250 foods</b>, TH + EN names).',
       '<b>⭐ Star</b> any result to add it to your Favorites for one-tap re-logging.',
       'Use <b>Manual entry</b> for foods not in the database; check <b>"Save to library"</b> to keep them.',
       'Pick the meal slot (Breakfast/Lunch/Dinner/Snack) — defaults to current time-of-day.',
       'Attach a photo (optional). Edit or delete any entry from the food log.',
+    ]},
+    {ico:'🤖',title:'AI food photo',items:[
+      'On Add Food, tap <b>🤖 AI photo</b> · take or pick a photo of your meal.',
+      'AI estimates the dish name + kcal + macros · review then tap <b>Use these values</b> to prefill the form.',
+      'Free for members: 20 photos/day. If AI isn\'t working, try signing out and back in.',
+      'Power users: put your own API key (Claude / OpenAI / Gemini) in Settings to skip the daily limit.',
+    ]},
+    {ico:'🎮',title:'Profile (Steam-style)',items:[
+      'Hero card shows: avatar · display name · <b>level badge</b> (Lv 1-6) · bio.',
+      'Stats showcase: 🔥 streak · 📝 days logged · 🎯 on track · 🏆 score.',
+      'Tap <b>✏️ Edit profile</b> to change banner color · add a bio · update personal info.',
+      'Level computed from your streak + days logged + days on track. Reach Lv 6 for 👑 Legend.',
+    ]},
+    {ico:'👥',title:'Friends + profile viewing',items:[
+      'Add friends in <b>Friends</b> (drawer) by searching their email or display name.',
+      'Tap any row in the leaderboard to <b>open that friend\'s profile</b> · see their banner, bio, level, stats + badges.',
+      'Tap <b>👏 Send cheer</b> to encourage them.',
+      'Remove a friend with the ✕ button on the right of their row.',
     ]},
     {ico:'🏋️',title:'Workouts',items:[
       'On the workouts card on Today, tap <b>+ Add</b>.',
@@ -4139,11 +4157,29 @@ function renderHelp(){
       '<b>💡 คำแนะนำสุขภาพ</b> ใต้แถบน้ำ จะปรับตามข้อมูลแต่ละวัน — โปรตีน, มื้อ, น้ำ ฯลฯ',
     ]},
     {ico:'➕',title:'การบันทึกอาหาร',items:[
-      'ค้นหาจากฐานข้อมูล 110+ รายการ (ชื่อไทย/อังกฤษ)',
+      'ค้นหาจากฐานข้อมูล <b>250 รายการ</b> (ชื่อไทย/อังกฤษ)',
       'กด <b>⭐</b> เพิ่มของโปรดเพื่อกดบันทึกซ้ำได้ในแตะเดียว',
       'ใช้ <b>กรอกเอง</b> สำหรับอาหารที่ไม่มีในฐาน — ติ๊ก <b>"บันทึกลงไลบรารี"</b> เพื่อเก็บไว้ใช้ครั้งหน้า',
       'เลือกมื้อ (เช้า/กลางวัน/เย็น/ของว่าง) — ระบบเดาให้ตามเวลาปัจจุบัน',
       'แนบรูปได้ (ไม่บังคับ) · แก้ไข/ลบรายการจาก log ได้เลย',
+    ]},
+    {ico:'🤖',title:'AI ถ่ายรูปอาหาร',items:[
+      'ในหน้าเพิ่มอาหาร กด <b>🤖 ถ่ายรูป AI</b> · ถ่ายรูปหรือเลือกรูปอาหาร',
+      'AI ประเมินชื่อ + แคล + มาโครให้ · ตรวจสอบและกด <b>ใช้ค่านี้</b> → กรอกฟอร์มอัตโนมัติ',
+      'ผู้สมาชิกใช้ฟรี 20 รูป/วัน · ถ้า AI ไม่ทำงานลองออกจากระบบแล้วล็อกอินใหม่',
+      'ขั้นสูง: ใส่ API key ของตัวเอง (Claude / OpenAI / Gemini) ใน Settings เพื่อใช้เกิน limit',
+    ]},
+    {ico:'🎮',title:'โปรไฟล์ (สไตล์ Steam)',items:[
+      'การ์ดด้านบนแสดง: avatar · ชื่อ · <b>level badge</b> (Lv 1-6) · bio',
+      'Stats showcase: 🔥 streak · 📝 วันที่บันทึก · 🎯 อยู่ในเป้า · 🏆 คะแนน',
+      'กด <b>✏️ แก้ไขโปรไฟล์</b> เพื่อเปลี่ยน banner color · ใส่ bio · แก้ข้อมูลส่วนตัว',
+      'Level คำนวณจาก streak + วันที่บันทึก + วันที่อยู่ในเป้า · ขึ้นได้ถึง Lv 6 👑 ตำนาน',
+    ]},
+    {ico:'👥',title:'เพื่อน + ดูโปรไฟล์เพื่อน',items:[
+      'เพิ่มเพื่อนในหน้า <b>Friends</b> (จาก drawer) ค้นด้วยอีเมลหรือชื่อ',
+      'กดที่แถวเพื่อนใน leaderboard → <b>เปิดโปรไฟล์เขาได้เลย</b> · เห็น banner, bio, level, stats + badges',
+      'กด <b>👏 ส่งกำลังใจ</b> เพื่อให้กำลังใจเพื่อน',
+      'กด ✕ ทางขวาเพื่อลบเพื่อน',
     ]},
     {ico:'🏋️',title:'ออกกำลังกาย',items:[
       'กด <b>+ เพิ่ม</b> ที่การ์ดออกกำลังกายในหน้าวันนี้',
@@ -6945,6 +6981,28 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.21.0':{
+    th:[
+      '🎮 **โปรไฟล์ใหม่สไตล์ Steam** — banner สีปรับได้ · level (Lv 1-6) · stats + badges showcase · ใส่ bio ได้',
+      '👥 **ดูโปรไฟล์เพื่อนได้** — กดที่แถวเพื่อนใน leaderboard เปิดดูได้เลย',
+      '🤖 **AI ถ่ายรูปอาหาร ฟรี 20 รูป/วัน** — ผู้สมาชิกใช้ได้ทันที · ใส่ API key เองได้ในตั้งค่าถ้าอยากใช้เกิน limit',
+      '🍱 **ฐานข้อมูลอาหารเพิ่มเป็น 250 รายการ** (+70 รายการใหม่)',
+      '🎨 ค่าเริ่มต้นใหม่: ฟอนต์ Prompt · ธีมสว่าง · แถบล่าง Today/Add/Analysis/Profile/Settings',
+      '🔔 ขอ permission แจ้งเตือนตอนเริ่มแอป · ถ้าปฏิเสธปิดเตือนมื้ออาหารอัตโนมัติ',
+      '📈 กราฟแนวโน้มน้ำหนักใหม่ — ใช้ข้อมูลที่ชั่งจริง · เส้นโค้งเรียบ + Y-axis labels',
+      '🛠️ Capacitor 8 + JDK 21 + Android 15 (APK เร็วขึ้น · รองรับ Android ใหม่)',
+    ],
+    en:[
+      '🎮 **Steam-style profile redesign** — customizable banner color · level (Lv 1-6) · stats + badges showcase · bio',
+      '👥 **View friend profiles** — tap any row in the leaderboard to open',
+      '🤖 **AI food photo free 20/day** — members get it instantly · BYO API key in settings for higher limits',
+      '🍱 **Food database now 250 items** (+70 new dishes)',
+      '🎨 New defaults: Prompt font · light theme · bottom nav Today/Add/Analysis/Profile/Settings',
+      '🔔 Asks for notification permission on first launch · auto-disables meal reminders if denied',
+      '📈 Weight trend chart redesigned — uses actual measurements · smooth curves + Y-axis labels',
+      '🛠️ Capacitor 8 + JDK 21 + Android 15 (faster APK · better new-Android support)',
+    ],
+  },
   '2.20.0':{
     th:[
       '🎯 **Modals ทุกตัวอยู่กลางจอ** — เลิกใช้แบบ bottom-sheet · เด้งขึ้นกลางจอ scale-fade in ดูสมัยใหม่กว่า',

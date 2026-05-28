@@ -67,6 +67,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.21.0** *(APK + web · BETA)* — 🎮 **โปรไฟล์ Steam-style** · banner สี · level · badges showcase · bio · 👥 **ดูโปรไฟล์เพื่อนได้** · 🤖 AI ถ่ายรูปฟรี 20/วัน · 🍱 อาหารเพิ่มเป็น 250 · 🎨 default ใหม่ (Prompt + light + nav 5 tabs) · 🔔 ขอ notification permission auto · 📈 weight chart ใหม่ · 🛠️ Capacitor 8 + JDK 21 + Android 15
 - **v2.20.0** *(APK + web · BETA)* — 🎨 **UX pass** · **🎯 modals กลางจอ** (เลิก bottom-sheet) · **🤖 AI live status + spinner + heartbeat + "เหลือ N/20"** chip · **🔒 AI members-only** (กัน proxy abuse) · **🍱 Add Food ใหม่** (search top · favorites bottom) · **📉 weight chart 14 วันย้อนหลังเท่านั้น** (no future) · **🏆 badges ถาวร** (localStorage `cp_earned_badges`)
 - **v2.19.3** *(APK + web · BETA)* — 🐞 **แก้ AI photo "sign-in timed out"** · `signInAnonymously()` deadlock → ใช้ REST `POST /auth/v1/signup` ตรงๆ ไม่ผ่าน SDK lock
 - **v2.19.2** *(APK + web · BETA)* — 🐞 **แก้ AI photo "invalid_jwt"** · stale anon session ถูก auto-wipe + re-sign-in + retry once
