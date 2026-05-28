@@ -1068,10 +1068,11 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <h3 data-i18n="ai_photo_title">🤖 ถ่ายรูปอาหาร · AI ประเมิน</h3>
       <button class="mc-close" onclick="closeAiPhotoModal()" aria-label="Close">✕</button>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
       <div style="font-size:.74rem;color:var(--muted);line-height:1.5;flex:1;min-width:200px" data-i18n="ai_photo_hint">ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก</div>
       <span id="aiUsageChip" style="font-size:.66rem;background:var(--surface2);color:var(--accent);padding:4px 10px;border-radius:99px;white-space:nowrap;font-weight:600">—</span>
     </div>
+    <div style="font-size:.68rem;color:var(--amber, #f59f00);background:rgba(245,159,0,.08);border-left:3px solid var(--amber, #f59f00);padding:6px 9px;border-radius:6px;margin-bottom:10px;line-height:1.5" data-i18n="ai_relogin_notice">📌 หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)</div>
     <input type="file" id="aiPhotoFile" accept="image/*" capture="environment" onchange="handleAiPhotoSelect(this)" style="display:block;width:100%;font-size:.82rem;margin-bottom:10px">
     <img id="aiPhotoPreview" alt="" style="display:none;width:100%;max-height:240px;object-fit:contain;border-radius:9px;background:var(--surface2);margin-bottom:8px">
     <div id="aiPhotoStatus" style="font-size:.78rem;color:var(--muted);text-align:center;margin:6px 0;min-height:20px;display:flex;align-items:center;justify-content:center;gap:8px"></div>
@@ -1446,6 +1447,7 @@ const I18N = {
     ai_settings_sub:'ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)',
     ai_photo_btn:'🤖 ถ่ายรูป AI',ai_photo_title:'🤖 ถ่ายรูปอาหาร · AI ประเมิน',
     ai_photo_hint:'ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก',
+    ai_relogin_notice:'📌 หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)',
     smart_goal_pref:'ปรับเป้าหมายอัตโนมัติ',smart_goal_pref_sub:'แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า',
     weekly_recap_pref:'สรุปรายสัปดาห์',weekly_recap_pref_sub:'popup ทุกวันจันทร์เช้า',
     water_goal_cfg:'เป้าหมายน้ำดื่ม',
@@ -1529,6 +1531,7 @@ const I18N = {
     ai_settings_sub:'Snap a photo → AI estimates kcal/macros · uses your own API key (Claude/OpenAI/Gemini)',
     ai_photo_btn:'🤖 AI photo',ai_photo_title:'🤖 Photo · AI estimate',
     ai_photo_hint:'Take one food photo · AI will estimate name/kcal/macros · review + edit before saving',
+    ai_relogin_notice:'📌 Note: if AI camera doesn\'t work, please sign out and sign back in (Settings → Cloud Sync)',
     smart_goal_pref:'Auto goal adjustment',smart_goal_pref_sub:'Popup every 4 weeks if weight trend deviates',
     weekly_recap_pref:'Weekly recap',weekly_recap_pref_sub:'Popup every Monday morning',
     water_goal_cfg:'Water goal',
@@ -1875,7 +1878,7 @@ const EXERCISES = [
 ];
 let currentDate = todayKey();
 let activeCat = 'thai';
-let settings = {theme:'dark', accent:'#ff6b6b', lang:'th', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','tdee'], aiProvider:'proxy'};
+let settings = {theme:'light', accent:'#ff6b6b', lang:'th', font:'prompt', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','profile','settings'], aiProvider:'proxy'};
 
 // Bottom-nav tab catalog — id → { icon SVG path, i18n key }
 const NAV_CATALOG = {
@@ -2102,7 +2105,7 @@ function showApp(){
 // ═══ BOTTOM NAV ═══
 function renderBottomNav(){
   const nav=document.getElementById('mainNav');if(!nav)return;
-  const tabs=(settings.navTabs&&settings.navTabs.length)?settings.navTabs:['today','add','analysis','tdee'];
+  const tabs=(settings.navTabs&&settings.navTabs.length)?settings.navTabs:['today','add','analysis','profile','settings'];
   // Always ensure "today" is first
   const finalTabs=['today',...tabs.filter(t=>t!=='today')].slice(0,5);
   nav.innerHTML='';
@@ -6173,9 +6176,61 @@ function applyAiResult(parsed){
   showToast(isEn?'Filled in from AI · review + save':'กรอกข้อมูลจาก AI แล้ว · ตรวจสอบและบันทึก',2800);
 }
 
+// ─── One-time branding refresh ───
+// Applies the standardized defaults (Prompt font · light theme · red accent ·
+// bottom-nav preset Today/Add/Analysis/Profile/Settings) ONCE, then sets a
+// flag so it never overrides user customizations later. Run BEFORE applyFont
+// + applyTheme so the first paint already reflects the new defaults.
+function applyBrandingDefaultsOnce(){
+  if(localStorage.getItem('cp_branding_v220')==='1')return;
+  settings.font='prompt';
+  settings.theme='light';
+  settings.accent='#ff6b6b';
+  settings.navTabs=['today','add','analysis','profile','settings'];
+  try{lsSave(LS_SETTINGS,settings);}catch{}
+  try{localStorage.setItem('cp_branding_v220','1');}catch{}
+  // Re-apply visuals — loadUserData already ran applyTheme() using the old
+  // stored values, so we need to refresh now with the new defaults.
+  try{if(typeof applyTheme==='function')applyTheme();}catch{}
+}
+// ─── First-launch notification permission ───
+// Ask once per device. If the user denies, auto-disable meal reminders so
+// the in-app reminder banner doesn't keep showing for someone who won't get
+// the system notifications anyway. Runs after a short delay so the app
+// renders before the prompt appears.
+async function requestNotifPermOnLaunch(){
+  if(localStorage.getItem('cp_notif_perm_asked')==='1')return;
+  // Defer past first paint so the system prompt doesn't blot out the empty UI
+  await new Promise(r=>setTimeout(r,1500));
+  try{localStorage.setItem('cp_notif_perm_asked','1');}catch{}
+  try{
+    const cap=window.Capacitor;
+    let granted=false;
+    if(cap?.isNativePlatform?.()){
+      const LN=cap.Plugins?.LocalNotifications;
+      if(!LN)return;
+      const r=await LN.requestPermissions();
+      granted=r.display==='granted';
+    }else if('Notification' in window){
+      if(Notification.permission==='granted'){granted=true;}
+      else if(Notification.permission==='default'){
+        const r=await Notification.requestPermission();
+        granted=r==='granted';
+      }
+    }
+    if(!granted){
+      settings.mealReminders=false;
+      try{lsSave(LS_SETTINGS,settings);}catch{}
+      // Refresh Settings render if user happens to be on that page
+      try{if(document.getElementById('mealRemToggle'))document.getElementById('mealRemToggle').checked=false;}catch{}
+    }
+  }catch(e){console.warn('[notif-perm]',e.message);}
+}
+
 // ═══ INIT ═══
 loadUserData();
-applyFont(settings.font||'system');
+applyBrandingDefaultsOnce();
+applyFont(settings.font||'prompt');
 applyLang();
 renderBottomNav();
 showApp();
@@ -6183,6 +6238,7 @@ showApp();
 parseReferralOnLoad();    // handle ?ref= URL param + welcome toast
 dailyCheckInToast();      // congratulate active-streak users on app open
 scheduleStreakSaver();    // schedule 21:30 push notification (Capacitor only)
+requestNotifPermOnLaunch();  // ask permission once on first launch · disable mealReminders on denial
 // iOS-only refresh button — Android browser + Capacitor APK don't get it
 (function showIosRefreshIfApplicable(){
   const ua=navigator.userAgent||'';
