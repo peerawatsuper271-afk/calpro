@@ -10,8 +10,9 @@
 // Run the migration once before first use:
 //   psql -f calpro-database-v2.19-ai-usage.sql
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+// Deno.serve is built-in since Deno 1.40 — no std/http import needed.
+// supabase-js pinned to @2 wildcard so we float up minor/patch automatically.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") || "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
@@ -33,7 +34,7 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "content-type": "application/json" },
   });
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 

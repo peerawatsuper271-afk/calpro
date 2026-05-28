@@ -3455,11 +3455,12 @@ function setFont(key){
 
 // ═══ BARCODE SCANNER — lazy-loads ZXing + OpenFoodFacts lookup ═══
 // @zxing/browser has no UMD bundle, so its CDN script tag 404s. Use
-// @zxing/library 0.20.0 — last version with the browser API + UMD bundle.
+// @zxing/library — has the browser API + UMD bundle. 0.23.0 verified
+// to still ship umd/index.min.js on both unpkg + jsDelivr.
 // Global is `ZXing`, scan stops via `reader.reset()` (no controls object).
 let _bcReader=null;
-const ZXING_PRIMARY='https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js';
-const ZXING_FALLBACK='https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js';
+const ZXING_PRIMARY='https://unpkg.com/@zxing/library@0.23.0/umd/index.min.js';
+const ZXING_FALLBACK='https://cdn.jsdelivr.net/npm/@zxing/library@0.23.0/umd/index.min.js';
 function loadZxing(){
   if(window.ZXing&&window.ZXing.BrowserMultiFormatReader)return Promise.resolve(window.ZXing);
   const tryUrl=(url)=>new Promise((resolve,reject)=>{
