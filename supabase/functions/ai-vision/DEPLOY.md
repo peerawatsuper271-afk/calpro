@@ -44,8 +44,9 @@ supabase secrets set GEMINI_API_KEY=AIza...your-key-here
 (ออปชั่นนัล) ปรับ daily limit หรือ model:
 ```
 supabase secrets set AI_DAILY_LIMIT=20
-supabase secrets set GEMINI_MODEL=gemini-2.0-flash
+supabase secrets set GEMINI_MODEL=gemini-2.5-flash
 ```
+**Note:** ใช้ `gemini-2.5-flash` (default · multimodal · เร็ว · free tier รองรับ). อย่าใช้ `gemini-2.0-flash` เพราะใน free tier ใหม่ถูก rate-limit ทันที. ทางเลือกประหยัด token: `gemini-2.5-flash-lite`
 
 Deploy function (no-verify-jwt เพราะเรา verify เองใน code):
 ```

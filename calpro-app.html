@@ -915,7 +915,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.19.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.19.1 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1321,7 +1321,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.19.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.19.1 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1338,7 +1338,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.19.0';
+const APP_VERSION = '2.19.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -5610,18 +5610,40 @@ async function aiCallGemini(key,endpoint,model,imageBase64,prompt){
 }
 // Make sure we have a Supabase session — anonymous is fine. Used by the
 // "proxy" provider so users don't need to sign up.
+//
+// IMPORTANT: client.auth.getSession() can hang indefinitely due to a
+// navigator-lock deadlock in supabase-js v2 (esp. when refreshToken is
+// in flight or when another tab holds the lock). We bypass it by reading
+// the storageKey directly from localStorage — that's where the SDK
+// persists the session anyway.
 async function aiEnsureSupabaseSession(){
   const client=sb||await ensureSupabase(8000);
   if(!client)throw new Error('Supabase not available');
-  const {data:{session}}=await client.auth.getSession();
-  if(session?.access_token)return session;
-  // Try anonymous sign-in (Supabase project must have anonymous sign-ins enabled)
-  if(typeof client.auth.signInAnonymously==='function'){
-    const {data,error}=await client.auth.signInAnonymously();
-    if(error)throw new Error('Anonymous sign-in failed: '+error.message);
-    return data.session;
+  // 1) Direct read from localStorage (avoids getSession() lock deadlock)
+  try{
+    const raw=localStorage.getItem('calpro-sb-auth');
+    if(raw){
+      const p=JSON.parse(raw);
+      const sessionLike=p?.currentSession||p;
+      const accessToken=sessionLike?.access_token;
+      const expiresAt=sessionLike?.expires_at;
+      // Treat as valid if it's not expired (give 60s buffer)
+      if(accessToken&&expiresAt&&expiresAt*1000>Date.now()+60000){
+        return sessionLike;
+      }
+    }
+  }catch{}
+  // 2) No (or expired) session — try anonymous sign-in
+  if(typeof client.auth.signInAnonymously!=='function'){
+    throw new Error('Anonymous sign-in not supported in this SDK version');
   }
-  throw new Error('No session and anonymous sign-in not supported');
+  const result=await Promise.race([
+    client.auth.signInAnonymously(),
+    new Promise((_,r)=>setTimeout(()=>r(new Error('Anonymous sign-in timed out (12s)')),12000)),
+  ]);
+  if(result?.error)throw new Error('Anonymous sign-in failed: '+result.error.message);
+  if(!result?.data?.session?.access_token)throw new Error('Anonymous sign-in returned no session');
+  return result.data.session;
 }
 // Adapter — CalPro+ proxy (Supabase Edge Function). Key stays on server.
 async function aiCallProxy(imageBase64,prompt){
@@ -6246,6 +6268,16 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.19.1':{
+    th:[
+      '🐞 **แก้บั๊ก AI photo ค้าง** — `getSession()` ของ supabase-js v2 deadlock จาก navigator-lock · ตอนนี้อ่าน session จาก localStorage ตรงๆ แล้วใช้ anonymous sign-in เป็น fallback',
+      '🔧 เปลี่ยน Gemini model default `gemini-2.0-flash` → `gemini-2.5-flash` (free tier ใหม่ใช้ตัวเก่าไม่ได้แล้ว · 2.5 ทำงานได้ดี)',
+    ],
+    en:[
+      '🐞 **Fix AI photo hang** — supabase-js v2 `getSession()` was deadlocking on the navigator lock · now reads session straight from localStorage with anonymous sign-in fallback',
+      '🔧 Switched default Gemini model from `gemini-2.0-flash` → `gemini-2.5-flash` (free tier no longer serves 2.0 · 2.5 works cleanly)',
+    ],
+  },
   '2.19.0':{
     th:[
       '🤖 **AI วิเคราะห์อาหารจากรูป (ฟรี!)** — ถ่ายรูปอาหาร → AI ประเมินชื่อ/แคล/มาโครให้ · 20 รูป/วัน/คน · ไม่ต้องตั้งค่าอะไรเลย (มี BYO key สำหรับใช้เกิน limit)',

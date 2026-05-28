@@ -67,6 +67,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.19.1** *(APK + web · BETA)* — 🐞 **Hotfix AI photo ค้าง** · `getSession()` ของ supabase-js v2 deadlock จาก navigator-lock → อ่าน session จาก localStorage ตรงๆ + anon sign-in fallback · เปลี่ยน Gemini model default จาก 2.0-flash → 2.5-flash (free tier ใหม่)
 - **v2.19.0** *(APK + web · BETA)* — 🚀 **Mega-release: Growth + AI** · **🤖 AI ถ่ายรูปอาหาร ฟรี** ผ่าน Supabase Edge Function proxy (20 รูป/วัน/คน · BYO key ได้) — Claude/OpenAI/Gemini/Custom · **🔥 Streak-saver** push 21:30 · **🎉 Milestone share อัตโนมัติ** 7/14/30/60/100 · **🎁 Referral link** + badge · **Daily check-in toast** · **Onboarding telemetry** · 5 badges ใหม่ (streak14/30/60/100 + referred)
 - **v2.18.3** *(APK + web · BETA)* — 🤝 **เปิดใช้งานลิงก์ Affiliate จริง** (Lazada + Shopee) · ปรับชื่อสินค้าให้ตรงกับลิงก์จริง: เวย์ · เชือกกระโดดถ่วงน้ำหนัก · ทดแทนมื้อ · อาหารคลีน · โปรตีนซีเรียล · ผักเคลกรอบ · ธัญพืชรวม · CP อกไก่ (รวม 8 สินค้า)
 - **v2.18.2** *(APK + web · BETA)* — 📺 **โฆษณา Affiliate Phase 1** — banner ในหน้าวันนี้ + หน้าวิเคราะห์ · สนับสนุนการพัฒนาแอป · กด × เพื่อปิดในแต่ละ session · escape hatch ผ่าน `settings.adsHidden` · `rel="nofollow sponsored"`
