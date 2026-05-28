@@ -599,7 +599,10 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card">
         <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
         <div class="sbox"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"></div>
-        <button class="btn-sec" onclick="openBarcodeModal()" style="width:100%;margin-bottom:8px;font-size:.84rem" data-i18n="scan_barcode">📷 สแกนบาร์โค้ด</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+          <button class="btn-sec" onclick="openBarcodeModal()" style="font-size:.82rem" data-i18n="scan_barcode">📷 บาร์โค้ด</button>
+          <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem" data-i18n="ai_photo_btn">🤖 ถ่ายรูป AI</button>
+        </div>
         <div class="cats" id="catBtns"></div>
         <div class="sres" id="sRes"></div>
         <div class="fl"><label data-i18n="meal">มื้ออาหาร</label>
@@ -864,6 +867,11 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         <div id="notifStatus" style="font-size:.7rem;color:var(--muted);margin-top:6px;text-align:center"></div>
       </div>
       <div class="card">
+        <h3 data-i18n="ai_settings_title">🤖 AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)</h3>
+        <div style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:10px" data-i18n="ai_settings_sub">ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)</div>
+        <div id="aiSettingsBody"></div>
+      </div>
+      <div class="card">
         <h3 data-i18n="customize_nav">ปรับแต่งแถบล่าง</h3>
         <div style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:10px" data-i18n="customize_nav_sub">เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้</div>
         <div id="navTabsList"></div>
@@ -1048,6 +1056,21 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <button class="btn-sec" onclick="lookupManualBarcode()" style="white-space:nowrap" data-i18n="barcode_lookup">ค้นหา</button>
     </div>
     <div id="bcResult"></div>
+  </div>
+</div>
+
+<!-- AI VISION MODAL — photo → AI estimate → prefill Add Food form -->
+<div class="modal-bg hide" id="aiPhotoModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hdr">
+      <h3 data-i18n="ai_photo_title">🤖 ถ่ายรูปอาหาร · AI ประเมิน</h3>
+      <button class="mc-close" onclick="closeAiPhotoModal()" aria-label="Close">✕</button>
+    </div>
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:10px;line-height:1.5" data-i18n="ai_photo_hint">ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก</div>
+    <input type="file" id="aiPhotoFile" accept="image/*" capture="environment" onchange="handleAiPhotoSelect(this)" style="display:block;width:100%;font-size:.82rem;margin-bottom:10px">
+    <img id="aiPhotoPreview" alt="" style="display:none;width:100%;max-height:240px;object-fit:contain;border-radius:9px;background:var(--surface2);margin-bottom:8px">
+    <div id="aiPhotoStatus" style="font-size:.78rem;color:var(--muted);text-align:center;margin:6px 0;min-height:20px"></div>
+    <div id="aiPhotoResult"></div>
   </div>
 </div>
 
@@ -1414,6 +1437,10 @@ const I18N = {
     simple_mode:'โหมดใช้งานง่าย',simple_mode_sub:'เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น',
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
     streak_saver:'เตือนรักษา streak',streak_saver_sub:'push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)',
+    ai_settings_title:'🤖 AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)',
+    ai_settings_sub:'ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)',
+    ai_photo_btn:'🤖 ถ่ายรูป AI',ai_photo_title:'🤖 ถ่ายรูปอาหาร · AI ประเมิน',
+    ai_photo_hint:'ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก',
     smart_goal_pref:'ปรับเป้าหมายอัตโนมัติ',smart_goal_pref_sub:'แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า',
     weekly_recap_pref:'สรุปรายสัปดาห์',weekly_recap_pref_sub:'popup ทุกวันจันทร์เช้า',
     water_goal_cfg:'เป้าหมายน้ำดื่ม',
@@ -1493,6 +1520,10 @@ const I18N = {
     simple_mode:'Simple mode',simple_mode_sub:'Focus on calorie ring + meals · larger fonts · hides other widgets',
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
     streak_saver:'Streak saver',streak_saver_sub:'21:30 push if not logged yet + streak ≥ 3 days (APK only)',
+    ai_settings_title:'🤖 AI food vision (bring your own key)',
+    ai_settings_sub:'Snap a photo → AI estimates kcal/macros · uses your own API key (Claude/OpenAI/Gemini)',
+    ai_photo_btn:'🤖 AI photo',ai_photo_title:'🤖 Photo · AI estimate',
+    ai_photo_hint:'Take one food photo · AI will estimate name/kcal/macros · review + edit before saving',
     smart_goal_pref:'Auto goal adjustment',smart_goal_pref_sub:'Popup every 4 weeks if weight trend deviates',
     weekly_recap_pref:'Weekly recap',weekly_recap_pref_sub:'Popup every Monday morning',
     water_goal_cfg:'Water goal',
@@ -4716,6 +4747,8 @@ function renderSettings(){
   setCk('streakSaverToggle',settings.streakSaver!==false);
   setCk('smartGoalToggle',settings.smartGoal!==false);
   setCk('recapToggle',settings.weeklyRecap!==false);
+  // AI settings (Epic 2) — render dynamically since options depend on selected provider
+  try{ if(typeof renderAiSettingsBody==='function') renderAiSettingsBody(); }catch{}
   // Water goal
   const wr=document.getElementById('waterGoalRange'),wv=document.getElementById('waterGoalVal');
   if(wr){wr.value=getWaterGoal();}
@@ -5453,6 +5486,371 @@ function toggleStreakSaver(){
   settings.streakSaver=el?el.checked:true;
   lsSave(LS_SETTINGS,settings);
   scheduleStreakSaver();
+}
+
+// ═══ AI FOOD VISION (Epic 2 — BYO API key) ═══
+// User supplies their own provider API key (Claude / OpenAI / Gemini / OpenAI-compatible).
+// Photo → resize ≤768px → adapter request → JSON parse → prefill Add Food form.
+// All requests go DIRECTLY from the browser to the provider — no proxy. The key
+// is stored in localStorage. Document that limitation prominently in Settings.
+
+// Stable defaults — also referenced by the Settings dropdown population.
+const AI_PROVIDERS={
+  claude:{
+    label:'Claude (Anthropic)',
+    defaultModel:'claude-sonnet-4-5-20250929',
+    defaultEndpoint:'https://api.anthropic.com/v1/messages',
+    keyHint:'sk-ant-...',
+    costPerImage:'~$0.003 / รูป',
+  },
+  openai:{
+    label:'OpenAI (GPT-4o-mini)',
+    defaultModel:'gpt-4o-mini',
+    defaultEndpoint:'https://api.openai.com/v1/chat/completions',
+    keyHint:'sk-...',
+    costPerImage:'~$0.001 / รูป',
+  },
+  gemini:{
+    label:'Gemini (Google)',
+    defaultModel:'gemini-2.0-flash',
+    defaultEndpoint:'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
+    keyHint:'AIza...',
+    costPerImage:'ฟรี (tier ฟรี · มี rate limit)',
+  },
+  custom:{
+    label:'Custom (OpenAI-compatible)',
+    defaultModel:'gpt-4o-mini',
+    defaultEndpoint:'https://your-proxy.example.com/v1/chat/completions',
+    keyHint:'(your-key)',
+    costPerImage:'แล้วแต่ provider',
+  },
+};
+// Build the structured prompt — request strict JSON output we can parse safely.
+function aiFoodPrompt(){
+  return `You are a nutrition analyst. Look at the food photo and return ONLY a JSON object (no markdown, no commentary). The user's app is Thai-language so prefer Thai dish names if recognizable.\n\nShape:\n{"name":"...","kcal":NUMBER,"protein_g":NUMBER,"carbs_g":NUMBER,"fat_g":NUMBER,"portion_estimate":"...","confidence":0..1}\n\nRules:\n- Estimate for the WHOLE visible portion in the photo (not per 100g)\n- All macro numbers in grams, kcal as integer\n- portion_estimate is a short human-readable description ("1 จาน · ประมาณ 250g")\n- confidence 0-1 reflects how sure you are about the dish identification\n- If you cannot identify food, return {"error":"no_food_detected"}\n- Output ONLY the JSON, nothing else`;
+}
+// Adapter — Claude messages API. Vision uses content blocks.
+async function aiCallClaude(key,endpoint,model,imageBase64,prompt){
+  const res=await fetch(endpoint,{
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      // Required when calling Anthropic from a browser — opts user into the
+      // direct-browser-access path with explicit acknowledgment.
+      'anthropic-dangerous-direct-browser-access':'true',
+    },
+    body:JSON.stringify({
+      model,
+      max_tokens:512,
+      messages:[{
+        role:'user',
+        content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:imageBase64}},
+          {type:'text',text:prompt},
+        ],
+      }],
+    }),
+  });
+  if(!res.ok)throw new Error(`Claude HTTP ${res.status}: ${(await res.text()).slice(0,200)}`);
+  const j=await res.json();
+  return j.content?.[0]?.text||'';
+}
+// Adapter — OpenAI Chat Completions (also handles the "custom" provider).
+async function aiCallOpenAI(key,endpoint,model,imageBase64,prompt){
+  const res=await fetch(endpoint,{
+    method:'POST',
+    headers:{'content-type':'application/json','authorization':'Bearer '+key},
+    body:JSON.stringify({
+      model,
+      max_tokens:512,
+      messages:[{
+        role:'user',
+        content:[
+          {type:'image_url',image_url:{url:`data:image/jpeg;base64,${imageBase64}`}},
+          {type:'text',text:prompt},
+        ],
+      }],
+    }),
+  });
+  if(!res.ok)throw new Error(`OpenAI HTTP ${res.status}: ${(await res.text()).slice(0,200)}`);
+  const j=await res.json();
+  return j.choices?.[0]?.message?.content||'';
+}
+// Adapter — Gemini generateContent. Key goes in the URL query string.
+async function aiCallGemini(key,endpoint,model,imageBase64,prompt){
+  const url=endpoint.replace('{model}',model)+'?key='+encodeURIComponent(key);
+  const res=await fetch(url,{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({
+      contents:[{
+        parts:[
+          {inline_data:{mime_type:'image/jpeg',data:imageBase64}},
+          {text:prompt},
+        ],
+      }],
+    }),
+  });
+  if(!res.ok)throw new Error(`Gemini HTTP ${res.status}: ${(await res.text()).slice(0,200)}`);
+  const j=await res.json();
+  return j.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+// Dispatch by selected provider.
+async function aiCallVision(imageBase64){
+  const provider=settings.aiProvider||'claude';
+  const key=localStorage.getItem('cp_ai_key')||'';
+  if(!key)throw new Error('NO_KEY');
+  const model=settings.aiModel||AI_PROVIDERS[provider]?.defaultModel||'';
+  const endpoint=settings.aiEndpoint||AI_PROVIDERS[provider]?.defaultEndpoint||'';
+  const prompt=aiFoodPrompt();
+  if(provider==='claude')return aiCallClaude(key,endpoint,model,imageBase64,prompt);
+  if(provider==='openai'||provider==='custom')return aiCallOpenAI(key,endpoint,model,imageBase64,prompt);
+  if(provider==='gemini')return aiCallGemini(key,endpoint,model,imageBase64,prompt);
+  throw new Error('UNKNOWN_PROVIDER');
+}
+// Tiny "say ok" probe for the test-connection button.
+async function aiPing(){
+  const provider=settings.aiProvider||'claude';
+  const key=localStorage.getItem('cp_ai_key')||'';
+  if(!key)throw new Error('NO_KEY');
+  const model=settings.aiModel||AI_PROVIDERS[provider]?.defaultModel||'';
+  const endpoint=settings.aiEndpoint||AI_PROVIDERS[provider]?.defaultEndpoint||'';
+  const prompt='Say "ok" in one word.';
+  if(provider==='claude'){
+    const res=await fetch(endpoint,{
+      method:'POST',
+      headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model,max_tokens:10,messages:[{role:'user',content:prompt}]}),
+    });
+    if(!res.ok)throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0,150)}`);
+    return (await res.json()).content?.[0]?.text||'(empty)';
+  }
+  if(provider==='openai'||provider==='custom'){
+    const res=await fetch(endpoint,{
+      method:'POST',
+      headers:{'content-type':'application/json','authorization':'Bearer '+key},
+      body:JSON.stringify({model,max_tokens:10,messages:[{role:'user',content:prompt}]}),
+    });
+    if(!res.ok)throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0,150)}`);
+    return (await res.json()).choices?.[0]?.message?.content||'(empty)';
+  }
+  if(provider==='gemini'){
+    const url=endpoint.replace('{model}',model)+'?key='+encodeURIComponent(key);
+    const res=await fetch(url,{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}),
+    });
+    if(!res.ok)throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0,150)}`);
+    return (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text||'(empty)';
+  }
+  throw new Error('UNKNOWN_PROVIDER');
+}
+// Resize an image File to fit within ≤768px on its longest edge, then return base64
+// (without the "data:image/jpeg;base64," prefix — providers want raw base64).
+function resizeImageForVision(file,maxEdge=768){
+  return new Promise((resolve,reject)=>{
+    if(!file)return reject(new Error('No file'));
+    if(file.size>10*1024*1024)return reject(new Error('Image too large (max 10MB)'));
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error('Read failed'));
+    reader.onload=(e)=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error('Not a valid image'));
+      img.onload=()=>{
+        try{
+          const ratio=Math.min(maxEdge/img.width,maxEdge/img.height,1);
+          const w=Math.round(img.width*ratio),h=Math.round(img.height*ratio);
+          const c=document.createElement('canvas');c.width=w;c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          // 0.85 quality — slight visual loss but big token savings
+          const dataUrl=c.toDataURL('image/jpeg',0.85);
+          const base64=dataUrl.split(',')[1]||'';
+          resolve({base64,dataUrl,w,h});
+        }catch(err){reject(err);}
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+// Parse the LLM's response into a JS object. The prompt asks for raw JSON
+// but models sometimes wrap in ```json fences or add commentary — strip & retry.
+function aiParseFoodJson(text){
+  if(!text)return null;
+  // Strip code fences
+  let s=text.trim().replace(/^```(?:json)?\s*/,'').replace(/```$/,'').trim();
+  // Find first { and last } — handles cases like "Here you go: {...}"
+  const start=s.indexOf('{'),end=s.lastIndexOf('}');
+  if(start>=0&&end>start)s=s.slice(start,end+1);
+  try{return JSON.parse(s);}catch{return null;}
+}
+// Settings UI helpers
+function aiSetProvider(provider){
+  settings.aiProvider=provider;
+  const cfg=AI_PROVIDERS[provider];
+  // Reset model + endpoint to provider defaults when switching
+  settings.aiModel=cfg?.defaultModel||'';
+  settings.aiEndpoint=cfg?.defaultEndpoint||'';
+  lsSave(LS_SETTINGS,settings);
+  renderAiSettingsBody();
+}
+function aiSaveKey(){
+  const el=document.getElementById('aiKeyInput');
+  if(!el)return;
+  const v=el.value.trim();
+  if(v){localStorage.setItem('cp_ai_key',v);}
+  else{localStorage.removeItem('cp_ai_key');}
+  const isEn=settings.lang==='en';
+  showToast(v?(isEn?'Key saved ✓':'บันทึก key แล้ว ✓'):(isEn?'Key cleared':'ลบ key แล้ว'));
+  renderAiSettingsBody();
+}
+function aiSaveModel(){
+  const el=document.getElementById('aiModelInput');
+  if(!el)return;
+  settings.aiModel=el.value.trim()||AI_PROVIDERS[settings.aiProvider||'claude']?.defaultModel||'';
+  lsSave(LS_SETTINGS,settings);
+}
+function aiSaveEndpoint(){
+  const el=document.getElementById('aiEndpointInput');
+  if(!el)return;
+  settings.aiEndpoint=el.value.trim()||AI_PROVIDERS[settings.aiProvider||'claude']?.defaultEndpoint||'';
+  lsSave(LS_SETTINGS,settings);
+}
+async function testAiConnection(){
+  const status=document.getElementById('aiTestStatus');
+  const isEn=settings.lang==='en';
+  if(!status)return;
+  status.style.color='var(--muted)';
+  status.textContent=isEn?'Testing...':'กำลังทดสอบ...';
+  try{
+    const reply=await aiPing();
+    status.style.color='var(--green)';
+    status.textContent=(isEn?'✓ Connected · reply: ':'✓ เชื่อมต่อสำเร็จ · ตอบกลับ: ')+String(reply).slice(0,40);
+  }catch(e){
+    status.style.color='var(--accent)';
+    const msg=e.message==='NO_KEY'?(isEn?'No API key set':'ยังไม่ได้ตั้งค่า key'):e.message;
+    status.textContent=(isEn?'✗ Failed: ':'✗ ล้มเหลว: ')+msg;
+  }
+}
+// Render the AI settings card body (provider dropdown, key, model, endpoint, test btn)
+function renderAiSettingsBody(){
+  const body=document.getElementById('aiSettingsBody');
+  if(!body)return;
+  const provider=settings.aiProvider||'claude';
+  const cfg=AI_PROVIDERS[provider]||AI_PROVIDERS.claude;
+  const key=localStorage.getItem('cp_ai_key')||'';
+  const keyMasked=key?'•'.repeat(Math.min(20,key.length)):'';
+  const model=settings.aiModel||cfg.defaultModel||'';
+  const endpoint=settings.aiEndpoint||cfg.defaultEndpoint||'';
+  const isEn=settings.lang==='en';
+  const options=Object.entries(AI_PROVIDERS).map(([id,c])=>
+    `<option value="${id}"${id===provider?' selected':''}>${escapeHtml(c.label)}</option>`
+  ).join('');
+  body.innerHTML=
+    `<div class="fl"><label data-i18n="ai_provider">${isEn?'Provider':'ผู้ให้บริการ'}</label>`+
+      `<select onchange="aiSetProvider(this.value)">${options}</select></div>`+
+    `<div class="fl"><label data-i18n="ai_key">${isEn?'API key':'API key'}</label>`+
+      `<input type="password" id="aiKeyInput" placeholder="${escapeHtml(cfg.keyHint||'')}" value="${escapeHtml(key)}" autocomplete="off" spellcheck="false">`+
+      `<div style="font-size:.66rem;color:var(--muted);margin-top:3px">${keyMasked?(isEn?'Saved · ':'บันทึกแล้ว · ')+keyMasked.slice(0,8)+'…':(isEn?'Not set':'ยังไม่ได้ตั้งค่า')}</div>`+
+    `</div>`+
+    `<div class="fl"><label data-i18n="ai_model">${isEn?'Model':'โมเดล'}</label>`+
+      `<input type="text" id="aiModelInput" value="${escapeHtml(model)}" onchange="aiSaveModel()" spellcheck="false"></div>`+
+    `<div class="fl"><label data-i18n="ai_endpoint">${isEn?'Endpoint (advanced)':'Endpoint (สำหรับ advanced)'}</label>`+
+      `<input type="text" id="aiEndpointInput" value="${escapeHtml(endpoint)}" onchange="aiSaveEndpoint()" spellcheck="false" style="font-size:.74rem"></div>`+
+    `<div style="display:flex;gap:8px;margin-top:8px">`+
+      `<button class="btn-sec" onclick="aiSaveKey()" style="flex:1">💾 ${isEn?'Save key':'บันทึก key'}</button>`+
+      `<button class="btn-sec" onclick="testAiConnection()" style="flex:1">🔌 ${isEn?'Test':'ทดสอบ'}</button>`+
+    `</div>`+
+    `<div id="aiTestStatus" style="font-size:.74rem;text-align:center;margin-top:6px;min-height:18px"></div>`+
+    `<div style="font-size:.7rem;color:var(--muted);margin-top:10px;line-height:1.5;padding:8px;background:var(--surface2);border-radius:6px">`+
+      (isEn
+        ? `🔒 Your key + every photo are sent <b>directly to ${escapeHtml(cfg.label)}</b> from this device — they never touch our servers. Cost: ${escapeHtml(cfg.costPerImage||'?')}.`
+        : `🔒 Key + รูปทุกภาพถูกส่ง<b>ตรงไปยัง ${escapeHtml(cfg.label)}</b> จากเครื่องคุณ — ไม่ผ่านเซิร์ฟเวอร์ของเรา · ต้นทุน: ${escapeHtml(cfg.costPerImage||'?')}`)+
+    `</div>`;
+}
+// ─── PHOTO → AI VISION FLOW ───
+function openAiPhotoModal(){
+  const key=localStorage.getItem('cp_ai_key')||'';
+  if(!key){
+    const isEn=settings.lang==='en';
+    showToast(isEn?'Set up your AI key in Settings first':'ตั้งค่า AI key ใน Settings ก่อน',3000);
+    setTimeout(()=>navTo('settings'),900);
+    return;
+  }
+  document.getElementById('aiPhotoModal').classList.remove('hide');
+  document.getElementById('aiPhotoStatus').textContent='';
+  document.getElementById('aiPhotoPreview').style.display='none';
+  document.getElementById('aiPhotoResult').innerHTML='';
+  document.getElementById('aiPhotoFile').value='';
+}
+function closeAiPhotoModal(){
+  document.getElementById('aiPhotoModal').classList.add('hide');
+}
+async function handleAiPhotoSelect(input){
+  const file=input.files?.[0];
+  if(!file)return;
+  const isEn=settings.lang==='en';
+  const status=document.getElementById('aiPhotoStatus');
+  const preview=document.getElementById('aiPhotoPreview');
+  const result=document.getElementById('aiPhotoResult');
+  result.innerHTML='';
+  status.textContent=isEn?'Resizing...':'กำลังลดขนาดรูป...';
+  try{
+    const {base64,dataUrl,w,h}=await resizeImageForVision(file,768);
+    preview.src=dataUrl;preview.style.display='block';
+    status.textContent=(isEn?`✓ Resized to ${w}×${h} · calling `:`✓ ลดขนาดเหลือ ${w}×${h} · กำลังเรียก `)+(AI_PROVIDERS[settings.aiProvider||'claude']?.label||'AI');
+    let txt=await aiCallVision(base64);
+    let parsed=aiParseFoodJson(txt);
+    if(!parsed){
+      // One retry — re-prompt for clean JSON
+      status.textContent=isEn?'⚠ Malformed response · retrying...':'⚠ ตอบกลับไม่ใช่ JSON · ลองใหม่...';
+      txt=await aiCallVision(base64);
+      parsed=aiParseFoodJson(txt);
+    }
+    if(!parsed)throw new Error(isEn?'AI response was not parsable JSON':'AI ตอบกลับไม่ใช่ JSON ที่อ่านได้');
+    if(parsed.error==='no_food_detected')throw new Error(isEn?'No food detected in this photo':'ตรวจไม่พบอาหารในรูปนี้');
+    status.textContent=isEn?'✓ Got result':'✓ ได้ผลลัพธ์';
+    const conf=Math.round((parsed.confidence||0.5)*100);
+    result.innerHTML=
+      `<div style="font-size:.78rem;color:var(--muted);margin-bottom:4px">${isEn?'AI estimate':'ผล AI วิเคราะห์'} · ${isEn?'confidence':'ความมั่นใจ'} ${conf}%</div>`+
+      `<div style="font-size:1rem;font-weight:700;margin-bottom:4px">${escapeHtml(parsed.name||'?')}</div>`+
+      `<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">${escapeHtml(parsed.portion_estimate||'')}</div>`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;font-size:.78rem;margin-bottom:10px">`+
+        `<div><div style="font-weight:700">${parsed.kcal||0}</div><div style="font-size:.6rem;color:var(--muted)">kcal</div></div>`+
+        `<div><div style="font-weight:700">${parsed.protein_g||0}g</div><div style="font-size:.6rem;color:var(--muted)">P</div></div>`+
+        `<div><div style="font-weight:700">${parsed.carbs_g||0}g</div><div style="font-size:.6rem;color:var(--muted)">C</div></div>`+
+        `<div><div style="font-weight:700">${parsed.fat_g||0}g</div><div style="font-size:.6rem;color:var(--muted)">F</div></div>`+
+      `</div>`+
+      `<button class="btn" onclick='applyAiResult(${JSON.stringify(parsed).replace(/'/g,"&apos;")})' style="width:100%">${isEn?'✓ Use these values':'✓ ใช้ค่านี้'}</button>`+
+      `<div style="font-size:.66rem;color:var(--muted);margin-top:6px;text-align:center">${isEn?'You can edit before saving':'แก้ไขก่อนบันทึกได้'}</div>`;
+  }catch(e){
+    status.style.color='var(--accent)';
+    const msg=e.message==='NO_KEY'?(isEn?'No API key set':'ยังไม่ได้ตั้งค่า key'):e.message;
+    status.textContent=(isEn?'✗ ':'✗ ')+msg.slice(0,200);
+  }
+}
+function applyAiResult(parsed){
+  // Pre-fill the manual entry form so the user can review + edit + save
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v??'';};
+  set('fName',parsed.name||'');
+  set('fCal',Math.round(parsed.kcal||0));
+  set('fP',Math.round(parsed.protein_g||0));
+  set('fC',Math.round(parsed.carbs_g||0));
+  set('fF',Math.round(parsed.fat_g||0));
+  closeAiPhotoModal();
+  // Make sure we're on the Add tab + scroll to the manual entry form
+  if(typeof navTo==='function'){
+    try{navTo('add');}catch{}
+  }
+  setTimeout(()=>{
+    const fn=document.getElementById('fName');
+    if(fn){fn.scrollIntoView({behavior:'smooth',block:'center'});fn.focus();}
+  },150);
+  const isEn=settings.lang==='en';
+  showToast(isEn?'Filled in from AI · review + save':'กรอกข้อมูลจาก AI แล้ว · ตรวจสอบและบันทึก',2800);
 }
 
 // ═══ INIT ═══
