@@ -1,5 +1,5 @@
 // CalPro Service Worker — offline cache
-const VERSION = '2.21.0';
+const VERSION = '2.22.0';
 const CACHE = 'calpro-v' + VERSION;
 const ASSETS = [
   './',
@@ -44,9 +44,38 @@ self.addEventListener('notificationclick', (e) => {
   })());
 });
 
+// Stale-while-revalidate for the main HTML — serve cache fast,
+// then refresh in background. Other assets stay cache-first.
+// Skip Supabase + AI provider URLs entirely — they have their own
+// auth/CORS rules and shouldn't be cached.
+const STALE_WHILE_REVALIDATE_PATHS = ['./calpro-app.html', './'];
+
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  // Bypass API hosts — never cache, always go straight to network.
+  if (/supabase\.co|generativelanguage\.googleapis\.com|api\.anthropic\.com|api\.openai\.com/.test(url.hostname)) {
+    return; // let the network handle it
+  }
+  // Stale-while-revalidate for index HTML — same-origin only
+  const isSWR = url.origin === self.location.origin &&
+    STALE_WHILE_REVALIDATE_PATHS.some(p => url.pathname.endsWith(p) || url.pathname.endsWith(p.slice(1)));
+  if (isSWR) {
+    e.respondWith((async () => {
+      const cached = await caches.match(req);
+      const fetchPromise = fetch(req).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      }).catch(() => null);
+      return cached || (await fetchPromise) || caches.match('./calpro-app.html');
+    })());
+    return;
+  }
+  // Cache-first for everything else (icons, manifest, fonts via google CDN, etc.)
   e.respondWith(
     caches.match(req).then(hit => {
       if (hit) return hit;

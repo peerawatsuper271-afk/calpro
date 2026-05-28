@@ -4,6 +4,14 @@
 
 **Live demo:** https://peerawatsuper271-afk.github.io/calpro/
 
+## ทำไมต้อง CalPro+
+
+- 🇹🇭 **เข้าใจคนไทย** — ฐานข้อมูล 250 รายการ มีอาหารไทยตั้งแต่ street food ถึง chain ดัง พร้อมแมโครที่เคยตรวจสอบ
+- 🤖 **AI ถ่ายรูปฟรี** — ถ่ายรูปอาหาร · ระบบช่วยกรอกแคล/มาโคร · ไม่ต้องตั้งค่าอะไรเลย
+- 📱 **ไม่ต้องล็อกอินก็ใช้ได้** — ข้อมูลเก็บในเครื่อง · อยาก sync ข้ามมือถือค่อยเปิด Cloud Sync (ฟรี)
+- 🎮 **โปรไฟล์สไตล์ Steam** — banner สีปรับได้ · level + badges · เห็นโปรไฟล์เพื่อนแบบ social
+- 🔒 **เคารพ privacy** — ไม่มี tracker · ไม่มีโฆษณาเข้าระบบ · source code เปิดให้ตรวจสอบ
+
 ## ฟีเจอร์
 
 - 🏠 บันทึกอาหารแบบ real-time (เช้า/กลางวัน/เย็น/ของว่าง) · แก้ไข/ลบ/แนบรูปได้
@@ -67,6 +75,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.22.0** *(APK + web · BETA)* — ✨ **Friends + Leaderboard GA** · ⚡ Service Worker stale-while-revalidate · 🌐 บายพาส API (Supabase/Gemini/OpenAI/Claude) · ♿ ARIA dialog + role บน leaderboard · 🧹 i18n holdouts (dev mode + sign-in)
 - **v2.21.0** *(APK + web · BETA)* — 🎮 **โปรไฟล์ Steam-style** · banner สี · level · badges showcase · bio · 👥 **ดูโปรไฟล์เพื่อนได้** · 🤖 AI ถ่ายรูปฟรี 20/วัน · 🍱 อาหารเพิ่มเป็น 250 · 🎨 default ใหม่ (Prompt + light + nav 5 tabs) · 🔔 ขอ notification permission auto · 📈 weight chart ใหม่ · 🛠️ Capacitor 8 + JDK 21 + Android 15
 - **v2.20.0** *(APK + web · BETA)* — 🎨 **UX pass** · **🎯 modals กลางจอ** (เลิก bottom-sheet) · **🤖 AI live status + spinner + heartbeat + "เหลือ N/20"** chip · **🔒 AI members-only** (กัน proxy abuse) · **🍱 Add Food ใหม่** (search top · favorites bottom) · **📉 weight chart 14 วันย้อนหลังเท่านั้น** (no future) · **🏆 badges ถาวร** (localStorage `cp_earned_badges`)
 - **v2.19.3** *(APK + web · BETA)* — 🐞 **แก้ AI photo "sign-in timed out"** · `signInAnonymously()` deadlock → ใช้ REST `POST /auth/v1/signup` ตรงๆ ไม่ผ่าน SDK lock

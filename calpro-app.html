@@ -1016,7 +1016,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.21.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.22.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1161,9 +1161,9 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 </div>
 
 <!-- FRIEND PROFILE MODAL — Steam-style read-only view of another user -->
-<div class="modal-bg hide" id="friendProfileModal">
+<div class="modal-bg hide" id="friendProfileModal" role="dialog" aria-modal="true" aria-labelledby="fpName">
   <div class="modal" style="max-width:440px;padding:0;overflow:hidden">
-    <button class="fp-close" onclick="closeFriendProfile()" aria-label="Close">✕</button>
+    <button class="fp-close" onclick="closeFriendProfile()" aria-label="ปิดโปรไฟล์เพื่อน">✕</button>
     <div class="profile-hero" style="border-radius:0;border:none;margin-bottom:0">
       <div class="profile-hero-banner" id="fpBanner"></div>
       <div class="profile-hero-body">
@@ -1444,7 +1444,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
   <nav class="drawer-nav">
     <div class="drawer-sect" data-i18n="account_section">บัญชี</div>
     <button class="drawer-item" onclick="navTo('profile')"><span data-i18n="profile">โปรไฟล์</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span><span data-i18n="friends_only">เพื่อน</span><span class="beta-badge">BETA</span></span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span data-i18n="friends_only">เพื่อน</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect drawer-tools-row" data-i18n="tools_section">เครื่องมือ</div>
     <button class="drawer-item drawer-tools-row" onclick="openQuickWater()"><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
@@ -1460,7 +1460,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.21.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.22.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1477,7 +1477,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.21.0';
+const APP_VERSION = '2.22.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1585,6 +1585,8 @@ const I18N = {
     send_cheer:'👏 ส่งกำลังใจ',cheer_sent:'ส่งกำลังใจให้ %n แล้ว 👏',
     lvl_newcomer:'มือใหม่',lvl_starter:'นักสะสมสตรีค',lvl_regular:'ขาประจำ',lvl_pro:'มืออาชีพ',lvl_master:'มาสเตอร์',lvl_legend:'ตำนาน',
     fp_loading:'กำลังโหลดโปรไฟล์...',fp_err:'โหลดโปรไฟล์ไม่สำเร็จ',
+    dev_unlocked:'🔧 ปลดล็อก Developer mode',dev_locked:'ล็อก Developer mode แล้ว',dev_wrong_pw:'รหัสผ่านไม่ถูกต้อง',dev_dumped:'ดัมป์ใน console แล้ว',
+    sign_in_first:'กรุณาเข้าสู่ระบบก่อน',
     ai_settings_title:'🤖 AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)',
     ai_settings_sub:'ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)',
     ai_photo_btn:'🤖 ถ่ายรูป AI',ai_photo_title:'🤖 ถ่ายรูปอาหาร · AI ประเมิน',
@@ -1678,6 +1680,8 @@ const I18N = {
     send_cheer:'👏 Send cheer',cheer_sent:'Sent cheer to %n 👏',
     lvl_newcomer:'Newcomer',lvl_starter:'Streak starter',lvl_regular:'Regular',lvl_pro:'Pro',lvl_master:'Master',lvl_legend:'Legend',
     fp_loading:'Loading profile...',fp_err:'Failed to load profile',
+    dev_unlocked:'🔧 Developer mode unlocked',dev_locked:'Developer mode locked',dev_wrong_pw:'Wrong password',dev_dumped:'Dumped to console',
+    sign_in_first:'Sign in first',
     ai_settings_title:'🤖 AI food vision (bring your own key)',
     ai_settings_sub:'Snap a photo → AI estimates kcal/macros · uses your own API key (Claude/OpenAI/Gemini)',
     ai_photo_btn:'🤖 AI photo',ai_photo_title:'🤖 Photo · AI estimate',
@@ -2349,7 +2353,7 @@ function renderBottomNav(){
     btn.dataset.tab=tabId;
     btn.onclick=()=>showPage(tabId,btn);
     const label=cfg.label_literal||t(cfg.label_key);
-    const beta=tabId==='friends'?'<span class="beta-badge" style="font-size:.45rem;padding:1px 4px;margin-left:3px">BETA</span>':'';
+    const beta=''; // Friends graduated from BETA in v2.22.0
     btn.innerHTML=`<svg viewBox="0 0 24 24">${cfg.svg}</svg><span>${label}${beta}</span>`;
     nav.appendChild(btn);
   });
@@ -3032,7 +3036,7 @@ async function renderFriendsCard(){
       const meTag=settings.lang==='en'?' (You)':' (คุณ)';
       const safeName=escapeHtml(u.display_name||'?');
       const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px">✕</button>`;
-      const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}"`;
+      const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}" role="button" tabindex="0" aria-label="ดูโปรไฟล์ ${safeName}"`;
       html+=`<div class="lb-item${isMe?' me':''}"${clickAttr} style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
         `<div style="width:22px;text-align:center;font-weight:700">${rank}</div>`+
         av+
@@ -3139,7 +3143,7 @@ async function manualSync(){
 
 // Connection diagnostic — reports each table count and whether migration is applied
 async function diagnoseSync(){
-  if(!cloudUser||!sb){showToast('Sign in first');return;}
+  if(!cloudUser||!sb){showToast(t('sign_in_first'));return;}
   showToast(settings.lang==='en'?'Diagnosing...':'กำลังตรวจ...',3000);
   const uid=cloudUser.id;
   const tables=['profiles','food_entries','weights','water','workouts','body_measures','favorites','custom_foods'];
@@ -6716,15 +6720,15 @@ function enterDevMode(){
   if(pw==null)return;                 // user cancelled
   if(pw===DEV_PASSWORD){
     sessionStorage.setItem('calpro_dev_unlocked','1');
-    showToast('🔧 Developer mode unlocked');
+    showToast(t('dev_unlocked'));
     navTo('dev');
   }else{
-    showToast('Wrong password');
+    showToast(t('dev_wrong_pw'));
   }
 }
 function lockDevMode(){
   sessionStorage.removeItem('calpro_dev_unlocked');
-  showToast('Developer mode locked');
+  showToast(t('dev_locked'));
   navTo('today');
 }
 async function renderDev(){
@@ -6874,7 +6878,7 @@ function devLogToConsole(){
   });
   console.log('Supabase client',sb);
   console.groupEnd();
-  showToast('Dumped to console');
+  showToast(t('dev_dumped'));
 }
 
 // Quick-add: jump to Add tab + focus the search box so the keyboard pops on mobile
@@ -6981,6 +6985,22 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.22.0':{
+    th:[
+      '✨ **เพื่อน + leaderboard ออกจาก BETA** · กลายเป็น GA เต็มตัว',
+      '⚡ **เปิดแอปไวขึ้น** — Service Worker ใช้ stale-while-revalidate · โหลด cache ก่อน · อัปเดต background',
+      '🌐 **บายพาส API ใน SW** — Supabase / Gemini / OpenAI / Claude ไม่ถูก cache · เร็วและถูกต้องกว่าเดิม',
+      '♿ เพิ่ม ARIA dialog + role/tabindex บน leaderboard rows · ดีต่อ screen reader',
+      '🧹 i18n holdouts: dev mode + sign-in toast พูดได้สองภาษาแล้ว',
+    ],
+    en:[
+      '✨ **Friends + leaderboard out of BETA** · now fully GA',
+      '⚡ **Faster app launch** — Service Worker uses stale-while-revalidate · serves cache first, updates in background',
+      '🌐 **API bypass in SW** — Supabase / Gemini / OpenAI / Claude no longer cached · faster + correct',
+      '♿ Added ARIA dialog + role/tabindex on leaderboard rows · better screen-reader UX',
+      '🧹 i18n holdouts: dev mode + sign-in toast now bilingual',
+    ],
+  },
   '2.21.0':{
     th:[
       '🎮 **โปรไฟล์ใหม่สไตล์ Steam** — banner สีปรับได้ · level (Lv 1-6) · stats + badges showcase · ใส่ bio ได้',
