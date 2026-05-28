@@ -915,7 +915,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.18.3 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.19.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1321,7 +1321,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.18.3 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.19.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1338,7 +1338,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.18.3';
+const APP_VERSION = '2.19.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1870,7 +1870,7 @@ const EXERCISES = [
 ];
 let currentDate = todayKey();
 let activeCat = 'thai';
-let settings = {theme:'dark', accent:'#ff6b6b', lang:'th', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','tdee']};
+let settings = {theme:'dark', accent:'#ff6b6b', lang:'th', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','tdee'], aiProvider:'proxy'};
 
 // Bottom-nav tab catalog — id → { icon SVG path, i18n key }
 const NAV_CATALOG = {
@@ -5494,8 +5494,19 @@ function toggleStreakSaver(){
 // All requests go DIRECTLY from the browser to the provider — no proxy. The key
 // is stored in localStorage. Document that limitation prominently in Settings.
 
+// Edge Function endpoint — points to our own Supabase project. Key lives in
+// Supabase secrets, never reaches the browser. Free tier proxy.
+const AI_PROXY_URL=SUPABASE_URL+'/functions/v1/ai-vision';
 // Stable defaults — also referenced by the Settings dropdown population.
 const AI_PROVIDERS={
+  proxy:{
+    label:'🆓 CalPro+ ฟรี (ผ่าน proxy)',
+    defaultModel:'(server-managed)',
+    defaultEndpoint:AI_PROXY_URL,
+    keyHint:'(ไม่ต้องใส่ — ระบบจัดการให้)',
+    costPerImage:'ฟรี · จำกัด 20 รูป/วัน/คน',
+    noKey:true,
+  },
   claude:{
     label:'Claude (Anthropic)',
     defaultModel:'claude-sonnet-4-5-20250929',
@@ -5597,14 +5608,55 @@ async function aiCallGemini(key,endpoint,model,imageBase64,prompt){
   const j=await res.json();
   return j.candidates?.[0]?.content?.parts?.[0]?.text||'';
 }
+// Make sure we have a Supabase session — anonymous is fine. Used by the
+// "proxy" provider so users don't need to sign up.
+async function aiEnsureSupabaseSession(){
+  const client=sb||await ensureSupabase(8000);
+  if(!client)throw new Error('Supabase not available');
+  const {data:{session}}=await client.auth.getSession();
+  if(session?.access_token)return session;
+  // Try anonymous sign-in (Supabase project must have anonymous sign-ins enabled)
+  if(typeof client.auth.signInAnonymously==='function'){
+    const {data,error}=await client.auth.signInAnonymously();
+    if(error)throw new Error('Anonymous sign-in failed: '+error.message);
+    return data.session;
+  }
+  throw new Error('No session and anonymous sign-in not supported');
+}
+// Adapter — CalPro+ proxy (Supabase Edge Function). Key stays on server.
+async function aiCallProxy(imageBase64,prompt){
+  const session=await aiEnsureSupabaseSession();
+  const res=await fetch(AI_PROXY_URL,{
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'authorization':'Bearer '+session.access_token,
+    },
+    body:JSON.stringify({image:imageBase64,prompt}),
+  });
+  const j=await res.json().catch(()=>({error:'parse_failed'}));
+  if(!res.ok){
+    if(j.error==='rate_limited')throw new Error(`RATE_LIMIT:${j.used}/${j.limit}`);
+    throw new Error(`Proxy HTTP ${res.status}: ${j.error||'unknown'} ${j.detail||''}`);
+  }
+  // Side-effect: stash usage info for the Settings card to read
+  try{
+    if(typeof j.used==='number'&&typeof j.limit==='number'){
+      localStorage.setItem('cp_ai_proxy_usage',JSON.stringify({used:j.used,limit:j.limit,day:new Date().toISOString().slice(0,10)}));
+    }
+  }catch{}
+  return j.text||'';
+}
 // Dispatch by selected provider.
 async function aiCallVision(imageBase64){
-  const provider=settings.aiProvider||'claude';
+  const provider=settings.aiProvider||'proxy';
+  const prompt=aiFoodPrompt();
+  if(provider==='proxy')return aiCallProxy(imageBase64,prompt);
+  // BYO-key providers below — require a key in localStorage
   const key=localStorage.getItem('cp_ai_key')||'';
   if(!key)throw new Error('NO_KEY');
   const model=settings.aiModel||AI_PROVIDERS[provider]?.defaultModel||'';
   const endpoint=settings.aiEndpoint||AI_PROVIDERS[provider]?.defaultEndpoint||'';
-  const prompt=aiFoodPrompt();
   if(provider==='claude')return aiCallClaude(key,endpoint,model,imageBase64,prompt);
   if(provider==='openai'||provider==='custom')return aiCallOpenAI(key,endpoint,model,imageBase64,prompt);
   if(provider==='gemini')return aiCallGemini(key,endpoint,model,imageBase64,prompt);
@@ -5612,7 +5664,17 @@ async function aiCallVision(imageBase64){
 }
 // Tiny "say ok" probe for the test-connection button.
 async function aiPing(){
-  const provider=settings.aiProvider||'claude';
+  const provider=settings.aiProvider||'proxy';
+  if(provider==='proxy'){
+    // For the proxy we can't easily ping without consuming quota — verify
+    // we at least have a session + the function URL is reachable (CORS check).
+    try{
+      await aiEnsureSupabaseSession();
+      const res=await fetch(AI_PROXY_URL,{method:'OPTIONS'});
+      if(!res.ok&&res.status>=500)throw new Error('Proxy unreachable: HTTP '+res.status);
+      return '(proxy reachable · session OK)';
+    }catch(e){throw new Error('Proxy check failed: '+e.message);}
+  }
   const key=localStorage.getItem('cp_ai_key')||'';
   if(!key)throw new Error('NO_KEY');
   const model=settings.aiModel||AI_PROVIDERS[provider]?.defaultModel||'';
@@ -5739,42 +5801,73 @@ async function testAiConnection(){
 function renderAiSettingsBody(){
   const body=document.getElementById('aiSettingsBody');
   if(!body)return;
-  const provider=settings.aiProvider||'claude';
-  const cfg=AI_PROVIDERS[provider]||AI_PROVIDERS.claude;
+  const provider=settings.aiProvider||'proxy';
+  const cfg=AI_PROVIDERS[provider]||AI_PROVIDERS.proxy;
+  const isProxy=cfg.noKey===true;
   const key=localStorage.getItem('cp_ai_key')||'';
   const keyMasked=key?'•'.repeat(Math.min(20,key.length)):'';
   const model=settings.aiModel||cfg.defaultModel||'';
   const endpoint=settings.aiEndpoint||cfg.defaultEndpoint||'';
   const isEn=settings.lang==='en';
+  // Read cached usage for the proxy provider
+  let usageNote='';
+  if(isProxy){
+    try{
+      const u=JSON.parse(localStorage.getItem('cp_ai_proxy_usage')||'null');
+      const today=new Date().toISOString().slice(0,10);
+      if(u&&u.day===today){
+        usageNote=isEn?`Used today: ${u.used}/${u.limit}`:`ใช้วันนี้: ${u.used}/${u.limit} รูป`;
+      }
+    }catch{}
+  }
   const options=Object.entries(AI_PROVIDERS).map(([id,c])=>
     `<option value="${id}"${id===provider?' selected':''}>${escapeHtml(c.label)}</option>`
   ).join('');
-  body.innerHTML=
-    `<div class="fl"><label data-i18n="ai_provider">${isEn?'Provider':'ผู้ให้บริการ'}</label>`+
-      `<select onchange="aiSetProvider(this.value)">${options}</select></div>`+
-    `<div class="fl"><label data-i18n="ai_key">${isEn?'API key':'API key'}</label>`+
-      `<input type="password" id="aiKeyInput" placeholder="${escapeHtml(cfg.keyHint||'')}" value="${escapeHtml(key)}" autocomplete="off" spellcheck="false">`+
-      `<div style="font-size:.66rem;color:var(--muted);margin-top:3px">${keyMasked?(isEn?'Saved · ':'บันทึกแล้ว · ')+keyMasked.slice(0,8)+'…':(isEn?'Not set':'ยังไม่ได้ตั้งค่า')}</div>`+
-    `</div>`+
-    `<div class="fl"><label data-i18n="ai_model">${isEn?'Model':'โมเดล'}</label>`+
-      `<input type="text" id="aiModelInput" value="${escapeHtml(model)}" onchange="aiSaveModel()" spellcheck="false"></div>`+
-    `<div class="fl"><label data-i18n="ai_endpoint">${isEn?'Endpoint (advanced)':'Endpoint (สำหรับ advanced)'}</label>`+
-      `<input type="text" id="aiEndpointInput" value="${escapeHtml(endpoint)}" onchange="aiSaveEndpoint()" spellcheck="false" style="font-size:.74rem"></div>`+
+  // Build the body — different layout for proxy vs BYO-key providers
+  let inner=`<div class="fl"><label data-i18n="ai_provider">${isEn?'Provider':'ผู้ให้บริการ'}</label>`+
+    `<select onchange="aiSetProvider(this.value)">${options}</select></div>`;
+  if(isProxy){
+    inner+=
+      `<div style="background:var(--surface2);padding:10px;border-radius:9px;margin:8px 0;font-size:.78rem;line-height:1.5">`+
+        `<div style="font-weight:600;margin-bottom:4px">🎁 ${isEn?'Free for everyone — no setup needed':'ฟรีสำหรับทุกคน · ไม่ต้องตั้งค่าอะไรเลย'}</div>`+
+        `<div style="color:var(--muted)">${isEn?'CalPro+ handles the key on the server · 20 photos/day per user':'ระบบจัดการ key ฝั่งเซิร์ฟเวอร์ให้ · 20 รูป/วัน/คน'}</div>`+
+        (usageNote?`<div style="margin-top:6px;font-weight:600;color:var(--accent)">${usageNote}</div>`:'')+
+      `</div>`;
+  }else{
+    inner+=
+      `<div class="fl"><label data-i18n="ai_key">${isEn?'API key':'API key'}</label>`+
+        `<input type="password" id="aiKeyInput" placeholder="${escapeHtml(cfg.keyHint||'')}" value="${escapeHtml(key)}" autocomplete="off" spellcheck="false">`+
+        `<div style="font-size:.66rem;color:var(--muted);margin-top:3px">${keyMasked?(isEn?'Saved · ':'บันทึกแล้ว · ')+keyMasked.slice(0,8)+'…':(isEn?'Not set':'ยังไม่ได้ตั้งค่า')}</div>`+
+      `</div>`+
+      `<div class="fl"><label data-i18n="ai_model">${isEn?'Model':'โมเดล'}</label>`+
+        `<input type="text" id="aiModelInput" value="${escapeHtml(model)}" onchange="aiSaveModel()" spellcheck="false"></div>`+
+      `<div class="fl"><label data-i18n="ai_endpoint">${isEn?'Endpoint (advanced)':'Endpoint (สำหรับ advanced)'}</label>`+
+        `<input type="text" id="aiEndpointInput" value="${escapeHtml(endpoint)}" onchange="aiSaveEndpoint()" spellcheck="false" style="font-size:.74rem"></div>`;
+  }
+  inner+=
     `<div style="display:flex;gap:8px;margin-top:8px">`+
-      `<button class="btn-sec" onclick="aiSaveKey()" style="flex:1">💾 ${isEn?'Save key':'บันทึก key'}</button>`+
+      (isProxy?'':`<button class="btn-sec" onclick="aiSaveKey()" style="flex:1">💾 ${isEn?'Save key':'บันทึก key'}</button>`)+
       `<button class="btn-sec" onclick="testAiConnection()" style="flex:1">🔌 ${isEn?'Test':'ทดสอบ'}</button>`+
     `</div>`+
     `<div id="aiTestStatus" style="font-size:.74rem;text-align:center;margin-top:6px;min-height:18px"></div>`+
     `<div style="font-size:.7rem;color:var(--muted);margin-top:10px;line-height:1.5;padding:8px;background:var(--surface2);border-radius:6px">`+
-      (isEn
-        ? `🔒 Your key + every photo are sent <b>directly to ${escapeHtml(cfg.label)}</b> from this device — they never touch our servers. Cost: ${escapeHtml(cfg.costPerImage||'?')}.`
-        : `🔒 Key + รูปทุกภาพถูกส่ง<b>ตรงไปยัง ${escapeHtml(cfg.label)}</b> จากเครื่องคุณ — ไม่ผ่านเซิร์ฟเวอร์ของเรา · ต้นทุน: ${escapeHtml(cfg.costPerImage||'?')}`)+
+      (isProxy
+        ? (isEn
+          ? `🔒 Photos go through our Edge Function — the AI key never reaches your browser. We don't store the photos. Limit: <b>${escapeHtml(cfg.costPerImage||'')}</b>.`
+          : `🔒 รูปถูกส่งผ่าน Edge Function ของเรา · key ไม่ถูกแสดงในเบราว์เซอร์ · ไม่เก็บรูปของคุณ · จำกัด: <b>${escapeHtml(cfg.costPerImage||'')}</b>`)
+        : (isEn
+          ? `🔒 Your key + every photo are sent <b>directly to ${escapeHtml(cfg.label)}</b> from this device — they never touch our servers. Cost: ${escapeHtml(cfg.costPerImage||'?')}.`
+          : `🔒 Key + รูปทุกภาพถูกส่ง<b>ตรงไปยัง ${escapeHtml(cfg.label)}</b> จากเครื่องคุณ — ไม่ผ่านเซิร์ฟเวอร์ของเรา · ต้นทุน: ${escapeHtml(cfg.costPerImage||'?')}`))+
     `</div>`;
+  body.innerHTML=inner;
 }
 // ─── PHOTO → AI VISION FLOW ───
 function openAiPhotoModal(){
+  // Proxy provider doesn't need a key — open immediately
+  const provider=settings.aiProvider||'proxy';
+  const needsKey=!AI_PROVIDERS[provider]?.noKey;
   const key=localStorage.getItem('cp_ai_key')||'';
-  if(!key){
+  if(needsKey&&!key){
     const isEn=settings.lang==='en';
     showToast(isEn?'Set up your AI key in Settings first':'ตั้งค่า AI key ใน Settings ก่อน',3000);
     setTimeout(()=>navTo('settings'),900);
@@ -6153,6 +6246,24 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.19.0':{
+    th:[
+      '🤖 **AI วิเคราะห์อาหารจากรูป (ฟรี!)** — ถ่ายรูปอาหาร → AI ประเมินชื่อ/แคล/มาโครให้ · 20 รูป/วัน/คน · ไม่ต้องตั้งค่าอะไรเลย (มี BYO key สำหรับใช้เกิน limit)',
+      '🔥 **Streak-saver** — push notification 21:30 ถ้ายังไม่บันทึก + streak ≥ 3 (เฉพาะ APK) · ตั้งค่าได้ใน Settings → การเตือน',
+      '🎉 **Milestone share อัตโนมัติ** — ครบ 7/14/30/60/100 วันติด → popup share image ทันที + badge ใหม่',
+      '🎁 **ระบบ referral** — share ลิงก์ → เพื่อนเปิด → toast "เพื่อนคุณเชิญคุณมา" + badge "ผู้ได้รับเชิญ"',
+      '🔥 **Daily check-in toast** — เปิดแอปวันใหม่เห็น "X วันติด เก่งมาก!" ทุกครั้ง',
+      '📊 **Onboarding telemetry** ใน Developer Mode (เห็นว่า user drop ที่ step ไหน)',
+    ],
+    en:[
+      '🤖 **AI food photo (free!)** — snap a photo → AI estimates name/kcal/macros · 20 photos/day per user · zero setup (BYO key option for higher limits)',
+      '🔥 **Streak saver** — 21:30 push notification if not logged + streak ≥ 3 (APK only) · toggle in Settings → Reminders',
+      '🎉 **Auto milestone share** — hit 7/14/30/60/100-day streak → share image pops automatically + new badges',
+      '🎁 **Referral system** — share link → friend opens → "A friend invited you" toast + "Invited friend" badge',
+      '🔥 **Daily check-in toast** — open the app on a new day → "X-day streak · keep going!"',
+      '📊 **Onboarding telemetry** in Developer Mode (see where users drop off)',
+    ],
+  },
   '2.18.3':{
     th:[
       '🤝 **เปิดใช้งานลิงก์ Affiliate จริง** (Lazada + Shopee) — แตะการ์ดโฆษณาแล้วไปร้านค้าจริงได้ทันที',
