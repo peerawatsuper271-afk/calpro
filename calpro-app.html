@@ -592,10 +592,11 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card">
         <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
         <div class="sbox"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
           <button class="btn-sec" onclick="openBarcodeModal()" style="font-size:.82rem" data-i18n="scan_barcode">📷 บาร์โค้ด</button>
           <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem" data-i18n="ai_photo_btn">🤖 ถ่ายรูป AI</button>
         </div>
+        <div id="aiQuotaInline" style="font-size:.66rem;color:var(--muted);text-align:right;margin-bottom:8px;padding-right:4px;min-height:14px"></div>
         <div class="cats" id="catBtns"></div>
         <div class="sres" id="sRes"></div>
         <div class="fl"><label data-i18n="meal">มื้ออาหาร</label>
@@ -2164,7 +2165,7 @@ function showPage(id,btn){
   document.querySelectorAll('.bnt').forEach(b=>{if(b.dataset.tab===id)b.classList.add('active');});
   if(id==='analysis')renderAnalysis();
   if(id==='tdee')syncTDEEFromProfile();
-  if(id==='add')renderQuickList();
+  if(id==='add'){renderQuickList();refreshAiQuotaInline();}
   if(id==='settings')renderSettings();
   if(id==='help')renderHelp();
   if(id==='dev')renderDev();
@@ -4222,81 +4223,135 @@ function renderProjectionChart(){
   const calGoal=+userProfile?.goal_cal||1800;
   const kgU=t('kg_unit');
   if(!startW){
-    wrap.innerHTML=`<div class="empty" style="padding:20px 0;font-size:.78rem">${isEn?'Enter your weight in Profile to see projection':'กรอกน้ำหนักในโปรไฟล์เพื่อดูแนวโน้ม'}</div>`;
+    wrap.innerHTML=`<div class="empty" style="padding:20px 0;font-size:.78rem">${isEn?'Enter your weight in Profile to see trend':'กรอกน้ำหนักในโปรไฟล์เพื่อดูแนวโน้ม'}</div>`;
     sum.textContent='';return;
   }
-  // Gather past HISTORY days — backward only, EXCLUDING today (today's data
-  // is still being collected so projecting from it is misleading)
   const HISTORY=14;
   const today=new Date();
+  // Build per-day entries — actual weight (if logged) takes priority over the
+  // calorie-based estimate. We loop back HISTORY days and stop at yesterday
+  // (i=1) so today (still in progress) is excluded.
   const days=[];
+  let cum=0;
   for(let i=HISTORY;i>=1;i--){
     const d=new Date(today);d.setDate(d.getDate()-i);
     const k=dateKey(d);
+    const actualKg=+allWeights[k]||0;
     const entries=allEntries[k]||[];
-    if(!entries.length){days.push({k,hasData:false});continue;}
-    const food=entries.reduce((s,e)=>s+(+e.calories||0),0);
-    const burned=(allWorkouts[k]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
-    const net=Math.max(0,food-burned);
-    const delta=calGoal-net;          // positive = calorie deficit = lose weight
-    days.push({k,hasData:true,delta});
+    let estDelta=0,hasFood=false;
+    if(entries.length){
+      hasFood=true;
+      const food=entries.reduce((s,e)=>s+(+e.calories||0),0);
+      const burned=(allWorkouts[k]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
+      estDelta=calGoal-Math.max(0,food-burned);   // +ve deficit = weight loss
+      cum-=estDelta/7700;
+    }
+    days.push({k,d,actual:actualKg||null,estimate:startW+cum,hasFood});
   }
-  const logged=days.filter(d=>d.hasData);
-  if(!logged.length){
-    wrap.innerHTML=`<div class="empty" style="padding:20px 0;font-size:.78rem">${isEn?'Log meals to see weight trend':'บันทึกอาหารเพื่อดูแนวโน้มน้ำหนัก'}</div>`;
+  const hasAnyData=days.some(d=>d.hasFood||d.actual);
+  if(!hasAnyData){
+    wrap.innerHTML=`<div class="empty" style="padding:20px 0;font-size:.78rem">${isEn?'Log meals or weight to see trend':'บันทึกอาหารหรือน้ำหนักเพื่อดูแนวโน้ม'}</div>`;
     sum.textContent='';return;
   }
-  // Cumulative weight history (kg) — only the past, no future projection
-  let cum=0;
-  const pastPts=days.map(d=>{
-    if(d.hasData)cum-=d.delta/7700;   // -delta/7700 = weight change (negative delta = surplus → gain)
-    return startW+cum;
+  // The displayed weight per day = actual if measured, else the rolling estimate.
+  // Persist any synthesized "last actual carries forward" expectation across gaps.
+  let lastActual=null;
+  const yByDay=days.map(d=>{
+    if(d.actual){lastActual=d.actual;return d.actual;}
+    return d.estimate;
   });
-  const avgDelta=logged.reduce((s,d)=>s+d.delta,0)/logged.length;
-  const kgPerDay=avgDelta/7700;       // positive = losing weight (used for summary text)
-  const kgPerWeek=kgPerDay*7;
-  const lastW=pastPts[pastPts.length-1];
-  // Chart geometry — only past data, no future
-  const W=320,H=130,PT=10,PB=14,PL=4,PR=4;
-  const allW=[...pastPts];
-  if(goalW)allW.push(goalW);
-  const minV=Math.min(...allW),maxV=Math.max(...allW);
-  const range=Math.max(0.5,maxV-minV);
-  const yMin=minV-range*0.12,yMax=maxV+range*0.12;
-  const N=pastPts.length;
-  const xstep=(W-PL-PR)/(N-1);
-  const yPx=w=>PT+(H-PT-PB)*(1-(w-yMin)/(yMax-yMin));
+  const actualPoints=days.map((d,i)=>d.actual?{i,w:d.actual,k:d.k,d:d.d}:null).filter(Boolean);
+  // ── Geometry ──
+  const W=320,H=160,PT=14,PB=24,PL=30,PR=10;
   const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#ff6b6b';
-  const lineColor=kgPerDay>0?'#51cf66':kgPerDay<0?accent:'#888aa0';
-  // Past path (solid) — the only line we render
-  const pastPath=pastPts.map((w,i)=>`${i===0?'M':'L'}${(PL+i*xstep).toFixed(1)},${yPx(w).toFixed(1)}`).join(' ');
-  // Goal line (dashed, horizontal)
+  const muted='#888aa0';
+  const allW=[...yByDay,startW];if(goalW)allW.push(goalW);
+  const minV=Math.min(...allW),maxV=Math.max(...allW);
+  const range=Math.max(1.0,maxV-minV);                  // floor at 1 kg so flat lines aren't paper-thin
+  const yMin=minV-range*0.15,yMax=maxV+range*0.15;
+  const N=yByDay.length;
+  const xstep=(W-PL-PR)/(N-1);
+  const xPx=i=>PL+i*xstep;
+  const yPx=w=>PT+(H-PT-PB)*(1-(w-yMin)/(yMax-yMin));
+  // Recompute the slope from the displayed series, not the raw estimate — when
+  // actual weight is measured the user wants summary stats to reflect reality.
+  const first=yByDay[0],last=yByDay[yByDay.length-1];
+  const kgPerDay=(first-last)/(yByDay.length-1);        // +ve = losing
+  const kgPerWeek=kgPerDay*7;
+  const lineColor=kgPerWeek>0.05?'#51cf66':kgPerWeek<-0.05?accent:muted;
+  // ── Y-axis grid + labels (4 horizontal lines at 25/50/75/100%) ──
+  let grid='';
+  for(let g=0;g<=4;g++){
+    const wAtG=yMax-(yMax-yMin)*g/4;
+    const y=yPx(wAtG).toFixed(1);
+    grid+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="${muted}" stroke-width=".5" opacity=".18"/>`+
+      `<text x="${PL-3}" y="${(+y+3).toFixed(1)}" text-anchor="end" font-size="9" fill="${muted}">${wAtG.toFixed(1)}</text>`;
+  }
+  // ── X-axis date labels (every ~4 days) ──
+  let xLabels='';
+  const labelStep=Math.max(1,Math.floor(N/4));
+  const locStr=settings.lang==='en'?'en-GB':'th-TH';
+  for(let i=0;i<N;i+=labelStep){
+    const dLbl=days[i].d.toLocaleDateString(locStr,{day:'numeric',month:'short'});
+    xLabels+=`<text x="${xPx(i).toFixed(1)}" y="${(H-6).toFixed(1)}" text-anchor="middle" font-size="9" fill="${muted}">${dLbl}</text>`;
+  }
+  // ── Goal line ──
   let goalLine='';
   if(goalW&&goalW>=yMin&&goalW<=yMax){
     const gy=yPx(goalW).toFixed(1);
-    goalLine=`<line x1="${PL}" y1="${gy}" x2="${(W-PR).toFixed(1)}" y2="${gy}" stroke="#888aa0" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/>`+
-      `<text x="${(W-PR).toFixed(1)}" y="${(+gy-3).toFixed(1)}" text-anchor="end" font-size="9" fill="#888aa0">${isEn?'Goal':'เป้า'} ${goalW.toFixed(1)}</text>`;
+    goalLine=`<line x1="${PL}" y1="${gy}" x2="${W-PR}" y2="${gy}" stroke="${muted}" stroke-width="1.2" stroke-dasharray="5 4" opacity=".55"/>`+
+      `<text x="${(W-PR).toFixed(1)}" y="${(+gy-4).toFixed(1)}" text-anchor="end" font-size="9" fill="${muted}">${isEn?'Goal':'เป้า'} ${goalW.toFixed(1)}</text>`;
   }
-  // Yesterday marker — dot at the end of the chart (the most recent past day)
-  const lastX=(PL+(pastPts.length-1)*xstep).toFixed(1);
-  const lastDot=`<circle cx="${lastX}" cy="${yPx(lastW).toFixed(1)}" r="3.5" fill="${accent}"/>`;
-  wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="overflow:visible">`+
-    goalLine+
-    `<path d="${pastPath}" fill="none" stroke="${lineColor}" stroke-width="2"/>`+
-    lastDot+
-    `<text x="${PL}" y="${(H-2).toFixed(1)}" font-size="9" fill="#888aa0">−${HISTORY}${isEn?'d':'ว'}</text>`+
-    `<text x="${lastX}" y="${(H-2).toFixed(1)}" text-anchor="end" font-size="9" fill="#888aa0">${isEn?'yesterday':'เมื่อวาน'}</text>`+
-    `</svg>`;
-  // Summary text — past-trend framing (no future projection)
+  // ── Smooth cubic-Bezier path through yByDay ──
+  // Uses Catmull-Rom→Bezier conversion with a small tension factor for nice curves.
+  const pts=yByDay.map((w,i)=>({x:xPx(i),y:yPx(w)}));
+  let path='';
+  if(pts.length>0){
+    path='M'+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1);
+    for(let i=0;i<pts.length-1;i++){
+      const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+      const cp1x=p1.x+(p2.x-p0.x)/6,cp1y=p1.y+(p2.y-p0.y)/6;
+      const cp2x=p2.x-(p3.x-p1.x)/6,cp2y=p2.y-(p3.y-p1.y)/6;
+      path+=` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+    }
+  }
+  // ── Area fill underneath the line for visual weight ──
+  let areaPath='';
+  if(pts.length){
+    areaPath=path+` L${pts[pts.length-1].x.toFixed(1)},${(H-PB).toFixed(1)} L${pts[0].x.toFixed(1)},${(H-PB).toFixed(1)} Z`;
+  }
+  // ── Actual-weight markers (filled dots) ──
+  const dots=actualPoints.map(p=>
+    `<circle cx="${xPx(p.i).toFixed(1)}" cy="${yPx(p.w).toFixed(1)}" r="3" fill="${accent}" stroke="var(--surface)" stroke-width="1.5"/>`
+  ).join('');
+  // ── Render ──
+  wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="overflow:visible;width:100%">
+    <defs>
+      <linearGradient id="lcAreaGrad" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="${lineColor}" stop-opacity=".22"/>
+        <stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${grid}${goalLine}
+    <path d="${areaPath}" fill="url(#lcAreaGrad)" stroke="none"/>
+    <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}
+    ${xLabels}
+  </svg>`;
+  // ── Summary text — honest about data source ──
   const arrow=kgPerWeek>0.05?'↓':kgPerWeek<-0.05?'↑':'→';
   const clr=kgPerWeek>0.05?'color:var(--green)':kgPerWeek<-0.05?'color:var(--accent)':'color:var(--muted)';
   const wkUnit=isEn?'kg/wk':'กก./สัปดาห์';
   const sign=kgPerWeek>0?'-':kgPerWeek<0?'+':'';
-  const delta14=lastW-startW;
+  const delta14=last-first;
   const deltaStr=delta14>0.05?`+${delta14.toFixed(1)} ${kgU}`:delta14<-0.05?`${delta14.toFixed(1)} ${kgU}`:`±0 ${kgU}`;
-  let out=`<span style="${clr}">${arrow} ${sign}${Math.abs(kgPerWeek).toFixed(2)} ${wkUnit}</span> · ${isEn?'14-day change':'14 วันย้อนหลัง'}: <b>${deltaStr}</b>`;
+  const actualCount=actualPoints.length;
+  const sourceTag=actualCount>=2
+    ? `<span style="color:var(--accent);font-size:.68rem">● ${isEn?actualCount+' actual measurements':actualCount+' ครั้งที่ชั่งจริง'}</span>`
+    : `<span style="color:var(--muted);font-size:.68rem">${isEn?'estimated from calories':'ประเมินจากแคลอรี่'}</span>`;
+  let out=`<span style="${clr}">${arrow} ${sign}${Math.abs(kgPerWeek).toFixed(2)} ${wkUnit}</span> · ${isEn?'14-day change':'14 วันย้อนหลัง'}: <b>${deltaStr}</b><br>${sourceTag}`;
   if(goalW&&Math.abs(kgPerDay)>0.0005){
-    const diff=lastW-goalW;
+    const diff=last-goalW;
     if((diff>0&&kgPerDay>0)||(diff<0&&kgPerDay<0)){
       const weeks=Math.round(Math.abs(diff/kgPerDay)/7);
       out+=`<br><span style="color:var(--green)">🎯 ${isEn?'At this pace · reach goal in ~':'ที่อัตราเดิม ถึงเป้าใน ~'}${weeks} ${isEn?'wks':'สัปดาห์'}</span>`;
@@ -4304,7 +4359,7 @@ function renderProjectionChart(){
       out+=`<br><span style="color:var(--amber)">⚠️ ${isEn?'Trend going opposite to goal':'แนวโน้มสวนทางกับเป้า'}</span>`;
     }
   }else if(!goalW){
-    out+=`<br><span style="color:var(--muted)">${isEn?'Tip: set a goal weight in Profile to see ETA':'เคล็ด: ตั้งเป้าหมายน้ำหนักในโปรไฟล์เพื่อดูเวลาถึงเป้า'}</span>`;
+    out+=`<br><span style="color:var(--muted)">${isEn?'Tip: set a goal weight in Profile for ETA':'เคล็ด: ตั้งเป้าหมายน้ำหนักในโปรไฟล์เพื่อดูเวลาถึงเป้า'}</span>`;
   }
   sum.innerHTML=out;
 }
@@ -5648,9 +5703,9 @@ async function aiEnsureSupabaseSession(){
       const user=sessionLike?.user;
       const valid=accessToken&&expiresAt&&expiresAt*1000>Date.now()+60000;
       // Reject anonymous sessions for the free proxy — feature is members-only.
-      // Sessions with an email are real (or pending-confirmation) users.
+      // Any non-anonymous valid session counts (we don't require email field).
       if(valid){
-        if(user?.is_anonymous===true||user?.aud==='anon'||!user?.email){
+        if(user?.is_anonymous===true||user?.aud==='anon'){
           throw new Error('REQUIRES_SIGN_UP');
         }
         return sessionLike;
@@ -5915,11 +5970,44 @@ function renderAiSettingsBody(){
   body.innerHTML=inner;
 }
 // ─── PHOTO → AI VISION FLOW ───
+// Refresh the small "เหลือ N/20 รูป AI วันนี้" chip below the AI button
+// on the Add Food page. Reads cp_ai_proxy_usage (set by aiCallProxy after
+// each successful call). Idempotent — safe to call anytime.
+function refreshAiQuotaInline(){
+  const el=document.getElementById('aiQuotaInline');
+  if(!el)return;
+  const isEn=settings.lang==='en';
+  // Only show for proxy provider — BYO-key users manage their own quota
+  if((settings.aiProvider||'proxy')!=='proxy'){el.textContent='';return;}
+  if(!isRegisteredUser()){
+    el.textContent=isEn?'🔒 AI photo requires sign-up · free 20/day after':'🔒 AI ถ่ายรูปต้องสมัครสมาชิกก่อน · ใช้ฟรี 20 รูป/วัน';
+    el.style.color='var(--muted)';
+    return;
+  }
+  try{
+    const u=JSON.parse(localStorage.getItem('cp_ai_proxy_usage')||'null');
+    const today=new Date().toISOString().slice(0,10);
+    if(u&&u.day===today){
+      const left=Math.max(0,u.limit-u.used);
+      el.textContent=isEn?`${left}/${u.limit} AI photos left today`:`เหลือ ${left}/${u.limit} รูป AI วันนี้`;
+      // Color hint when low
+      el.style.color=left<=3?'var(--accent)':left<=8?'var(--amber, #f59f00)':'var(--muted)';
+      return;
+    }
+  }catch{}
+  // No usage data yet today
+  el.textContent=isEn?'Free · 20 AI photos/day':'ฟรี · 20 รูป AI/วัน';
+  el.style.color='var(--muted)';
+}
 // Detect "real" signed-in user — not anonymous, not undefined.
 // Used to gate the proxy AI feature (members-only).
 // We can't trust cloudUser alone — sb.auth.getSession() deadlocks in v2,
 // so cloudUser may be null even when a valid session exists. The source
 // of truth is the localStorage session row that the SDK persists.
+//
+// Any non-anonymous session with a valid token counts — we don't require
+// a specific email field, so users who logged in via any provider (incl.
+// the "demo" flow) keep their AI access.
 function isRegisteredUser(){
   try{
     const raw=localStorage.getItem('calpro-sb-auth');
@@ -5933,12 +6021,12 @@ function isRegisteredUser(){
       if(user.is_anonymous===true||user.aud==='anon')return false;
       // Token expired?
       if(expiresAt&&expiresAt*1000<=Date.now())return false;
-      // Real users have an email or phone
-      return !!(user.email||user.phone);
+      // Any non-anonymous valid token counts as "logged in"
+      return true;
     }
   }catch{}
-  // Fallback: trust the in-memory cloudUser only if it has an email
-  return !!(cloudUser&&cloudUser.email&&!cloudUser.is_anonymous);
+  // Fallback: trust in-memory cloudUser if it's not flagged anonymous
+  return !!(cloudUser&&!cloudUser.is_anonymous);
 }
 function openAiPhotoModal(){
   const provider=settings.aiProvider||'proxy';
@@ -6040,6 +6128,7 @@ async function handleAiPhotoSelect(input){
         chip.textContent=isEn?`${left}/${u.limit} left today`:`เหลือ ${left}/${u.limit} รูปวันนี้`;
       }
     }catch{}
+    refreshAiQuotaInline();  // also update the inline chip on the Add Food page
     const totalS=Math.round((Date.now()-t0)/1000);
     setStatus(isEn?`✓ Done in ${totalS}s`:`✓ เสร็จใน ${totalS} วินาที`,'var(--green)');
     const conf=Math.round((parsed.confidence||0.5)*100);
