@@ -915,7 +915,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.19.1 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.19.2 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1321,7 +1321,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.19.1 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.19.2 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1338,7 +1338,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.19.1';
+const APP_VERSION = '2.19.2';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -5646,20 +5646,34 @@ async function aiEnsureSupabaseSession(){
   return result.data.session;
 }
 // Adapter — CalPro+ proxy (Supabase Edge Function). Key stays on server.
+// If the stored anon session has been wiped server-side (or token signature
+// no longer matches because the anon user was deleted), the proxy will
+// return 401 with "invalid_jwt". We catch that, wipe stale storage, mint a
+// fresh anonymous session, and retry once.
 async function aiCallProxy(imageBase64,prompt){
-  const session=await aiEnsureSupabaseSession();
-  const res=await fetch(AI_PROXY_URL,{
-    method:'POST',
-    headers:{
-      'content-type':'application/json',
-      'authorization':'Bearer '+session.access_token,
-    },
-    body:JSON.stringify({image:imageBase64,prompt}),
-  });
-  const j=await res.json().catch(()=>({error:'parse_failed'}));
+  const callOnce=async ()=>{
+    const session=await aiEnsureSupabaseSession();
+    const res=await fetch(AI_PROXY_URL,{
+      method:'POST',
+      headers:{
+        'content-type':'application/json',
+        'authorization':'Bearer '+session.access_token,
+      },
+      body:JSON.stringify({image:imageBase64,prompt}),
+    });
+    const text=await res.text();
+    let j={};try{j=JSON.parse(text);}catch{j={error:'parse_failed',raw:text}}
+    return {res,j};
+  };
+  let {res,j}=await callOnce();
+  // Retry once if the server says our JWT references a missing session.
+  if(res.status===401&&(j.error==='invalid_jwt'||/invalid.*jwt|session.*does not exist/i.test(j.detail||j.message||''))){
+    try{localStorage.removeItem('calpro-sb-auth');}catch{}
+    ({res,j}=await callOnce());
+  }
   if(!res.ok){
     if(j.error==='rate_limited')throw new Error(`RATE_LIMIT:${j.used}/${j.limit}`);
-    throw new Error(`Proxy HTTP ${res.status}: ${j.error||'unknown'} ${j.detail||''}`);
+    throw new Error(`Proxy HTTP ${res.status}: ${j.error||'unknown'} ${j.detail||j.message||''}`);
   }
   // Side-effect: stash usage info for the Settings card to read
   try{
@@ -6268,6 +6282,14 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.19.2':{
+    th:[
+      '🐞 **แก้ AI photo error "invalid_jwt"** — ถ้า session anonymous เก่าใน localStorage ถูก server ลบไปแล้ว · ระบบจะลบ session เก่าทิ้ง + สร้างใหม่ + retry อัตโนมัติ',
+    ],
+    en:[
+      '🐞 **Fix AI photo "invalid_jwt" error** — when the stored anonymous session no longer exists on the server, we now auto-wipe + re-sign-in + retry once',
+    ],
+  },
   '2.19.1':{
     th:[
       '🐞 **แก้บั๊ก AI photo ค้าง** — `getSession()` ของ supabase-js v2 deadlock จาก navigator-lock · ตอนนี้อ่าน session จาก localStorage ตรงๆ แล้วใช้ anonymous sign-in เป็น fallback',
