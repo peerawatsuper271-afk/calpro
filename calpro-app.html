@@ -261,6 +261,57 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .gchip.active{border-color:var(--accent);color:var(--accent);background:rgba(255,107,107,.08);}
 .tip{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:9px;padding:10px;margin-top:9px;font-size:.75rem;line-height:1.6;}
 .tip strong{color:var(--accent);}
+/* ═══ STEAM-STYLE PROFILE (v2.21) ═══ */
+.profile-hero{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;position:relative;}
+.profile-hero-banner{height:88px;background:linear-gradient(135deg,var(--banner-color,#ff6b6b),color-mix(in srgb,var(--banner-color,#ff6b6b) 60%,#000));position:relative;}
+.profile-hero-banner::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 60%);}
+.profile-hero-body{padding:0 16px 14px;display:flex;gap:14px;margin-top:-46px;position:relative;z-index:1;}
+.profile-avatar-lg{width:92px;height:92px;border-radius:50%;background:var(--surface2);border:4px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:var(--accent);cursor:pointer;overflow:hidden;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.18);transition:transform .15s;user-select:none;}
+.profile-avatar-lg:hover{transform:scale(1.04);}
+.profile-avatar-lg img{width:100%;height:100%;object-fit:cover;}
+.profile-hero-info{flex:1;min-width:0;padding-top:48px;}
+.profile-display-name{font-size:1.15rem;font-weight:700;color:var(--text);line-height:1.2;}
+.profile-level-row{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:.74rem;}
+.profile-level-badge{background:var(--accent);color:#fff;padding:2px 8px;border-radius:99px;font-weight:700;font-size:.66rem;letter-spacing:.4px;}
+.profile-level-title{color:var(--muted);font-weight:500;}
+.profile-bio{font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;white-space:pre-wrap;word-break:break-word;}
+.profile-bio:empty{display:none;}
+.profile-hero-actions{display:flex;gap:6px;padding:0 14px 12px;}
+.profile-action-btn{flex:1;font-size:.78rem;padding:7px;}
+.profile-action-btn:last-child{flex:0 0 42px;}
+.profile-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
+.profile-stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 6px;text-align:center;}
+.pst-icon{font-size:1.1rem;line-height:1;}
+.pst-val{font-size:1.05rem;font-weight:700;color:var(--text);margin-top:4px;}
+.pst-lbl{font-size:.6rem;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
+.profile-badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;}
+.profile-badge-tile{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center;transition:transform .15s;cursor:default;}
+.profile-badge-tile:hover{transform:translateY(-2px);border-color:var(--accent);}
+.pbt-ico{font-size:1.7rem;line-height:1;}
+.pbt-name{font-size:.62rem;color:var(--muted);margin-top:4px;line-height:1.2;}
+.profile-badge-empty{font-size:.74rem;color:var(--muted);padding:18px 0;text-align:center;grid-column:1/-1;}
+.profile-goal-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.profile-goal-cell{background:var(--surface2);border-radius:9px;padding:9px 11px;}
+.pgc-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.pgc-val{font-size:.95rem;font-weight:700;color:var(--text);margin-top:2px;}
+.profile-edit-card{transition:opacity .2s;}
+.banner-color-grid{display:flex;gap:6px;flex-wrap:wrap;}
+.banner-color-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;}
+.banner-color-swatch:hover{transform:scale(1.1);}
+.banner-color-swatch.active{border-color:var(--text);transform:scale(1.15);}
+/* leaderboard clickable */
+.lb-item{cursor:pointer;transition:transform .15s,border-color .15s;}
+.lb-item:hover{transform:translateY(-1px);border-color:var(--accent)!important;}
+.lb-item.me{cursor:default;}
+.lb-item.me:hover{transform:none;}
+/* friend profile modal — uses same hero classes */
+#friendProfileModal .modal{max-width:440px;padding:0;}
+#friendProfileModal .fp-close{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.4);color:#fff;border:none;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;z-index:2;}
+#friendProfileModal .fp-content{padding:0 16px 16px;}
+@media(max-width:380px){
+  .profile-stats-grid{grid-template-columns:repeat(2,1fr);}
+  .pst-val{font-size:1.15rem;}
+}
 .user-avatar{width:108px;height:108px;border-radius:50%;background:rgba(255,107,107,.15);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:700;color:var(--accent);margin:0 auto 14px;cursor:pointer;overflow:hidden;position:relative;transition:transform .15s;user-select:none;box-shadow:0 4px 12px rgba(0,0,0,.15);}
 .user-avatar:hover{transform:scale(1.04);}
 .user-avatar img{width:100%;height:100%;object-fit:cover;}
@@ -729,13 +780,61 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         <button class="back-btn" onclick="navTo('today')">‹</button>
         <h2 data-i18n="profile">โปรไฟล์</h2>
       </div>
-      <div class="card" style="text-align:center;padding:20px 14px">
-        <div class="user-avatar" id="profileAvatar" onclick="openAvatarModal()" title="คลิกเพื่อเปลี่ยน">?</div>
-        <div style="font-size:1rem;font-weight:600" id="profileName2">—</div>
-        <div style="font-size:.75rem;color:var(--muted);margin-top:3px" id="profileEmail2">—</div>
+      <!-- ─── Hero card (Steam-style) ─── -->
+      <div class="profile-hero" id="profileHero">
+        <div class="profile-hero-banner" id="profileBanner"></div>
+        <div class="profile-hero-body">
+          <div class="profile-avatar-lg" id="profileAvatar" onclick="openAvatarModal()" title="คลิกเพื่อเปลี่ยน">?</div>
+          <div class="profile-hero-info">
+            <div class="profile-display-name" id="profileName2">—</div>
+            <div class="profile-level-row">
+              <span class="profile-level-badge" id="profileLevelBadge">Lv 1</span>
+              <span class="profile-level-title" id="profileLevelTitle">Newcomer</span>
+            </div>
+            <div class="profile-bio" id="profileBioView" data-i18n="bio_empty_self">ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม</div>
+          </div>
+        </div>
+        <div class="profile-hero-actions">
+          <button class="btn-sec profile-action-btn" onclick="toggleProfileEdit()"><span data-i18n="edit_profile">✏️ แก้ไขโปรไฟล์</span></button>
+          <button class="btn-sec profile-action-btn" onclick="shareAchievements()" title="แชร์โปรไฟล์">📤</button>
+        </div>
       </div>
+      <!-- ─── Stats showcase (4 mini cards) ─── -->
+      <div class="profile-stats-grid" id="profileStatsGrid">
+        <div class="profile-stat-tile"><div class="pst-icon">🔥</div><div class="pst-val" id="pstStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon">📝</div><div class="pst-val" id="pstDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon">🎯</div><div class="pst-val" id="pstOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon">🏆</div><div class="pst-val" id="pstScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
+      </div>
+      <!-- ─── Badges showcase ─── -->
       <div class="card">
-        <h3 data-i18n="personal_info">ข้อมูลส่วนตัว</h3>
+        <h3><span data-i18n="badges_showcase">🏅 เหรียญตราที่ได้รับ</span> <span style="font-size:.7rem;color:var(--muted);font-weight:400" id="pstBadgeCount">(0)</span></h3>
+        <div class="profile-badges-grid" id="profileBadgesGrid"></div>
+      </div>
+      <!-- ─── Goal showcase ─── -->
+      <div class="card" id="profileGoalCard">
+        <h3 data-i18n="my_goal">🎯 เป้าหมายของฉัน</h3>
+        <div class="profile-goal-row">
+          <div class="profile-goal-cell"><div class="pgc-lbl" data-i18n="goal_type_lbl">ประเภท</div><div class="pgc-val" id="pgcGoalType">—</div></div>
+          <div class="profile-goal-cell"><div class="pgc-lbl">TDEE</div><div class="pgc-val" id="pgcTDEE">—</div></div>
+          <div class="profile-goal-cell"><div class="pgc-lbl" data-i18n="goal_label2">เป้า/วัน</div><div class="pgc-val" id="pgcDaily">—</div></div>
+          <div class="profile-goal-cell"><div class="pgc-lbl" data-i18n="weight_progress">น้ำหนัก</div><div class="pgc-val" id="pgcWeight">—</div></div>
+        </div>
+      </div>
+      <!-- ─── Edit Profile (collapsed by default) ─── -->
+      <div class="card profile-edit-card hide" id="profileEditCard">
+        <h3 data-i18n="edit_profile_long">✏️ แก้ไขโปรไฟล์</h3>
+        <!-- Banner color picker -->
+        <div class="sec-lbl" data-i18n="banner_color">สีแบนเนอร์</div>
+        <div class="banner-color-grid" id="bannerColorGrid"></div>
+        <!-- Bio -->
+        <div class="fl" style="margin-top:10px">
+          <label data-i18n="bio_label">เกี่ยวกับฉัน (≤280 ตัวอักษร)</label>
+          <textarea id="pBio" maxlength="280" rows="2" placeholder="เล่าเรื่องเป้าหมายของคุณ..." style="resize:vertical;font-family:inherit"></textarea>
+          <div style="font-size:.66rem;color:var(--muted);text-align:right;margin-top:2px"><span id="pBioCount">0</span>/280</div>
+        </div>
+        <!-- Personal info -->
+        <div class="sec-lbl" style="margin-top:10px" data-i18n="personal_info">ข้อมูลส่วนตัว</div>
         <div class="pgrid">
           <div class="fl"><label data-i18n="name">ชื่อ</label><input type="text" id="pName" placeholder="ชื่อ" data-i18n="name_ph_profile"></div>
           <div class="fl"><label data-i18n="gender">เพศ</label><select id="pGender"><option value="male" data-i18n="male">ชาย</option><option value="female" data-i18n="female">หญิง</option></select></div>
@@ -1058,6 +1157,40 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <button class="btn-sec" onclick="lookupManualBarcode()" style="white-space:nowrap" data-i18n="barcode_lookup">ค้นหา</button>
     </div>
     <div id="bcResult"></div>
+  </div>
+</div>
+
+<!-- FRIEND PROFILE MODAL — Steam-style read-only view of another user -->
+<div class="modal-bg hide" id="friendProfileModal">
+  <div class="modal" style="max-width:440px;padding:0;overflow:hidden">
+    <button class="fp-close" onclick="closeFriendProfile()" aria-label="Close">✕</button>
+    <div class="profile-hero" style="border-radius:0;border:none;margin-bottom:0">
+      <div class="profile-hero-banner" id="fpBanner"></div>
+      <div class="profile-hero-body">
+        <div class="profile-avatar-lg" id="fpAvatar">?</div>
+        <div class="profile-hero-info">
+          <div class="profile-display-name" id="fpName">—</div>
+          <div class="profile-level-row">
+            <span class="profile-level-badge" id="fpLevelBadge">Lv 1</span>
+            <span class="profile-level-title" id="fpLevelTitle">—</span>
+          </div>
+          <div class="profile-bio" id="fpBio"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fp-content">
+      <div class="profile-stats-grid">
+        <div class="profile-stat-tile"><div class="pst-icon">🔥</div><div class="pst-val" id="fpStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon">📝</div><div class="pst-val" id="fpDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon">🎯</div><div class="pst-val" id="fpOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon">🏆</div><div class="pst-val" id="fpScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
+      </div>
+      <div style="margin-top:10px">
+        <div style="font-size:.78rem;font-weight:600;margin-bottom:6px"><span data-i18n="badges_showcase">🏅 เหรียญตรา</span> <span style="font-size:.66rem;color:var(--muted);font-weight:400" id="fpBadgeCount">(0)</span></div>
+        <div class="profile-badges-grid" id="fpBadgesGrid"></div>
+      </div>
+      <button class="btn-sec" style="width:100%;margin-top:14px" onclick="sendFriendCheer()"><span data-i18n="send_cheer">👏 ส่งกำลังใจ</span></button>
+    </div>
   </div>
 </div>
 
@@ -1443,6 +1576,15 @@ const I18N = {
     simple_mode:'โหมดใช้งานง่าย',simple_mode_sub:'เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น',
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
     streak_saver:'เตือนรักษา streak',streak_saver_sub:'push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)',
+    edit_profile:'✏️ แก้ไขโปรไฟล์',edit_profile_long:'✏️ แก้ไขโปรไฟล์',
+    bio_label:'เกี่ยวกับฉัน (≤280 ตัวอักษร)',bio_empty_self:'ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม',bio_empty_friend:'(เพื่อนยังไม่ใส่คำอธิบาย)',
+    banner_color:'สีแบนเนอร์',
+    badges_showcase:'🏅 เหรียญตราที่ได้รับ',
+    my_goal:'🎯 เป้าหมายของฉัน',goal_type_lbl:'ประเภท',goal_label2:'เป้า/วัน',weight_progress:'น้ำหนัก',
+    streak_lbl:'streak',days_lbl:'วันที่บันทึก',on_track_lbl:'อยู่ในเป้า',score_lbl:'คะแนน',
+    send_cheer:'👏 ส่งกำลังใจ',cheer_sent:'ส่งกำลังใจให้ %n แล้ว 👏',
+    lvl_newcomer:'มือใหม่',lvl_starter:'นักสะสมสตรีค',lvl_regular:'ขาประจำ',lvl_pro:'มืออาชีพ',lvl_master:'มาสเตอร์',lvl_legend:'ตำนาน',
+    fp_loading:'กำลังโหลดโปรไฟล์...',fp_err:'โหลดโปรไฟล์ไม่สำเร็จ',
     ai_settings_title:'🤖 AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)',
     ai_settings_sub:'ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)',
     ai_photo_btn:'🤖 ถ่ายรูป AI',ai_photo_title:'🤖 ถ่ายรูปอาหาร · AI ประเมิน',
@@ -1527,6 +1669,15 @@ const I18N = {
     simple_mode:'Simple mode',simple_mode_sub:'Focus on calorie ring + meals · larger fonts · hides other widgets',
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
     streak_saver:'Streak saver',streak_saver_sub:'21:30 push if not logged yet + streak ≥ 3 days (APK only)',
+    edit_profile:'✏️ Edit profile',edit_profile_long:'✏️ Edit profile',
+    bio_label:'About me (≤280 chars)',bio_empty_self:'No bio yet · tap Edit profile to add one',bio_empty_friend:'(No bio yet)',
+    banner_color:'Banner color',
+    badges_showcase:'🏅 Badges earned',
+    my_goal:'🎯 My goal',goal_type_lbl:'Type',goal_label2:'Daily',weight_progress:'Weight',
+    streak_lbl:'streak',days_lbl:'logged',on_track_lbl:'on track',score_lbl:'score',
+    send_cheer:'👏 Send cheer',cheer_sent:'Sent cheer to %n 👏',
+    lvl_newcomer:'Newcomer',lvl_starter:'Streak starter',lvl_regular:'Regular',lvl_pro:'Pro',lvl_master:'Master',lvl_legend:'Legend',
+    fp_loading:'Loading profile...',fp_err:'Failed to load profile',
     ai_settings_title:'🤖 AI food vision (bring your own key)',
     ai_settings_sub:'Snap a photo → AI estimates kcal/macros · uses your own API key (Claude/OpenAI/Gemini)',
     ai_photo_btn:'🤖 AI photo',ai_photo_title:'🤖 Photo · AI estimate',
@@ -2881,7 +3032,8 @@ async function renderFriendsCard(){
       const meTag=settings.lang==='en'?' (You)':' (คุณ)';
       const safeName=escapeHtml(u.display_name||'?');
       const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px">✕</button>`;
-      html+=`<div class="lb-item${isMe?' me':''}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
+      const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}"`;
+      html+=`<div class="lb-item${isMe?' me':''}"${clickAttr} style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
         `<div style="width:22px;text-align:center;font-weight:700">${rank}</div>`+
         av+
         `<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${safeName}${isMe?meTag:''}</div><div style="font-size:.68rem;color:var(--muted)">${t('streak')} ${u.streak} · ${t('on_track')} ${u.onTrack} ${t('days')}</div></div>`+
@@ -2890,7 +3042,11 @@ async function renderFriendsCard(){
     body.innerHTML=html+`<button class="btn-sec" onclick="addFriendPrompt()" style="width:100%;margin-top:6px">${t('add_friend')}</button>`;
     // Wire up the ✕ remove buttons on each non-self leaderboard row
     body.querySelectorAll('button[data-frid]').forEach(b=>{
-      b.onclick=()=>removeFriend(b.dataset.frid,b.dataset.frname);
+      b.onclick=(e)=>{e.stopPropagation();removeFriend(b.dataset.frid,b.dataset.frname);};
+    });
+    // Wire row click → open friend profile modal
+    body.querySelectorAll('.lb-item[data-openfid]').forEach(row=>{
+      row.onclick=()=>openFriendProfile(row.dataset.openfid,row.dataset.openfname);
     });
   }catch(e){body.innerHTML=`<div class="empty" style="padding:10px 0">โหลดไม่สำเร็จ: ${e.message}</div>`;}
 }
@@ -3093,12 +3249,18 @@ async function syncToCloud(){
   if(!cloudUser||!sb)return;
   const uid=cloudUser.id;
   let okCount=0,failCount=0;
-  // 1. Profile (always upsert by id)
+  // 1. Profile (always upsert by id) — retries without bio/banner_color if those
+  //    columns aren't in the schema yet (v2.21 migration hasn't been applied).
   if(userProfile){
     const p={...userProfile,id:uid,email:cloudUser.email,updated_at:new Date().toISOString()};
     delete p.created_at;
     const ok=await syncStep('profile', async ()=>{
-      const {error}=await sb.from('profiles').upsert(p,{onConflict:'id'});
+      let {error}=await sb.from('profiles').upsert(p,{onConflict:'id'});
+      if(error&&/bio|banner_color|level_title/i.test(error.message||'')){
+        // Strip the v2.21 fields and retry — old schema
+        const fallback={...p};delete fallback.bio;delete fallback.banner_color;delete fallback.level_title;
+        ({error}=await sb.from('profiles').upsert(fallback,{onConflict:'id'}));
+      }
       if(error)throw error;
     });
     ok?okCount++:failCount++;
@@ -4556,12 +4718,14 @@ function saveProfile(){
   const goalW=+document.getElementById('pGoalW').value;
   const act=+document.getElementById('pAct').value;
   const goalType=document.querySelector('#pg-profile .gchip.active').dataset.g;
+  const bioRaw=document.getElementById('pBio')?.value||'';
+  const bio=bioRaw.trim().slice(0,280);
   if(!age||!weight||!height){showToast(settings.lang==='en'?'Fill in all fields':'กรอกข้อมูลให้ครบ');return;}
   let bmr=gender==='male'?88.362+13.397*weight+4.799*height-5.677*age:447.593+9.247*weight+3.098*height-4.330*age;
   const tdee=bmr*act;
   let gc=goalType==='lose'?tdee-500:goalType==='gain'?tdee+300:tdee;
   gc=Math.max(1200,Math.round(gc));
-  userProfile={...userProfile,display_name:name,gender,age,weight,height,goal_weight:goalW,activity:act,goal_type:goalType,goal_cal:gc};
+  userProfile={...userProfile,display_name:name,gender,age,weight,height,goal_weight:goalW,activity:act,goal_type:goalType,goal_cal:gc,bio};
   saveProfile_LS();
   document.getElementById('hdrSub').textContent=name+' · '+gc.toLocaleString()+' kcal/วัน';
   const bmi=(weight/(height/100)**2).toFixed(1);
@@ -4585,15 +4749,72 @@ function saveProfile(){
   scheduleAutoSync('profile');
 }
 const CUTE_AVATARS=['🐱','🐶','🐻','🐼','🦊','🐰','🐯','🦁','🐨','🐭','🐹','🐮','🐷','🐸','🐵','🦄','🐧','🦉','🐺','🦝','🐢','🐬','🦋','🌸'];
+// Banner color presets — Steam-style swatches
+const BANNER_COLORS=['#ff6b6b','#ffa94d','#51cf66','#74c0fc','#b197fc','#f783ac','#ffd43b','#63e6be','#495057'];
+// Compute "level" from streak + days · returns {level, title}
+function computeUserLevel(streak,days,onTrack){
+  // Composite: streak ×2 + days/2 + onTrack/3 (rough)
+  const score=streak*2+Math.floor(days/2)+Math.floor(onTrack/3);
+  if(score>=100)return {lv:6,title:t('lvl_legend'),icon:'👑'};
+  if(score>=60)return {lv:5,title:t('lvl_master'),icon:'💎'};
+  if(score>=30)return {lv:4,title:t('lvl_pro'),icon:'🚀'};
+  if(score>=15)return {lv:3,title:t('lvl_regular'),icon:'⚡'};
+  if(score>=5)return {lv:2,title:t('lvl_starter'),icon:'🔥'};
+  return {lv:1,title:t('lvl_newcomer'),icon:'🌱'};
+}
+// Render the new Steam-style profile page (own profile)
 function renderProfileUI(){
   const p=userProfile;if(!p)return;
-  const n=p.display_name||'';
+  const n=p.display_name||(cloudUser?.email?cloudUser.email.split('@')[0]:'')||'';
+  const isEn=settings.lang==='en';
+  // ── Hero: avatar + banner color ──
   const av=document.getElementById('profileAvatar');
   if(p.avatar&&p.avatar.startsWith('data:')){av.innerHTML='<img src="'+p.avatar+'" alt="avatar">';}
   else if(p.avatar){av.textContent=p.avatar;}
   else{av.textContent=(n[0]||'?').toUpperCase();}
+  const bannerColor=p.banner_color||'#ff6b6b';
+  document.getElementById('profileHero').style.setProperty('--banner-color',bannerColor);
   document.getElementById('profileName2').textContent=n||'—';
-  document.getElementById('profileEmail2').textContent=t('goal_label')+' '+(p.goal_cal||1800).toLocaleString()+' kcal'+dayUnitShort();
+  // ── Stats + level ──
+  const ebd={};Object.entries(allEntries).forEach(([k,arr])=>{if(arr&&arr.length)ebd[k]=arr;});
+  const streak=calcStreak(ebd);
+  const days=logDays(ebd);
+  const onTrack=daysOnTrack(ebd);
+  const earned=earnedBadges(ebd);
+  const score=calcScore(ebd);
+  const lvl=computeUserLevel(streak,days,onTrack);
+  document.getElementById('profileLevelBadge').textContent=`${lvl.icon} Lv ${lvl.lv}`;
+  document.getElementById('profileLevelTitle').textContent=lvl.title;
+  document.getElementById('pstStreak').textContent=streak;
+  document.getElementById('pstDays').textContent=days;
+  document.getElementById('pstOnTrack').textContent=onTrack;
+  document.getElementById('pstScore').textContent=score;
+  // ── Bio ──
+  const bioEl=document.getElementById('profileBioView');
+  if(p.bio&&p.bio.trim()){bioEl.textContent=p.bio;bioEl.style.fontStyle='normal';}
+  else{bioEl.textContent=t('bio_empty_self');bioEl.style.fontStyle='italic';bioEl.style.opacity='.7';}
+  // ── Badges showcase ──
+  const bg=document.getElementById('profileBadgesGrid');
+  document.getElementById('pstBadgeCount').textContent=`(${earned.length})`;
+  if(earned.length){
+    bg.innerHTML=earned.map(id=>{
+      const b=BADGES.find(x=>x.id===id);if(!b)return '';
+      const name=isEn?(b.name_en||b.name):b.name;
+      return `<div class="profile-badge-tile" title="${escapeHtml(name)}"><div class="pbt-ico">${b.ico}</div><div class="pbt-name">${escapeHtml(name)}</div></div>`;
+    }).join('');
+  }else{
+    bg.innerHTML=`<div class="profile-badge-empty">${isEn?'No badges yet — keep logging to earn them!':'ยังไม่มีเหรียญตรา — บันทึกอาหารต่อเนื่องเพื่อปลดล็อก!'}</div>`;
+  }
+  // ── Goal showcase ──
+  const goalTypeLbl={lose:isEn?'🔥 Lose':'🔥 ลดน้ำหนัก',maintain:isEn?'⚖️ Maintain':'⚖️ คงน้ำหนัก',gain:isEn?'💪 Gain':'💪 เพิ่มกล้าม'}[p.goal_type||'lose'];
+  document.getElementById('pgcGoalType').textContent=goalTypeLbl;
+  // TDEE compute
+  const bmr=p.weight&&p.height&&p.age?(p.gender==='male'?88.362+13.397*p.weight+4.799*p.height-5.677*p.age:447.593+9.247*p.weight+3.098*p.height-4.330*p.age):0;
+  const tdee=bmr?Math.round(bmr*(p.activity||1.55)):0;
+  document.getElementById('pgcTDEE').textContent=tdee?tdee.toLocaleString():'—';
+  document.getElementById('pgcDaily').textContent=(p.goal_cal||0).toLocaleString();
+  document.getElementById('pgcWeight').textContent=p.weight?`${p.weight} kg`+(p.goal_weight?` → ${p.goal_weight}`:''):'—';
+  // ── Edit form fields ──
   if(n)document.getElementById('pName').value=n;
   if(p.age)document.getElementById('pAge').value=p.age;
   if(p.weight)document.getElementById('pWeight').value=p.weight;
@@ -4601,10 +4822,121 @@ function renderProfileUI(){
   if(p.goal_weight)document.getElementById('pGoalW').value=p.goal_weight;
   document.getElementById('pGender').value=p.gender||'male';
   document.getElementById('pAct').value=p.activity||1.55;
+  document.getElementById('pBio').value=p.bio||'';
+  document.getElementById('pBioCount').textContent=(p.bio||'').length;
   document.querySelectorAll('#pg-profile .gchip').forEach(b=>b.classList.toggle('active',b.dataset.g===(p.goal_type||'lose')));
+  // ── Banner color swatches ──
+  const bcg=document.getElementById('bannerColorGrid');
+  if(bcg){
+    bcg.innerHTML=BANNER_COLORS.map(c=>`<div class="banner-color-swatch${c===bannerColor?' active':''}" data-bc="${c}" style="background:linear-gradient(135deg,${c},color-mix(in srgb,${c} 60%,#000))"></div>`).join('');
+    bcg.querySelectorAll('.banner-color-swatch').forEach(s=>s.onclick=()=>pickBannerColor(s.dataset.bc));
+  }
   renderMeasurements();
   renderCloudStatus();
   renderFriendsCard();
+}
+function toggleProfileEdit(){
+  const card=document.getElementById('profileEditCard');
+  if(!card)return;
+  card.classList.toggle('hide');
+  if(!card.classList.contains('hide')){
+    setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  }
+}
+function pickBannerColor(c){
+  if(!userProfile)return;
+  userProfile.banner_color=c;
+  saveProfile_LS();
+  document.getElementById('profileHero').style.setProperty('--banner-color',c);
+  document.querySelectorAll('.banner-color-swatch').forEach(s=>s.classList.toggle('active',s.dataset.bc===c));
+  scheduleAutoSync('profile');
+}
+// Bind bio char-counter (called after first render)
+function bindBioCounter(){
+  const ta=document.getElementById('pBio');const ct=document.getElementById('pBioCount');
+  if(ta&&ct&&!ta.dataset.bound){
+    ta.dataset.bound='1';
+    ta.addEventListener('input',()=>{ct.textContent=ta.value.length;});
+  }
+}
+setTimeout(bindBioCounter,500);
+
+// ─── FRIEND PROFILE MODAL (Steam-style read-only view) ───
+async function openFriendProfile(userId,displayName,avatar){
+  if(!userId||!sb)return;
+  const modal=document.getElementById('friendProfileModal');
+  const isEn=settings.lang==='en';
+  modal.classList.remove('hide');
+  // Show loading placeholders
+  document.getElementById('fpName').textContent=displayName||t('fp_loading');
+  document.getElementById('fpLevelTitle').textContent='...';
+  document.getElementById('fpStreak').textContent='—';
+  document.getElementById('fpDays').textContent='—';
+  document.getElementById('fpOnTrack').textContent='—';
+  document.getElementById('fpScore').textContent='—';
+  document.getElementById('fpBadgesGrid').innerHTML=`<div class="profile-badge-empty">${t('fp_loading')}</div>`;
+  // Stash for sendFriendCheer
+  modal.dataset.fid=userId;
+  modal.dataset.fname=displayName||'';
+  try{
+    // Fetch profile (try with bio/banner_color first, fallback if columns don't exist)
+    let prof=null;
+    try{
+      const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,bio,banner_color').eq('id',userId).maybeSingle();
+      prof=r.data;
+    }catch{
+      const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type').eq('id',userId).maybeSingle();
+      prof=r.data;
+    }
+    if(!prof){throw new Error(t('fp_err'));}
+    // Fetch their food entries for stats
+    const {data:entries}=await sb.from('food_entries').select('entry_date,calories,protein,carbs,fat').eq('user_id',userId);
+    const ebd={};(entries||[]).forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);});
+    // Stats
+    const streak=calcStreak(ebd);
+    const days=logDays(ebd);
+    const onTrack=daysOnTrack(ebd);
+    const earned=earnedBadges(ebd);
+    const score=calcScore(ebd);
+    const lvl=computeUserLevel(streak,days,onTrack);
+    // Fill modal
+    const av=document.getElementById('fpAvatar');
+    if(prof.avatar&&prof.avatar.startsWith('data:')){av.innerHTML='<img src="'+prof.avatar+'" alt="avatar">';}
+    else if(prof.avatar){av.textContent=prof.avatar;av.innerHTML=prof.avatar;}
+    else{av.textContent=((prof.display_name||'?')[0]||'?').toUpperCase();}
+    document.getElementById('fpBanner').style.setProperty('background',`linear-gradient(135deg,${prof.banner_color||'#ff6b6b'},color-mix(in srgb,${prof.banner_color||'#ff6b6b'} 60%,#000))`);
+    document.getElementById('fpName').textContent=prof.display_name||displayName||'—';
+    document.getElementById('fpLevelBadge').textContent=`${lvl.icon} Lv ${lvl.lv}`;
+    document.getElementById('fpLevelTitle').textContent=lvl.title;
+    const bio=prof.bio&&prof.bio.trim()?prof.bio:t('bio_empty_friend');
+    const bioEl=document.getElementById('fpBio');
+    bioEl.textContent=bio;
+    bioEl.style.fontStyle=prof.bio?'normal':'italic';
+    bioEl.style.opacity=prof.bio?'1':'.7';
+    document.getElementById('fpStreak').textContent=streak;
+    document.getElementById('fpDays').textContent=days;
+    document.getElementById('fpOnTrack').textContent=onTrack;
+    document.getElementById('fpScore').textContent=score;
+    document.getElementById('fpBadgeCount').textContent=`(${earned.length})`;
+    const bg=document.getElementById('fpBadgesGrid');
+    if(earned.length){
+      bg.innerHTML=earned.map(id=>{
+        const b=BADGES.find(x=>x.id===id);if(!b)return '';
+        const name=isEn?(b.name_en||b.name):b.name;
+        return `<div class="profile-badge-tile" title="${escapeHtml(name)}"><div class="pbt-ico">${b.ico}</div><div class="pbt-name">${escapeHtml(name)}</div></div>`;
+      }).join('');
+    }else{
+      bg.innerHTML=`<div class="profile-badge-empty">${isEn?'No badges yet':'ยังไม่มีเหรียญตรา'}</div>`;
+    }
+  }catch(e){
+    document.getElementById('fpBadgesGrid').innerHTML=`<div class="profile-badge-empty" style="color:var(--accent)">${escapeHtml(e.message||t('fp_err'))}</div>`;
+  }
+}
+function closeFriendProfile(){document.getElementById('friendProfileModal').classList.add('hide');}
+function sendFriendCheer(){
+  const modal=document.getElementById('friendProfileModal');
+  const name=modal.dataset.fname||'?';
+  showToast(t('cheer_sent').replace('%n',name));
 }
 
 // ═══ COMPACT MODE STYLES (applied via data-compact) ═══
