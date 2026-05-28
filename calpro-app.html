@@ -841,6 +841,13 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
         <div id="mealTimesGrid" style="margin-top:8px"></div>
         <div class="setting-row">
           <div class="sr-l">
+            <div class="sr-name" data-i18n="streak_saver">เตือนรักษา streak</div>
+            <div class="sr-sub" data-i18n="streak_saver_sub">push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="streakSaverToggle" onchange="toggleStreakSaver()"><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="sr-l">
             <div class="sr-name" data-i18n="smart_goal_pref">ปรับเป้าหมายอัตโนมัติ</div>
             <div class="sr-sub" data-i18n="smart_goal_pref_sub">แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า</div>
           </div>
@@ -1406,6 +1413,7 @@ const I18N = {
     appearance:'รูปลักษณ์',compact_mode:'โหมดกะทัดรัด',compact_mode_sub:'ลดช่องว่าง · เห็นข้อมูลได้มากขึ้นต่อหน้า',
     simple_mode:'โหมดใช้งานง่าย',simple_mode_sub:'เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น',
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
+    streak_saver:'เตือนรักษา streak',streak_saver_sub:'push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)',
     smart_goal_pref:'ปรับเป้าหมายอัตโนมัติ',smart_goal_pref_sub:'แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า',
     weekly_recap_pref:'สรุปรายสัปดาห์',weekly_recap_pref_sub:'popup ทุกวันจันทร์เช้า',
     water_goal_cfg:'เป้าหมายน้ำดื่ม',
@@ -1484,6 +1492,7 @@ const I18N = {
     appearance:'Appearance',compact_mode:'Compact mode',compact_mode_sub:'Tighter spacing · more info per screen',
     simple_mode:'Simple mode',simple_mode_sub:'Focus on calorie ring + meals · larger fonts · hides other widgets',
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
+    streak_saver:'Streak saver',streak_saver_sub:'21:30 push if not logged yet + streak ≥ 3 days (APK only)',
     smart_goal_pref:'Auto goal adjustment',smart_goal_pref_sub:'Popup every 4 weeks if weight trend deviates',
     weekly_recap_pref:'Weekly recap',weekly_recap_pref_sub:'Popup every Monday morning',
     water_goal_cfg:'Water goal',
@@ -1767,10 +1776,15 @@ const MEAL_ICONS={เช้า:'🌅',กลางวัน:'☀️',เย็�
 const BADGES=[
   {id:'streak3',ico:'🔥',name:'3 วันติด',name_en:'3-day streak',cond:u=>calcStreak(u)>=3},
   {id:'streak7',ico:'⚡',name:'7 วันติด',name_en:'7-day streak',cond:u=>calcStreak(u)>=7},
+  {id:'streak14',ico:'🌟',name:'2 สัปดาห์ติด',name_en:'14-day streak',cond:u=>calcStreak(u)>=14},
+  {id:'streak30',ico:'💎',name:'30 วันติด',name_en:'30-day streak',cond:u=>calcStreak(u)>=30},
+  {id:'streak60',ico:'🚀',name:'60 วันติด',name_en:'60-day streak',cond:u=>calcStreak(u)>=60},
+  {id:'streak100',ico:'👑',name:'100 วันติด',name_en:'100-day streak',cond:u=>calcStreak(u)>=100},
   {id:'ontrack',ico:'🎯',name:'อยู่ในเป้า 5 วัน',name_en:'5 days on track',cond:u=>daysOnTrack(u)>=5},
   {id:'protein',ico:'💪',name:'โปรตีนครบ 3 วัน',name_en:'Protein 3 days',cond:u=>protDays(u)>=3},
   {id:'month',ico:'🏆',name:'แชมป์เดือน',name_en:'Monthly champ',cond:u=>daysOnTrack(u)>=20},
   {id:'logged7',ico:'📝',name:'บันทึก 7 วัน',name_en:'7 days logged',cond:u=>logDays(u)>=7},
+  {id:'referred',ico:'🎁',name:'ผู้ได้รับเชิญ',name_en:'Invited friend',cond:u=>!!localStorage.getItem('calpro_referred_by')},
   {id:'master',ico:'👑',name:'Master',name_en:'Master',cond:u=>earnedBadges(u).length>=5},
 ];
 const THEMES={
@@ -1907,6 +1921,9 @@ function saveProfile_LS(){
 function saveEntries_LS(){
   allEntries[currentDate] = dailyEntries;
   lsSave(LS_ENTRIES, allEntries);
+  // Growth hook — auto-celebrate streak milestones (7/14/30/60/100) at most once each.
+  // Wrapped in try because celebrateMilestoneIfNew is defined later in the file.
+  try{ if(typeof celebrateMilestoneIfNew==='function') celebrateMilestoneIfNew(); }catch{}
 }
 // Clear meal photos older than 30 days — frees localStorage quota
 function cleanOldPhotos(){
@@ -3613,6 +3630,8 @@ function openOnboard(){
 }
 function obShowStep(n){
   _obStep=n;
+  // Growth telemetry — record first time each step is reached (no-op if already set)
+  try{ if(typeof instrumentOnboardingStep==='function') instrumentOnboardingStep(n,'shown'); }catch{}
   document.querySelectorAll('#onboardSlides .ob-slide').forEach(s=>{
     s.classList.toggle('hide',+s.dataset.step!==n);
   });
@@ -3699,6 +3718,12 @@ function finishOnboard(skipped){
     // Make sure profile is saved (in case step 3 was skipped over via Next chain)
     saveObProfile();
   }
+  // Growth telemetry — mark how the onboarding ended (completed vs skipped)
+  try{
+    if(typeof instrumentOnboardingStep==='function'){
+      instrumentOnboardingStep('done',skipped?'skipped':'completed');
+    }
+  }catch{}
   lsSave('calpro_onboarded',true);
   document.getElementById('onboardModal').classList.add('hide');
   // Refresh visible UI to reflect new profile
@@ -4688,6 +4713,7 @@ function renderSettings(){
   setCk('simpleToggle',settings.simple);
   renderNavTabsList();
   setCk('mealRemToggle',settings.mealReminders!==false);
+  setCk('streakSaverToggle',settings.streakSaver!==false);
   setCk('smartGoalToggle',settings.smartGoal!==false);
   setCk('recapToggle',settings.weeklyRecap!==false);
   // Water goal
@@ -4802,10 +4828,10 @@ function pickInvite(){
 async function shareText(text,title){
   const isEn=settings.lang==='en';
   if(navigator.share){
-    try{await navigator.share({title,text,url:SHARE_URL});showToast(isEn?'Shared ✓':'แชร์เรียบร้อย ✓');}
+    try{await navigator.share({title,text,url:getReferralUrl()});showToast(isEn?'Shared ✓':'แชร์เรียบร้อย ✓');}
     catch(e){if(e.name!=='AbortError')showToast(isEn?'Share failed':'แชร์ไม่สำเร็จ');}
   }else if(navigator.clipboard){
-    try{await navigator.clipboard.writeText(text+'\n'+SHARE_URL);showToast(isEn?'Copied · paste anywhere':'คัดลอกแล้ว · วางได้ทุกที่');}
+    try{await navigator.clipboard.writeText(text+'\n'+getReferralUrl());showToast(isEn?'Copied · paste anywhere':'คัดลอกแล้ว · วางได้ทุกที่');}
     catch{showToast(isEn?'Copy failed':'คัดลอกไม่สำเร็จ');}
   }else{showToast(isEn?'Browser does not support sharing':'เบราว์เซอร์ไม่รองรับการแชร์');}
 }
@@ -4955,7 +4981,7 @@ async function shareDaily(){
     const blob=await new Promise(r=>canvas.toBlob(r,'image/png',0.95));
     if(!blob)throw new Error('canvas to blob failed');
     const file=new File([blob],'calpro-summary.png',{type:'image/png'});
-    const caption=`${invite}\n\n${SHARE_URL}`;
+    const caption=`${invite}\n\n${getReferralUrl()}`;
     // Web Share Level 2: try sharing files
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       try{
@@ -4976,7 +5002,7 @@ async function shareDaily(){
     console.warn('[share] image failed, falling back to text:',e);
     // Last-resort fallback: text-only share
     const invite=pickInvite();
-    const text=`${invite}\n\n${SHARE_URL}`;
+    const text=`${invite}\n\n${getReferralUrl()}`;
     shareText(text,'CalPro+');
   }
 }
@@ -5105,7 +5131,7 @@ async function shareAchievements(){
     const blob=await new Promise(r=>canvas.toBlob(r,'image/png',0.95));
     if(!blob)throw new Error('canvas to blob failed');
     const file=new File([blob],'calpro-achievements.png',{type:'image/png'});
-    const caption=`${invite}\n\n${SHARE_URL}`;
+    const caption=`${invite}\n\n${getReferralUrl()}`;
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       try{
         await navigator.share({files:[file],text:caption,title:'CalPro+'});
@@ -5301,12 +5327,144 @@ function refreshAllAds(){
   });
 }
 
+// ═══ GROWTH / RETENTION HOOKS (Epic 1) ═══
+// All state on localStorage for now — no backend tracking. Cosmetic + social only.
+
+// Stable per-device pseudo-ID for the ?ref= referral link. We don't tie this to
+// Supabase auth on purpose — that way users without an account can still share
+// a link that "comes from them" (matters more for vibes than for tracking).
+function getLocalUserId(){
+  let id=localStorage.getItem('calpro_local_id');
+  if(!id){
+    // Short random base36 string. Not a security token — just identification.
+    id=Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+    try{localStorage.setItem('calpro_local_id',id);}catch{}
+  }
+  return id;
+}
+// Append ?ref=<id> to the base share URL. Used wherever we previously inlined SHARE_URL.
+function getReferralUrl(){
+  const id=getLocalUserId();
+  return SHARE_URL+(SHARE_URL.includes('?')?'&':'?')+'ref='+encodeURIComponent(id);
+}
+// If the current page URL has ?ref=, record it and welcome the user once.
+function parseReferralOnLoad(){
+  try{
+    const params=new URLSearchParams(location.search);
+    const ref=params.get('ref');
+    if(!ref)return;
+    if(ref===getLocalUserId())return;        // self-referrals do nothing
+    const stored=localStorage.getItem('calpro_referred_by');
+    if(stored)return;                         // already attributed — don't re-celebrate
+    localStorage.setItem('calpro_referred_by',ref);
+    localStorage.setItem('calpro_referred_at',new Date().toISOString());
+    const isEn=settings.lang==='en';
+    setTimeout(()=>{
+      showToast(isEn?'🎁 A friend invited you to CalPro+':'🎁 เพื่อนคุณเชิญคุณมา CalPro+',3500);
+    },1500);
+  }catch(e){console.warn('[referral] parse failed:',e.message);}
+}
+// Daily check-in micro-toast on app open. Fires at most once per day.
+function dailyCheckInToast(){
+  try{
+    const today=todayKey();
+    const last=localStorage.getItem('calpro_last_visit');
+    if(last===today)return;                   // already greeted today
+    localStorage.setItem('calpro_last_visit',today);
+    const streak=calcStreak(allEntries);
+    if(streak<1)return;                       // no active streak — nothing to celebrate
+    const isEn=settings.lang==='en';
+    const msg=isEn
+      ?`🔥 ${streak}-day streak · keep going!`
+      :`🔥 ${streak} วันติด · เก่งมาก!`;
+    setTimeout(()=>showToast(msg,2400),900);
+  }catch(e){console.warn('[checkin] failed:',e.message);}
+}
+// Milestone share auto-trigger. After save, if the streak just hit 7/14/30/60/100,
+// pop the existing share-achievement sheet (so user gets a beautiful 1080×1350 image
+// of their milestone). Only triggers ONCE per milestone — tracked in localStorage.
+const STREAK_MILESTONES=[7,14,30,60,100];
+function getStreakMilestone(streak){
+  for(let i=STREAK_MILESTONES.length-1;i>=0;i--){
+    if(streak>=STREAK_MILESTONES[i])return STREAK_MILESTONES[i];
+  }
+  return 0;
+}
+function celebrateMilestoneIfNew(){
+  try{
+    const streak=calcStreak(allEntries);
+    const ms=getStreakMilestone(streak);
+    if(!ms)return;
+    const celebrated=JSON.parse(localStorage.getItem('calpro_milestones_shared')||'[]');
+    if(celebrated.includes(ms))return;
+    celebrated.push(ms);
+    localStorage.setItem('calpro_milestones_shared',JSON.stringify(celebrated));
+    const isEn=settings.lang==='en';
+    // Small intro toast then open share sheet
+    showToast(isEn?`🎉 ${ms}-day milestone — share it!`:`🎉 ครบ ${ms} วันติด — แชร์ความสำเร็จ!`,3000);
+    setTimeout(()=>{try{shareAchievements();}catch(e){console.warn('[milestone] share failed:',e.message);}},1200);
+  }catch(e){console.warn('[milestone] check failed:',e.message);}
+}
+// Streak-saver native notification at ~21:30 local. Only on Capacitor (web has no
+// reliable scheduled-notification API). Reschedules every app open. Cancels itself
+// if the user has already logged food today.
+const STREAK_SAVER_ID=99001;
+async function scheduleStreakSaver(){
+  try{
+    const cap=window.Capacitor;
+    if(!cap?.isNativePlatform?.())return;       // native APK only
+    if(settings.streakSaver===false)return;     // user disabled
+    const LN=cap.Plugins?.LocalNotifications;
+    if(!LN)return;
+    // Always cancel any previously-scheduled one first
+    try{await LN.cancel({notifications:[{id:STREAK_SAVER_ID}]});}catch{}
+    // Already logged today? streak is "safe" — no need to bug them
+    if((allEntries[todayKey()]||[]).length>0)return;
+    const streak=calcStreak(allEntries);
+    if(streak<3)return;                         // not worth saving for tiny streaks
+    const now=new Date();
+    const target=new Date();
+    target.setHours(21,30,0,0);
+    if(target<=now)return;                      // 21:30 already passed today
+    const perm=await LN.checkPermissions();
+    if(perm.display!=='granted')return;         // don't auto-prompt; user must opt in via test button
+    const isEn=settings.lang==='en';
+    await LN.schedule({notifications:[{
+      id:STREAK_SAVER_ID,
+      title:'CalPro+',
+      body:isEn?`🔥 ${streak}-day streak in danger · log something quick`:`🔥 streak ${streak} วันกำลังจะหาย · บันทึกอะไรเร็วๆ`,
+      schedule:{at:target},
+      smallIcon:'ic_launcher',iconColor:'#ff6b6b',
+    }]});
+  }catch(e){console.warn('[streak-saver] schedule failed:',e.message);}
+}
+// Onboarding step telemetry — small localStorage breadcrumbs so we can see
+// drop-off in Developer Mode. Doesn't change UX.
+function instrumentOnboardingStep(n,action){
+  try{
+    const key='calpro_onb_step_'+n+(action?'_'+action:'');
+    if(!localStorage.getItem(key)){
+      localStorage.setItem(key,new Date().toISOString());
+    }
+  }catch{}
+}
+function toggleStreakSaver(){
+  const el=document.getElementById('streakSaverToggle');
+  settings.streakSaver=el?el.checked:true;
+  lsSave(LS_SETTINGS,settings);
+  scheduleStreakSaver();
+}
+
 // ═══ INIT ═══
 loadUserData();
 applyFont(settings.font||'system');
 applyLang();
 renderBottomNav();
 showApp();
+// Growth hooks (Epic 1) — run AFTER showApp() so all globals are populated.
+parseReferralOnLoad();    // handle ?ref= URL param + welcome toast
+dailyCheckInToast();      // congratulate active-streak users on app open
+scheduleStreakSaver();    // schedule 21:30 push notification (Capacitor only)
 // iOS-only refresh button — Android browser + Capacitor APK don't get it
 (function showIosRefreshIfApplicable(){
   const ua=navigator.userAgent||'';
@@ -5442,6 +5600,32 @@ async function renderDev(){
     `<div class="card"><h3>👤 Profile (raw)</h3>`+
       `<pre class="dev-pre">${escapeHtml(JSON.stringify(userProfile,null,2))}</pre>`+
     `</div>`+
+    (function(){
+      // ── Growth telemetry (Epic 1) ──
+      const onb={};
+      for(const k in localStorage){
+        if(k.startsWith('calpro_onb_step_')){
+          onb[k.replace('calpro_onb_step_','')]=localStorage.getItem(k);
+        }
+      }
+      const lv=localStorage.getItem('calpro_last_visit')||'(never)';
+      const lid=localStorage.getItem('calpro_local_id')||'(none — generated on first share)';
+      const rby=localStorage.getItem('calpro_referred_by')||'(none)';
+      const rat=localStorage.getItem('calpro_referred_at')||'(none)';
+      const ms=JSON.parse(localStorage.getItem('calpro_milestones_shared')||'[]');
+      return `<div class="card"><h3>🚀 Growth telemetry</h3>`+
+        row('Last app visit',lv)+
+        row('Local user ID',lid)+
+        row('Referred by',rby)+
+        (rby!=='(none)'?row('Referred at',rat):'')+
+        row('Streak milestones celebrated',ms.length?ms.join(' · '):'(none yet)')+
+        row('Current streak',calcStreak(allEntries)+' day(s)')+
+        `<div style="font-size:.74rem;color:var(--muted);margin:8px 0 4px">Onboarding flow:</div>`+
+        (Object.keys(onb).length
+          ? `<pre class="dev-pre">${escapeHtml(JSON.stringify(onb,null,2))}</pre>`
+          : `<div style="font-size:.78rem;color:var(--muted)">(no onboarding events recorded yet)</div>`)+
+      `</div>`;
+    })()+
     `<div class="card"><h3>🛠️ Actions</h3>`+
       `<button class="btn-sec" onclick="devLogToConsole()" style="width:100%;margin-bottom:6px">📋 Dump full state to console</button>`+
       `<button class="btn-sec" onclick="renderDev()" style="width:100%;margin-bottom:6px">🔄 Refresh diagnostics</button>`+
