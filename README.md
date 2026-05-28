@@ -67,6 +67,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.19.3** *(APK + web · BETA)* — 🐞 **แก้ AI photo "sign-in timed out"** · `signInAnonymously()` deadlock → ใช้ REST `POST /auth/v1/signup` ตรงๆ ไม่ผ่าน SDK lock
 - **v2.19.2** *(APK + web · BETA)* — 🐞 **แก้ AI photo "invalid_jwt"** · stale anon session ถูก auto-wipe + re-sign-in + retry once
 - **v2.19.1** *(APK + web · BETA)* — 🐞 **Hotfix AI photo ค้าง** · `getSession()` ของ supabase-js v2 deadlock จาก navigator-lock → อ่าน session จาก localStorage ตรงๆ + anon sign-in fallback · เปลี่ยน Gemini model default จาก 2.0-flash → 2.5-flash (free tier ใหม่)
 - **v2.19.0** *(APK + web · BETA)* — 🚀 **Mega-release: Growth + AI** · **🤖 AI ถ่ายรูปอาหาร ฟรี** ผ่าน Supabase Edge Function proxy (20 รูป/วัน/คน · BYO key ได้) — Claude/OpenAI/Gemini/Custom · **🔥 Streak-saver** push 21:30 · **🎉 Milestone share อัตโนมัติ** 7/14/30/60/100 · **🎁 Referral link** + badge · **Daily check-in toast** · **Onboarding telemetry** · 5 badges ใหม่ (streak14/30/60/100 + referred)

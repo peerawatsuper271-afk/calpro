@@ -915,7 +915,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.19.2 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.19.3 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1321,7 +1321,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.19.2 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.19.3 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1338,7 +1338,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.19.2';
+const APP_VERSION = '2.19.3';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -5611,14 +5611,12 @@ async function aiCallGemini(key,endpoint,model,imageBase64,prompt){
 // Make sure we have a Supabase session — anonymous is fine. Used by the
 // "proxy" provider so users don't need to sign up.
 //
-// IMPORTANT: client.auth.getSession() can hang indefinitely due to a
-// navigator-lock deadlock in supabase-js v2 (esp. when refreshToken is
-// in flight or when another tab holds the lock). We bypass it by reading
-// the storageKey directly from localStorage — that's where the SDK
-// persists the session anyway.
+// IMPORTANT: supabase-js v2 auth methods (getSession, signInAnonymously,
+// even getUser) can hang for tens of seconds due to a navigator-lock
+// deadlock when there's any stored state conflict. We bypass the SDK
+// entirely and talk to the auth REST API directly — same wire protocol,
+// no internal locks.
 async function aiEnsureSupabaseSession(){
-  const client=sb||await ensureSupabase(8000);
-  if(!client)throw new Error('Supabase not available');
   // 1) Direct read from localStorage (avoids getSession() lock deadlock)
   try{
     const raw=localStorage.getItem('calpro-sb-auth');
@@ -5633,17 +5631,34 @@ async function aiEnsureSupabaseSession(){
       }
     }
   }catch{}
-  // 2) No (or expired) session — try anonymous sign-in
-  if(typeof client.auth.signInAnonymously!=='function'){
-    throw new Error('Anonymous sign-in not supported in this SDK version');
+  // 2) No (or expired) session — sign in anonymously via REST.
+  // This sidesteps the SDK's auth.signInAnonymously() which has been
+  // observed to deadlock for >12s when the auth-storage lock is held.
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),12000);
+  let res;
+  try{
+    res=await fetch(SUPABASE_URL+'/auth/v1/signup',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'content-type':'application/json'},
+      body:'{}',
+      signal:ctrl.signal,
+    });
+  }catch(e){
+    clearTimeout(timer);
+    if(e.name==='AbortError')throw new Error('Anonymous sign-in timed out (12s)');
+    throw new Error('Anonymous sign-in fetch failed: '+e.message);
   }
-  const result=await Promise.race([
-    client.auth.signInAnonymously(),
-    new Promise((_,r)=>setTimeout(()=>r(new Error('Anonymous sign-in timed out (12s)')),12000)),
-  ]);
-  if(result?.error)throw new Error('Anonymous sign-in failed: '+result.error.message);
-  if(!result?.data?.session?.access_token)throw new Error('Anonymous sign-in returned no session');
-  return result.data.session;
+  clearTimeout(timer);
+  const txt=await res.text();
+  let j={};try{j=JSON.parse(txt);}catch{}
+  if(!res.ok){
+    throw new Error('Anonymous sign-in HTTP '+res.status+': '+(j.msg||j.error_description||j.error||txt.slice(0,200)));
+  }
+  if(!j.access_token)throw new Error('Anonymous sign-in returned no token');
+  // Persist in the same storage key the SDK uses, so subsequent calls reuse it.
+  try{localStorage.setItem('calpro-sb-auth',JSON.stringify(j));}catch{}
+  return j;
 }
 // Adapter — CalPro+ proxy (Supabase Edge Function). Key stays on server.
 // If the stored anon session has been wiped server-side (or token signature
@@ -6282,6 +6297,14 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.19.3':{
+    th:[
+      '🐞 **แก้ AI photo "sign-in timed out"** — `signInAnonymously()` ของ supabase-js v2 ก็ deadlock เหมือน getSession() · เปลี่ยนไปใช้ REST API ตรงๆ (`POST /auth/v1/signup`) ที่ไม่มี navigator-lock',
+    ],
+    en:[
+      '🐞 **Fix AI photo "sign-in timed out"** — supabase-js v2 `signInAnonymously()` also deadlocks like getSession · switched to direct REST call (`POST /auth/v1/signup`) that bypasses the navigator-lock',
+    ],
+  },
   '2.19.2':{
     th:[
       '🐞 **แก้ AI photo error "invalid_jwt"** — ถ้า session anonymous เก่าใน localStorage ถูก server ลบไปแล้ว · ระบบจะลบ session เก่าทิ้ง + สร้างใหม่ + retry อัตโนมัติ',
