@@ -303,7 +303,6 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .profile-goal-cell{background:var(--surface2);border-radius:9px;padding:9px 11px;}
 .pgc-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
 .pgc-val{font-size:.95rem;font-weight:700;color:var(--text);margin-top:2px;}
-.profile-edit-card{transition:opacity .2s;}
 .banner-color-grid{display:flex;gap:6px;flex-wrap:wrap;}
 .banner-color-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;}
 .banner-color-swatch:hover{transform:scale(1.1);}
@@ -867,81 +866,8 @@ select,textarea{font-size:max(16px,1rem)!important;}
           <div class="profile-goal-cell"><div class="pgc-lbl" data-i18n="weight_progress">น้ำหนัก</div><div class="pgc-val" id="pgcWeight">—</div></div>
         </div>
       </div>
-      <!-- ─── Edit Profile (collapsed by default) ─── -->
-      <div class="card profile-edit-card hide" id="profileEditCard">
-        <h3 data-i18n="edit_profile_long">✏️ แก้ไขโปรไฟล์</h3>
-        <!-- Banner color picker -->
-        <div class="sec-lbl" data-i18n="banner_color">สีแบนเนอร์</div>
-        <div class="banner-color-grid" id="bannerColorGrid"></div>
-        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          <button type="button" class="btn-sec" onclick="document.getElementById('bannerImgUpload').click()" style="flex:1;font-size:.74rem;padding:7px"><span data-i18n="banner_image">📷 หรืออัปโหลดรูปแบนเนอร์</span></button>
-          <button type="button" class="btn-sec" id="bannerRemoveBtn" onclick="removeBannerImage()" style="font-size:.74rem;padding:7px;display:none" data-i18n="banner_remove">ลบรูป</button>
-          <input type="file" id="bannerImgUpload" accept="image/*" hidden onchange="uploadBannerImage(this.files[0])">
-        </div>
-        <!-- Bio -->
-        <div class="fl" style="margin-top:10px">
-          <label data-i18n="bio_label">เกี่ยวกับฉัน (≤280 ตัวอักษร)</label>
-          <textarea id="pBio" maxlength="280" rows="2" placeholder="เล่าเรื่องเป้าหมายของคุณ..." style="resize:vertical;font-family:inherit"></textarea>
-          <div style="font-size:.66rem;color:var(--muted);text-align:right;margin-top:2px"><span id="pBioCount">0</span>/280</div>
-        </div>
-        <!-- Personal info -->
-        <div class="sec-lbl" style="margin-top:10px" data-i18n="personal_info">ข้อมูลส่วนตัว</div>
-        <div class="pgrid">
-          <div class="fl"><label data-i18n="name">ชื่อ</label><input type="text" id="pName" placeholder="ชื่อ" data-i18n="name_ph_profile"></div>
-          <div class="fl"><label data-i18n="gender">เพศ</label><select id="pGender"><option value="male" data-i18n="male">ชาย</option><option value="female" data-i18n="female">หญิง</option></select></div>
-          <div class="fl"><label data-i18n="age">อายุ</label><input type="number" id="pAge" placeholder="25"></div>
-          <div class="fl"><label data-i18n="weight_kg">น้ำหนัก (กก.)</label><input type="number" id="pWeight" placeholder="65"></div>
-          <div class="fl"><label data-i18n="height_cm">ส่วนสูง (ซม.)</label><input type="number" id="pHeight" placeholder="170"></div>
-          <div class="fl"><label data-i18n="goal_weight_kg">เป้าหมาย (กก.)</label><input type="number" id="pGoalW" placeholder="60"></div>
-        </div>
-        <div class="fl" style="margin-bottom:10px">
-          <label data-i18n="activity_lvl">การออกกำลังกาย</label>
-          <select id="pAct">
-            <option value="1.2" data-i18n="act_1">ไม่ค่อยออกกำลังกาย</option>
-            <option value="1.375" data-i18n="act_2">เบา 1–3 วัน/สัปดาห์</option>
-            <option value="1.55" selected data-i18n="act_3">ปานกลาง 3–5 วัน/สัปดาห์</option>
-            <option value="1.725" data-i18n="act_4">หนัก 6–7 วัน/สัปดาห์</option>
-            <option value="1.9" data-i18n="act_5">หนักมาก / งานใช้แรง</option>
-          </select>
-        </div>
-        <div style="margin-bottom:10px">
-          <div class="sec-lbl" data-i18n="goal_title">เป้าหมาย</div>
-          <div class="gchips">
-            <button class="gchip active" data-g="lose" onclick="pickGoal(this)" data-i18n="goal_lose">🔥 ลดน้ำหนัก</button>
-            <button class="gchip" data-g="maintain" onclick="pickGoal(this)" data-i18n="goal_maintain">⚖️ คงน้ำหนัก</button>
-            <button class="gchip" data-g="gain" onclick="pickGoal(this)" data-i18n="goal_gain">💪 เพิ่มกล้ามเนื้อ</button>
-          </div>
-        </div>
-        <button class="btn" onclick="saveProfile()" data-i18n="save_calc">บันทึกและคำนวณ</button>
-      </div>
-      <div class="card" id="resultCard" style="display:none">
-        <h3 data-i18n="calc_result">ผลการคำนวณ</h3>
-        <div class="rbox">
-          <div class="rbox-t">Harris-Benedict</div>
-          <div class="rrow"><span class="rl">BMR</span><span class="rv" id="rBMR">—</span></div>
-          <div class="rrow"><span class="rl">TDEE</span><span class="rv" id="rTDEE">—</span></div>
-          <div class="rrow"><span class="rl" data-i18n="goal_per_day">เป้าหมาย/วัน</span><span class="rv" id="rGoal" style="color:var(--accent)">—</span></div>
-        </div>
-        <div class="rbox">
-          <div class="rbox-t">Health</div>
-          <div class="rrow"><span class="rl" data-i18n="protein">โปรตีน</span><span class="rv" id="rProt" style="color:var(--blue)">—</span></div>
-          <div class="rrow"><span class="rl">BMI</span><span class="rv" id="rBMI">—</span></div>
-          <div class="rrow"><span class="rl">Timeline</span><span class="rv" id="rWeeks">—</span></div>
-        </div>
-        <div class="tip" id="tipBox"></div>
-      </div>
-      <div class="card hide" id="profileMeasurementsCard">
-        <h3 data-i18n="body_measurements">สัดส่วนร่างกาย</h3>
-        <div class="pgrid">
-          <div class="fl"><label data-i18n="waist">รอบเอว (ซม.)</label><input type="number" id="mWaist" step="0.1" placeholder="80"></div>
-          <div class="fl"><label data-i18n="hip">รอบสะโพก (ซม.)</label><input type="number" id="mHip" step="0.1" placeholder="95"></div>
-          <div class="fl"><label data-i18n="chest">รอบอก (ซม.)</label><input type="number" id="mChest" step="0.1" placeholder="95"></div>
-          <div class="fl"><label data-i18n="neck">รอบคอ (ซม.)</label><input type="number" id="mNeck" step="0.1" placeholder="38"></div>
-        </div>
-        <button class="btn-sec" onclick="saveMeasurements()" style="width:100%;margin-top:6px" data-i18n="save">บันทึก</button>
-        <div id="bfResult" style="margin-top:10px;font-size:.78rem"></div>
-        <div id="measureHistory" style="margin-top:10px;font-size:.74rem;color:var(--muted)"></div>
-      </div>
+      <!-- Edit profile + measurements now live in a popup modal further
+           down. The hero's "✏️ Edit profile" button opens it. -->
     </div>
 
     <!-- SETTINGS (full page) -->
@@ -1190,6 +1116,85 @@ select,textarea{font-size:max(16px,1rem)!important;}
       <input type="text" id="frSearchInput" placeholder="aa@example.com / John" oninput="renderFriendSearch(this.value)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;outline:none">
     </div>
     <div id="frSearchResults" style="max-height:280px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL — combined profile + measurements edit (lifted out
+     of pg-profile to avoid the confusing inline expand/collapse pattern) -->
+<div class="modal-bg hide" id="profileEditModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hdr"><h3 data-i18n="edit_profile_long">✏️ แก้ไขโปรไฟล์</h3><button class="mc-close" onclick="closeProfileEdit()" aria-label="Close">✕</button></div>
+    <!-- Banner color picker -->
+    <div class="sec-lbl" data-i18n="banner_color">สีแบนเนอร์</div>
+    <div class="banner-color-grid" id="bannerColorGrid"></div>
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+      <button type="button" class="btn-sec" onclick="document.getElementById('bannerImgUpload').click()" style="flex:1;font-size:.74rem;padding:7px"><span data-i18n="banner_image">📷 หรืออัปโหลดรูปแบนเนอร์</span></button>
+      <button type="button" class="btn-sec" id="bannerRemoveBtn" onclick="removeBannerImage()" style="font-size:.74rem;padding:7px;display:none" data-i18n="banner_remove">ลบรูป</button>
+      <input type="file" id="bannerImgUpload" accept="image/*" hidden onchange="uploadBannerImage(this.files[0])">
+    </div>
+    <!-- Bio -->
+    <div class="fl" style="margin-top:10px">
+      <label data-i18n="bio_label">เกี่ยวกับฉัน (≤280 ตัวอักษร)</label>
+      <textarea id="pBio" maxlength="280" rows="2" placeholder="เล่าเรื่องเป้าหมายของคุณ..." style="resize:vertical;font-family:inherit"></textarea>
+      <div style="font-size:.66rem;color:var(--muted);text-align:right;margin-top:2px"><span id="pBioCount">0</span>/280</div>
+    </div>
+    <!-- Personal info -->
+    <div class="sec-lbl" style="margin-top:10px" data-i18n="personal_info">ข้อมูลส่วนตัว</div>
+    <div class="pgrid">
+      <div class="fl"><label data-i18n="name">ชื่อ</label><input type="text" id="pName" placeholder="ชื่อ" data-i18n="name_ph_profile"></div>
+      <div class="fl"><label data-i18n="gender">เพศ</label><select id="pGender"><option value="male" data-i18n="male">ชาย</option><option value="female" data-i18n="female">หญิง</option></select></div>
+      <div class="fl"><label data-i18n="age">อายุ</label><input type="number" id="pAge" placeholder="25"></div>
+      <div class="fl"><label data-i18n="weight_kg">น้ำหนัก (กก.)</label><input type="number" id="pWeight" placeholder="65"></div>
+      <div class="fl"><label data-i18n="height_cm">ส่วนสูง (ซม.)</label><input type="number" id="pHeight" placeholder="170"></div>
+      <div class="fl"><label data-i18n="goal_weight_kg">เป้าหมาย (กก.)</label><input type="number" id="pGoalW" placeholder="60"></div>
+    </div>
+    <div class="fl" style="margin-bottom:10px">
+      <label data-i18n="activity_lvl">การออกกำลังกาย</label>
+      <select id="pAct">
+        <option value="1.2" data-i18n="act_1">ไม่ค่อยออกกำลังกาย</option>
+        <option value="1.375" data-i18n="act_2">เบา 1–3 วัน/สัปดาห์</option>
+        <option value="1.55" selected data-i18n="act_3">ปานกลาง 3–5 วัน/สัปดาห์</option>
+        <option value="1.725" data-i18n="act_4">หนัก 6–7 วัน/สัปดาห์</option>
+        <option value="1.9" data-i18n="act_5">หนักมาก / งานใช้แรง</option>
+      </select>
+    </div>
+    <div style="margin-bottom:10px">
+      <div class="sec-lbl" data-i18n="goal_title">เป้าหมาย</div>
+      <div class="gchips">
+        <button class="gchip active" data-g="lose" onclick="pickGoal(this)" data-i18n="goal_lose">🔥 ลดน้ำหนัก</button>
+        <button class="gchip" data-g="maintain" onclick="pickGoal(this)" data-i18n="goal_maintain">⚖️ คงน้ำหนัก</button>
+        <button class="gchip" data-g="gain" onclick="pickGoal(this)" data-i18n="goal_gain">💪 เพิ่มกล้ามเนื้อ</button>
+      </div>
+    </div>
+    <button class="btn" onclick="saveProfile()" style="width:100%" data-i18n="save_calc">บันทึกและคำนวณ</button>
+    <!-- Calc result lives inside the modal — shown after save, hidden again next open -->
+    <div id="resultCard" style="display:none;margin-top:14px">
+      <h3 data-i18n="calc_result" style="margin-bottom:8px">ผลการคำนวณ</h3>
+      <div class="rbox">
+        <div class="rbox-t">Harris-Benedict</div>
+        <div class="rrow"><span class="rl">BMR</span><span class="rv" id="rBMR">—</span></div>
+        <div class="rrow"><span class="rl">TDEE</span><span class="rv" id="rTDEE">—</span></div>
+        <div class="rrow"><span class="rl" data-i18n="goal_per_day">เป้าหมาย/วัน</span><span class="rv" id="rGoal" style="color:var(--accent)">—</span></div>
+      </div>
+      <div class="rbox">
+        <div class="rbox-t">Health</div>
+        <div class="rrow"><span class="rl" data-i18n="protein">โปรตีน</span><span class="rv" id="rProt" style="color:var(--blue)">—</span></div>
+        <div class="rrow"><span class="rl">BMI</span><span class="rv" id="rBMI">—</span></div>
+        <div class="rrow"><span class="rl">Timeline</span><span class="rv" id="rWeeks">—</span></div>
+      </div>
+      <div class="tip" id="tipBox"></div>
+    </div>
+    <!-- Body measurements (was a second collapsed card; now a section in the modal) -->
+    <div class="sec-lbl" style="margin-top:16px" data-i18n="body_measurements">สัดส่วนร่างกาย</div>
+    <div class="pgrid">
+      <div class="fl"><label data-i18n="waist">รอบเอว (ซม.)</label><input type="number" id="mWaist" step="0.1" placeholder="80"></div>
+      <div class="fl"><label data-i18n="hip">รอบสะโพก (ซม.)</label><input type="number" id="mHip" step="0.1" placeholder="95"></div>
+      <div class="fl"><label data-i18n="chest">รอบอก (ซม.)</label><input type="number" id="mChest" step="0.1" placeholder="95"></div>
+      <div class="fl"><label data-i18n="neck">รอบคอ (ซม.)</label><input type="number" id="mNeck" step="0.1" placeholder="38"></div>
+    </div>
+    <button class="btn-sec" onclick="saveMeasurements()" style="width:100%;margin-top:6px" data-i18n="save">บันทึก</button>
+    <div id="bfResult" style="margin-top:10px;font-size:.78rem"></div>
+    <div id="measureHistory" style="margin-top:10px;font-size:.74rem;color:var(--muted)"></div>
   </div>
 </div>
 
@@ -5163,7 +5168,9 @@ function saveProfile(){
   const height=+document.getElementById('pHeight').value;
   const goalW=+document.getElementById('pGoalW').value;
   const act=+document.getElementById('pAct').value;
-  const goalType=document.querySelector('#pg-profile .gchip.active').dataset.g;
+  // Profile-edit chips use data-g (TDEE page chips use data-tg), so this
+  // attribute selector survives the lift-into-modal move.
+  const goalType=(document.querySelector('.gchip[data-g].active')||{dataset:{g:'lose'}}).dataset.g;
   const bioRaw=document.getElementById('pBio')?.value||'';
   const bio=bioRaw.trim().slice(0,280);
   if(!age||!weight||!height){showToast(settings.lang==='en'?'Fill in all fields':'กรอกข้อมูลให้ครบ');return;}
@@ -5289,7 +5296,7 @@ function renderProfileUI(){
   document.getElementById('pAct').value=p.activity||1.55;
   document.getElementById('pBio').value=p.bio||'';
   document.getElementById('pBioCount').textContent=(p.bio||'').length;
-  document.querySelectorAll('#pg-profile .gchip').forEach(b=>b.classList.toggle('active',b.dataset.g===(p.goal_type||'lose')));
+  document.querySelectorAll('.gchip[data-g]').forEach(b=>b.classList.toggle('active',b.dataset.g===(p.goal_type||'lose')));
   // ── Banner color swatches ──
   const bcg=document.getElementById('bannerColorGrid');
   if(bcg){
@@ -5300,22 +5307,20 @@ function renderProfileUI(){
   renderCloudStatus();
   renderFriendsCard();
 }
+// Open the edit-profile modal. (Was an inline expand/collapse — users
+// kept missing the toggle, so it's a real popup now.) Reading from
+// userProfile happens via renderProfileUI which re-runs on open so
+// fields are always current.
 function toggleProfileEdit(){
-  const card=document.getElementById('profileEditCard');
-  const measure=document.getElementById('profileMeasurementsCard');
-  if(!card)return;
-  const willOpen=card.classList.contains('hide');
-  card.classList.toggle('hide',!willOpen);
-  if(measure)measure.classList.toggle('hide',!willOpen);
-  // Update the trigger button text to reflect state
-  const btn=document.querySelector('.profile-action-btn span[data-i18n="edit_profile"]');
-  if(btn){
-    const isEn=settings.lang==='en';
-    btn.textContent=willOpen?(isEn?'✓ Done editing':'✓ เสร็จสิ้น'):(isEn?'✏️ Edit profile':'✏️ แก้ไขโปรไฟล์');
-  }
-  if(willOpen){
-    setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),50);
-  }
+  const m=document.getElementById('profileEditModal');
+  if(!m)return;
+  // Reset transient result panel from a previous open
+  const rc=document.getElementById('resultCard');if(rc)rc.style.display='none';
+  m.classList.remove('hide');
+}
+function closeProfileEdit(){
+  const m=document.getElementById('profileEditModal');
+  if(m)m.classList.add('hide');
 }
 function pickBannerColor(c){
   if(!userProfile)return;
