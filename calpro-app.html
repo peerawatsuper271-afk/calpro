@@ -249,6 +249,22 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .fl input:focus,.fl select:focus{border-color:var(--accent);}
 .fl select option{background:var(--surface2);}
 
+/* ── BIO FIELD (modern textarea + progress + counter) ── */
+.bio-field{margin-top:10px;}
+.bio-field>label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:500;letter-spacing:.2px;}
+.bio-wrap{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:12px;transition:border-color .18s,box-shadow .18s,background .18s;overflow:hidden;}
+.bio-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,107,107,.12);}
+.bio-wrap textarea{display:block;width:100%;background:transparent;border:none;color:var(--text);padding:11px 13px 4px;font-size:.88rem;line-height:1.5;outline:none;resize:none;font-family:inherit;min-height:62px;max-height:140px;}
+.bio-wrap textarea::placeholder{color:var(--muted);opacity:.55;}
+.bio-meta{display:flex;align-items:center;gap:9px;padding:5px 13px 9px;}
+.bio-progress{flex:1;height:3px;background:var(--border);border-radius:99px;overflow:hidden;}
+.bio-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#ff8e53);border-radius:99px;transition:width .22s ease-out,background .22s;}
+.bio-progress-fill.warn{background:#ffa94d;}
+.bio-progress-fill.full{background:#ff5252;}
+.bio-count{font-size:.66rem;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:500;min-width:48px;text-align:right;transition:color .18s;}
+.bio-count.warn{color:#ffa94d;}
+.bio-count.full{color:#ff5252;}
+
 /* ── BUTTONS ── */
 .btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .2s;}
 .btn:hover{opacity:.85;}
@@ -1132,11 +1148,17 @@ select,textarea{font-size:max(16px,1rem)!important;}
       <button type="button" class="btn-sec" id="bannerRemoveBtn" onclick="removeBannerImage()" style="font-size:.74rem;padding:7px;display:none" data-i18n="banner_remove">ลบรูป</button>
       <input type="file" id="bannerImgUpload" accept="image/*" hidden onchange="uploadBannerImage(this.files[0])">
     </div>
-    <!-- Bio -->
-    <div class="fl" style="margin-top:10px">
-      <label data-i18n="bio_label">เกี่ยวกับฉัน (≤280 ตัวอักษร)</label>
-      <textarea id="pBio" maxlength="280" rows="2" placeholder="เล่าเรื่องเป้าหมายของคุณ..." style="resize:vertical;font-family:inherit"></textarea>
-      <div style="font-size:.66rem;color:var(--muted);text-align:right;margin-top:2px"><span id="pBioCount">0</span>/280</div>
+    <!-- Bio — modern look: borderless textarea over a card wrapper with
+         focus-glow + a thin gradient progress bar tracking 0/280 chars. -->
+    <div class="bio-field">
+      <label data-i18n="bio_label">เกี่ยวกับฉัน</label>
+      <div class="bio-wrap">
+        <textarea id="pBio" maxlength="280" rows="3" placeholder="เล่าเรื่องเป้าหมายของคุณ..." oninput="updateBioCount(this)"></textarea>
+        <div class="bio-meta">
+          <div class="bio-progress"><div class="bio-progress-fill" id="pBioFill"></div></div>
+          <div class="bio-count" id="pBioCountWrap"><span id="pBioCount">0</span> / 280</div>
+        </div>
+      </div>
     </div>
     <!-- Personal info -->
     <div class="sec-lbl" style="margin-top:10px" data-i18n="personal_info">ข้อมูลส่วนตัว</div>
@@ -1729,7 +1751,7 @@ const I18N = {
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
     streak_saver:'เตือนรักษา streak',streak_saver_sub:'push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)',
     edit_profile:'✏️ แก้ไขโปรไฟล์',edit_profile_long:'✏️ แก้ไขโปรไฟล์',
-    bio_label:'เกี่ยวกับฉัน (≤280 ตัวอักษร)',bio_empty_self:'ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม',bio_empty_friend:'(เพื่อนยังไม่ใส่คำอธิบาย)',
+    bio_label:'เกี่ยวกับฉัน',bio_empty_self:'ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม',bio_empty_friend:'(เพื่อนยังไม่ใส่คำอธิบาย)',
     banner_color:'สีแบนเนอร์',
     badges_showcase:'🏅 เหรียญตราที่ได้รับ',
     my_goal:'🎯 เป้าหมายของฉัน',goal_type_lbl:'ประเภท',goal_label2:'เป้า/วัน',weight_progress:'น้ำหนัก',
@@ -1831,7 +1853,7 @@ const I18N = {
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
     streak_saver:'Streak saver',streak_saver_sub:'21:30 push if not logged yet + streak ≥ 3 days (APK only)',
     edit_profile:'✏️ Edit profile',edit_profile_long:'✏️ Edit profile',
-    bio_label:'About me (≤280 chars)',bio_empty_self:'No bio yet · tap Edit profile to add one',bio_empty_friend:'(No bio yet)',
+    bio_label:'About me',bio_empty_self:'No bio yet · tap Edit profile to add one',bio_empty_friend:'(No bio yet)',
     banner_color:'Banner color',
     badges_showcase:'🏅 Badges earned',
     my_goal:'🎯 My goal',goal_type_lbl:'Type',goal_label2:'Daily',weight_progress:'Weight',
@@ -5153,6 +5175,18 @@ function renderAnalysis(){
 
 // ═══ PROFILE ═══
 function pickGoal(btn){document.querySelectorAll('.gchip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+// Sync the bio field's progress bar + counter to the current value.
+// Two thresholds: 80% (warn / amber) and 96% (full / red).
+function updateBioCount(el){
+  const n=(el?.value||'').length;
+  const pct=Math.min(100,(n/280)*100);
+  const warn=n>=224, full=n>=270;
+  const c=document.getElementById('pBioCount');if(c)c.textContent=n;
+  const cw=document.getElementById('pBioCountWrap');
+  if(cw){cw.classList.toggle('warn',warn&&!full);cw.classList.toggle('full',full);}
+  const f=document.getElementById('pBioFill');
+  if(f){f.style.width=pct.toFixed(1)+'%';f.classList.toggle('warn',warn&&!full);f.classList.toggle('full',full);}
+}
 function bmiLabel(b){
   const isEn=settings.lang==='en';
   if(b<18.5)return isEn?'(underweight)':'(ผอมเกิน)';
@@ -5294,8 +5328,9 @@ function renderProfileUI(){
   if(p.goal_weight)document.getElementById('pGoalW').value=p.goal_weight;
   document.getElementById('pGender').value=p.gender||'male';
   document.getElementById('pAct').value=p.activity||1.55;
-  document.getElementById('pBio').value=p.bio||'';
-  document.getElementById('pBioCount').textContent=(p.bio||'').length;
+  const bioEl=document.getElementById('pBio');
+  bioEl.value=p.bio||'';
+  updateBioCount(bioEl);  // also seeds the progress bar fill
   document.querySelectorAll('.gchip[data-g]').forEach(b=>b.classList.toggle('active',b.dataset.g===(p.goal_type||'lose')));
   // ── Banner color swatches ──
   const bcg=document.getElementById('bannerColorGrid');
