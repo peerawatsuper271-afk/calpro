@@ -313,6 +313,11 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .lb-item:hover{transform:translateY(-1px);border-color:var(--accent)!important;}
 .lb-item.me{cursor:default;}
 .lb-item.me:hover{transform:none;}
+/* banner crop modal — frame shows what will be saved at the banner's 4:1 aspect */
+.crop-frame{position:relative;width:100%;aspect-ratio:4/1;background:var(--surface2);border-radius:9px;overflow:hidden;touch-action:none;user-select:none;cursor:grab;}
+.crop-frame:active{cursor:grabbing;}
+.crop-frame img{position:absolute;top:0;left:0;transform-origin:0 0;pointer-events:none;max-width:none;}
+.crop-frame::after{content:'';position:absolute;inset:0;border:2px solid var(--accent);border-radius:9px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.35) inset;}
 /* friend profile modal — uses same hero classes */
 #friendProfileModal .modal{max-width:440px;padding:0;}
 #friendProfileModal .fp-hdr{padding:12px 14px;margin:0;border-bottom:1px solid var(--border);background:var(--surface);}
@@ -1178,6 +1183,29 @@ select,textarea{font-size:max(16px,1rem)!important;}
   </div>
 </div>
 
+<!-- BANNER CROP MODAL — drag + zoom an uploaded image to fit the banner area -->
+<div class="modal-bg hide" id="bannerCropModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hdr">
+      <h3 data-i18n="crop_title">ปรับตำแหน่งรูป</h3>
+      <button class="mc-close" onclick="closeBannerCrop()" aria-label="Close">✕</button>
+    </div>
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="crop_hint">ลากเพื่อเลื่อน · เลื่อน slider เพื่อซูม</div>
+    <div class="crop-frame" id="cropFrame">
+      <img id="cropImg" alt="" draggable="false">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
+      <span style="font-size:.74rem;color:var(--muted);min-width:38px" data-i18n="crop_zoom">ซูม</span>
+      <input type="range" id="cropZoom" min="100" max="400" value="100" step="5" style="flex:1" oninput="updateCropTransform()">
+      <button class="btn-sec" onclick="resetCrop()" style="font-size:.72rem;padding:4px 10px" data-i18n="crop_reset">รีเซ็ต</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn-sec" onclick="closeBannerCrop()" data-i18n="crop_cancel">ยกเลิก</button>
+      <button class="btn" onclick="applyBannerCrop()" data-i18n="crop_apply">✓ ใช้รูปนี้</button>
+    </div>
+  </div>
+</div>
+
 <!-- FRIEND PROFILE MODAL — Steam-style read-only view of another user -->
 <div class="modal-bg hide" id="friendProfileModal" role="dialog" aria-modal="true" aria-labelledby="fpName">
   <div class="modal" style="max-width:440px;padding:0;overflow:hidden">
@@ -1607,7 +1635,9 @@ const I18N = {
     my_goal:'🎯 เป้าหมายของฉัน',goal_type_lbl:'ประเภท',goal_label2:'เป้า/วัน',weight_progress:'น้ำหนัก',
     streak_lbl:'streak',days_lbl:'วันที่บันทึก',on_track_lbl:'อยู่ในเป้า',score_lbl:'คะแนน',
     send_cheer:'👏 ส่งกำลังใจ',cheer_sent:'ส่งกำลังใจให้ %n แล้ว 👏',
-    lvl_newcomer:'มือใหม่',lvl_starter:'นักสะสมสตรีค',lvl_regular:'ขาประจำ',lvl_pro:'มืออาชีพ',lvl_master:'มาสเตอร์',lvl_legend:'ตำนาน',
+    lvl_newcomer:'มือใหม่',lvl_starter:'นักสะสมสตรีค',lvl_regular:'ขาประจำ',lvl_pro:'มืออาชีพ',lvl_master:'มาสเตอร์',lvl_champion:'แชมป์เปี้ยน',lvl_veteran:'ผู้เก๋าเกม',lvl_elite:'ระดับเอลีท',lvl_mythic:'ระดับมิทิก',lvl_legend:'ตำนาน',
+    lvl_progress:'อีก %n คะแนนถึง Lv %l',lvl_maxed:'ระดับสูงสุด · เก่งเทพ!',
+    crop_title:'ปรับตำแหน่งรูป',crop_hint:'ลากเพื่อเลื่อน · เลื่อน slider เพื่อซูม',crop_zoom:'ซูม',crop_reset:'รีเซ็ต',crop_cancel:'ยกเลิก',crop_apply:'✓ ใช้รูปนี้',
     fp_loading:'กำลังโหลดโปรไฟล์...',fp_err:'โหลดโปรไฟล์ไม่สำเร็จ',
     dev_unlocked:'🔧 ปลดล็อก Developer mode',dev_locked:'ล็อก Developer mode แล้ว',dev_wrong_pw:'รหัสผ่านไม่ถูกต้อง',dev_dumped:'ดัมป์ใน console แล้ว',
     sign_in_first:'กรุณาเข้าสู่ระบบก่อน',
@@ -1704,7 +1734,9 @@ const I18N = {
     my_goal:'🎯 My goal',goal_type_lbl:'Type',goal_label2:'Daily',weight_progress:'Weight',
     streak_lbl:'streak',days_lbl:'logged',on_track_lbl:'on track',score_lbl:'score',
     send_cheer:'👏 Send cheer',cheer_sent:'Sent cheer to %n 👏',
-    lvl_newcomer:'Newcomer',lvl_starter:'Streak starter',lvl_regular:'Regular',lvl_pro:'Pro',lvl_master:'Master',lvl_legend:'Legend',
+    lvl_newcomer:'Newcomer',lvl_starter:'Streak starter',lvl_regular:'Regular',lvl_pro:'Pro',lvl_master:'Master',lvl_champion:'Champion',lvl_veteran:'Veteran',lvl_elite:'Elite',lvl_mythic:'Mythic',lvl_legend:'Legend',
+    lvl_progress:'%n more to Lv %l',lvl_maxed:'Max level · godlike!',
+    crop_title:'Adjust image',crop_hint:'Drag to move · slider to zoom',crop_zoom:'Zoom',crop_reset:'Reset',crop_cancel:'Cancel',crop_apply:'✓ Apply',
     fp_loading:'Loading profile...',fp_err:'Failed to load profile',
     dev_unlocked:'🔧 Developer mode unlocked',dev_locked:'Developer mode locked',dev_wrong_pw:'Wrong password',dev_dumped:'Dumped to console',
     sign_in_first:'Sign in first',
@@ -4822,16 +4854,28 @@ function saveProfile(){
 const CUTE_AVATARS=['🐱','🐶','🐻','🐼','🦊','🐰','🐯','🦁','🐨','🐭','🐹','🐮','🐷','🐸','🐵','🦄','🐧','🦉','🐺','🦝','🐢','🐬','🦋','🌸'];
 // Banner color presets — Steam-style swatches
 const BANNER_COLORS=['#ff6b6b','#ffa94d','#51cf66','#74c0fc','#b197fc','#f783ac','#ffd43b','#63e6be','#495057'];
-// Compute "level" from streak + days · returns {level, title}
+// Compute "level" from streak + days · returns {lv, title, icon, score, nextAt}
+// 10-tier system — higher tiers take exponentially more effort, matching MMO/
+// game progression curves so users feel a clear sense of climbing.
 function computeUserLevel(streak,days,onTrack){
-  // Composite: streak ×2 + days/2 + onTrack/3 (rough)
   const score=streak*2+Math.floor(days/2)+Math.floor(onTrack/3);
-  if(score>=100)return {lv:6,title:t('lvl_legend'),icon:'👑'};
-  if(score>=60)return {lv:5,title:t('lvl_master'),icon:'💎'};
-  if(score>=30)return {lv:4,title:t('lvl_pro'),icon:'🚀'};
-  if(score>=15)return {lv:3,title:t('lvl_regular'),icon:'⚡'};
-  if(score>=5)return {lv:2,title:t('lvl_starter'),icon:'🔥'};
-  return {lv:1,title:t('lvl_newcomer'),icon:'🌱'};
+  const TIERS=[
+    {min:0,    lv:1,  icon:'🌱', key:'lvl_newcomer'},   // 0-4
+    {min:5,    lv:2,  icon:'🔥', key:'lvl_starter'},    // 5-14
+    {min:15,   lv:3,  icon:'⚡', key:'lvl_regular'},    // 15-29
+    {min:30,   lv:4,  icon:'🚀', key:'lvl_pro'},        // 30-59
+    {min:60,   lv:5,  icon:'💎', key:'lvl_master'},     // 60-99
+    {min:100,  lv:6,  icon:'🏆', key:'lvl_champion'},   // 100-149
+    {min:150,  lv:7,  icon:'⭐', key:'lvl_veteran'},    // 150-249
+    {min:250,  lv:8,  icon:'🥇', key:'lvl_elite'},      // 250-399
+    {min:400,  lv:9,  icon:'🌟', key:'lvl_mythic'},     // 400-599
+    {min:600,  lv:10, icon:'👑', key:'lvl_legend'},     // 600+
+  ];
+  let cur=TIERS[0],next=TIERS[1];
+  for(let i=TIERS.length-1;i>=0;i--){
+    if(score>=TIERS[i].min){cur=TIERS[i];next=TIERS[i+1]||null;break;}
+  }
+  return {lv:cur.lv,title:t(cur.key),icon:cur.icon,score,nextAt:next?next.min:null};
 }
 // Render the new Steam-style profile page (own profile)
 function renderProfileUI(){
@@ -4855,7 +4899,14 @@ function renderProfileUI(){
   const score=calcScore(ebd);
   const lvl=computeUserLevel(streak,days,onTrack);
   document.getElementById('profileLevelBadge').textContent=`${lvl.icon} Lv ${lvl.lv}`;
-  document.getElementById('profileLevelTitle').textContent=lvl.title;
+  let title=lvl.title;
+  if(lvl.nextAt){
+    const remaining=lvl.nextAt-lvl.score;
+    title+=` · ${t('lvl_progress').replace('%n',remaining).replace('%l',lvl.lv+1)}`;
+  }else{
+    title+=` · ${t('lvl_maxed')}`;
+  }
+  document.getElementById('profileLevelTitle').textContent=title;
   document.getElementById('pstStreak').textContent=streak;
   document.getElementById('pstDays').textContent=days;
   document.getElementById('pstOnTrack').textContent=onTrack;
@@ -4952,7 +5003,10 @@ function applyBannerVisual(){
     }
   }
 }
-// Resize an uploaded image to a banner-friendly size + store as data URL.
+// ─── BANNER IMAGE CROP FLOW ───
+// Pick a file → open crop modal with drag + zoom → save to userProfile.
+// State held in _cropState while modal is open.
+let _cropState=null;
 function uploadBannerImage(file){
   if(!file||!userProfile)return;
   const isEn=settings.lang==='en';
@@ -4961,25 +5015,129 @@ function uploadBannerImage(file){
   reader.onload=e=>{
     const img=new Image();
     img.onload=()=>{
-      try{
-        // Target ~1200x300 (4:1 wide banner) · cap to source dims
-        const MAXW=1200,MAXH=400;
-        const ratio=Math.min(MAXW/img.width,MAXH/img.height,1);
-        const w=Math.round(img.width*ratio),h=Math.round(img.height*ratio);
-        const c=document.createElement('canvas');c.width=w;c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
-        userProfile.banner_image=c.toDataURL('image/jpeg',0.82);
-        saveProfile_LS();
-        applyBannerVisual();
-        scheduleAutoSync('profile');
-        showToast(isEn?'Banner updated ✓':'อัปเดต banner แล้ว ✓');
-      }catch(err){showToast((isEn?'Image error: ':'รูปผิดพลาด: ')+err.message);}
+      // Reset the file input so the same file can be re-selected later
+      const inp=document.getElementById('bannerImgUpload');if(inp)inp.value='';
+      openBannerCropModal(img);
     };
     img.onerror=()=>showToast(isEn?'Not a valid image':'ไฟล์ไม่ใช่รูปภาพ');
     img.src=e.target.result;
   };
   reader.onerror=()=>showToast(isEn?'Read failed':'อ่านไฟล์ไม่สำเร็จ');
   reader.readAsDataURL(file);
+}
+// Open the crop modal with a loaded image. Initial state fits image to frame
+// at object-fit:cover behavior (fill frame, no whitespace).
+function openBannerCropModal(img){
+  const modal=document.getElementById('bannerCropModal');
+  const frame=document.getElementById('cropFrame');
+  const slot=document.getElementById('cropImg');
+  slot.src=img.src;
+  // Compute the "cover" scale — the larger of (frameW/imgW), (frameH/imgH) ·
+  // ensures image always fills the frame even before user zooms.
+  const fw=frame.clientWidth||320;
+  const fh=fw/4;  // 4:1 aspect
+  const baseScale=Math.max(fw/img.naturalWidth,fh/img.naturalHeight);
+  _cropState={
+    img,                     // for canvas render later
+    naturalW:img.naturalWidth,
+    naturalH:img.naturalHeight,
+    frameW:fw,
+    frameH:fh,
+    baseScale,               // cover scale at zoom 100%
+    scale:1,                 // user zoom multiplier (1.0-4.0)
+    tx:0,ty:0,               // drag offset (px)
+    dragging:false,lastX:0,lastY:0,
+  };
+  // Center the image in the frame initially
+  const fullW=img.naturalWidth*baseScale;
+  const fullH=img.naturalHeight*baseScale;
+  _cropState.tx=(fw-fullW)/2;
+  _cropState.ty=(fh-fullH)/2;
+  document.getElementById('cropZoom').value=100;
+  slot.style.width=img.naturalWidth+'px';
+  slot.style.height=img.naturalHeight+'px';
+  updateCropTransform();
+  modal.classList.remove('hide');
+  bindCropDrag();
+}
+function updateCropTransform(){
+  if(!_cropState)return;
+  const z=+document.getElementById('cropZoom').value/100;
+  _cropState.scale=z;
+  const s=_cropState.baseScale*z;
+  document.getElementById('cropImg').style.transform=`translate(${_cropState.tx}px,${_cropState.ty}px) scale(${s})`;
+}
+function bindCropDrag(){
+  const frame=document.getElementById('cropFrame');
+  if(frame.dataset.bound==='1')return;
+  frame.dataset.bound='1';
+  const start=(x,y)=>{if(!_cropState)return;_cropState.dragging=true;_cropState.lastX=x;_cropState.lastY=y;};
+  const move=(x,y)=>{
+    if(!_cropState||!_cropState.dragging)return;
+    const dx=x-_cropState.lastX,dy=y-_cropState.lastY;
+    _cropState.tx+=dx;_cropState.ty+=dy;
+    _cropState.lastX=x;_cropState.lastY=y;
+    updateCropTransform();
+  };
+  const end=()=>{if(_cropState)_cropState.dragging=false;};
+  frame.addEventListener('mousedown',e=>{e.preventDefault();start(e.clientX,e.clientY);});
+  window.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+  window.addEventListener('mouseup',end);
+  frame.addEventListener('touchstart',e=>{const t=e.touches[0];start(t.clientX,t.clientY);},{passive:true});
+  frame.addEventListener('touchmove',e=>{const t=e.touches[0];move(t.clientX,t.clientY);},{passive:true});
+  frame.addEventListener('touchend',end);
+}
+function resetCrop(){
+  if(!_cropState)return;
+  document.getElementById('cropZoom').value=100;
+  const fullW=_cropState.naturalW*_cropState.baseScale;
+  const fullH=_cropState.naturalH*_cropState.baseScale;
+  _cropState.tx=(_cropState.frameW-fullW)/2;
+  _cropState.ty=(_cropState.frameH-fullH)/2;
+  _cropState.scale=1;
+  updateCropTransform();
+}
+function closeBannerCrop(){
+  document.getElementById('bannerCropModal').classList.add('hide');
+  _cropState=null;
+}
+// Render the visible portion of the image to a 1200x300 banner-sized canvas
+// then store the JPEG data URL. Math: image coord at frame (0,0) is
+// (-tx/(baseScale*scale), -ty/(baseScale*scale)).
+function applyBannerCrop(){
+  if(!_cropState||!userProfile)return;
+  const isEn=settings.lang==='en';
+  try{
+    const OUT_W=1200,OUT_H=300;     // 4:1 banner
+    const s=_cropState.baseScale*_cropState.scale;
+    const sx=-_cropState.tx/s;
+    const sy=-_cropState.ty/s;
+    const sw=_cropState.frameW/s;
+    const sh=_cropState.frameH/s;
+    const c=document.createElement('canvas');c.width=OUT_W;c.height=OUT_H;
+    const ctx=c.getContext('2d');
+    // Clamp to image bounds so drawImage doesn't error on out-of-range
+    const cx=Math.max(0,sx),cy=Math.max(0,sy);
+    const cw=Math.min(_cropState.naturalW-cx,sw-(cx-sx));
+    const ch=Math.min(_cropState.naturalH-cy,sh-(cy-sy));
+    // Fill any out-of-bounds area with a subtle bg so it doesn't render black
+    ctx.fillStyle='#222';ctx.fillRect(0,0,OUT_W,OUT_H);
+    if(cw>0&&ch>0){
+      const tx=((cx-sx)/sw)*OUT_W;
+      const ty=((cy-sy)/sh)*OUT_H;
+      const tw=(cw/sw)*OUT_W;
+      const th=(ch/sh)*OUT_H;
+      ctx.drawImage(_cropState.img,cx,cy,cw,ch,tx,ty,tw,th);
+    }
+    userProfile.banner_image=c.toDataURL('image/jpeg',0.84);
+    saveProfile_LS();
+    applyBannerVisual();
+    scheduleAutoSync('profile');
+    closeBannerCrop();
+    showToast(isEn?'Banner updated ✓':'อัปเดต banner แล้ว ✓');
+  }catch(err){
+    showToast((isEn?'Crop error: ':'แก้รูปผิดพลาด: ')+err.message);
+  }
 }
 function removeBannerImage(){
   if(!userProfile)return;
