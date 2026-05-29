@@ -2502,6 +2502,9 @@ function showPage(id,btn){
   if(btn)btn.classList.add('active');
   // Also highlight matching bottom-nav button if any
   document.querySelectorAll('.bnt').forEach(b=>{if(b.dataset.tab===id)b.classList.add('active');});
+  // Today gets a fresh render too — otherwise switching tabs shows a stale
+  // DOM (water count, food log, macros) until the user manually refreshes.
+  if(id==='today'){loadEntries();renderToday();}
   if(id==='analysis')renderAnalysis();
   if(id==='tdee')syncTDEEFromProfile();
   if(id==='add'){renderQuickList();refreshAiQuotaInline();}
@@ -3134,19 +3137,32 @@ async function renderAllUsersLeaderboard(){
     // Need an sb client to query — it's loaded lazily, so wait if needed.
     const client=sb||await ensureSupabase(8000);
     if(!client)throw new Error('Supabase unavailable');
-    // Pull up to 200 profiles + up to 20k recent food entries
-    const [profilesRes,entriesRes]=await Promise.all([
+    // Pull up to 200 profiles + daily-aggregated totals (60-day window).
+    // The RPC is SECURITY DEFINER so it bypasses RLS — without it, non-friends'
+    // entries are filtered out and every non-friend scores 0.
+    // Falls back to direct food_entries query if the RPC isn't deployed yet
+    // (older Supabase instances pre-v2.23 migration).
+    const [profilesRes,totalsRes]=await Promise.all([
       client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200),
-      client.from('food_entries').select('user_id,entry_date,calories').limit(20000),
+      client.rpc('get_public_daily_totals',{_days:60}),
     ]);
     const profiles=profilesRes.data||[];
     if(!profiles.length){body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_no_users')}</div>`;return;}
-    // Group entries by user_id → entries_by_day
+    // RPC returns rows of {user_id, entry_date, total_kcal}. If the RPC doesn't
+    // exist yet (404), fall back to the old direct-query path so the page
+    // still works — just with the old 0-score-for-non-friends limitation.
+    let totalsRows=totalsRes.data;
+    if(totalsRes.error||!totalsRows){
+      const fallback=await client.from('food_entries').select('user_id,entry_date,calories').limit(20000);
+      totalsRows=(fallback.data||[]).map(e=>({user_id:e.user_id,entry_date:e.entry_date,total_kcal:e.calories}));
+    }
+    // Group totals by user_id → {date: [{calories:total_kcal}]} — wrapped so
+    // calcStreak/daysOnTrack (which expect arrays of entries) still work.
     const byUser={};
-    (entriesRes.data||[]).forEach(e=>{
-      if(!byUser[e.user_id])byUser[e.user_id]={};
-      if(!byUser[e.user_id][e.entry_date])byUser[e.user_id][e.entry_date]=[];
-      byUser[e.user_id][e.entry_date].push(e);
+    totalsRows.forEach(r=>{
+      if(!byUser[r.user_id])byUser[r.user_id]={};
+      const prev=byUser[r.user_id][r.entry_date]?.[0]?.calories||0;
+      byUser[r.user_id][r.entry_date]=[{calories:prev+(r.total_kcal||0)}];
     });
     // Score per profile · join with profile fields
     const ranked=profiles.map(p=>{
