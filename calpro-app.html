@@ -132,9 +132,35 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;font-weight:600;}
 
 /* ── DATE NAV ── */
-.dnav{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;}
-.dnav button{background:var(--surface);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;}
-.dlbl{font-size:.88rem;font-weight:600;min-width:145px;text-align:center;}
+.dnav{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 14px;}
+.dnav-arrow{background:var(--surface);border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:50%;font-size:1.1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;transition:border-color .15s,color .15s,opacity .15s,transform .1s;}
+.dnav-arrow:hover{border-color:var(--accent);color:var(--accent);}
+.dnav-arrow:active{transform:scale(.9);}
+.dnav-arrow.is-disabled{opacity:.3;pointer-events:none;}
+.dnav-pill{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:99px;padding:7px 16px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;min-width:148px;justify-content:center;transition:border-color .15s;}
+.dnav-pill:hover{border-color:var(--accent);}
+.dnav-pill:active{transform:scale(.98);}
+.dnav-cal-ico{width:14px;height:14px;stroke:var(--accent);stroke-width:2.2;fill:none;flex:none;}
+
+/* ── CUSTOM CALENDAR ── */
+.cal-pop{width:100%;max-width:330px;}
+.cal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-hd-title{font-size:1rem;font-weight:700;}
+.cal-nav{background:var(--surface2);border:none;color:var(--text);width:32px;height:32px;border-radius:50%;font-size:1.1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s,opacity .15s;}
+.cal-nav:hover{background:var(--accent);color:#fff;}
+.cal-nav.is-disabled{opacity:.3;pointer-events:none;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-dow{font-size:.6rem;color:var(--muted);text-align:center;font-weight:700;padding:2px 0 6px;}
+.cal-day{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.82rem;border-radius:10px;cursor:pointer;color:var(--text);border:1.5px solid transparent;transition:background .12s,color .12s;}
+.cal-day:hover{background:var(--surface2);}
+.cal-day.is-empty{visibility:hidden;pointer-events:none;}
+.cal-day.is-future{color:var(--muted);opacity:.28;pointer-events:none;}
+.cal-day.is-today{border-color:var(--accent);font-weight:700;}
+.cal-day.is-selected{background:var(--accent);color:#fff;font-weight:700;}
+.cal-day .cal-dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--green);}
+.cal-day.is-selected .cal-dot{background:#fff;}
+.cal-today-btn{width:100%;margin-top:14px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;}
+.cal-today-btn:hover{border-color:var(--accent);color:var(--accent);}
 
 /* ── RING ── */
 .ring-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;}
@@ -168,12 +194,16 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .wwcard{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 12px;}
 .wwcard h4{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
 .wwval{font-size:1rem;font-weight:700;}
-.water-dots{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
-.wd{width:14px;height:18px;border-radius:3px 3px 7px 7px;background:var(--surface2);border:1px solid var(--border);transition:background .15s;cursor:pointer;}
+/* Compact water card: title + inline stepper on one row, dots below */
+.water-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.water-stepper{display:flex;align-items:center;gap:8px;flex:none;}
+.water-stepper button{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.05rem;line-height:1;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;flex:none;transition:border-color .15s,color .15s,transform .1s;}
+.water-stepper button:hover{border-color:var(--blue);color:var(--blue);}
+.water-stepper button:active{transform:scale(.9);}
+.water-stepper .wwval{min-width:70px;text-align:center;}
+.water-dots{display:flex;gap:3px;margin-top:10px;flex-wrap:wrap;}
+.wd{width:13px;height:17px;border-radius:3px 3px 6px 6px;background:var(--surface2);border:1px solid var(--border);transition:background .15s;cursor:pointer;}
 .wd.full{background:var(--blue);border-color:var(--blue);}
-.water-ctrl{display:flex;gap:5px;margin-top:5px;}
-.water-ctrl button{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px;font-size:.78rem;cursor:pointer;font-family:inherit;}
-.water-ctrl button:hover{border-color:var(--blue);}
 .weight-input{display:flex;gap:5px;align-items:center;margin-top:4px;}
 .weight-input input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px 8px;font-size:.85rem;outline:none;font-family:inherit;}
 .weight-input input:focus{border-color:var(--accent);}
@@ -625,10 +655,12 @@ select,textarea{font-size:max(16px,1rem)!important;}
     <!-- TODAY -->
     <div class="screen active" id="pg-today">
       <div class="dnav">
-        <button onclick="changeDay(-1)">‹</button>
-        <div class="dlbl" id="dateLabel" onclick="openDatePicker()" style="cursor:pointer" title="คลิกเพื่อเลือกวันที่">—</div>
-        <button onclick="changeDay(1)">›</button>
-        <input type="date" id="datePicker" onchange="pickDate(this.value)" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
+        <button class="dnav-arrow" onclick="changeDay(-1)" aria-label="วันก่อนหน้า">‹</button>
+        <button class="dnav-pill" id="dateLabel" onclick="openDatePicker()" aria-label="เลือกวันที่">
+          <svg class="dnav-cal-ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+          <span id="dateLabelText">—</span>
+        </button>
+        <button class="dnav-arrow" id="dnavNext" onclick="changeDay(1)" aria-label="วันถัดไป">›</button>
       </div>
       <div id="reminderBanner"></div>
       <div class="ring-wrap">
@@ -652,13 +684,15 @@ select,textarea{font-size:max(16px,1rem)!important;}
       </div>
       <div class="wwrow">
         <div class="wwcard wwcard-full">
-          <h4><span data-i18n="water">น้ำดื่ม</span></h4>
-          <div class="wwval"><span id="waterCount">0</span>/<span id="waterGoalDisp">8</span> <span data-i18n="cups_unit">แก้ว</span></div>
-          <div class="water-dots" id="waterDots"></div>
-          <div class="water-ctrl">
-            <button onclick="addWater(-1)" aria-label="Remove one cup of water">−</button>
-            <button onclick="addWater(1)" aria-label="Add one cup of water">+</button>
+          <div class="water-top">
+            <h4 style="margin:0"><span data-i18n="water">น้ำดื่ม</span></h4>
+            <div class="water-stepper">
+              <button onclick="addWater(-1)" aria-label="Remove one cup of water">−</button>
+              <span class="wwval"><span id="waterCount">0</span>/<span id="waterGoalDisp">8</span> <span data-i18n="cups_unit">แก้ว</span></span>
+              <button onclick="addWater(1)" aria-label="Add one cup of water">+</button>
+            </div>
           </div>
+          <div class="water-dots" id="waterDots"></div>
         </div>
       </div>
       <div class="card hide" id="healthCard" style="margin-top:8px">
@@ -1123,6 +1157,20 @@ select,textarea{font-size:max(16px,1rem)!important;}
       <button class="btn-sec" onclick="addWater(-1);renderQuickWater()" style="font-size:1.2rem">−</button>
       <button class="btn" onclick="addWater(1);renderQuickWater()" style="font-size:1.2rem">+</button>
     </div>
+  </div>
+</div>
+
+<!-- CUSTOM CALENDAR — date picker (replaces native input · modern + minimal) -->
+<div class="modal-bg hide" id="calendarModal" onclick="if(event.target===this)closeCalendar()">
+  <div class="modal cal-pop">
+    <div class="cal-hd">
+      <button class="cal-nav" id="calPrev" onclick="calNav(-1)" aria-label="เดือนก่อนหน้า">‹</button>
+      <div class="cal-hd-title" id="calTitle">—</div>
+      <button class="cal-nav" id="calNext" onclick="calNav(1)" aria-label="เดือนถัดไป">›</button>
+    </div>
+    <div class="cal-grid" id="calDow"></div>
+    <div class="cal-grid" id="calGrid" style="margin-top:3px"></div>
+    <button class="cal-today-btn" onclick="calPick(todayKey())" data-i18n="today">วันนี้</button>
   </div>
 </div>
 
@@ -1591,7 +1639,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.24.3';
+const APP_VERSION = '2.25.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2624,19 +2672,63 @@ function changeDay(d){
   if(nk>todayKey())return;
   currentDate=nk;loadEntries();renderToday();
 }
+// ═══ CUSTOM CALENDAR (replaces the native <input type=date>) ═══
+// _calView holds the month currently shown in the picker {y, m} (m = 0-11).
+let _calView={y:0,m:0};
 function openDatePicker(){
-  const dp=document.getElementById('datePicker');
-  dp.value=currentDate;dp.max=todayKey();
-  // showPicker() is the modern API; fallback to focus+click for older browsers
-  if(dp.showPicker){try{dp.showPicker();return;}catch(e){}}
-  dp.style.opacity=1;dp.style.width='auto';dp.style.height='auto';dp.style.pointerEvents='auto';
-  dp.focus();dp.click();
+  const d=new Date(currentDate+'T00:00:00');
+  _calView={y:d.getFullYear(),m:d.getMonth()};
+  renderCalendar();
+  document.getElementById('calendarModal').classList.remove('hide');
+}
+function closeCalendar(){document.getElementById('calendarModal').classList.add('hide');}
+function calNav(delta){
+  let {y,m}=_calView; m+=delta;
+  if(m<0){m=11;y--;} else if(m>11){m=0;y++;}
+  // Don't navigate past the current month (no future logging)
+  const now=new Date();
+  if(y>now.getFullYear()||(y===now.getFullYear()&&m>now.getMonth()))return;
+  _calView={y,m}; renderCalendar();
+}
+function calPick(k){
+  if(!k||k>todayKey())return;
+  closeCalendar();
+  pickDate(k);
+}
+function renderCalendar(){
+  const {y,m}=_calView;
+  const isEn=settings.lang==='en';
+  const loc=isEn?'en-GB':'th-TH';
+  // Header — month + year (Buddhist year shown by th-TH locale automatically)
+  document.getElementById('calTitle').textContent=new Date(y,m,1).toLocaleDateString(loc,{month:'long',year:'numeric'});
+  // Day-of-week header (Sun-first to match getDay())
+  const dow=isEn?['Su','Mo','Tu','We','Th','Fr','Sa']:['อา','จ','อ','พ','พฤ','ศ','ส'];
+  document.getElementById('calDow').innerHTML=dow.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  // Day grid
+  const firstDow=new Date(y,m,1).getDay();       // 0=Sun
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const tk=todayKey();
+  let cells='';
+  for(let i=0;i<firstDow;i++)cells+=`<div class="cal-day is-empty"></div>`;
+  for(let day=1;day<=daysInMonth;day++){
+    const k=dateKey(new Date(y,m,day));
+    const cls=['cal-day'];
+    if(k>tk)cls.push('is-future');
+    if(k===tk)cls.push('is-today');
+    if(k===currentDate)cls.push('is-selected');
+    const dot=(allEntries[k]&&allEntries[k].length)?'<span class="cal-dot"></span>':'';
+    const click=k>tk?'':` onclick="calPick('${k}')"`;
+    cells+=`<div class="${cls.join(' ')}"${click}>${day}${dot}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML=cells;
+  // Disable the "next month" arrow when viewing the current month
+  const now=new Date();
+  const atCurrentMonth=(y===now.getFullYear()&&m===now.getMonth());
+  document.getElementById('calNext').classList.toggle('is-disabled',atCurrentMonth);
 }
 function pickDate(v){
   if(!v||v>todayKey())return;
   currentDate=v;loadEntries();renderToday();
-  const dp=document.getElementById('datePicker');
-  dp.style.opacity=0;dp.style.width=0;dp.style.height=0;dp.style.pointerEvents='none';
 }
 
 // ═══ SEARCH ═══
@@ -4906,7 +4998,10 @@ function renderToday(){
   const pct=Math.min(net/goal,1);
   const over=net>goal;
   const clr=over?'#ff6b6b':pct>0.85?'#ffa94d':'#51cf66';
-  document.getElementById('dateLabel').textContent=fmtDate(currentDate);
+  document.getElementById('dateLabelText').textContent=fmtDate(currentDate);
+  // Disable the forward arrow on today (can't log the future)
+  const nextBtn=document.getElementById('dnavNext');
+  if(nextBtn)nextBtn.classList.toggle('is-disabled',currentDate>=todayKey());
   const circ=376.99;
   document.getElementById('ringFill').style.strokeDashoffset=(circ-pct*circ).toFixed(2);
   document.getElementById('ringFill').style.stroke=clr;
@@ -5777,8 +5872,8 @@ const DENSITY_CSS = `
 [data-simple="1"] .mg-hdr{font-size:.9rem;}
 [data-simple="1"] .bnt{font-size:.82rem;padding:12px 4px 10px;}
 [data-simple="1"] .bnt .ico{font-size:1.5rem;}
-[data-simple="1"] .dlbl{font-size:1.05rem;}
-[data-simple="1"] .dnav button{width:38px;height:38px;font-size:1.2rem;}
+[data-simple="1"] .dnav-pill{font-size:1rem;padding:9px 18px;}
+[data-simple="1"] .dnav-arrow{width:38px;height:38px;font-size:1.2rem;}
 [data-simple="1"] .empty{font-size:1rem;padding:32px 0;}
 /* Drawer tools: only show when Simple Mode is on (full mode has these on Today page) */
 :root:not([data-simple="1"]) .drawer-tools-row{display:none;}
@@ -7907,6 +8002,18 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.25.0':{
+    th:[
+      '📅 **ปฏิทินใหม่** — เลือกวันที่ผ่านปฏิทินในแอป (ไม่ใช้ของระบบ) · มินิมอล · มีจุดบอกวันที่บันทึกอาหารไว้',
+      '🎨 **หน้าแรกโล่งขึ้น** — แถบวันที่เป็นปุ่มมน เว้นระยะจากหัวไม่ชนกัน',
+      '💧 **การ์ดน้ำดื่มกระชับ** — ปุ่ม −/+ เล็กลง อยู่บรรทัดเดียวกับจำนวน',
+    ],
+    en:[
+      '📅 **New in-app calendar** — pick dates with a custom minimal calendar (not the system one) · dots mark days you logged food',
+      '🎨 **Cleaner home** — date bar is now a rounded pill with breathing room from the header',
+      '💧 **Compact water card** — smaller −/+ buttons inline with the count',
+    ],
+  },
   '2.24.3':{
     th:[
       '🐞 **แก้โปรไฟล์เพื่อนโชว์ Lv 1 / streak 0 ผิด** — คนที่ไม่ใช่เพื่อนกันจะเห็นสถิติเป็น 0 ทั้งที่ติดอันดับต้นๆ · ตอนนี้ตรงกับกระดานผู้นำแล้ว',
