@@ -127,9 +127,9 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-foot{padding:14px 18px;border-top:1px solid var(--border);font-size:.66rem;color:var(--muted);text-align:center;}
 
 /* ── CARD ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:9px;}
 .card.hide{display:none;}
-.card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;font-weight:600;}
+.card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
 
 /* ── DATE NAV ── */
 .dnav{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 14px;}
@@ -341,11 +341,11 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .pst-icon{font-size:1.1rem;line-height:1;}
 .pst-val{font-size:1.05rem;font-weight:700;color:var(--text);margin-top:4px;}
 .pst-lbl{font-size:.6rem;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
-.profile-badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;}
-.profile-badge-tile{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center;transition:transform .15s;cursor:default;}
+.profile-badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:7px;}
+.profile-badge-tile{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 5px;text-align:center;transition:transform .15s;cursor:default;}
 .profile-badge-tile:hover{transform:translateY(-2px);border-color:var(--accent);}
-.pbt-ico{font-size:1.7rem;line-height:1;}
-.pbt-name{font-size:.62rem;color:var(--muted);margin-top:4px;line-height:1.2;}
+.pbt-ico{font-size:1.45rem;line-height:1;}
+.pbt-name{font-size:.6rem;color:var(--muted);margin-top:3px;line-height:1.2;}
 .profile-badge-empty{font-size:.74rem;color:var(--muted);padding:18px 0;text-align:center;grid-column:1/-1;}
 .profile-goal-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .profile-goal-cell{background:var(--surface2);border-radius:9px;padding:9px 11px;}
@@ -805,10 +805,12 @@ select,textarea{font-size:max(16px,1rem)!important;}
 
     <!-- TDEE CALCULATOR -->
     <div class="screen" id="pg-tdee">
-      <div class="card" style="text-align:center;padding:18px 14px">
-        <div style="font-size:2.5rem;margin-bottom:4px">🔥</div>
-        <div style="font-size:1.05rem;font-weight:700" data-i18n="tdee_title">เครื่องคำนวณ TDEE</div>
-        <div style="font-size:.74rem;color:var(--muted);margin-top:3px" data-i18n="tdee_sub">Total Daily Energy Expenditure — พลังงานที่ร่างกายเผาผลาญต่อวัน</div>
+      <div class="card" style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:1.8rem;line-height:1;flex:none">🔥</div>
+        <div style="min-width:0">
+          <div style="font-size:.95rem;font-weight:700" data-i18n="tdee_title">เครื่องคำนวณ TDEE</div>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:2px;line-height:1.35" data-i18n="tdee_sub">Total Daily Energy Expenditure — พลังงานที่ร่างกายเผาผลาญต่อวัน</div>
+        </div>
       </div>
       <div class="card">
         <h3 data-i18n="fill_info">กรอกข้อมูล</h3>
