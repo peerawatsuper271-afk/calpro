@@ -299,6 +299,8 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .profile-level-row{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:.74rem;}
 .profile-level-badge{background:var(--accent);color:#fff;padding:2px 8px;border-radius:99px;font-weight:700;font-size:.66rem;letter-spacing:.4px;}
 .profile-level-title{color:var(--muted);font-weight:500;}
+.profile-level-progress{font-size:.66rem;color:var(--muted);margin-top:2px;opacity:.85;}
+.profile-level-progress:empty{display:none;}
 .profile-bio{font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;white-space:pre-wrap;word-break:break-word;}
 .profile-bio:empty{display:none;}
 .profile-hero-actions{display:flex;gap:6px;padding:0 14px 12px;}
@@ -852,6 +854,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
               <span class="profile-level-badge" id="profileLevelBadge">Lv 1</span>
               <span class="profile-level-title" id="profileLevelTitle">Newcomer</span>
             </div>
+            <div class="profile-level-progress" id="profileLevelProgress"></div>
             <div class="profile-bio" id="profileBioView" data-i18n="bio_empty_self">ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม</div>
           </div>
         </div>
@@ -3368,10 +3371,12 @@ async function renderAllUsersLeaderboard(){
         `<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${safeName}${meTag}</div><div style="font-size:.68rem;color:var(--muted)">${t('streak')} ${u.streak} · ${t('on_track')} ${u.onTrack} ${t('days')}</div></div>`+
         `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div>${addBtn}</div>`;
     });
-    // If user isn't in top 50 — fetch + show their position separately
-    // (skipped entirely when no one's signed in)
+    // If user isn't in top 50 — show their position separately. Only for
+    // REAL signed-in users: anonymous accounts are excluded from the public
+    // board entirely, so showing them an "อันดับคุณ: #1" footer would be
+    // misleading (they aren't actually listed/competing).
     let footer='';
-    if(cloudUser&&meIdx===-1){
+    if(isRealForFr&&meIdx===-1){
       const myProf=profiles.find(p=>p.id===cloudUser.id);
       const myEbd=byUser[cloudUser.id]||{};
       const myStreak=calcStreak(myEbd);
@@ -5355,14 +5360,15 @@ function renderProfileUI(){
   const score=onTrack*10+streak*5+earned.length*20;
   const lvl=computeUserLevel(streak,days,onTrack);
   document.getElementById('profileLevelBadge').textContent=`${lvl.icon} Lv ${lvl.lv}`;
-  let title=lvl.title;
-  if(lvl.nextAt){
-    const remaining=lvl.nextAt-lvl.score;
-    title+=` · ${t('lvl_progress').replace('%n',remaining).replace('%l',lvl.lv+1)}`;
-  }else{
-    title+=` · ${t('lvl_maxed')}`;
+  // Level title stays on the badge row; the "N more points to Lv X" progress
+  // moves to its own line below so it doesn't crowd the title.
+  document.getElementById('profileLevelTitle').textContent=lvl.title;
+  const progEl=document.getElementById('profileLevelProgress');
+  if(progEl){
+    progEl.textContent=lvl.nextAt
+      ? t('lvl_progress').replace('%n',lvl.nextAt-lvl.score).replace('%l',lvl.lv+1)
+      : t('lvl_maxed');
   }
-  document.getElementById('profileLevelTitle').textContent=title;
   document.getElementById('pstStreak').textContent=streak;
   document.getElementById('pstDays').textContent=days;
   document.getElementById('pstOnTrack').textContent=onTrack;
