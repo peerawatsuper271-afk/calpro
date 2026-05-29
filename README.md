@@ -75,6 +75,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.24.2** *(APK + web · BETA)* — 🧹 กันบัญชีไม่ล็อกอิน (anonymous) ขึ้นกระดานผู้นำ — เดิมโผล่เป็น "Test User" รก (เจอจากการตรวจระบบ Supabase) · 🏅 leaderboard แสดงเฉพาะสมาชิกที่ตั้งชื่อแล้ว
 - **v2.24.1** *(APK + web · BETA)* — 🖼️ banner รูปแสดงในโปรไฟล์เพื่อน + ข้ามเครื่อง · 🏅 เหรียญตราซิงค์คลาวด์ (เพื่อนเห็น + ไม่หายตอนใช้เครื่องใหม่) · 📊 คะแนน leaderboard ตรงกันทุกเครื่อง (ใช้เป้าหมายเจ้าของ ไม่ใช่ผู้ดู)
 - **v2.24.0** *(APK + web · BETA)* — ☁️ **ซิงค์แม้ไม่ได้ล็อคอิน** (anonymous Supabase session · ข้อมูลผูกกับเครื่องนี้จนกว่าจะล็อคอิน) · 🔄 **ย้ายข้อมูลอัตโนมัติเมื่อล็อคอิน** · 🏆 fix คะแนน 0 ของคนไม่ใช่เพื่อน (RPC รวมยอดต่อวัน) · 🔁 หน้าแรกรีโหลดเมื่อเปลี่ยน tab · 🧹 ลบหัวข้อ "เหลือ" + "จำนวนรายการ" · ✏️ test user → Test User
 - **v2.23.0** *(APK + web · BETA)* — 🌍 **Global leaderboard ดูได้แม้ไม่ล็อกอิน** (Friends tab ต้อง login) · 📊 แคล/น้ำ 7d↔30d toggle + auto-resize · 🎮 Steam profile · Level 1-10 · banner upload + crop · ✏️ edit/measurements ซ่อนเป็น default · 📌 sticky header · 🤳 iOS no-zoom · ✕ friend profile close ในหัว + footer

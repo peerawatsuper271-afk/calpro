@@ -1588,7 +1588,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.24.1';
+const APP_VERSION = '2.24.2';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -3289,14 +3289,18 @@ async function renderAllUsersLeaderboard(){
     const friendsPromise=isRealForFr
       ?client.from('friends').select('friend_id').eq('user_id',cloudUser.id)
       :Promise.resolve({data:[]});
-    // Fetch banner_image + persisted_badges + weight so the leaderboard
-    // computes each user's score with THEIR goal/weight (not the viewer's)
-    // and the friend-profile click has banner/badges ready instantly.
-    // Falls back gracefully if v2.24 columns aren't deployed yet.
-    let profilesQuery=client.from('profiles').select('id,display_name,avatar,goal_cal,weight,banner_color,banner_image,bio,persisted_badges').limit(200);
-    let profilesRes=await profilesQuery;
-    if(profilesRes.error&&/banner_image|persisted_badges|weight/i.test(profilesRes.error.message||'')){
-      profilesRes=await client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200);
+    // Profiles — prefer the get_public_profiles RPC which excludes anonymous
+    // + nameless accounts SERVER-SIDE (anon sessions get auto-created for the
+    // AI camera + offline-sync features and would otherwise flood the public
+    // board as nameless "Test User" rows). Fall back to a direct query +
+    // client-side nameless filter if the RPC isn't deployed yet.
+    let profilesRes=await client.rpc('get_public_profiles');
+    let usedRpc=!profilesRes.error&&Array.isArray(profilesRes.data);
+    if(!usedRpc){
+      profilesRes=await client.from('profiles').select('id,display_name,avatar,goal_cal,weight,banner_color,banner_image,bio,persisted_badges').limit(200);
+      if(profilesRes.error&&/banner_image|persisted_badges|weight/i.test(profilesRes.error.message||'')){
+        profilesRes=await client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200);
+      }
     }
     const [totalsRes,friendsRes]=await Promise.all([
       client.rpc('get_public_daily_totals',{_days:60}),
@@ -3306,7 +3310,11 @@ async function renderAllUsersLeaderboard(){
     // Keep the cache used by the Add Friend search modal in sync — saves a
     // round-trip when the modal opens right after.
     _frCurrentIds=new Set(friendIdSet);
-    const profiles=profilesRes.data||[];
+    // Client-side safety net: when we fell back to the raw table, drop
+    // nameless rows (every anon session that synced pre-fix left one). The
+    // RPC already filters these, so this is a no-op on the RPC path.
+    let profiles=profilesRes.data||[];
+    if(!usedRpc)profiles=profiles.filter(p=>p.display_name&&p.display_name.trim());
     if(!profiles.length){body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_no_users')}</div>`;return;}
     // RPC returns rows of {user_id, entry_date, total_kcal}. If the RPC doesn't
     // exist yet (404), fall back to the old direct-query path so the page
@@ -3666,7 +3674,14 @@ async function syncToCloud(){
   //    v2.24 fields (banner_image, persisted_badges) → v2.21 fields
   //    (bio, banner_color, level_title) → bare minimum.
   //    banner_image data URL is ~150KB JPEG @ 1200×300; well under row limit.
-  if(userProfile){
+  //
+  //    SKIP for anonymous sessions: an anon user's profile row would surface
+  //    on the PUBLIC leaderboard (profiles_select RLS = true) as a nameless
+  //    "Test User" — anonymous accounts must NOT clutter the global board.
+  //    Their food/water/etc still sync (data preserved); only the public
+  //    profile row is withheld until they sign up for real.
+  const isAnonSession=cloudUser.is_anonymous===true||cloudUser.aud==='anon';
+  if(userProfile&&!isAnonSession){
     const p={...userProfile,id:uid,email:cloudUser.email,updated_at:new Date().toISOString()};
     delete p.created_at;
     // Snapshot the persisted-badge ledger so friends + other devices see the
@@ -7867,6 +7882,16 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.24.2':{
+    th:[
+      '🧹 **กันบัญชีไม่ล็อกอินขึ้นกระดานผู้นำ** — เดิม anonymous account โผล่เป็น "Test User" เต็มไปหมด (เจอจากการตรวจระบบ: 14 จาก 18 โปรไฟล์เป็น anonymous)',
+      '🏅 leaderboard แสดงเฉพาะสมาชิกที่ตั้งชื่อแล้วเท่านั้น',
+    ],
+    en:[
+      '🧹 **Keep anonymous accounts off the leaderboard** — they were flooding it as nameless "Test User" rows (audit found 14 of 18 profiles were anonymous)',
+      '🏅 Leaderboard now shows only named, signed-up members',
+    ],
+  },
   '2.24.1':{
     th:[
       '🖼️ **banner รูปแสดงข้ามเครื่อง + ในโปรไฟล์เพื่อน** (เคย local-only)',
