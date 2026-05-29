@@ -1588,7 +1588,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.24.2';
+const APP_VERSION = '2.24.3';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -3675,13 +3675,14 @@ async function syncToCloud(){
   //    (bio, banner_color, level_title) → bare minimum.
   //    banner_image data URL is ~150KB JPEG @ 1200×300; well under row limit.
   //
-  //    SKIP for anonymous sessions: an anon user's profile row would surface
-  //    on the PUBLIC leaderboard (profiles_select RLS = true) as a nameless
-  //    "Test User" — anonymous accounts must NOT clutter the global board.
-  //    Their food/water/etc still sync (data preserved); only the public
-  //    profile row is withheld until they sign up for real.
-  const isAnonSession=cloudUser.is_anonymous===true||cloudUser.aud==='anon';
-  if(userProfile&&!isAnonSession){
+  //    NB: We MUST upsert the profile even for anonymous sessions. Every data
+  //    table (food_entries, weights, water, …) has user_id → profiles(id) as a
+  //    FOREIGN KEY, so without a profiles row the anon user's data inserts all
+  //    fail with a 23503 FK violation — which would silently break the entire
+  //    "anonymous cloud backup" feature. Anonymous accounts are kept OFF the
+  //    public leaderboard by the get_public_profiles RPC (server-side filter
+  //    on auth.users.is_anonymous), NOT by withholding their profile row.
+  if(userProfile){
     const p={...userProfile,id:uid,email:cloudUser.email,updated_at:new Date().toISOString()};
     delete p.created_at;
     // Snapshot the persisted-badge ledger so friends + other devices see the
@@ -5649,11 +5650,29 @@ async function openFriendProfile(userId,displayName,avatar){
       }
     }
     if(!prof){throw new Error(t('fp_err'));}
-    // Fetch their food entries for stats (RLS lets friends read each other's;
-    // non-friends get an empty array → live-derived badges will be empty and
-    // we fall back to the synced persisted_badges below).
-    const {data:entries}=await sb.from('food_entries').select('entry_date,calories,protein,carbs,fat').eq('user_id',userId);
-    const ebd={};(entries||[]).forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);});
+    // Stats source — two paths, because RLS only lets FRIENDS read each
+    // other's raw food_entries:
+    //  · Friends → direct query returns full rows (incl. protein for badges).
+    //  · Non-friends → that query is empty, so streak/level would wrongly show
+    //    0 / Lv 1 even for a top-ranked user. Fall back to the public daily
+    //    totals RPC (SECURITY DEFINER, bypasses RLS) — the SAME source the
+    //    leaderboard uses, so the profile's streak/on-track now MATCH the
+    //    leaderboard instead of contradicting it.
+    const [entriesRes,totalsRes]=await Promise.all([
+      sb.from('food_entries').select('entry_date,calories,protein,carbs,fat').eq('user_id',userId),
+      sb.rpc('get_public_daily_totals',{_days:60}).then(r=>r,()=>({data:null})),
+    ]);
+    const ebd={};
+    const directRows=entriesRes.data||[];
+    if(directRows.length){
+      directRows.forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);});
+    }else if(totalsRes&&Array.isArray(totalsRes.data)){
+      // Build a per-day shape calcStreak/daysOnTrack understand, from the
+      // target user's public daily kcal totals.
+      totalsRes.data.filter(r=>r.user_id===userId).forEach(r=>{
+        ebd[r.entry_date]=[{calories:r.total_kcal||0}];
+      });
+    }
     // Target-context stats — uses THE FRIEND'S goal/weight so their score
     // matches what they see on their own device.
     const opts={goal:prof.goal_cal,weight:prof.weight};
@@ -7882,6 +7901,16 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.24.3':{
+    th:[
+      '🐞 **แก้โปรไฟล์เพื่อนโชว์ Lv 1 / streak 0 ผิด** — คนที่ไม่ใช่เพื่อนกันจะเห็นสถิติเป็น 0 ทั้งที่ติดอันดับต้นๆ · ตอนนี้ตรงกับกระดานผู้นำแล้ว',
+      '🩹 **แก้ซิงค์ของบัญชีไม่ล็อกอินพัง** — กันข้อมูลหายเพราะ foreign key (จากบั๊กที่เผลอใส่ใน 2.24.2)',
+    ],
+    en:[
+      '🐞 **Fixed friend profile showing Lv 1 / streak 0** — non-friends saw all-zero stats even for top-ranked users · now matches the leaderboard',
+      '🩹 **Fixed broken sync for anonymous accounts** — prevented data loss from a foreign-key issue (regression from 2.24.2)',
+    ],
+  },
   '2.24.2':{
     th:[
       '🧹 **กันบัญชีไม่ล็อกอินขึ้นกระดานผู้นำ** — เดิม anonymous account โผล่เป็น "Test User" เต็มไปหมด (เจอจากการตรวจระบบ: 14 จาก 18 โปรไฟล์เป็น anonymous)',
