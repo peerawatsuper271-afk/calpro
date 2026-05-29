@@ -3248,10 +3248,20 @@ async function renderAllUsersLeaderboard(){
     // entries are filtered out and every non-friend scores 0.
     // Falls back to direct food_entries query if the RPC isn't deployed yet
     // (older Supabase instances pre-v2.23 migration).
-    const [profilesRes,totalsRes]=await Promise.all([
+    // Also fetch current friends so we can show "+ Add" buttons inline.
+    const isRealForFr=cloudUser&&cloudUser.is_anonymous!==true&&cloudUser.aud!=='anon';
+    const friendsPromise=isRealForFr
+      ?client.from('friends').select('friend_id').eq('user_id',cloudUser.id)
+      :Promise.resolve({data:[]});
+    const [profilesRes,totalsRes,friendsRes]=await Promise.all([
       client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200),
       client.rpc('get_public_daily_totals',{_days:60}),
+      friendsPromise,
     ]);
+    const friendIdSet=new Set((friendsRes?.data||[]).map(r=>r.friend_id));
+    // Keep the cache used by the Add Friend search modal in sync — saves a
+    // round-trip when the modal opens right after.
+    _frCurrentIds=new Set(friendIdSet);
     const profiles=profilesRes.data||[];
     if(!profiles.length){body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_no_users')}</div>`;return;}
     // RPC returns rows of {user_id, entry_date, total_kcal}. If the RPC doesn't
@@ -3291,11 +3301,17 @@ async function renderAllUsersLeaderboard(){
         :`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
       const meTag=isMe?(isEn?' (You)':' (คุณ)'):'';
       const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}" role="button" tabindex="0" aria-label="ดูโปรไฟล์ ${safeName}"`;
+      // "+ Add" friend button — only when signed in real, not yourself,
+      // and not already a friend. Tucked at the row's right edge.
+      const isAlreadyFriend=friendIdSet.has(u.id);
+      const addBtn=(isRealForFr&&!isMe&&!isAlreadyFriend)
+        ?`<button class="lb-add" data-fid="${u.id}" data-fname="${safeName}" title="${isEn?'Add friend':'เพิ่มเพื่อน'}" aria-label="${isEn?'Add friend':'เพิ่มเพื่อน'}" style="background:rgba(255,107,107,.1);color:var(--accent);border:1px solid rgba(255,107,107,.3);border-radius:8px;padding:4px 9px;font-size:.78rem;font-weight:700;cursor:pointer;margin-left:4px">+</button>`
+        :(isAlreadyFriend&&!isMe?`<span style="font-size:.66rem;color:var(--green);margin-left:4px" title="${isEn?'Already a friend':'เพื่อนกันแล้ว'}">✓</span>`:'');
       html+=`<div class="lb-item${isMe?' me':''}"${clickAttr} style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
         `<div style="width:28px;text-align:center;font-weight:700">${rank}</div>`+
         av+
         `<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${safeName}${meTag}</div><div style="font-size:.68rem;color:var(--muted)">${t('streak')} ${u.streak} · ${t('on_track')} ${u.onTrack} ${t('days')}</div></div>`+
-        `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div></div>`;
+        `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div>${addBtn}</div>`;
     });
     // If user isn't in top 50 — fetch + show their position separately
     // (skipped entirely when no one's signed in)
@@ -3314,6 +3330,22 @@ async function renderAllUsersLeaderboard(){
     // Wire row click → friend profile
     body.querySelectorAll('.lb-item[data-openfid]').forEach(row=>{
       row.onclick=()=>openFriendProfile(row.dataset.openfid,row.dataset.openfname);
+    });
+    // Wire "+ Add" buttons → add friend in place + flip to ✓.
+    // doAddFriend swallows its own errors and shows a toast, so we use the
+    // _frCurrentIds set as the truth-signal for whether the add succeeded.
+    body.querySelectorAll('.lb-add').forEach(btn=>{
+      btn.onclick=async (e)=>{
+        e.stopPropagation();  // don't bubble to row → open profile
+        btn.disabled=true;btn.textContent='…';
+        const fid=btn.dataset.fid;
+        await doAddFriend(fid,btn.dataset.fname);
+        if(_frCurrentIds.has(fid)){
+          btn.outerHTML=`<span style="font-size:.66rem;color:var(--green);margin-left:4px">✓</span>`;
+        }else{
+          btn.disabled=false;btn.textContent='+';
+        }
+      };
     });
   }catch(e){
     body.innerHTML=`<div class="empty" style="padding:10px 0;color:var(--accent)">${escapeHtml(e.message||String(e))}</div>`;
@@ -3429,10 +3461,14 @@ async function doAddFriend(friendId,friendName){
     if(error)throw error;
     _frCurrentIds.add(friendId);
     showToast(t('fr_added').replace('%n',friendName));
-    // Re-render search row to swap "+" → "✓ already"
-    renderFriendSearch(document.getElementById('frSearchInput').value);
-    // Refresh leaderboard in background
-    renderFriendsCard();
+    // Re-render search row to swap "+" → "✓ already" — only when the
+    // Add-Friend modal is open (the search results node only exists then).
+    const inp=document.getElementById('frSearchInput');
+    if(inp&&document.getElementById('frSearchResults'))renderFriendSearch(inp.value);
+    // Refresh leaderboard in background — only if the friends tab is the
+    // active leaderboard tab (otherwise we'd undo the all-users render
+    // we're currently inside of).
+    if(_lbTab==='friends')renderFriendsCard();
   }catch(e){showToast(e.message||String(e));}
 }
 async function removeFriend(friendId,friendName){
@@ -5659,8 +5695,10 @@ function renderDrawerHeader(){
   if(cloudUser&&!isAnonCU)emailEl.textContent=cloudUser.email||'';
   else if(isAnonCU)emailEl.textContent=settings.lang==='en'?'📱 Device-only sync':'📱 ซิงค์เฉพาะเครื่องนี้';
   else emailEl.textContent=settings.lang==='en'?'Local only':'เครื่องนี้เท่านั้น';
-  // Show friends button only if signed in with a real (non-anonymous) account
-  document.getElementById('drawerFriendsBtn').style.display=(cloudUser&&!isAnonCU)?'flex':'none';
+  // Always show the friends button — the leaderboard works for everyone
+  // (anon + unsigned can browse "all users"; the Friends tab itself prompts
+  // sign-in when needed).
+  document.getElementById('drawerFriendsBtn').style.display='flex';
 }
 function navTo(page){
   closeDrawer();
@@ -5691,6 +5729,10 @@ function toggleReminder(kind){
   else if(kind==='smart')settings.smartGoal=document.getElementById('smartGoalToggle').checked;
   else if(kind==='recap')settings.weeklyRecap=document.getElementById('recapToggle').checked;
   lsSave(LS_SETTINGS,settings);
+  // Reschedule native pushes when the meal-reminder toggle flips (and also
+  // when the user enables — first toggle from off→on needs to actually
+  // schedule the OS notifications).
+  if(kind==='meal'){try{scheduleMealReminders();}catch{}}
   renderToday();
 }
 function changeWaterGoal(v){
@@ -5703,6 +5745,8 @@ function changeMealTime(meal,hr){
   if(!settings.mealTimes)settings.mealTimes={morning:9,lunch:14,dinner:20};
   settings.mealTimes[meal]=+hr;
   lsSave(LS_SETTINGS,settings);
+  // Reschedule the OS pushes for the new time
+  try{scheduleMealReminders();}catch{}
 }
 // ═══ NOTIFICATION TEST ═══
 // Unified helper: tries Capacitor → ServiceWorker showNotification → Notification constructor
@@ -6540,6 +6584,134 @@ function celebrateMilestoneIfNew(){
     setTimeout(()=>{try{shareAchievements();}catch(e){console.warn('[milestone] share failed:',e.message);}},1200);
   }catch(e){console.warn('[milestone] check failed:',e.message);}
 }
+// ─── Daily meal-reminder notifications ───
+// Friendly pushes at breakfast / lunch / dinner times. Encourages logging
+// without nagging — only if the user hasn't logged that meal yet (the OS
+// schedules fire blindly; we skip "already logged" check by always firing,
+// but the copy invites rather than demands).
+//
+// Capacitor: schedules native recurring notifications at on:{hour,minute}.
+// Web: fired opportunistically when the app opens / tab gains focus / a
+// 5-min interval ticks past the meal hour. Web can't fire when the tab is
+// fully closed — that's a browser/OS limitation — but installed PWA on
+// Android does work via Service Worker periodicSync (not implemented yet).
+const MEAL_NOTIF_IDS={morning:99002,lunch:99003,dinner:99004};
+const MEAL_COPY={
+  morning:{
+    th:['🌅 อรุณสวัสดิ์! บันทึกมื้อเช้าหน่อยนะ · เริ่มต้นวันดูแลสุขภาพ',
+        '🍳 ถึงเวลามื้อเช้าแล้ว · ทานอะไรมาแล้วบันทึกเลย',
+        '☀️ มื้อเช้าคือพลังของวัน · มาบันทึกกันเถอะ'],
+    en:['🌅 Good morning! Log your breakfast · start the day healthy',
+        '🍳 Breakfast time · log what you had',
+        '☀️ Fuel your day · log breakfast'],
+  },
+  lunch:{
+    th:['☀️ ทานกลางวันหรือยัง? · บันทึกเพื่อสุขภาพดี',
+        '🍱 ถึงเวลามื้อกลางวันแล้ว · มาบันทึกกันเลย',
+        '🥗 อย่าลืมบันทึกมื้อกลางวันนะ'],
+    en:['☀️ Lunch yet? Log it for better health',
+        '🍱 Lunchtime · log your meal',
+        '🥗 Don\'t forget to log lunch'],
+  },
+  dinner:{
+    th:['🌙 มื้อเย็นหรือยัง? · บันทึกเร็วๆ ก่อนลืม',
+        '🍲 ถึงเวลามื้อเย็น · มาบันทึกกันเลย',
+        '🌆 ปิดท้ายวันด้วยการบันทึกมื้อเย็น · รักษา streak ของคุณ'],
+    en:['🌙 Dinner yet? Log it before you forget',
+        '🍲 Dinnertime · log your meal',
+        '🌆 End the day right · log dinner & keep your streak'],
+  },
+};
+function _pickCopy(meal,lang){
+  const variants=(MEAL_COPY[meal]||{})[lang]||(MEAL_COPY[meal]||{}).th||[];
+  if(!variants.length)return 'CalPro+';
+  // Vary by day so it's not the same every day
+  const idx=(new Date().getDate())%variants.length;
+  return variants[idx];
+}
+async function scheduleMealReminders(){
+  try{
+    const cap=window.Capacitor;
+    if(!cap?.isNativePlatform?.())return;       // native APK only
+    if(settings.mealReminders===false)return;   // user disabled
+    const LN=cap.Plugins?.LocalNotifications;
+    if(!LN)return;
+    // Cancel previously-scheduled meal reminders so we don't pile up
+    try{await LN.cancel({notifications:Object.values(MEAL_NOTIF_IDS).map(id=>({id}))});}catch{}
+    const perm=await LN.checkPermissions();
+    if(perm.display!=='granted')return;
+    const mt=settings.mealTimes||{morning:9,lunch:14,dinner:20};
+    const lang=settings.lang==='en'?'en':'th';
+    const meals=[
+      {key:'morning',hour:mt.morning,id:MEAL_NOTIF_IDS.morning},
+      {key:'lunch',hour:mt.lunch,id:MEAL_NOTIF_IDS.lunch},
+      {key:'dinner',hour:mt.dinner,id:MEAL_NOTIF_IDS.dinner},
+    ];
+    const notifs=meals.map(m=>({
+      id:m.id,
+      title:'CalPro+',
+      body:_pickCopy(m.key,lang),
+      schedule:{on:{hour:m.hour,minute:0},allowWhileIdle:true},
+      smallIcon:'ic_launcher',
+      iconColor:'#ff6b6b',
+    }));
+    await LN.schedule({notifications:notifs});
+    console.log('[meal-reminders] scheduled',meals.map(m=>m.key+'@'+m.hour).join(', '));
+  }catch(e){console.warn('[meal-reminders] schedule failed:',e.message);}
+}
+// Web/PWA fallback: fire missed-meal notifications opportunistically when
+// the app opens or the tab gains focus. Each meal fires at most once per
+// day per browser. No tab-closed delivery on web — that's a browser limit.
+async function fireMissedMealNotifsWeb(){
+  try{
+    if(settings.mealReminders===false)return;
+    const cap=window.Capacitor;
+    if(cap?.isNativePlatform?.())return;       // Capacitor handles natively
+    if(!('Notification' in window))return;
+    if(Notification.permission!=='granted')return;
+    const now=new Date();const hour=now.getHours();
+    const todayK=todayKey();
+    const stateKey='cp_notif_meal_fired_'+todayK;
+    let fired={};try{fired=JSON.parse(localStorage.getItem(stateKey)||'{}');}catch{}
+    const mt=settings.mealTimes||{morning:9,lunch:14,dinner:20};
+    const E=allEntries[todayK]||[];
+    const meals=[
+      {key:'morning',hour:mt.morning,mealName:'เช้า'},
+      {key:'lunch',hour:mt.lunch,mealName:'กลางวัน'},
+      {key:'dinner',hour:mt.dinner,mealName:'เย็น'},
+    ];
+    const lang=settings.lang==='en'?'en':'th';
+    let reg=null;
+    try{reg=await navigator.serviceWorker?.getRegistration();}catch{}
+    for(const m of meals){
+      if(hour<m.hour)continue;                                  // not yet
+      if(fired[m.key])continue;                                 // already pinged
+      if(E.some(e=>e.meal===m.mealName))continue;               // user logged
+      const body=_pickCopy(m.key,lang);
+      try{
+        if(reg&&reg.showNotification){
+          await reg.showNotification('CalPro+',{body,icon:'./icon-192.png',badge:'./icon-192.png',tag:'meal-'+m.key,renotify:true});
+        }else{
+          new Notification('CalPro+',{body,icon:'./icon-192.png',tag:'meal-'+m.key});
+        }
+        fired[m.key]=Date.now();
+      }catch(e){console.warn('[notif-fire]',m.key,e.message);}
+    }
+    try{localStorage.setItem(stateKey,JSON.stringify(fired));}catch{}
+    // GC old day-keys (anything older than 3 days)
+    try{
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);
+        if(k&&k.startsWith('cp_notif_meal_fired_')){
+          const day=k.replace('cp_notif_meal_fired_','');
+          const ageDays=(Date.now()-new Date(day+'T00:00:00').getTime())/86400000;
+          if(ageDays>3)localStorage.removeItem(k);
+        }
+      }
+    }catch{}
+  }catch(e){console.warn('[fire-missed]',e.message);}
+}
+
 // Streak-saver native notification at ~21:30 local. Only on Capacitor (web has no
 // reliable scheduled-notification API). Reschedules every app open. Cancels itself
 // if the user has already logged food today.
@@ -7248,6 +7420,13 @@ async function requestNotifPermOnLaunch(){
       try{lsSave(LS_SETTINGS,settings);}catch{}
       // Refresh Settings render if user happens to be on that page
       try{if(document.getElementById('mealRemToggle'))document.getElementById('mealRemToggle').checked=false;}catch{}
+    }else{
+      // Permission just granted on first launch — schedule the OS pushes
+      // now (earlier scheduleMealReminders() bailed because permission
+      // wasn't granted yet).
+      try{scheduleMealReminders();}catch{}
+      try{scheduleStreakSaver();}catch{}
+      try{fireMissedMealNotifsWeb();}catch{}
     }
   }catch(e){console.warn('[notif-perm]',e.message);}
 }
@@ -7263,6 +7442,15 @@ showApp();
 parseReferralOnLoad();    // handle ?ref= URL param + welcome toast
 dailyCheckInToast();      // congratulate active-streak users on app open
 scheduleStreakSaver();    // schedule 21:30 push notification (Capacitor only)
+scheduleMealReminders();  // schedule daily breakfast/lunch/dinner pushes (Capacitor)
+fireMissedMealNotifsWeb();// web/PWA fallback: ping missed-meals on app open
+// Re-check missed meals every 5 min so the notification fires even if the
+// user keeps the tab open all day past the meal hour.
+setInterval(()=>{try{fireMissedMealNotifsWeb();}catch{}},5*60*1000);
+// Also re-check on tab focus
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible')fireMissedMealNotifsWeb();
+});
 requestNotifPermOnLaunch();  // ask permission once on first launch · disable mealReminders on denial
 // iOS-only refresh button — Android browser + Capacitor APK don't get it
 (function showIosRefreshIfApplicable(){
