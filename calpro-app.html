@@ -4880,7 +4880,10 @@ function renderWaterStats(){
   const overGoal=maxC/goal;
   const colH=overGoal>1.6?Math.min(90,baseColH+18):baseColH;
   const gap=isMonth?'2px':'5px';
-  const colW=isMonth?'auto':'14px';
+  // 7-day: fixed 14px column width (chunky visual).
+  // 30-day: fill the flex:1 column (was 'auto' which collapses to 0 because the
+  // inner fill is position:absolute — outer div had nothing to size against).
+  const colW=isMonth?'100%':'14px';
   const wrap=document.getElementById('waterStats');
   const bars=daysArr.map(d=>{
     const pct=Math.min(d.c/maxC,1);
