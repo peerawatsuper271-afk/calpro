@@ -340,10 +340,20 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .av-opt.active{border-color:var(--accent);background:rgba(255,107,107,.12);}
 
 /* ── ANALYSIS ── */
-.wbars{display:flex;align-items:flex-end;gap:5px;height:68px;margin-bottom:5px;}
-.wbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.wbars{display:flex;align-items:flex-end;gap:5px;height:var(--chart-h,68px);margin-bottom:5px;transition:height .25s;}
+.wbars.is-month{gap:2px;height:var(--chart-h,110px);}
+.wbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
 .wb{width:100%;border-radius:3px 3px 0 0;transition:height .5s,background .3s;min-height:2px;}
-.wb-l{font-size:.6rem;color:var(--muted);}.wb-c{font-size:.58rem;color:var(--muted);}
+.wb-l{font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;}
+.wb-c{font-size:.58rem;color:var(--muted);white-space:nowrap;overflow:hidden;}
+.wbars.is-month .wb-l,.wbars.is-month .wb-c{font-size:.52rem;}
+/* Period tab pills — used on Analysis charts + Leaderboard for 7d/30d toggle */
+.period-tabs{display:inline-flex;background:var(--surface2);border-radius:99px;padding:3px;gap:2px;}
+.ptab{padding:4px 12px;border-radius:99px;border:none;background:transparent;color:var(--muted);font-size:.7rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.ptab.active{background:var(--accent);color:#fff;}
+.ptab:hover:not(.active){color:var(--text);}
+.card-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap;}
+.card-hdr-row h3{margin:0;}
 .ins{background:var(--surface2);border-radius:9px;padding:10px 12px;margin-bottom:7px;display:flex;gap:9px;}
 .ins-i{font-size:.95rem;flex-shrink:0;margin-top:1px;}
 .ins-t{font-size:.77rem;line-height:1.5;}.ins-t strong{color:var(--amber);}
@@ -710,9 +720,28 @@ select,textarea{font-size:max(16px,1rem)!important;}
 
     <!-- ANALYSIS -->
     <div class="screen" id="pg-analysis">
-      <div class="card"><h3 data-i18n="cal_7d">แคลอรี่ 7 วัน</h3><div class="wbars" id="wBars"></div><div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div></div>
+      <div class="card">
+        <div class="card-hdr-row">
+          <h3><span id="calChartTitle" data-i18n="cal_7d">แคลอรี่ 7 วัน</span></h3>
+          <div class="period-tabs" role="tablist" aria-label="คาลอรี่ period">
+            <button class="ptab active" data-period="7" onclick="setCalPeriod('7')" data-i18n="period_7d">7 วัน</button>
+            <button class="ptab" data-period="30" onclick="setCalPeriod('30')" data-i18n="period_30d">1 เดือน</button>
+          </div>
+        </div>
+        <div class="wbars" id="wBars"></div>
+        <div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div>
+      </div>
       <div class="card"><h3 data-i18n="projection_title">แนวโน้มน้ำหนักย้อนหลัง 14 วัน</h3><div class="lc-wrap" id="projChart"></div><div id="projSum" style="font-size:.74rem;color:var(--muted);margin-top:6px;text-align:center;line-height:1.5"></div></div>
-      <div class="card"><h3 data-i18n="water_7d">น้ำดื่ม 7 วัน</h3><div id="waterStats"></div></div>
+      <div class="card">
+        <div class="card-hdr-row">
+          <h3><span id="waterChartTitle" data-i18n="water_7d">น้ำดื่ม 7 วัน</span></h3>
+          <div class="period-tabs" role="tablist" aria-label="น้ำดื่ม period">
+            <button class="ptab active" data-wperiod="7" onclick="setWaterPeriod('7')" data-i18n="period_7d">7 วัน</button>
+            <button class="ptab" data-wperiod="30" onclick="setWaterPeriod('30')" data-i18n="period_30d">1 เดือน</button>
+          </div>
+        </div>
+        <div id="waterStats"></div>
+      </div>
       <!-- Ad slot — Analysis page -->
       <div class="ad-slot" data-ad-slot="analysis-1"></div>
       <div class="card"><h3 data-i18n="summary">สรุป</h3><div id="wkSum"></div></div>
@@ -1026,6 +1055,10 @@ select,textarea{font-size:max(16px,1rem)!important;}
         <h2 data-i18n="friends">เพื่อน + Leaderboard</h2>
       </div>
       <div class="card" id="friendsCard">
+        <div class="period-tabs" role="tablist" aria-label="leaderboard scope" style="margin-bottom:12px">
+          <button class="ptab active" data-lbtab="friends" onclick="setLbTab('friends')" data-i18n="lb_friends">👥 เพื่อน</button>
+          <button class="ptab" data-lbtab="all" onclick="setLbTab('all')" data-i18n="lb_global">🌍 ทั้งหมด</button>
+        </div>
         <div id="friendsBody"></div>
       </div>
     </div>
@@ -1638,6 +1671,8 @@ const I18N = {
     lvl_newcomer:'มือใหม่',lvl_starter:'นักสะสมสตรีค',lvl_regular:'ขาประจำ',lvl_pro:'มืออาชีพ',lvl_master:'มาสเตอร์',lvl_champion:'แชมป์เปี้ยน',lvl_veteran:'ผู้เก๋าเกม',lvl_elite:'ระดับเอลีท',lvl_mythic:'ระดับมิทิก',lvl_legend:'ตำนาน',
     lvl_progress:'อีก %n คะแนนถึง Lv %l',lvl_maxed:'ระดับสูงสุด · เก่งเทพ!',
     crop_title:'ปรับตำแหน่งรูป',crop_hint:'ลากเพื่อเลื่อน · เลื่อน slider เพื่อซูม',crop_zoom:'ซูม',crop_reset:'รีเซ็ต',crop_cancel:'ยกเลิก',crop_apply:'✓ ใช้รูปนี้',
+    period_7d:'7 วัน',period_30d:'1 เดือน',cal_30d:'แคลอรี่ 30 วัน',water_30d:'น้ำดื่ม 30 วัน',
+    lb_friends:'👥 เพื่อน',lb_global:'🌍 ทั้งหมด',lb_loading_all:'กำลังโหลดอันดับทั้งหมด...',lb_no_users:'ยังไม่มีผู้ใช้คนอื่น',
     fp_loading:'กำลังโหลดโปรไฟล์...',fp_err:'โหลดโปรไฟล์ไม่สำเร็จ',
     dev_unlocked:'🔧 ปลดล็อก Developer mode',dev_locked:'ล็อก Developer mode แล้ว',dev_wrong_pw:'รหัสผ่านไม่ถูกต้อง',dev_dumped:'ดัมป์ใน console แล้ว',
     sign_in_first:'กรุณาเข้าสู่ระบบก่อน',
@@ -1737,6 +1772,8 @@ const I18N = {
     lvl_newcomer:'Newcomer',lvl_starter:'Streak starter',lvl_regular:'Regular',lvl_pro:'Pro',lvl_master:'Master',lvl_champion:'Champion',lvl_veteran:'Veteran',lvl_elite:'Elite',lvl_mythic:'Mythic',lvl_legend:'Legend',
     lvl_progress:'%n more to Lv %l',lvl_maxed:'Max level · godlike!',
     crop_title:'Adjust image',crop_hint:'Drag to move · slider to zoom',crop_zoom:'Zoom',crop_reset:'Reset',crop_cancel:'Cancel',crop_apply:'✓ Apply',
+    period_7d:'7 days',period_30d:'30 days',cal_30d:'30-day calories',water_30d:'30-day water',
+    lb_friends:'👥 Friends',lb_global:'🌍 Global',lb_loading_all:'Loading global ranking...',lb_no_users:'No other users yet',
     fp_loading:'Loading profile...',fp_err:'Failed to load profile',
     dev_unlocked:'🔧 Developer mode unlocked',dev_locked:'Developer mode locked',dev_wrong_pw:'Wrong password',dev_dumped:'Dumped to console',
     sign_in_first:'Sign in first',
@@ -2470,7 +2507,7 @@ function showPage(id,btn){
   if(id==='settings')renderSettings();
   if(id==='help')renderHelp();
   if(id==='dev')renderDev();
-  if(id==='friends')renderFriendsCard();
+  if(id==='friends')renderLeaderboard();
   if(id==='profile')renderProfileUI();
 }
 
@@ -2950,7 +2987,7 @@ function refreshActivePage(){
   else if(active==='pg-tdee')syncTDEEFromProfile();
   else if(active==='pg-profile')renderProfileUI();
   else if(active==='pg-settings')renderSettings();
-  else if(active==='pg-friends')renderFriendsCard();
+  else if(active==='pg-friends')renderLeaderboard();
   else if(active==='pg-help')renderHelp();
   // header always
   const name=userProfile?.display_name||t('you');
@@ -3067,6 +3104,90 @@ function renderCloudStatus(){
 }
 
 // ═══ FRIENDS (cloud-only) ═══
+// Leaderboard tab state — 'friends' or 'all'. Persists across nav.
+let _lbTab=localStorage.getItem('cp_lb_tab')||'friends';
+function setLbTab(t){
+  _lbTab=t;localStorage.setItem('cp_lb_tab',t);
+  renderLeaderboard();
+}
+// Dispatcher · also syncs the active tab pill on every render
+function renderLeaderboard(){
+  document.querySelectorAll('[data-lbtab]').forEach(b=>b.classList.toggle('active',b.dataset.lbtab===_lbTab));
+  if(_lbTab==='all')renderAllUsersLeaderboard(); else renderFriendsCard();
+}
+// Global leaderboard — fetch all profiles + their food entries in one shot,
+// compute score per user · sort + show top 50. Score = onTrack×10 + streak×5
+// (same formula as friends leaderboard).
+async function renderAllUsersLeaderboard(){
+  const card=document.getElementById('friendsCard');
+  const body=document.getElementById('friendsBody');
+  if(!card||!body)return;
+  if(!cloudUser){card.style.display='none';return;}
+  card.style.display='block';
+  body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_loading_all')}</div>`;
+  try{
+    // Pull up to 200 profiles + up to 20k recent food entries
+    const [profilesRes,entriesRes]=await Promise.all([
+      sb.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200),
+      sb.from('food_entries').select('user_id,entry_date,calories').limit(20000),
+    ]);
+    const profiles=profilesRes.data||[];
+    if(!profiles.length){body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_no_users')}</div>`;return;}
+    // Group entries by user_id → entries_by_day
+    const byUser={};
+    (entriesRes.data||[]).forEach(e=>{
+      if(!byUser[e.user_id])byUser[e.user_id]={};
+      if(!byUser[e.user_id][e.entry_date])byUser[e.user_id][e.entry_date]=[];
+      byUser[e.user_id][e.entry_date].push(e);
+    });
+    // Score per profile · join with profile fields
+    const ranked=profiles.map(p=>{
+      const ebd=byUser[p.id]||{};
+      const streak=calcStreak(ebd);
+      const onTrack=daysOnTrack(ebd);
+      const score=onTrack*10+streak*5;
+      return {...p,streak,onTrack,score};
+    }).sort((a,b)=>b.score-a.score).slice(0,50);
+    // Find self's rank to highlight in list (or show "Your rank: #N" if outside top 50)
+    const meIdx=ranked.findIndex(u=>u.id===cloudUser.id);
+    let html='';
+    const isEn=settings.lang==='en';
+    ranked.forEach((u,i)=>{
+      const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
+      const isMe=u.id===cloudUser.id;
+      const safeName=escapeHtml(u.display_name||(isEn?'Anonymous':'ไม่ระบุชื่อ'));
+      const av=u.avatar&&u.avatar.startsWith('data:')
+        ?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`
+        :`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
+      const meTag=isMe?(isEn?' (You)':' (คุณ)'):'';
+      const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}" role="button" tabindex="0" aria-label="ดูโปรไฟล์ ${safeName}"`;
+      html+=`<div class="lb-item${isMe?' me':''}"${clickAttr} style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
+        `<div style="width:28px;text-align:center;font-weight:700">${rank}</div>`+
+        av+
+        `<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${safeName}${meTag}</div><div style="font-size:.68rem;color:var(--muted)">${t('streak')} ${u.streak} · ${t('on_track')} ${u.onTrack} ${t('days')}</div></div>`+
+        `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div></div>`;
+    });
+    // If user isn't in top 50 — fetch + show their position separately
+    let footer='';
+    if(meIdx===-1){
+      const myEbd=byUser[cloudUser.id]||{};
+      const myStreak=calcStreak(myEbd);
+      const myOnTrack=daysOnTrack(myEbd);
+      const myScore=myOnTrack*10+myStreak*5;
+      // Compute rank by counting how many profiles have higher score
+      const allScores=profiles.map(p=>{const e=byUser[p.id]||{};return daysOnTrack(e)*10+calcStreak(e)*5;});
+      const myRank=allScores.filter(s=>s>myScore).length+1;
+      footer=`<div style="margin-top:10px;padding:8px 10px;border-radius:9px;background:var(--surface2);font-size:.74rem;color:var(--muted)">${isEn?'Your rank':'อันดับคุณ'}: #${myRank} · ${myScore} ${t('score_lbl')}</div>`;
+    }
+    body.innerHTML=html+footer;
+    // Wire row click → friend profile
+    body.querySelectorAll('.lb-item[data-openfid]').forEach(row=>{
+      row.onclick=()=>openFriendProfile(row.dataset.openfid,row.dataset.openfname);
+    });
+  }catch(e){
+    body.innerHTML=`<div class="empty" style="padding:10px 0;color:var(--accent)">${escapeHtml(e.message||String(e))}</div>`;
+  }
+}
 async function renderFriendsCard(){
   const card=document.getElementById('friendsCard');
   const body=document.getElementById('friendsBody');
@@ -4716,54 +4837,96 @@ function renderProjectionChart(){
   sum.innerHTML=out;
 }
 function renderWaterStats(){
-  const days7=[];
-  const loc2=settings.lang==='en'?'en-GB':'th-TH';
-  for(let i=6;i>=0;i--){
+  const isEn=settings.lang==='en';
+  const PERIOD=+_waterPeriod;
+  const isMonth=PERIOD===30;
+  const titleEl=document.getElementById('waterChartTitle');
+  if(titleEl)titleEl.textContent=isMonth?t('water_30d'):t('water_7d');
+  document.querySelectorAll('[data-wperiod]').forEach(b=>b.classList.toggle('active',b.dataset.wperiod===_waterPeriod));
+  const daysArr=[];
+  const loc2=isEn?'en-GB':'th-TH';
+  for(let i=PERIOD-1;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
     const k=dateKey(d);
-    days7.push({k,c:allWater[k]||0,label:d.toLocaleDateString(loc2,{weekday:'short'})});
+    const label=isMonth?(d.getDate()%5===0||i===0||i===PERIOD-1?String(d.getDate()):''):d.toLocaleDateString(loc2,{weekday:'short'});
+    daysArr.push({k,c:allWater[k]||0,label});
   }
-  const hit=days7.filter(d=>d.c>=getWaterGoal()).length;
-  const avg=days7.reduce((s,d)=>s+d.c,0)/7;
+  const goal=getWaterGoal();
+  const hit=daysArr.filter(d=>d.c>=goal).length;
+  const avg=daysArr.reduce((s,d)=>s+d.c,0)/PERIOD;
+  // Auto-resize: if there's a giant drink day way above goal, the column needs
+  // more vertical headroom. Cap at 90px so it doesn't dominate the card.
+  const maxC=Math.max(...daysArr.map(d=>d.c),goal);
+  const baseColH=isMonth?68:54;
+  const overGoal=maxC/goal;
+  const colH=overGoal>1.6?Math.min(90,baseColH+18):baseColH;
+  const gap=isMonth?'2px':'5px';
+  const colW=isMonth?'auto':'14px';
   const wrap=document.getElementById('waterStats');
-  const bars=days7.map(d=>{
-    const pct=Math.min(d.c/getWaterGoal(),1);
-    // Any cups drunk → fill blue (matches color of cup icons on Today).
-    // Saturate slightly when hitting the daily goal for visual feedback.
-    const hue=d.c>=getWaterGoal()?'var(--blue)':d.c>0?'var(--blue)':'var(--surface2)';
-    const op=d.c>=getWaterGoal()?'1':d.c>0?'.78':'1';
-    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">`+
-      `<div style="width:14px;height:48px;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden">`+
+  const bars=daysArr.map(d=>{
+    const pct=Math.min(d.c/maxC,1);
+    const hue=d.c>=goal?'var(--blue)':d.c>0?'var(--blue)':'var(--surface2)';
+    const op=d.c>=goal?'1':d.c>0?'.78':'1';
+    const valueLbl=isMonth?'':(d.c||'');
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0">`+
+      `<div style="width:${colW};height:${colH}px;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden">`+
         `<div style="position:absolute;bottom:0;left:0;right:0;height:${(pct*100).toFixed(1)}%;background:${hue};opacity:${op};transition:height .3s"></div>`+
       `</div>`+
-      `<div style="font-size:.58rem;color:var(--muted)">${d.label}</div>`+
-      `<div style="font-size:.55rem;color:var(--muted)">${d.c||''}</div>`+
+      `<div style="font-size:.58rem;color:var(--muted);white-space:nowrap">${d.label}</div>`+
+      `<div style="font-size:.55rem;color:var(--muted)">${valueLbl}</div>`+
     `</div>`;
   }).join('');
-  const goalLbl=settings.lang==='en'?`Hit ${getWaterGoal()} cups`:`บรรลุเป้า ${getWaterGoal()} แก้ว`;
-  wrap.innerHTML=`<div style="display:flex;gap:5px;justify-content:space-between;margin-bottom:8px">${bars}</div>`+
-    `<div class="rrow"><span class="rl">${goalLbl}</span><span class="rv" style="color:var(--blue)">${hit}/7 ${t('days')}</span></div>`+
+  const goalLbl=isEn?`Hit ${goal} cups`:`บรรลุเป้า ${goal} แก้ว`;
+  const periodLbl=isMonth?`${hit}/${PERIOD} ${t('days')}`:`${hit}/7 ${t('days')}`;
+  wrap.innerHTML=`<div style="display:flex;gap:${gap};justify-content:space-between;margin-bottom:8px;align-items:flex-end">${bars}</div>`+
+    `<div class="rrow"><span class="rl">${goalLbl}</span><span class="rv" style="color:var(--blue)">${periodLbl}</span></div>`+
     `<div class="rrow"><span class="rl">${t('avg_per_day')}</span><span class="rv">${avg.toFixed(1)} ${t('cups_unit')}</span></div>`;
 }
+// Cal/Water chart period state — '7' or '30'. Persisted across nav so users
+// don't have to re-toggle every time they hit Analysis.
+let _calPeriod=localStorage.getItem('cp_cal_period')||'7';
+let _waterPeriod=localStorage.getItem('cp_water_period')||'7';
+function setCalPeriod(p){_calPeriod=p;localStorage.setItem('cp_cal_period',p);document.querySelectorAll('[data-period]').forEach(b=>b.classList.toggle('active',b.dataset.period===p));renderAnalysis();}
+function setWaterPeriod(p){_waterPeriod=p;localStorage.setItem('cp_water_period',p);document.querySelectorAll('[data-wperiod]').forEach(b=>b.classList.toggle('active',b.dataset.wperiod===p));renderWaterStats();}
 function renderAnalysis(){
   renderProjectionChart();renderWaterStats();
   renderAdSlot('analysis-1',document.querySelector('[data-ad-slot="analysis-1"]'));
+  const isEn=settings.lang==='en';
+  const PERIOD=+_calPeriod;
+  const isMonth=PERIOD===30;
+  // Sync the heading + tab active state on every render (covers lang change)
+  const titleEl=document.getElementById('calChartTitle');
+  if(titleEl)titleEl.textContent=isMonth?t('cal_30d'):t('cal_7d');
+  document.querySelectorAll('[data-period]').forEach(b=>b.classList.toggle('active',b.dataset.period===_calPeriod));
   const days=[];
-  const loc=settings.lang==='en'?'en-GB':'th-TH';
-  for(let i=6;i>=0;i--){
+  const loc=isEn?'en-GB':'th-TH';
+  for(let i=PERIOD-1;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
     const k=dateKey(d);
     const entries=allEntries[k]||[];
     const cal=entries.reduce((s,e)=>s+e.calories,0);
-    days.push({k,cal,label:d.toLocaleDateString(loc,{weekday:'short'})});
+    // 7-day: weekday short. 30-day: day-of-month or empty for non-marker days.
+    const label=isMonth?(d.getDate()%5===0||i===0||i===PERIOD-1?String(d.getDate()):''):d.toLocaleDateString(loc,{weekday:'short'});
+    days.push({k,cal,label,d});
   }
   const goal=userProfile?.goal_cal||1800;
   const maxCal=Math.max(...days.map(d=>d.cal),goal,100);
-  const wb=document.getElementById('wBars');wb.innerHTML='';
+  // Auto-resize chart height: if max cal value is >1.6× goal (a big binge day),
+  // expand container so the bar has room without crushing labels.
+  const baseH=isMonth?110:68;
+  const overGoal=maxCal/goal;
+  const chartH=overGoal>2.2?Math.min(180,baseH+50):overGoal>1.6?baseH+22:baseH;
+  const barMax=chartH-6;   // leave a hair of padding so border-radius isn't clipped
+  const wb=document.getElementById('wBars');
+  wb.style.setProperty('--chart-h',chartH+'px');
+  wb.classList.toggle('is-month',isMonth);
+  wb.innerHTML='';
   days.forEach(d=>{
     const p=d.cal/maxCal;
     const div=document.createElement('div');div.className='wbw';
-    div.innerHTML=`<div class="wb" style="height:${Math.max(p*62,2).toFixed(1)}px;background:${d.cal>goal?'var(--accent)':d.cal>0?'var(--green)':'var(--surface2)'}"></div><div class="wb-l">${d.label}</div><div class="wb-c">${d.cal||''}</div>`;
+    // 30-day mode: hide per-bar numeric labels (won't fit in ~5px wide bars)
+    const calLabel=isMonth?'':(d.cal||'');
+    div.innerHTML=`<div class="wb" style="height:${Math.max(p*barMax,2).toFixed(1)}px;background:${d.cal>goal?'var(--accent)':d.cal>0?'var(--green)':'var(--surface2)'}"></div><div class="wb-l">${d.label}</div><div class="wb-c">${calLabel}</div>`;
     wb.appendChild(div);
   });
   document.getElementById('goalLine').textContent=t('goal')+' '+goal.toLocaleString();
@@ -4779,7 +4942,6 @@ function renderAnalysis(){
     <div class="rrow"><span class="rl">${t('days_logged')}</span><span class="rv">${act.length}/7 ${dayUnit}</span></div>`;
   const ins=document.getElementById('insDiv');ins.innerHTML='';
   const tips=[];
-  const isEn=settings.lang==='en';
   if(avg>0&&avg<goal*0.72)tips.push({i:'⚠️',t:isEn?`Avg <strong>${avg} kcal</strong>/day is too low — may affect muscle + metabolism`:`เฉลี่ย <strong>${avg} kcal</strong>/วัน ต่ำเกินไป อาจส่งผลต่อกล้ามเนื้อและเมตาบอลิซึม`});
   else if(avg>goal*1.1)tips.push({i:'🔥',t:isEn?`Avg <strong>${avg} kcal</strong> exceeds goal by ${avg-goal} kcal/day — try smaller portions`:`เฉลี่ย <strong>${avg} kcal</strong> เกินเป้า ${avg-goal} kcal/วัน ลองลดขนาดพอร์ชัน`});
   else if(avg>0)tips.push({i:'✅',t:isEn?`Avg <strong>${avg} kcal</strong> well within goal — keep it up!`:`เฉลี่ย <strong>${avg} kcal</strong> อยู่ในเป้าดีมาก รักษาไว้!`});
