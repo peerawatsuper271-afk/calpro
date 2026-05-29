@@ -1588,7 +1588,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.24.0';
+const APP_VERSION = '2.24.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2245,12 +2245,14 @@ const BADGES=[
   {id:'streak30',ico:'💎',name:'30 วันติด',name_en:'30-day streak',cond:u=>calcStreak(u)>=30},
   {id:'streak60',ico:'🚀',name:'60 วันติด',name_en:'60-day streak',cond:u=>calcStreak(u)>=60},
   {id:'streak100',ico:'👑',name:'100 วันติด',name_en:'100-day streak',cond:u=>calcStreak(u)>=100},
-  {id:'ontrack',ico:'🎯',name:'อยู่ในเป้า 5 วัน',name_en:'5 days on track',cond:u=>daysOnTrack(u)>=5},
-  {id:'protein',ico:'💪',name:'โปรตีนครบ 3 วัน',name_en:'Protein 3 days',cond:u=>protDays(u)>=3},
-  {id:'month',ico:'🏆',name:'แชมป์เดือน',name_en:'Monthly champ',cond:u=>daysOnTrack(u)>=20},
+  {id:'ontrack',ico:'🎯',name:'อยู่ในเป้า 5 วัน',name_en:'5 days on track',cond:(u,o)=>daysOnTrack(u,o)>=5},
+  {id:'protein',ico:'💪',name:'โปรตีนครบ 3 วัน',name_en:'Protein 3 days',cond:(u,o)=>protDays(u,o)>=3},
+  {id:'month',ico:'🏆',name:'แชมป์เดือน',name_en:'Monthly champ',cond:(u,o)=>daysOnTrack(u,o)>=20},
   {id:'logged7',ico:'📝',name:'บันทึก 7 วัน',name_en:'7 days logged',cond:u=>logDays(u)>=7},
-  {id:'referred',ico:'🎁',name:'ผู้ได้รับเชิญ',name_en:'Invited friend',cond:u=>!!localStorage.getItem('calpro_referred_by')},
-  {id:'master',ico:'👑',name:'Master',name_en:'Master',cond:u=>earnedBadges(u).length>=5},
+  // For friend profiles, opts.referred_by tells us if the TARGET user was
+  // referred. Without it (self), fall back to local-storage flag.
+  {id:'referred',ico:'🎁',name:'ผู้ได้รับเชิญ',name_en:'Invited friend',cond:(u,o)=>(o&&'referred_by' in o)?!!o.referred_by:!!localStorage.getItem('calpro_referred_by')},
+  {id:'master',ico:'👑',name:'Master',name_en:'Master',cond:(u,o)=>earnedBadges(u,o).length>=5},
 ];
 const THEMES={
   dark:{bg:'#0f0f14',s:'#1a1a24',s2:'#22222e',b:'#2e2e3e',t:'#e8e8f0',m:'#6868a0',mode:'dark'},
@@ -2343,18 +2345,25 @@ function calcStreak(entries_by_day){
   for(let i=0;i<90;i++){const d=new Date();d.setDate(d.getDate()-i);const k=dateKey(d);if((entries_by_day[k]||[]).length)s++;else break;}
   return s;
 }
-function daysOnTrack(ebd){
-  let n=0;const goal=userProfile?.goal_cal||1800;
+// Target-aware: passing {goal} computes against THAT user's calorie target.
+// Without opts, falls back to the viewer's profile — used for self-rendering
+// AND as a fallback when the leaderboard didn't fetch the target's goal yet.
+function daysOnTrack(ebd, opts){
+  const goal=(opts&&opts.goal)||userProfile?.goal_cal||1800;
+  let n=0;
   Object.values(ebd||{}).forEach(E=>{const c=E.reduce((s,e)=>s+e.calories,0);if(c>0&&c<=goal)n++;});
   return n;
 }
 function logDays(ebd){return Object.keys(ebd||{}).filter(k=>(ebd[k]||[]).length>0).length;}
-function protDays(ebd){
-  const pg=(userProfile?.weight||60)*1.6;let n=0;
+// Target-aware: passing {weight} uses that user's protein target (1.6g/kg).
+function protDays(ebd, opts){
+  const weight=(opts&&opts.weight)||userProfile?.weight||60;
+  const pg=weight*1.6;
+  let n=0;
   Object.values(ebd||{}).forEach(E=>{if(E.reduce((s,e)=>s+(e.protein||0),0)>=pg)n++;});
   return n;
 }
-function earnedBadges(ebd){return BADGES.filter(b=>b.id!=='master'&&b.cond(ebd)).map(b=>b.id);}
+function earnedBadges(ebd, opts){return BADGES.filter(b=>b.id!=='master'&&b.cond(ebd,opts)).map(b=>b.id);}
 // Persistent badge ledger — once earned, a badge sticks forever even if the
 // underlying condition stops being true (e.g. user breaks a streak). The
 // live-condition earnedBadges() is still used to DETECT new earnings; this
@@ -2374,7 +2383,7 @@ function syncEarnedBadges(ebd){
   if(changed){try{localStorage.setItem('cp_earned_badges',JSON.stringify([...set]));}catch{}}
   return [...set];
 }
-function calcScore(ebd){return daysOnTrack(ebd)*10+calcStreak(ebd)*5+earnedBadges(ebd).length*20;}
+function calcScore(ebd, opts){return daysOnTrack(ebd,opts)*10+calcStreak(ebd)*5+earnedBadges(ebd,opts).length*20;}
 
 // ═══ LOAD DATA (localStorage) ═══
 function loadUserData(){
@@ -3280,8 +3289,16 @@ async function renderAllUsersLeaderboard(){
     const friendsPromise=isRealForFr
       ?client.from('friends').select('friend_id').eq('user_id',cloudUser.id)
       :Promise.resolve({data:[]});
-    const [profilesRes,totalsRes,friendsRes]=await Promise.all([
-      client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200),
+    // Fetch banner_image + persisted_badges + weight so the leaderboard
+    // computes each user's score with THEIR goal/weight (not the viewer's)
+    // and the friend-profile click has banner/badges ready instantly.
+    // Falls back gracefully if v2.24 columns aren't deployed yet.
+    let profilesQuery=client.from('profiles').select('id,display_name,avatar,goal_cal,weight,banner_color,banner_image,bio,persisted_badges').limit(200);
+    let profilesRes=await profilesQuery;
+    if(profilesRes.error&&/banner_image|persisted_badges|weight/i.test(profilesRes.error.message||'')){
+      profilesRes=await client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200);
+    }
+    const [totalsRes,friendsRes]=await Promise.all([
       client.rpc('get_public_daily_totals',{_days:60}),
       friendsPromise,
     ]);
@@ -3307,11 +3324,14 @@ async function renderAllUsersLeaderboard(){
       const prev=byUser[r.user_id][r.entry_date]?.[0]?.calories||0;
       byUser[r.user_id][r.entry_date]=[{calories:prev+(r.total_kcal||0)}];
     });
-    // Score per profile · join with profile fields
+    // Score per profile · join with profile fields. Use THE TARGET'S
+    // goal_cal so each user's "days on track" is judged against their own
+    // calorie target, not the viewer's — otherwise the same person shows
+    // a different score on different viewers' screens.
     const ranked=profiles.map(p=>{
       const ebd=byUser[p.id]||{};
       const streak=calcStreak(ebd);
-      const onTrack=daysOnTrack(ebd);
+      const onTrack=daysOnTrack(ebd,{goal:p.goal_cal});
       const score=onTrack*10+streak*5;
       return {...p,streak,onTrack,score};
     }).sort((a,b)=>b.score-a.score).slice(0,50);
@@ -3344,12 +3364,14 @@ async function renderAllUsersLeaderboard(){
     // (skipped entirely when no one's signed in)
     let footer='';
     if(cloudUser&&meIdx===-1){
+      const myProf=profiles.find(p=>p.id===cloudUser.id);
       const myEbd=byUser[cloudUser.id]||{};
       const myStreak=calcStreak(myEbd);
-      const myOnTrack=daysOnTrack(myEbd);
+      const myOnTrack=daysOnTrack(myEbd,{goal:myProf?.goal_cal});
       const myScore=myOnTrack*10+myStreak*5;
       // Compute rank by counting how many profiles have higher score
-      const allScores=profiles.map(p=>{const e=byUser[p.id]||{};return daysOnTrack(e)*10+calcStreak(e)*5;});
+      // (each judged against its own goal_cal — same as the ranked map)
+      const allScores=profiles.map(p=>{const e=byUser[p.id]||{};return daysOnTrack(e,{goal:p.goal_cal})*10+calcStreak(e)*5;});
       const myRank=allScores.filter(s=>s>myScore).length+1;
       footer=`<div style="margin-top:10px;padding:8px 10px;border-radius:9px;background:var(--surface2);font-size:.74rem;color:var(--muted)">${isEn?'Your rank':'อันดับคุณ'}: #${myRank} · ${myScore} ${t('score_lbl')}</div>`;
     }
@@ -3401,8 +3423,11 @@ async function renderFriendsCard(){
     for(const u of allUsers){
       const {data}=await sb.from('food_entries').select('entry_date,calories').eq('user_id',u.id);
       const ebd={};(data||[]).forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);});
-      const score=daysOnTrack(ebd)*10+calcStreak(ebd)*5;
-      scores.push({...u,score,streak:calcStreak(ebd),onTrack:daysOnTrack(ebd)});
+      // Per-user goal — keeps "days on track" consistent across viewers
+      const opts={goal:u.goal_cal};
+      const onTrack=daysOnTrack(ebd,opts);
+      const streak=calcStreak(ebd);
+      scores.push({...u,score:onTrack*10+streak*5,streak,onTrack});
     }
     scores.sort((a,b)=>b.score-a.score);
     let html='';
@@ -3636,20 +3661,34 @@ async function syncToCloud(){
   if(!cloudUser||!sb)return;
   const uid=cloudUser.id;
   let okCount=0,failCount=0;
-  // 1. Profile (always upsert by id) — retries without bio/banner_color if those
-  //    columns aren't in the schema yet (v2.21 migration hasn't been applied).
-  //    banner_image is intentionally local-only — large data URLs aren't worth
-  //    syncing through Supabase row payloads.
+  // 1. Profile (always upsert by id) — retries strip newer columns if the
+  //    target schema is on an older migration. Order of retries:
+  //    v2.24 fields (banner_image, persisted_badges) → v2.21 fields
+  //    (bio, banner_color, level_title) → bare minimum.
+  //    banner_image data URL is ~150KB JPEG @ 1200×300; well under row limit.
   if(userProfile){
     const p={...userProfile,id:uid,email:cloudUser.email,updated_at:new Date().toISOString()};
     delete p.created_at;
-    delete p.banner_image;  // always local-only
+    // Snapshot the persisted-badge ledger so friends + other devices see the
+    // user's full earned set, not just whatever can be re-derived from
+    // currently-visible food entries.
+    try{
+      const pb=JSON.parse(localStorage.getItem('cp_earned_badges')||'[]');
+      if(Array.isArray(pb))p.persisted_badges=pb;
+    }catch{}
     const ok=await syncStep('profile', async ()=>{
       let {error}=await sb.from('profiles').upsert(p,{onConflict:'id'});
+      // First retry: drop the v2.24 columns if the schema lacks them
+      if(error&&/banner_image|persisted_badges/i.test(error.message||'')){
+        const fb1={...p};delete fb1.banner_image;delete fb1.persisted_badges;
+        ({error}=await sb.from('profiles').upsert(fb1,{onConflict:'id'}));
+      }
+      // Second retry: drop the v2.21 columns too if needed
       if(error&&/bio|banner_color|level_title/i.test(error.message||'')){
-        // Strip v2.21 fields and retry — old schema
-        const fallback={...p};delete fallback.bio;delete fallback.banner_color;delete fallback.level_title;
-        ({error}=await sb.from('profiles').upsert(fallback,{onConflict:'id'}));
+        const fb2={...p};
+        delete fb2.banner_image;delete fb2.persisted_badges;
+        delete fb2.bio;delete fb2.banner_color;delete fb2.level_title;
+        ({error}=await sb.from('profiles').upsert(fb2,{onConflict:'id'}));
       }
       if(error)throw error;
     });
@@ -3764,6 +3803,20 @@ async function syncFromCloud(){
     if(error)throw error;
     // Only override local profile fields that exist in cloud (keep local for null cloud fields)
     if(p){
+      // persisted_badges lives in its own localStorage key, not in
+      // userProfile. Lift it out before the generic field merge.
+      if(Array.isArray(p.persisted_badges)){
+        try{
+          // Union with local — never shrink the earned set (badges are
+          // monotonic per-user; conflicting values mean one device just
+          // hadn't pushed yet).
+          const local=new Set();
+          try{JSON.parse(localStorage.getItem('cp_earned_badges')||'[]').forEach(id=>local.add(id));}catch{}
+          p.persisted_badges.forEach(id=>local.add(id));
+          localStorage.setItem('cp_earned_badges',JSON.stringify([...local]));
+        }catch{}
+        delete p.persisted_badges;  // don't bleed into userProfile
+      }
       Object.keys(p).forEach(k=>{if(p[k]!==null&&p[k]!==undefined)userProfile[k]=p[k];});
       saveProfile_LS();
     }
@@ -5279,8 +5332,11 @@ function renderProfileUI(){
   const streak=calcStreak(ebd);
   const days=logDays(ebd);
   const onTrack=daysOnTrack(ebd);
-  const earned=earnedBadges(ebd);
-  const score=calcScore(ebd);
+  // syncEarnedBadges merges live-computed + persisted (and writes any new
+  // earnings back to localStorage), so already-earned badges keep showing
+  // even after a broken streak.
+  const earned=syncEarnedBadges(ebd);
+  const score=onTrack*10+streak*5+earned.length*20;
   const lvl=computeUserLevel(streak,days,onTrack);
   document.getElementById('profileLevelBadge').textContent=`${lvl.icon} Lv ${lvl.lv}`;
   let title=lvl.title;
@@ -5561,32 +5617,58 @@ async function openFriendProfile(userId,displayName,avatar){
   modal.dataset.fid=userId;
   modal.dataset.fname=displayName||'';
   try{
-    // Fetch profile (try with bio/banner_color first, fallback if columns don't exist)
+    // Fetch profile with v2.24 columns (banner_image, persisted_badges, weight)
+    // — fall back to the v2.21 column set if the schema is older.
     let prof=null;
     try{
-      const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,bio,banner_color').eq('id',userId).maybeSingle();
+      const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,weight,bio,banner_color,banner_image,persisted_badges').eq('id',userId).maybeSingle();
+      if(r.error)throw r.error;
       prof=r.data;
     }catch{
-      const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type').eq('id',userId).maybeSingle();
-      prof=r.data;
+      try{
+        const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,bio,banner_color').eq('id',userId).maybeSingle();
+        prof=r.data;
+      }catch{
+        const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type').eq('id',userId).maybeSingle();
+        prof=r.data;
+      }
     }
     if(!prof){throw new Error(t('fp_err'));}
-    // Fetch their food entries for stats
+    // Fetch their food entries for stats (RLS lets friends read each other's;
+    // non-friends get an empty array → live-derived badges will be empty and
+    // we fall back to the synced persisted_badges below).
     const {data:entries}=await sb.from('food_entries').select('entry_date,calories,protein,carbs,fat').eq('user_id',userId);
     const ebd={};(entries||[]).forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);});
-    // Stats
+    // Target-context stats — uses THE FRIEND'S goal/weight so their score
+    // matches what they see on their own device.
+    const opts={goal:prof.goal_cal,weight:prof.weight};
     const streak=calcStreak(ebd);
     const days=logDays(ebd);
-    const onTrack=daysOnTrack(ebd);
-    const earned=earnedBadges(ebd);
-    const score=calcScore(ebd);
+    const onTrack=daysOnTrack(ebd,opts);
+    const liveBadges=earnedBadges(ebd,opts);
+    // Merge with the synced persisted_badges so non-friends (RLS hides their
+    // entries) still see the badges the user actually earned.
+    const persistedFr=Array.isArray(prof.persisted_badges)?prof.persisted_badges:[];
+    const earned=[...new Set([...persistedFr,...liveBadges])];
+    const score=onTrack*10+streak*5+earned.length*20;
     const lvl=computeUserLevel(streak,days,onTrack);
     // Fill modal
     const av=document.getElementById('fpAvatar');
     if(prof.avatar&&prof.avatar.startsWith('data:')){av.innerHTML='<img src="'+prof.avatar+'" alt="avatar">';}
     else if(prof.avatar){av.textContent=prof.avatar;av.innerHTML=prof.avatar;}
     else{av.textContent=((prof.display_name||'?')[0]||'?').toUpperCase();}
-    document.getElementById('fpBanner').style.setProperty('background',`linear-gradient(135deg,${prof.banner_color||'#ff6b6b'},color-mix(in srgb,${prof.banner_color||'#ff6b6b'} 60%,#000))`);
+    // Banner — uploaded image takes precedence over color (matches the
+    // applyBannerVisual logic on the user's own profile).
+    const fpBanner=document.getElementById('fpBanner');
+    if(prof.banner_image){
+      fpBanner.style.background='';
+      fpBanner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${prof.banner_image}")`;
+      fpBanner.style.backgroundSize='cover';
+      fpBanner.style.backgroundPosition='center';
+    }else{
+      fpBanner.style.backgroundImage='';
+      fpBanner.style.setProperty('background',`linear-gradient(135deg,${prof.banner_color||'#ff6b6b'},color-mix(in srgb,${prof.banner_color||'#ff6b6b'} 60%,#000))`);
+    }
     document.getElementById('fpName').textContent=prof.display_name||displayName||'—';
     document.getElementById('fpLevelBadge').textContent=`${lvl.icon} Lv ${lvl.lv}`;
     document.getElementById('fpLevelTitle').textContent=lvl.title;
@@ -7785,6 +7867,18 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.24.1':{
+    th:[
+      '🖼️ **banner รูปแสดงข้ามเครื่อง + ในโปรไฟล์เพื่อน** (เคย local-only)',
+      '🏅 **เหรียญตราซิงค์ขึ้นคลาวด์** · เพื่อน + เครื่องใหม่เห็นเหรียญที่เคยได้',
+      '📊 **คะแนน leaderboard ตรงกันทุกเครื่อง** · ใช้เป้าหมายของเจ้าของ ไม่ใช่ผู้ดู',
+    ],
+    en:[
+      '🖼️ **Banner image now syncs cross-device + on friends profile** (was local-only)',
+      '🏅 **Badges sync to cloud** · friends + new devices see your earned badges',
+      '📊 **Leaderboard scores consistent across viewers** · uses each user\'s own goal, not the viewer\'s',
+    ],
+  },
   '2.24.0':{
     th:[
       '☁️ **ซิงค์ข้อมูลแม้ไม่ได้ล็อคอิน** — สำรองอัตโนมัติบนคลาวด์ · ข้อมูลผูกกับเครื่องนี้จนกว่าจะล็อคอิน',
