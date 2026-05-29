@@ -340,12 +340,15 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .av-opt.active{border-color:var(--accent);background:rgba(255,107,107,.12);}
 
 /* ── ANALYSIS ── */
-.wbars{display:flex;align-items:flex-end;gap:5px;height:var(--chart-h,68px);margin-bottom:5px;transition:height .25s;}
-.wbars.is-month{gap:2px;height:var(--chart-h,110px);}
+.wbars{display:flex;align-items:flex-end;gap:5px;height:var(--chart-h,100px);margin-top:6px;margin-bottom:5px;transition:height .25s;overflow:hidden;}
+.wbars.is-month{gap:2px;height:var(--chart-h,140px);}
 .wbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
 .wb{width:100%;border-radius:3px 3px 0 0;transition:height .5s,background .3s;min-height:2px;}
 .wb-l{font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;}
 .wb-c{font-size:.58rem;color:var(--muted);white-space:nowrap;overflow:hidden;}
+/* Collapse empty label/value cells so the column doesn't reserve ghost
+   line-height (matters in 30-day mode and zero-cal days). */
+.wb-l:empty,.wb-c:empty{display:none;}
 .wbars.is-month .wb-l,.wbars.is-month .wb-c{font-size:.52rem;}
 /* Period tab pills — used on Analysis charts + Leaderboard for 7d/30d toggle */
 .period-tabs{display:inline-flex;background:var(--surface2);border-radius:99px;padding:3px;gap:2px;}
@@ -4928,11 +4931,18 @@ function renderAnalysis(){
   const goal=userProfile?.goal_cal||1800;
   const maxCal=Math.max(...days.map(d=>d.cal),goal,100);
   // Auto-resize chart height: if max cal value is >1.6× goal (a big binge day),
-  // expand container so the bar has room without crushing labels.
-  const baseH=isMonth?110:68;
+  // expand the container so the tallest bar + labels still fit inside without
+  // overflowing upward into the title row above. Reserve ~28px for the day
+  // label + numeric value below each bar so even a maxed-out bar doesn't push
+  // the whole .wbw column above the chart's box.
+  const baseH=isMonth?140:100;
   const overGoal=maxCal/goal;
-  const chartH=overGoal>2.2?Math.min(180,baseH+50):overGoal>1.6?baseH+22:baseH;
-  const barMax=chartH-6;   // leave a hair of padding so border-radius isn't clipped
+  const chartH=overGoal>2.5?Math.min(220,baseH+80):overGoal>1.8?baseH+40:overGoal>1.2?baseH+15:baseH;
+  // Reserve 34px below the bar for the day label + numeric value (line-heights
+  // ~14px each + 2px gap + tiny buffer). Without this the .wbw column total
+  // height exceeds the chart container's height and overflows upward into
+  // the title row above.
+  const barMax=chartH-38;
   const wb=document.getElementById('wBars');
   wb.style.setProperty('--chart-h',chartH+'px');
   wb.classList.toggle('is-month',isMonth);
