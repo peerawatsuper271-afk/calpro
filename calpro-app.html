@@ -1561,7 +1561,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.23.0';
+const APP_VERSION = '2.24.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1602,6 +1602,69 @@ let syncStatus = 'idle';  // idle · syncing · synced · error · offline
 let syncTimer = null;     // for debounced auto-sync
 let periodicTimer = null; // for interval-based sync
 let noUpsertSupport = false; // set true when 42P10 detected — switches to fallback diff strategy
+
+// ═══ ANONYMOUS SESSION (device-only sync) ═══
+// Non-logged-in users still get cloud backup of their data — under an anonymous
+// user_id. The anonymous session token lives in localStorage, so the data is
+// tethered to this device. Once the user signs in with email, our existing
+// SIGNED_IN handler pulls their real account + pushes localStorage (which
+// still has the anon data) → anon data effectively migrates to the real
+// account. The orphaned anon user is left behind (Supabase cleans up unused
+// anon accounts after ~30 days by default).
+//
+// We use a direct REST call (POST /auth/v1/signup with empty body) because
+// supabase-js v2's signInAnonymously() can deadlock on the navigator-lock —
+// same issue we hit with the AI camera flow.
+async function ensureAnonSession(){
+  // 1. Already have a valid session (anon or real)? Use it.
+  try{
+    const raw=localStorage.getItem('calpro-sb-auth');
+    if(raw){
+      const p=JSON.parse(raw);
+      const s=p?.currentSession||p;
+      const valid=s?.access_token&&s?.expires_at&&s.expires_at*1000>Date.now()+60000;
+      if(valid&&s.user)return s;
+    }
+  }catch{}
+  // 2. None — POST to signup endpoint with empty body to create anonymous user.
+  //    8s timeout so we don't block the rest of app boot.
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),8000);
+  try{
+    const res=await fetch(SUPABASE_URL+'/auth/v1/signup',{
+      method:'POST',
+      headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json'},
+      body:'{}',
+      signal:ctrl.signal,
+    });
+    if(!res.ok){
+      const txt=await res.text().catch(()=>'');
+      throw new Error('anon signup HTTP '+res.status+' '+txt.slice(0,150));
+    }
+    const j=await res.json();
+    const session={
+      access_token:j.access_token,
+      refresh_token:j.refresh_token,
+      expires_in:j.expires_in||3600,
+      expires_at:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600),
+      token_type:j.token_type||'bearer',
+      user:j.user,
+    };
+    // Write in supabase-js v2 storage format so the SDK picks it up.
+    localStorage.setItem('calpro-sb-auth',JSON.stringify({currentSession:session,expiresAt:session.expires_at}));
+    // Tell the SDK directly too — setSession is a setter, no network call,
+    // so it doesn't suffer from the getSession() navigator-lock deadlock.
+    try{
+      if(sb&&sb.auth&&sb.auth.setSession){
+        await Promise.race([
+          sb.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token}),
+          new Promise(r=>setTimeout(r,2000)),  // 2s cap — proceed even if it stalls
+        ]);
+      }
+    }catch(e){console.warn('[anon] setSession warn:',e?.message||e);}
+    return session;
+  }finally{clearTimeout(t);}
+}
 
 // ═══ i18n ═══
 const I18N = {
@@ -3002,25 +3065,44 @@ function refreshActivePage(){
 }
 
 // Auth state listener — set up once Supabase SDK is loaded
-ensureSupabase().then(()=>{
+ensureSupabase().then(async ()=>{
+  // Track the previously-known user id so SIGNED_IN can detect anon → real
+  // upgrades (the localStorage data we're about to push to the new real
+  // account was actually written under the old anon user_id).
+  let _prevUserId=null;
+  try{
+    const raw=localStorage.getItem('calpro-sb-auth');
+    if(raw){_prevUserId=(JSON.parse(raw)?.currentSession||{}).user?.id||null;}
+  }catch{}
   sb.auth.onAuthStateChange(async (event,session)=>{
+    const wasAnon=cloudUser?.is_anonymous===true||cloudUser?.aud==='anon';
     cloudUser=session?.user||null;
     if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'){
-      console.log('[auth]',event);
+      console.log('[auth]',event,'anon='+(cloudUser?.is_anonymous===true));
       if(event==='SIGNED_IN'){
-        // First-time login on this device: pull then push (merge)
+        const isNowReal=cloudUser&&!cloudUser.is_anonymous;
+        const isAnonUpgrade=wasAnon&&isNowReal;
         setSyncStatus('syncing');
-        showToast(settings.lang==='en'?'Loading your data...':'กำลังโหลดข้อมูล...',8000);
-        try{
-          await syncFromCloud();
-          await syncToCloud();
-          setSyncStatus('synced');
-          showToast(settings.lang==='en'?'Data loaded ✓':'โหลดข้อมูลแล้ว ✓');
-        }catch(e){
-          setSyncStatus('error');
-          showToast((settings.lang==='en'?'Sync error: ':'ซิงค์ผิดพลาด: ')+e.message,4000);
+        // Anon-upgrade flow: push LS (which has the anon's data) to the new
+        // real account FIRST, then pull anything else the real account had.
+        // This preserves the anon-only data instead of letting a cloud-empty
+        // pull mask it.
+        if(isAnonUpgrade){
+          showToast(settings.lang==='en'?'Moving your data to your account...':'กำลังย้ายข้อมูลเข้าบัญชี...',8000);
+          try{await syncToCloud();await syncFromCloud();setSyncStatus('synced');
+            showToast(settings.lang==='en'?'Data migrated ✓':'ย้ายข้อมูลแล้ว ✓');}
+          catch(e){setSyncStatus('error');showToast((settings.lang==='en'?'Sync error: ':'ซิงค์ผิดพลาด: ')+e.message,4000);}
+        }else if(isNowReal){
+          // Plain sign-in on a fresh device: pull then push (merge)
+          showToast(settings.lang==='en'?'Loading your data...':'กำลังโหลดข้อมูล...',8000);
+          try{await syncFromCloud();await syncToCloud();setSyncStatus('synced');
+            showToast(settings.lang==='en'?'Data loaded ✓':'โหลดข้อมูลแล้ว ✓');}
+          catch(e){setSyncStatus('error');showToast((settings.lang==='en'?'Sync error: ':'ซิงค์ผิดพลาด: ')+e.message,4000);}
+        }else{
+          // Fresh anonymous session — just push whatever LS has up to the cloud.
+          try{await syncToCloud();setSyncStatus('synced');}
+          catch(e){setSyncStatus('error');console.warn('[anon sync]',e?.message||e);}
         }
-        // CRITICAL: refresh whatever page is currently visible so user sees new data
         refreshActivePage();
       }
     }else if(event==='SIGNED_OUT'){
@@ -3030,6 +3112,19 @@ ensureSupabase().then(()=>{
     renderCloudStatus();
     refreshActivePage();
   });
+  // Bootstrap: if nobody is signed in (no session at all), create an
+  // anonymous one so we still back the user's data up to the cloud.
+  // The session's tied to localStorage → moving devices = data stays behind
+  // until the user signs in with an email (which then migrates anon → real
+  // via the SIGNED_IN handler above).
+  try{
+    const stored=localStorage.getItem('calpro-sb-auth');
+    const hasSession=stored&&(()=>{try{const s=(JSON.parse(stored)?.currentSession||{});return s.access_token&&s.expires_at&&s.expires_at*1000>Date.now()+60000;}catch{return false;}})();
+    if(!hasSession){
+      console.log('[auth] no session — creating anonymous');
+      await ensureAnonSession();
+    }
+  }catch(e){console.warn('[auth] anon bootstrap failed:',e?.message||e);}
 }).catch(e=>{console.warn('[auth] Supabase SDK not available:',e?.message||e);});
 
 // ═══ AUTO-SYNC ═══
@@ -3082,17 +3177,13 @@ window.addEventListener('beforeunload',()=>{
 function renderCloudStatus(){
   const wrap=document.getElementById('cloudStatus');if(!wrap)return;
   if(!sb){wrap.innerHTML='<div style="font-size:.78rem;color:var(--muted)">Supabase SDK โหลดไม่ได้</div>';return;}
-  if(!cloudUser){
-    wrap.innerHTML=
-      `<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;line-height:1.5">${t('not_signed_in')}</div>`+
-      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">`+
-        `<button class="btn-sec" onclick="openAuthModal('login')">${t('login')}</button>`+
-        `<button class="btn" style="padding:8px" onclick="openAuthModal('signup')">${t('signup')}</button>`+
-      `</div>`;
-  }else{
-    const lastSync=lsLoad('calpro_last_sync',null);
-    const loc=settings.lang==='en'?'en-GB':'th-TH';
-    const lastTxt=lastSync?new Date(lastSync).toLocaleString(loc,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+  const isEn=settings.lang==='en';
+  const isAnon=cloudUser&&(cloudUser.is_anonymous===true||cloudUser.aud==='anon');
+  const isReal=cloudUser&&!isAnon;
+  const lastSync=lsLoad('calpro_last_sync',null);
+  const loc=isEn?'en-GB':'th-TH';
+  const lastTxt=lastSync?new Date(lastSync).toLocaleString(loc,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+  if(isReal){
     wrap.innerHTML=
       `<div style="font-size:.82rem;margin-bottom:4px">✓ <strong>${cloudUser.email}</strong></div>`+
       `<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">${t('last_sync')}: ${lastTxt}</div>`+
@@ -3101,8 +3192,23 @@ function renderCloudStatus(){
         `<button class="btn-sec" onclick="signOutCloud()">${t('sign_out')}</button>`+
       `</div>`+
       `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">`+
-        `<button class="btn-sec" onclick="diagnoseSync()" style="font-size:.74rem;padding:7px">🔍 ${settings.lang==='en'?'Diagnose':'ตรวจสอบ'}</button>`+
+        `<button class="btn-sec" onclick="diagnoseSync()" style="font-size:.74rem;padding:7px">🔍 ${isEn?'Diagnose':'ตรวจสอบ'}</button>`+
         `<button class="btn-danger" onclick="deleteCloudAccount()" style="font-size:.74rem;padding:7px">${t('delete_cloud')}</button>`+
+      `</div>`;
+  }else{
+    // Both "no session yet" and "anonymous session" show the same call-to-action:
+    // sign in / sign up. Anonymous gets a small extra hint that data is
+    // backed up to cloud but tethered to this device until they sign in.
+    const anonHint=isAnon
+      ?`<div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;line-height:1.55;padding:8px 10px;background:var(--surface2);border-radius:8px">${isEn?'📱 Your data is backed up to the cloud but tied to this device. Sign in to move it across devices.':'📱 ข้อมูลของคุณถูกสำรองบนคลาวด์แต่ผูกกับเครื่องนี้ — ล็อคอินเพื่อย้ายเครื่องได้'}`
+        +(lastSync?`<br><span style="font-size:.66rem">${t('last_sync')}: ${lastTxt}</span>`:'')
+        +`</div>`
+      :`<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;line-height:1.5">${t('not_signed_in')}</div>`;
+    wrap.innerHTML=
+      anonHint+
+      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">`+
+        `<button class="btn-sec" onclick="openAuthModal('login')">${t('login')}</button>`+
+        `<button class="btn" style="padding:8px" onclick="openAuthModal('signup')">${t('signup')}</button>`+
       `</div>`;
   }
 }
@@ -3179,7 +3285,7 @@ async function renderAllUsersLeaderboard(){
     ranked.forEach((u,i)=>{
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
       const isMe=cloudUser&&u.id===cloudUser.id;
-      const safeName=escapeHtml(u.display_name||'test user');
+      const safeName=escapeHtml(u.display_name||'Test User');
       const av=u.avatar&&u.avatar.startsWith('data:')
         ?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`
         :`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
@@ -3269,7 +3375,9 @@ async function renderFriendsCard(){
 // Open the dedicated Add Friend modal (replaces the old prompt())
 let _frCurrentIds=new Set();   // cached friend ids for "already" detection
 async function addFriendPrompt(){
-  if(!cloudUser){showToast(t('not_signed_in'));return;}
+  // Anonymous sessions can sync their own data but can't social — gate
+  // friend-adding to real (non-anonymous) accounts.
+  if(!cloudUser||cloudUser.is_anonymous===true){showToast(t('not_signed_in'));return;}
   document.getElementById('frSearchInput').value='';
   document.getElementById('frSearchResults').innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('fr_search_short')}</div>`;
   // Cache current friends so we can show "already added" badge
@@ -5544,9 +5652,15 @@ function renderDrawerHeader(){
   else if(p?.avatar)av.textContent=p.avatar;
   else av.textContent=((p?.display_name||'?')[0]||'?').toUpperCase();
   document.getElementById('drawerName').textContent=p?.display_name||t('you');
-  document.getElementById('drawerEmail').textContent=cloudUser?.email||(settings.lang==='en'?'Local only':'เครื่องนี้เท่านั้น');
-  // Show friends button only if signed in
-  document.getElementById('drawerFriendsBtn').style.display=cloudUser?'flex':'none';
+  // Anonymous sessions have no email — show a device-only hint instead.
+  // Real accounts show their email. No session at all → "Local only".
+  const isAnonCU=cloudUser&&(cloudUser.is_anonymous===true||cloudUser.aud==='anon');
+  const emailEl=document.getElementById('drawerEmail');
+  if(cloudUser&&!isAnonCU)emailEl.textContent=cloudUser.email||'';
+  else if(isAnonCU)emailEl.textContent=settings.lang==='en'?'📱 Device-only sync':'📱 ซิงค์เฉพาะเครื่องนี้';
+  else emailEl.textContent=settings.lang==='en'?'Local only':'เครื่องนี้เท่านั้น';
+  // Show friends button only if signed in with a real (non-anonymous) account
+  document.getElementById('drawerFriendsBtn').style.display=(cloudUser&&!isAnonCU)?'flex':'none';
 }
 function navTo(page){
   closeDrawer();
@@ -7440,6 +7554,24 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.24.0':{
+    th:[
+      '☁️ **ซิงค์ข้อมูลแม้ไม่ได้ล็อคอิน** — สำรองอัตโนมัติบนคลาวด์ · ข้อมูลผูกกับเครื่องนี้จนกว่าจะล็อคอิน',
+      '🔄 **ย้ายข้อมูลอัตโนมัติเมื่อล็อคอิน** — สมัคร/ล็อคอินแล้วข้อมูลย้ายเข้าบัญชีจริงไม่หาย',
+      '🏆 แก้คะแนนคนที่ไม่ใช่เพื่อนขึ้น 0 · ใช้ RPC รวมยอดต่อวัน (ไม่ leak ชื่ออาหาร)',
+      '🔁 เปลี่ยน tab → หน้าแรกรีโหลดข้อมูลใหม่อัตโนมัติ ไม่ต้องรีเฟรชแล้ว',
+      '🧹 ลบหัวข้อ "เหลือ" และ "จำนวนรายการ" ออกจากหน้าแรก',
+      '✏️ test user → Test User (ตัวพิมพ์ใหญ่)',
+    ],
+    en:[
+      '☁️ **Sync even without sign-in** — auto cloud backup · data is tied to this device until you sign in',
+      '🔄 **Data migrates on sign-in** — sign up / log in and your local data moves into the real account',
+      '🏆 Fixed 0-score for non-friends on leaderboard · uses per-day RPC aggregation (no food name leak)',
+      '🔁 Switching tabs back to Today auto-reloads · no more manual refresh needed',
+      '🧹 Removed "remaining" + entries-count headers from Today page',
+      '✏️ test user → Test User (titlecase)',
+    ],
+  },
   '2.23.0':{
     th:[
       '🌍 **Leaderboard ทั่วโลก ดูได้แม้ไม่ล็อกอิน** · Tab "เพื่อน" ต้องล็อกอินก่อน',
