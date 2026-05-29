@@ -75,6 +75,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.23.0** *(APK + web · BETA)* — 🌍 **Global leaderboard ดูได้แม้ไม่ล็อกอิน** (Friends tab ต้อง login) · 📊 แคล/น้ำ 7d↔30d toggle + auto-resize · 🎮 Steam profile · Level 1-10 · banner upload + crop · ✏️ edit/measurements ซ่อนเป็น default · 📌 sticky header · 🤳 iOS no-zoom · ✕ friend profile close ในหัว + footer
 - **v2.22.0** *(APK + web · BETA)* — ✨ **Friends + Leaderboard GA** · ⚡ Service Worker stale-while-revalidate · 🌐 บายพาส API (Supabase/Gemini/OpenAI/Claude) · ♿ ARIA dialog + role บน leaderboard · 🧹 i18n holdouts (dev mode + sign-in)
 - **v2.21.0** *(APK + web · BETA)* — 🎮 **โปรไฟล์ Steam-style** · banner สี · level · badges showcase · bio · 👥 **ดูโปรไฟล์เพื่อนได้** · 🤖 AI ถ่ายรูปฟรี 20/วัน · 🍱 อาหารเพิ่มเป็น 250 · 🎨 default ใหม่ (Prompt + light + nav 5 tabs) · 🔔 ขอ notification permission auto · 📈 weight chart ใหม่ · 🛠️ Capacitor 8 + JDK 21 + Android 15
 - **v2.20.0** *(APK + web · BETA)* — 🎨 **UX pass** · **🎯 modals กลางจอ** (เลิก bottom-sheet) · **🤖 AI live status + spinner + heartbeat + "เหลือ N/20"** chip · **🔒 AI members-only** (กัน proxy abuse) · **🍱 Add Food ใหม่** (search top · favorites bottom) · **📉 weight chart 14 วันย้อนหลังเท่านั้น** (no future) · **🏆 badges ถาวร** (localStorage `cp_earned_badges`)

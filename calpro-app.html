@@ -1072,7 +1072,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
       <div class="card" style="text-align:center;padding:24px 14px">
         <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.22.0 BETA</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.23.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
         <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
@@ -1545,7 +1545,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
     <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
-  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.22.0 BETA</span></div>
+  <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.23.0 BETA</span></div>
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
@@ -1562,7 +1562,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.22.0';
+const APP_VERSION = '2.23.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1673,6 +1673,7 @@ const I18N = {
     crop_title:'ปรับตำแหน่งรูป',crop_hint:'ลากเพื่อเลื่อน · เลื่อน slider เพื่อซูม',crop_zoom:'ซูม',crop_reset:'รีเซ็ต',crop_cancel:'ยกเลิก',crop_apply:'✓ ใช้รูปนี้',
     period_7d:'7 วัน',period_30d:'1 เดือน',cal_30d:'แคลอรี่ 30 วัน',water_30d:'น้ำดื่ม 30 วัน',
     lb_friends:'👥 เพื่อน',lb_global:'🌍 ทั้งหมด',lb_loading_all:'กำลังโหลดอันดับทั้งหมด...',lb_no_users:'ยังไม่มีผู้ใช้คนอื่น',
+    lb_signin_needed:'🔒 กรุณาล็อกอินก่อนเพื่อดูเพื่อน + เพิ่มเพื่อน',lb_go_signin:'ไปหน้าตั้งค่า → Cloud Sync',
     fp_loading:'กำลังโหลดโปรไฟล์...',fp_err:'โหลดโปรไฟล์ไม่สำเร็จ',
     dev_unlocked:'🔧 ปลดล็อก Developer mode',dev_locked:'ล็อก Developer mode แล้ว',dev_wrong_pw:'รหัสผ่านไม่ถูกต้อง',dev_dumped:'ดัมป์ใน console แล้ว',
     sign_in_first:'กรุณาเข้าสู่ระบบก่อน',
@@ -1774,6 +1775,7 @@ const I18N = {
     crop_title:'Adjust image',crop_hint:'Drag to move · slider to zoom',crop_zoom:'Zoom',crop_reset:'Reset',crop_cancel:'Cancel',crop_apply:'✓ Apply',
     period_7d:'7 days',period_30d:'30 days',cal_30d:'30-day calories',water_30d:'30-day water',
     lb_friends:'👥 Friends',lb_global:'🌍 Global',lb_loading_all:'Loading global ranking...',lb_no_users:'No other users yet',
+    lb_signin_needed:'🔒 Sign in to see friends + add new ones',lb_go_signin:'Go to Settings → Cloud Sync',
     fp_loading:'Loading profile...',fp_err:'Failed to load profile',
     dev_unlocked:'🔧 Developer mode unlocked',dev_locked:'Developer mode locked',dev_wrong_pw:'Wrong password',dev_dumped:'Dumped to console',
     sign_in_first:'Sign in first',
@@ -3110,26 +3112,33 @@ function setLbTab(t){
   _lbTab=t;localStorage.setItem('cp_lb_tab',t);
   renderLeaderboard();
 }
-// Dispatcher · also syncs the active tab pill on every render
+// Dispatcher · syncs active tab pill + shows the Friends card no matter the
+// auth state so the Global tab works for visitors who haven't signed up yet.
 function renderLeaderboard(){
   document.querySelectorAll('[data-lbtab]').forEach(b=>b.classList.toggle('active',b.dataset.lbtab===_lbTab));
+  const card=document.getElementById('friendsCard');
+  if(card)card.style.display='block';
+  // Make sure the Supabase SDK is loaded for the Global query (it's lazy)
+  ensureSupabase(6000).catch(()=>{});
   if(_lbTab==='all')renderAllUsersLeaderboard(); else renderFriendsCard();
 }
 // Global leaderboard — fetch all profiles + their food entries in one shot,
 // compute score per user · sort + show top 50. Score = onTrack×10 + streak×5
-// (same formula as friends leaderboard).
+// (same formula as friends leaderboard). Public · works without sign-in.
 async function renderAllUsersLeaderboard(){
   const card=document.getElementById('friendsCard');
   const body=document.getElementById('friendsBody');
   if(!card||!body)return;
-  if(!cloudUser){card.style.display='none';return;}
   card.style.display='block';
   body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_loading_all')}</div>`;
   try{
+    // Need an sb client to query — it's loaded lazily, so wait if needed.
+    const client=sb||await ensureSupabase(8000);
+    if(!client)throw new Error('Supabase unavailable');
     // Pull up to 200 profiles + up to 20k recent food entries
     const [profilesRes,entriesRes]=await Promise.all([
-      sb.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200),
-      sb.from('food_entries').select('user_id,entry_date,calories').limit(20000),
+      client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200),
+      client.from('food_entries').select('user_id,entry_date,calories').limit(20000),
     ]);
     const profiles=profilesRes.data||[];
     if(!profiles.length){body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_no_users')}</div>`;return;}
@@ -3148,14 +3157,14 @@ async function renderAllUsersLeaderboard(){
       const score=onTrack*10+streak*5;
       return {...p,streak,onTrack,score};
     }).sort((a,b)=>b.score-a.score).slice(0,50);
-    // Find self's rank to highlight in list (or show "Your rank: #N" if outside top 50)
-    const meIdx=ranked.findIndex(u=>u.id===cloudUser.id);
+    // Find self's rank — only meaningful when signed in
+    const meIdx=cloudUser?ranked.findIndex(u=>u.id===cloudUser.id):-1;
     let html='';
     const isEn=settings.lang==='en';
     ranked.forEach((u,i)=>{
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
-      const isMe=u.id===cloudUser.id;
-      const safeName=escapeHtml(u.display_name||(isEn?'Anonymous':'ไม่ระบุชื่อ'));
+      const isMe=cloudUser&&u.id===cloudUser.id;
+      const safeName=escapeHtml(u.display_name||'test user');
       const av=u.avatar&&u.avatar.startsWith('data:')
         ?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`
         :`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
@@ -3168,8 +3177,9 @@ async function renderAllUsersLeaderboard(){
         `<div style="font-size:.88rem;font-weight:700;color:var(--green)">${u.score}</div></div>`;
     });
     // If user isn't in top 50 — fetch + show their position separately
+    // (skipped entirely when no one's signed in)
     let footer='';
-    if(meIdx===-1){
+    if(cloudUser&&meIdx===-1){
       const myEbd=byUser[cloudUser.id]||{};
       const myStreak=calcStreak(myEbd);
       const myOnTrack=daysOnTrack(myEbd);
@@ -3192,8 +3202,14 @@ async function renderFriendsCard(){
   const card=document.getElementById('friendsCard');
   const body=document.getElementById('friendsBody');
   if(!card||!body)return;
-  if(!cloudUser){card.style.display='none';return;}
   card.style.display='block';
+  // Anonymous Supabase sessions (auto-created for AI camera access) don't
+  // count as "real" sign-in for the social features.
+  const isRealUser=cloudUser&&!cloudUser.is_anonymous;
+  if(!isRealUser){
+    body.innerHTML=`<div class="empty" style="padding:24px 12px;font-size:.82rem;line-height:1.6;text-align:center">${t('lb_signin_needed')}<br><button class="btn-sec" onclick="navTo('settings')" style="margin-top:12px;font-size:.78rem;padding:7px 14px">${t('lb_go_signin')}</button></div>`;
+    return;
+  }
   body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${settings.lang==='en'?'Loading...':'กำลังโหลด...'}</div>`;
   try{
     // Load friends list
@@ -7403,6 +7419,26 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.23.0':{
+    th:[
+      '🌍 **Leaderboard ทั่วโลก ดูได้แม้ไม่ล็อกอิน** · Tab "เพื่อน" ต้องล็อกอินก่อน',
+      '📊 **แคล/น้ำ 7 วัน / 1 เดือน** สลับได้ · กรอบขยายเองถ้ากราฟสูง',
+      '🎮 **โปรไฟล์ Steam style** · Level 1-10 · banner สีหรืออัปโหลดรูป (ลาก + ซูม crop)',
+      '✏️ แก้ไขโปรไฟล์ + สัดส่วน ซ่อนเป็นค่าเริ่มต้น · เปิดเมื่อกด "แก้ไข"',
+      '📌 Header ตรึงบน · เลื่อนหน้าไม่หาย',
+      '🤳 iOS คีย์บอร์ดไม่ซูมจอแล้ว',
+      '✕ ปุ่มปิดโปรไฟล์เพื่อนอยู่บนหัว + footer · กดง่ายขึ้น',
+    ],
+    en:[
+      '🌍 **Global leaderboard works without sign-in** · Friends tab still requires login',
+      '📊 **Calorie/water 7d ↔ 30d toggle** · chart frame auto-expands for tall bars',
+      '🎮 **Steam-style profile** · Level 1-10 · banner color or upload image (drag + zoom crop)',
+      '✏️ Edit profile + measurements hidden by default · opens via Edit button',
+      '📌 Sticky top header · stays in place when scrolling',
+      '🤳 iOS keyboard no longer zooms the page',
+      '✕ Friend profile close button in header + footer · easier to tap',
+    ],
+  },
   '2.22.0':{
     th:[
       '✨ **เพื่อน + leaderboard ออกจาก BETA** · กลายเป็น GA เต็มตัว',
