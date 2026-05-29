@@ -128,6 +128,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 
 /* ── CARD ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;}
+.card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;font-weight:600;}
 
 /* ── DATE NAV ── */
@@ -4912,6 +4913,12 @@ function toggleProfileEdit(){
   const willOpen=card.classList.contains('hide');
   card.classList.toggle('hide',!willOpen);
   if(measure)measure.classList.toggle('hide',!willOpen);
+  // Update the trigger button text to reflect state
+  const btn=document.querySelector('.profile-action-btn span[data-i18n="edit_profile"]');
+  if(btn){
+    const isEn=settings.lang==='en';
+    btn.textContent=willOpen?(isEn?'✓ Done editing':'✓ เสร็จสิ้น'):(isEn?'✏️ Edit profile':'✏️ แก้ไขโปรไฟล์');
+  }
   if(willOpen){
     setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),50);
   }
