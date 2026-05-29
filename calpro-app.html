@@ -5328,9 +5328,12 @@ function renderProfileUI(){
   if(p.goal_weight)document.getElementById('pGoalW').value=p.goal_weight;
   document.getElementById('pGender').value=p.gender||'male';
   document.getElementById('pAct').value=p.activity||1.55;
-  const bioEl=document.getElementById('pBio');
-  bioEl.value=p.bio||'';
-  updateBioCount(bioEl);  // also seeds the progress bar fill
+  // NB: `bioEl` already declared above for the read-only profileBioView —
+  // use a different name here so we don't trip the "Identifier already
+  // declared" SyntaxError that would otherwise nuke the whole inline script.
+  const bioInput=document.getElementById('pBio');
+  bioInput.value=p.bio||'';
+  updateBioCount(bioInput);  // also seeds the progress bar fill
   document.querySelectorAll('.gchip[data-g]').forEach(b=>b.classList.toggle('active',b.dataset.g===(p.goal_type||'lose')));
   // ── Banner color swatches ──
   const bcg=document.getElementById('bannerColorGrid');
