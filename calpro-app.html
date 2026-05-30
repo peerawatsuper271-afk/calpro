@@ -256,6 +256,21 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .empty-state .es-cta{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;border:none;border-radius:99px;padding:9px 20px;font-size:.84rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;}
 .empty-state .es-cta:hover{opacity:.9;}.empty-state .es-cta:active{transform:scale(.96);}
 
+/* ── QUICK-ADD (Today · log a recent food in 1 tap) ── */
+.qadd-wrap{margin-bottom:10px;}
+.qadd-wrap.hide{display:none;}
+.qadd-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:700;display:flex;align-items:center;gap:4px;}
+.qadd-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.qadd-row::-webkit-scrollbar{display:none;}
+.qadd-chip{flex:none;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 11px;cursor:pointer;transition:border-color .15s,transform .1s,background .15s;}
+.qadd-chip:hover{border-color:var(--accent);}
+.qadd-chip:active{transform:scale(.94);}
+.qadd-chip .qa-txt{min-width:0;}
+.qadd-chip .qa-name{font-size:.76rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+.qadd-chip .qa-cal{font-size:.64rem;color:var(--muted);}
+.qadd-chip .qa-plus{flex:none;width:20px;height:20px;border-radius:50%;background:rgba(255,107,107,.12);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1rem;line-height:1;font-weight:700;}
+.qadd-chip.just-added{background:rgba(81,207,102,.12);border-color:var(--green);}
+
 /* ── QUICK ADD TABS ── */
 .qtab{flex:1;padding:7px;text-align:center;font-size:.78rem;border-radius:7px;cursor:pointer;color:var(--muted);border:none;background:none;font-family:inherit;transition:all .2s;}
 .qtab.active{background:var(--surface);color:var(--text);font-weight:600;}
@@ -614,6 +629,9 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .fab svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;}
 .fab:active{transform:scale(.94);}
 @media (hover:hover){.fab:hover{transform:scale(1.06);box-shadow:0 10px 28px rgba(0,0,0,.34);}}
+/* First-run nudge — 3 expanding-ring pulses so new users find the + button */
+@keyframes fabHint{0%{box-shadow:0 6px 22px rgba(0,0,0,.28),0 0 0 0 rgba(255,107,107,.55);}70%{box-shadow:0 6px 22px rgba(0,0,0,.28),0 0 0 16px rgba(255,107,107,0);}100%{box-shadow:0 6px 22px rgba(0,0,0,.28),0 0 0 0 rgba(255,107,107,0);}}
+.fab.pulse-hint{animation:fabHint 1.4s ease-out 3;}
 /* ───── Desktop / tablet polish (placed last so it overrides earlier base rules) ───── */
 @media (min-width:768px){
   .app{max-width:560px;padding:0 18px;padding-bottom:calc(96px + env(safe-area-inset-bottom));}
@@ -747,6 +765,11 @@ select,textarea{font-size:max(16px,1rem)!important;}
       </div>
       <!-- Ad slot · filled by renderAdSlot() in renderToday · hidden if user is premium -->
       <div class="ad-slot" data-ad-slot="today-1"></div>
+      <!-- Quick-add: tap a recent/favorite food to log it in one tap -->
+      <div class="qadd-wrap hide" id="quickAddWrap">
+        <div class="qadd-lbl">⚡ <span data-i18n="quick_add">เพิ่มด่วน</span></div>
+        <div class="qadd-row" id="quickAddRow"></div>
+      </div>
       <div id="foodLog"></div>
       <div class="card" style="margin-top:8px">
         <h3 style="display:flex;justify-content:space-between;align-items:center">
@@ -1687,7 +1710,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.27.1';
+const APP_VERSION = '2.28.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -1801,7 +1824,7 @@ const I18N = {
     protein:'โปรตีน',carbs:'คาร์บ',fat:'ไขมัน',
     morning:'เช้า',lunch:'กลางวัน',dinner:'เย็น',snack:'ของว่าง',
     morning_opt:'🌅 เช้า',lunch_opt:'☀️ กลางวัน',dinner_opt:'🌙 เย็น',snack_opt:'🍎 ของว่าง',
-    no_entries:'ยังไม่มีรายการ',press_add:'กด ➕ เพื่อบันทึกอาหาร',
+    no_entries:'ยังไม่มีรายการ',press_add:'กด ➕ เพื่อบันทึกอาหาร',quick_add:'เพิ่มด่วน',added_quick:'เพิ่มแล้ว',
     quick_fav:'⭐ ของโปรด',quick_recent:'🕘 ล่าสุด',
     search_food:'ค้นหาอาหาร',search_ph:'พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)...',
     no_food:'ไม่พบอาหาร',no_fav:'ยังไม่มีของโปรด · กด ⭐ ในผลค้นหา',no_recent:'ยังไม่มีรายการล่าสุด · เพิ่มอาหารดูสิ',
@@ -1903,7 +1926,7 @@ const I18N = {
     protein:'Protein',carbs:'Carbs',fat:'Fat',
     morning:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',
     morning_opt:'🌅 Breakfast',lunch_opt:'☀️ Lunch',dinner_opt:'🌙 Dinner',snack_opt:'🍎 Snack',
-    no_entries:'No entries yet',press_add:'Press ➕ to log food',
+    no_entries:'No entries yet',press_add:'Press ➕ to log food',quick_add:'Quick add',added_quick:'Added',
     quick_fav:'⭐ Favorites',quick_recent:'🕘 Recent',
     search_food:'Search Food',search_ph:'Type food name (TH/EN)...',
     no_food:'No food found',no_fav:'No favorites yet · tap ⭐ on a result',no_recent:'No recent items · log something to populate this',
@@ -2984,7 +3007,13 @@ function renderQuickList(){
     ?favorites.map(n=>findFood(n)).filter(Boolean)
     :recentFoods.map(n=>findFood(n)).filter(Boolean);
   if(!list.length){
-    w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${activeQTab==='fav'?t('no_fav'):t('no_recent')}</div>`;
+    const isEn=settings.lang==='en';
+    const isFavTab=activeQTab==='fav';
+    w.innerHTML=`<div class="empty-state" style="padding:22px 16px">`+
+      `<div class="es-ico">${isFavTab?'⭐':'🕘'}</div>`+
+      `<div class="es-title">${isFavTab?(isEn?'No favorites yet':'ยังไม่มีของโปรด'):(isEn?'No recent foods':'ยังไม่มีรายการล่าสุด')}</div>`+
+      `<div class="es-sub">${isFavTab?(isEn?'Tap the ★ on any food to pin it here':'กด ★ ที่อาหารเพื่อปักหมุดไว้ตรงนี้'):(isEn?'Foods you log will show up here for quick re-adding':'อาหารที่บันทึกจะมาอยู่ตรงนี้ เพิ่มซ้ำได้เร็ว')}</div>`+
+    `</div>`;
     return;
   }
   w.innerHTML='';list.slice(0,8).forEach(f=>{
@@ -4795,6 +4824,13 @@ function finishOnboard(skipped){
     const hdr=document.getElementById('hdrSub');
     if(hdr&&userProfile?.goal_cal)hdr.textContent=(userProfile.display_name||t('you'))+' · '+userProfile.goal_cal.toLocaleString()+' kcal'+dayUnitShort();
   }
+  // First-run nudge: land on Today + pulse the + button so the new user
+  // knows exactly where to make their first log.
+  setTimeout(()=>{
+    showPage('today',document.querySelector('.bnt'));
+    const fab=document.getElementById('addFoodFab');
+    if(fab){fab.classList.add('pulse-hint');setTimeout(()=>fab.classList.remove('pulse-hint'),4600);}
+  },300);
 }
 
 // ═══ FEEDBACK (opens a mailto draft to the developer) ═══
@@ -5224,6 +5260,7 @@ function renderToday(){
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
   renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();
   renderAdSlot('today-1',document.querySelector('[data-ad-slot="today-1"]'));
+  renderQuickAddRow();
   const log=document.getElementById('foodLog');
   if(!E.length){
     // Rich empty state — guide the very first action instead of a blank list.
@@ -8142,6 +8179,43 @@ function applyDefaultMeal(){
   const sel=document.getElementById('mealSel');
   if(sel)sel.value=defaultMealForNow();
 }
+
+// ── QUICK-ADD: log a recent/favorite food in ONE tap from the Today page ──
+// The single biggest friction-saver: ~80% of meals are repeats of a handful
+// of foods. Tap a chip → logged with the time-appropriate meal, no portion
+// modal, no navigation. Ring + log update instantly.
+function renderQuickAddRow(){
+  const wrap=document.getElementById('quickAddWrap');
+  const row=document.getElementById('quickAddRow');
+  if(!wrap||!row)return;
+  // Only meaningful on today (you log "now"), and only when there's history.
+  if(currentDate!==todayKey()){wrap.classList.add('hide');return;}
+  // Recent first, fall back to favorites; de-dupe; resolve to food objects.
+  const names=[...new Set([...(recentFoods||[]),...(favorites||[])])];
+  const foods=names.map(n=>findFood(n)).filter(Boolean).slice(0,10);
+  if(!foods.length){wrap.classList.add('hide');return;}
+  wrap.classList.remove('hide');
+  row.innerHTML=foods.map(f=>{
+    const nm=escapeHtml(foodDisplayName(f));
+    return `<div class="qadd-chip" data-qa="${escapeHtml(f.n)}" role="button" tabindex="0" aria-label="${nm}">`+
+      `<div class="qa-txt"><div class="qa-name">${nm}</div><div class="qa-cal">${f.c} kcal</div></div>`+
+      `<div class="qa-plus">＋</div></div>`;
+  }).join('');
+  row.querySelectorAll('.qadd-chip').forEach(chip=>{
+    chip.onclick=()=>quickAdd(chip.dataset.qa,chip);
+  });
+}
+function quickAdd(name,chipEl){
+  const f=findFood(name); if(!f)return;
+  trackRecent(f.n);
+  // Brief green flash on the chip for tactile feedback before the re-render.
+  if(chipEl)chipEl.classList.add('just-added');
+  insertEntry({
+    food_name:f.n, calories:f.c,
+    protein:f.p, carbs:f.cb, fat:f.f,
+    amount_g:f.a||null, meal:defaultMealForNow(),
+  });
+}
 function goToAddFood(){
   showPage('add',document.querySelector('.bnt[data-tab="add"]'));
   setTimeout(()=>{
@@ -8245,6 +8319,18 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.28.0':{
+    th:[
+      '⚡ **เพิ่มด่วน 1 แตะ** — แถวอาหารล่าสุด/โปรด บนหน้าแรก · แตะครั้งเดียวบันทึกเลย (เลือกมื้อตามเวลาให้) · วงแหวนอัปเดตทันที',
+      '🍽️ **หน้าว่างมีปุ่มชวนลงมือ** — ทั้งหน้าแรก + ของโปรด/ล่าสุด · ไม่เจอหน้าจอว่างเปล่าอีก',
+      '👋 **มือใหม่หาปุ่มเจอง่าย** — หลังตั้งค่าครั้งแรก ปุ่ม + กระพริบบอกตำแหน่ง',
+    ],
+    en:[
+      '⚡ **One-tap quick add** — a row of your recent/favorite foods on Today · tap once to log (meal auto-picked by time) · ring updates instantly',
+      '🍽️ **Actionable empty states** — Today + favorites/recent now guide you instead of showing a blank screen',
+      '👋 **Easier first log** — after first-run setup the + button pulses to show where to start',
+    ],
+  },
   '2.27.1':{
     th:[
       '⏱️ **เลือกมื้ออัตโนมัติตามเวลา** — เปิดหน้าเพิ่มอาหารตอนเช้า/เที่ยง/เย็น จะเลือกมื้อให้เลย · ตัด 1 แตะทุกครั้งที่บันทึก',
