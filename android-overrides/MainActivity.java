@@ -20,8 +20,11 @@ public class MainActivity extends BridgeActivity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+    // Status bar transparent so app content (clock area) shows through at the top.
     getWindow().setStatusBarColor(Color.TRANSPARENT);
-    getWindow().setNavigationBarColor(Color.TRANSPARENT);
+    // Navigation bar solid black to match the app background — a transparent nav
+    // bar let the device wallpaper bleed through at the bottom on edge-to-edge.
+    getWindow().setNavigationBarColor(Color.BLACK);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       getWindow().setNavigationBarContrastEnforced(false);
     }

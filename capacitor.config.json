@@ -11,7 +11,7 @@
     "allowMixedContent": false,
     "captureInput": true,
     "webContentsDebuggingEnabled": true,
-    "backgroundColor": "#0f0f14"
+    "backgroundColor": "#000000"
   },
   "ios": {
     "contentInset": "always",
@@ -21,13 +21,13 @@
     "SplashScreen": {
       "launchShowDuration": 1200,
       "launchAutoHide": true,
-      "backgroundColor": "#0f0f14",
+      "backgroundColor": "#000000",
       "androidSplashResourceName": "splash",
       "showSpinner": false
     },
     "StatusBar": {
       "style": "DARK",
-      "backgroundColor": "#0f0f14",
+      "backgroundColor": "#000000",
       "overlaysWebView": true
     }
   }

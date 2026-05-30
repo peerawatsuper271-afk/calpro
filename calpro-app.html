@@ -60,7 +60,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
    bottom gap (like the reference). z-index 39 sits below the FAB (40) + nav (50)
    so they stay crisp, but above page content so that gets blurred. Masked to
    fade the blur out toward the top so there's no hard edge. */
-.nav-scrim{position:fixed;left:0;right:0;bottom:0;height:calc(74px + env(safe-area-inset-bottom));z-index:39;pointer-events:none;-webkit-backdrop-filter:blur(15px) saturate(1.3);backdrop-filter:blur(15px) saturate(1.3);-webkit-mask-image:linear-gradient(to top,#000 58%,transparent);mask-image:linear-gradient(to top,#000 58%,transparent);}
+.nav-scrim{position:fixed;left:0;right:0;bottom:0;height:calc(80px + env(safe-area-inset-bottom));z-index:39;pointer-events:none;background:linear-gradient(to top,var(--bg) 34%,transparent);-webkit-backdrop-filter:blur(15px) saturate(1.3);backdrop-filter:blur(15px) saturate(1.3);-webkit-mask-image:linear-gradient(to top,#000 60%,transparent);mask-image:linear-gradient(to top,#000 60%,transparent);}
 .icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
 /* ── SYNC INDICATOR ── */
@@ -1766,7 +1766,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.31.1';
+const APP_VERSION = '2.31.2';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
