@@ -116,8 +116,11 @@ select,textarea{font-size:max(16px,1rem)!important;}
 /* ── DRAWER ── */
 .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;backdrop-filter:blur(2px);}
 .drawer-overlay.open{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border-right:1px solid rgba(255,255,255,.08);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);box-shadow:10px 0 44px rgba(0,0,0,.55);}
-.drawer.open{transform:translateX(0);}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border-right:1px solid rgba(255,255,255,.08);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+/* Shadow ONLY while open — a closed drawer sits at translateX(-100%) with its
+   right edge exactly at x=0, so a permanent box-shadow bled a faint dark band
+   onto the left screen edge. Toggling it with .open kills that artifact. */
+.drawer.open{transform:translateX(0);box-shadow:10px 0 44px rgba(0,0,0,.45);}
 /* FB-style user card header */
 .drawer-hd{display:flex;align-items:center;gap:12px;text-align:left;margin:10px 10px 6px;padding:12px;border-radius:15px;background:var(--surface2);cursor:pointer;transition:opacity .15s;}
 .drawer-hd:active{opacity:.85;}
@@ -134,7 +137,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-item .di-ico{font-size:1.05rem;width:38px;height:38px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
 .drawer-item:hover .di-ico,.drawer-item.active .di-ico{background:var(--border);}
 .drawer-item>span:not(.di-ico):not(.di-arrow){flex:1;min-width:0;}
-.drawer-item .di-ico{font-size:1.15rem;width:24px;text-align:center;flex-shrink:0;}
+.drawer-item .di-ico svg{width:20px;height:20px;color:var(--text);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .drawer-item .di-arrow{margin-left:auto;color:var(--muted);font-size:.8rem;}
 .drawer-divider{height:1px;background:var(--border);margin:8px 18px;}
 .drawer-foot{padding:14px 18px;border-top:1px solid var(--border);font-size:.66rem;color:var(--muted);text-align:center;}
@@ -440,6 +443,17 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .crop-frame:active{cursor:grabbing;}
 .crop-frame img{position:absolute;top:0;left:0;transform-origin:0 0;pointer-events:none;max-width:none;}
 .crop-frame::after{content:'';position:absolute;inset:0;border:2px solid var(--accent);border-radius:9px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.35) inset;}
+/* Avatar crop variant — square frame + circular mask (FB profile-picture style) */
+.crop-frame.cf-avatar{aspect-ratio:1/1;max-width:280px;margin:0 auto;border-radius:50%;}
+.crop-frame.cf-avatar::after{border-radius:50%;border-color:#fff;}
+/* FB-style cropper chrome — back chevron · centered title · blue Save */
+.crop-hd{display:flex;align-items:center;gap:8px;margin:-2px 0 10px;}
+.crop-hd h3{flex:1;text-align:center;font-size:1rem;font-weight:700;margin:0;}
+.crop-back{background:var(--surface2);border:none;color:var(--text);width:36px;height:36px;border-radius:50%;font-size:1.3rem;line-height:1;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.crop-save{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:8px 16px;font-size:.86rem;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;}
+.crop-save:active{opacity:.85;}
+.crop-hint{font-size:.72rem;color:var(--muted);margin-bottom:10px;line-height:1.5;text-align:center;}
+.crop-zoom-row{display:flex;align-items:center;gap:8px;margin:12px 0 2px;}
 /* friend profile modal — uses same hero classes */
 #friendProfileModal .modal{max-width:440px;padding:0;}
 #friendProfileModal .fp-hdr{padding:12px 14px;margin:0;border-bottom:1px solid var(--border);background:var(--surface);}
@@ -1193,8 +1207,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <div class="card">
         <h3 data-i18n="about_links">ลิงก์</h3>
-        <a href="https://github.com/peerawatsuper271-afk/calpro" target="_blank" class="drawer-item" style="border-radius:9px"><span class="di-ico">📂</span><span>GitHub Repository</span><span class="di-arrow">↗</span></a>
-        <a href="https://peerawatsuper271-afk.github.io/calpro/" target="_blank" class="drawer-item" style="border-radius:9px"><span class="di-ico">🌐</span><span>Live URL</span><span class="di-arrow">↗</span></a>
+        <a href="https://github.com/peerawatsuper271-afk/calpro" target="_blank" class="drawer-item" style="border-radius:9px"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></span><span>GitHub Repository</span><span class="di-arrow">↗</span></a>
+        <a href="https://peerawatsuper271-afk.github.io/calpro/" target="_blank" class="drawer-item" style="border-radius:9px"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span>Live URL</span><span class="di-arrow">↗</span></a>
       </div>
       <div class="card">
         <h3 data-i18n="about_credits">เครดิต</h3>
@@ -1431,22 +1445,19 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- BANNER CROP MODAL — drag + zoom an uploaded image to fit the banner area -->
 <div class="modal-bg hide" id="bannerCropModal">
   <div class="modal" style="max-width:420px">
-    <div class="modal-hdr">
-      <h3 data-i18n="crop_title">ปรับตำแหน่งรูป</h3>
-      <button class="mc-close" onclick="closeBannerCrop()" aria-label="Close">✕</button>
+    <div class="crop-hd">
+      <button class="crop-back" onclick="closeBannerCrop()" aria-label="ยกเลิก">‹</button>
+      <h3 id="cropTitle">ปรับตำแหน่งรูป</h3>
+      <button class="crop-save" onclick="applyCrop()" data-i18n="save">บันทึก</button>
     </div>
-    <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="crop_hint">ลากเพื่อเลื่อน · เลื่อน slider เพื่อซูม</div>
+    <div class="crop-hint" id="cropHint">ลากเพื่อปรับ · เลื่อนแถบเพื่อซูม</div>
     <div class="crop-frame" id="cropFrame">
       <img id="cropImg" alt="" draggable="false">
     </div>
-    <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
+    <div class="crop-zoom-row">
       <span style="font-size:.74rem;color:var(--muted);min-width:38px" data-i18n="crop_zoom">ซูม</span>
       <input type="range" id="cropZoom" min="100" max="400" value="100" step="5" style="flex:1" oninput="updateCropTransform()">
       <button class="btn-sec" onclick="resetCrop()" style="font-size:.72rem;padding:4px 10px" data-i18n="crop_reset">รีเซ็ต</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button class="btn-sec" onclick="closeBannerCrop()" data-i18n="crop_cancel">ยกเลิก</button>
-      <button class="btn" onclick="applyBannerCrop()" data-i18n="crop_apply">✓ ใช้รูปนี้</button>
     </div>
   </div>
 </div>
@@ -1757,22 +1768,22 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
   </div>
   <nav class="drawer-nav">
     <div class="drawer-sect" data-i18n="account_section">บัญชี</div>
-    <button class="drawer-item" onclick="navTo('profile')"><span class="di-ico">👤</span><span data-i18n="profile">โปรไฟล์</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span class="di-ico">👥</span><span data-i18n="friends_only">เพื่อน</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="navTo('profile')"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span data-i18n="profile">โปรไฟล์</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span data-i18n="friends_only">เพื่อน</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect drawer-tools-row" data-i18n="tools_section">เครื่องมือ</div>
-    <button class="drawer-item drawer-tools-row" onclick="openQuickWater()"><span class="di-ico">💧</span><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item drawer-tools-row" onclick="closeDrawer();openWorkoutModal()"><span class="di-ico">🏃</span><span data-i18n="workouts">ออกกำลังกาย</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item drawer-tools-row" onclick="navTo('profile');setTimeout(()=>document.querySelector('#mWaist')?.scrollIntoView({behavior:'smooth',block:'center'}),300)"><span class="di-ico">📏</span><span data-i18n="body_measurements">สัดส่วนร่างกาย</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="openQuickWater()"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="closeDrawer();openWorkoutModal()"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span><span data-i18n="workouts">ออกกำลังกาย</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="navTo('profile');setTimeout(()=>document.querySelector('#mWaist')?.scrollIntoView({behavior:'smooth',block:'center'}),300)"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.3 8.7l-5.6-5.6a1 1 0 0 0-1.4 0L2.7 14.3a1 1 0 0 0 0 1.4l5.6 5.6a1 1 0 0 0 1.4 0L21.3 10.1a1 1 0 0 0 0-1.4z"/><path d="M7.5 10.5l2 2M10.5 7.5l2 2M13.5 4.5l2 2M4.5 13.5l2 2"/></svg></span><span data-i18n="body_measurements">สัดส่วนร่างกาย</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect" data-i18n="settings_section">การตั้งค่า</div>
-    <button class="drawer-item" onclick="navTo('settings')"><span class="di-ico">⚙️</span><span data-i18n="settings">ตั้งค่า</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="navTo('settings')"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span data-i18n="settings">ตั้งค่า</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
-    <button class="drawer-item" onclick="navTo('help')"><span class="di-ico">❓</span><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="openFeedback()"><span class="di-ico">💬</span><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="enterDevMode()"><span class="di-ico">🔧</span><span>Developer</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="navTo('about')"><span class="di-ico">ℹ️</span><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="navTo('help')"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="openFeedback()"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="enterDevMode()"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span><span>Developer</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="navTo('about')"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
   <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.23.0 BETA</span></div>
 </aside>
@@ -1792,7 +1803,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.32.0';
+const APP_VERSION = '2.32.1';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
@@ -6112,37 +6123,39 @@ function uploadBannerImage(file){
 }
 // Open the crop modal with a loaded image. Initial state fits image to frame
 // at object-fit:cover behavior (fill frame, no whitespace).
-function openBannerCropModal(img){
+function openBannerCropModal(img,mode){
+  mode=(mode==='avatar')?'avatar':'banner';
+  const isEn=settings.lang==='en';
   const modal=document.getElementById('bannerCropModal');
   const frame=document.getElementById('cropFrame');
   const slot=document.getElementById('cropImg');
+  // Frame shape per mode: avatar = 1:1 circular · banner = 4:1 rectangular
+  frame.classList.toggle('cf-avatar',mode==='avatar');
+  const titleEl=document.getElementById('cropTitle');
+  if(titleEl)titleEl.textContent=mode==='avatar'?(isEn?'Profile picture':'รูปโปรไฟล์'):(isEn?'Cover photo':'รูปพื้นหลัง');
+  const hintEl=document.getElementById('cropHint');
+  if(hintEl)hintEl.textContent=isEn?'Drag to reposition · slide to zoom':'ลากเพื่อปรับ · เลื่อนแถบเพื่อซูม';
   slot.src=img.src;
-  // Compute the "cover" scale — the larger of (frameW/imgW), (frameH/imgH) ·
-  // ensures image always fills the frame even before user zooms.
-  const fw=frame.clientWidth||320;
-  const fh=fw/4;  // 4:1 aspect
+  modal.classList.remove('hide');     // show FIRST so frame.clientWidth is real
+  const fw=frame.clientWidth||300;
+  const fh=(mode==='avatar')?fw:fw/4;
+  // "cover" scale — larger of (frameW/imgW),(frameH/imgH) so it always fills
   const baseScale=Math.max(fw/img.naturalWidth,fh/img.naturalHeight);
   _cropState={
-    img,                     // for canvas render later
-    naturalW:img.naturalWidth,
-    naturalH:img.naturalHeight,
-    frameW:fw,
-    frameH:fh,
-    baseScale,               // cover scale at zoom 100%
-    scale:1,                 // user zoom multiplier (1.0-4.0)
-    tx:0,ty:0,               // drag offset (px)
-    dragging:false,lastX:0,lastY:0,
+    img,mode,
+    naturalW:img.naturalWidth,naturalH:img.naturalHeight,
+    frameW:fw,frameH:fh,
+    baseScale,scale:1,
+    tx:0,ty:0,dragging:false,lastX:0,lastY:0,
   };
   // Center the image in the frame initially
-  const fullW=img.naturalWidth*baseScale;
-  const fullH=img.naturalHeight*baseScale;
+  const fullW=img.naturalWidth*baseScale, fullH=img.naturalHeight*baseScale;
   _cropState.tx=(fw-fullW)/2;
   _cropState.ty=(fh-fullH)/2;
   document.getElementById('cropZoom').value=100;
   slot.style.width=img.naturalWidth+'px';
   slot.style.height=img.naturalHeight+'px';
   updateCropTransform();
-  modal.classList.remove('hide');
   bindCropDrag();
 }
 function updateCropTransform(){
@@ -6189,6 +6202,40 @@ function closeBannerCrop(){
 // Render the visible portion of the image to a 1200x300 banner-sized canvas
 // then store the JPEG data URL. Math: image coord at frame (0,0) is
 // (-tx/(baseScale*scale), -ty/(baseScale*scale)).
+// Save button → route to the right output based on crop mode.
+function applyCrop(){
+  if(!_cropState)return;
+  if(_cropState.mode==='avatar')applyAvatarCrop();
+  else applyBannerCrop();
+}
+// Avatar: render the visible square region to a 512×512 canvas → userProfile.avatar
+// (stored square; the circular look is the CSS mask — same as the reference).
+function applyAvatarCrop(){
+  if(!_cropState||!userProfile)return;
+  const isEn=settings.lang==='en';
+  try{
+    const OUT=512;
+    const s=_cropState.baseScale*_cropState.scale;
+    const sx=-_cropState.tx/s, sy=-_cropState.ty/s;
+    const sw=_cropState.frameW/s, sh=_cropState.frameH/s;
+    const c=document.createElement('canvas');c.width=OUT;c.height=OUT;
+    const ctx=c.getContext('2d');
+    ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+    ctx.fillStyle='#222';ctx.fillRect(0,0,OUT,OUT);
+    const cx=Math.max(0,sx),cy=Math.max(0,sy);
+    const cw=Math.min(_cropState.naturalW-cx,sw-(cx-sx));
+    const ch=Math.min(_cropState.naturalH-cy,sh-(cy-sy));
+    if(cw>0&&ch>0){
+      const tx=((cx-sx)/sw)*OUT, ty=((cy-sy)/sh)*OUT;
+      const tw=(cw/sw)*OUT, th=(ch/sh)*OUT;
+      ctx.drawImage(_cropState.img,cx,cy,cw,ch,tx,ty,tw,th);
+    }
+    userProfile.avatar=c.toDataURL('image/jpeg',0.88);
+    saveProfile_LS();renderProfileUI();scheduleAutoSync('profile');
+    closeBannerCrop();
+    showToast(isEn?'Profile picture updated ✓':'อัปเดตรูปโปรไฟล์แล้ว ✓');
+  }catch(err){ showToast((isEn?'Crop error: ':'แก้รูปผิดพลาด: ')+err.message); }
+}
 function applyBannerCrop(){
   if(!_cropState||!userProfile)return;
   const isEn=settings.lang==='en';
@@ -6760,21 +6807,9 @@ function uploadAvatar(file){
   const reader=new FileReader();
   reader.onload=(e)=>{
     const img=new Image();
-    img.onload=()=>{
-      // Output 512×512 (was 256) — sharper avatar on retina/desktop displays.
-      // Quality 0.88 (was 0.82) for better skin-tone gradients without much size cost.
-      const SIZE=512;
-      const c=document.createElement('canvas');c.width=SIZE;c.height=SIZE;
-      const ctx=c.getContext('2d');
-      ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-      // Square crop center
-      const minDim=Math.min(img.width,img.height);
-      const sx=(img.width-minDim)/2,sy=(img.height-minDim)/2;
-      ctx.drawImage(img,sx,sy,minDim,minDim,0,0,SIZE,SIZE);
-      userProfile.avatar=c.toDataURL('image/jpeg',0.88);
-      saveProfile_LS();renderProfileUI();closeAvatarModal();
-      showToast(settings.lang==='en'?'Photo uploaded':'อัพโหลดรูปแล้ว');
-    };
+    // Open the interactive circular cropper (drag + zoom) instead of a blind
+    // center-crop — matches the reference's "preview profile picture" flow.
+    img.onload=()=>{ closeAvatarModal(); openBannerCropModal(img,'avatar'); };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
@@ -8611,6 +8646,18 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.32.1':{
+    th:[
+      '✂️ **ปรับรูปโปรไฟล์/พื้นหลังแบบลากซูมเอง** — เปิดหน้าครอปสไตล์โซเชียล (ลากเลื่อน + แถบซูม) · รูปโปรไฟล์ครอปเป็นวงกลม · รูปพื้นหลังครอป 4:1 ก่อนบันทึก (เลิกครอปกึ่งกลางอัตโนมัติ)',
+      '🎨 **ไอคอนเมนูด้านข้างเป็นเส้นโมเดิร์น** — เปลี่ยนจากอีโมจิเป็นไอคอนเส้นเรียบทันสมัยทั้งหมด',
+      '🩹 **เก็บกวาดขอบจอซ้าย** — เอาเงาดำจางๆ ที่ขอบซ้าย (โผล่ตอนเมนูปิดอยู่) ออก',
+    ],
+    en:[
+      '✂️ **Drag-to-zoom photo cropping** — profile & cover photos now open a social-style cropper (drag + zoom slider) · avatar crops to a circle, cover to 4:1, before saving (no more blind center-crop)',
+      '🎨 **Modern line icons in the side menu** — every emoji swapped for clean modern line icons',
+      '🩹 **Left-edge cleanup** — removed a faint dark band hugging the left edge (it showed while the menu was closed)',
+    ],
+  },
   '2.32.0':{
     th:[
       '👤 **หน้าโปรไฟล์โฉมใหม่สไตล์โซเชียล** — รูปปก + รูปโปรไฟล์ซ้อนมุมซ้าย (มีปุ่มกล้องแก้รูป/พื้นหลัง) · แถวสถิติย่อ · ปุ่ม แชร์ + แก้ไขโปรไฟล์',
