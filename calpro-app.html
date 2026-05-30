@@ -284,9 +284,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .sbox input:focus{border-color:var(--accent);}
 .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none;}
 .cats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
-.cbt{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 11px;font-size:.72rem;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
-.cbt .cbt-ico{font-size:.92rem;line-height:1;}
-.cbt.active,.cbt:hover{border-color:var(--blue);color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,var(--surface2));}
+/* (food-category chips removed in v2.29.3 — replaced by the #catFilter dropdown) */
 .sres{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
 .sri{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .15s;}
 .sri:hover{border-color:var(--accent);}
@@ -796,7 +794,10 @@ select,textarea{font-size:max(16px,1rem)!important;}
           <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem" data-i18n="ai_photo_btn">🤖 ถ่ายรูป AI</button>
         </div>
         <div id="aiQuotaInline" style="font-size:.66rem;color:var(--muted);text-align:right;margin-bottom:8px;padding-right:4px;min-height:14px"></div>
-        <div class="cats" id="catBtns"></div>
+        <div class="fl" id="catFilterWrap" style="margin-bottom:9px">
+          <label id="catFilterLabel">ประเภทอาหาร</label>
+          <select id="catFilter" onchange="onCatFilterChange(this.value)"></select>
+        </div>
         <div class="sres" id="sRes"></div>
         <div class="fl"><label data-i18n="meal">มื้ออาหาร</label>
           <select id="mealSel"><option value="เช้า" data-i18n="morning_opt">🌅 เช้า</option><option value="กลางวัน" selected data-i18n="lunch_opt">☀️ กลางวัน</option><option value="เย็น" data-i18n="dinner_opt">🌙 เย็น</option><option value="ของว่าง" data-i18n="snack_opt">🍎 ของว่าง</option></select>
@@ -1725,7 +1726,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.29.2';
+const APP_VERSION = '2.29.3';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
@@ -2385,9 +2386,9 @@ const FOODS=[
   {n:'ปลาแซลมอนซาชิมิ',e:'Salmon Sashimi (5 pcs)',c:220,p:24,cb:0,f:13,a:100,cat:'seafood'},
   {n:'หอยลายผัดฉ่า',e:'Stir-fried Clams',c:240,p:22,cb:8,f:14,a:200,cat:'seafood'},
 ];
-// Food-search category filters. Neutral food icons + localized TEXT labels —
-// the old country-flag emoji (🇹🇭🇯🇵…) rendered inconsistently across devices
-// and weren't a readable filter. renderCatBtns() shows "icon + label" chips.
+// Food-search categories. Neutral food icons + localized TEXT labels (no
+// country-flag emoji — they rendered inconsistently and weren't a clear filter).
+// renderCatFilter() builds a grouped <select> dropdown from these.
 const CATS={all:'🍽️',thai:'🍜',japanese:'🍣',korean:'🍲',chinese:'🥟',italian:'🍝',indian:'🍛',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
 const CAT_LABELS={all:{th:'ทั้งหมด',en:'All'},thai:{th:'ไทย',en:'Thai'},japanese:{th:'ญี่ปุ่น',en:'Japanese'},korean:{th:'เกาหลี',en:'Korean'},chinese:{th:'จีน',en:'Chinese'},italian:{th:'อิตาเลียน',en:'Italian'},indian:{th:'อินเดีย',en:'Indian'},fastfood:{th:'ฟาสต์ฟู้ด',en:'Fast food'},healthy:{th:'เฮลตี้',en:'Healthy'},drink:{th:'เครื่องดื่ม',en:'Drink'},dessert:{th:'ของหวาน',en:'Dessert'},fruit:{th:'ผลไม้',en:'Fruit'},seafood:{th:'ทะเล',en:'Seafood'},snack:{th:'ขนม',en:'Snack'},veggie:{th:'ผัก',en:'Veggie'},custom:{th:'ของฉัน',en:'Mine'}};
 const MEAL_ICONS={เช้า:'🌅',กลางวัน:'☀️',เย็น:'🌙',ของว่าง:'🍎'};
@@ -2836,7 +2837,7 @@ function dayUnitShort(){return settings.lang==='en'?'/day':'/วัน';}
 function showApp(){
   const name = userProfile?.display_name || t('you');
   document.getElementById('hdrSub').textContent = name + ' · ' + (userProfile?.goal_cal || 1800).toLocaleString() + ' kcal' + dayUnitShort();
-  renderCatBtns(); renderToday(); renderProfileUI();
+  renderCatFilter(); renderToday(); renderProfileUI();
 }
 
 // ═══ BOTTOM NAV ═══
@@ -2912,7 +2913,7 @@ function showPage(id,btn){
     today:()=>{loadEntries();renderToday();},
     analysis:renderAnalysis,
     tdee:syncTDEEFromProfile,
-    add:()=>{renderCatBtns();renderQuickList();refreshAiQuotaInline();applyDefaultMeal();},
+    add:()=>{renderCatFilter();renderQuickList();refreshAiQuotaInline();applyDefaultMeal();},
     settings:renderSettings,
     help:renderHelp,
     dev:renderDev,
@@ -3015,18 +3016,32 @@ function doSearch(v){
     renderResults(allFoods().filter(f=>f.n.includes(t)||(f.e||'').toLowerCase().includes(t)).slice(0,25));
   },130);
 }
-function renderCatBtns(){
-  const w=document.getElementById('catBtns');w.innerHTML='';
+// Food-category filter — a single dropdown (instead of a long, cluttered row of
+// chips). Cuisines are grouped together under one heading; food types under
+// another. Keeps full granularity while staying tidy.
+const CAT_GROUPS={
+  country:['thai','japanese','korean','chinese','italian','indian'],
+  type:['fastfood','healthy','drink','dessert','fruit','seafood','snack','veggie'],
+};
+function renderCatFilter(){
+  const sel=document.getElementById('catFilter');
+  if(!sel)return;
   const isEn=settings.lang==='en';
-  Object.entries(CATS).forEach(([k,ico])=>{
-    const b=document.createElement('button');b.className='cbt'+(k===activeCat?' active':'');
-    const lab=(CAT_LABELS[k]&&CAT_LABELS[k][isEn?'en':'th'])||k;
-    b.dataset.cat=k;b.title=lab;
-    b.innerHTML=`<span class="cbt-ico">${ico}</span>${escapeHtml(lab)}`;
-    b.onclick=()=>{document.getElementById('searchInput').value='';activeCat=k;renderCatBtns();renderCatResults(k);};
-    w.appendChild(b);
-  });
+  const lab=k=>(CAT_LABELS[k]&&CAT_LABELS[k][isEn?'en':'th'])||k;
+  const opt=k=>`<option value="${k}"${k===activeCat?' selected':''}>${CATS[k]||''} ${escapeHtml(lab(k))}</option>`;
+  sel.innerHTML=
+    opt('all')+
+    `<optgroup label="${isEn?'By cuisine':'อาหารนานาชาติ'}">`+CAT_GROUPS.country.map(opt).join('')+`</optgroup>`+
+    `<optgroup label="${isEn?'By type':'ตามประเภท'}">`+CAT_GROUPS.type.map(opt).join('')+`</optgroup>`+
+    opt('custom');
+  const lbl=document.getElementById('catFilterLabel');
+  if(lbl)lbl.textContent=isEn?'Food category':'ประเภทอาหาร';
   renderCatResults(activeCat);
+}
+function onCatFilterChange(cat){
+  const si=document.getElementById('searchInput');if(si)si.value='';
+  activeCat=cat;
+  renderCatResults(cat);
 }
 function allFoods(){return [...FOODS,...customFoods];}
 function findFood(name){return allFoods().find(f=>f.n===name);}
@@ -8452,6 +8467,14 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.29.3':{
+    th:[
+      '🧹 **หน้าค้นหาอาหารโล่งขึ้น** — รวมปุ่มหมวดทั้งแถว (16 ปุ่ม) เป็น **ตัวกรองแบบ dropdown อันเดียว** · จัดกลุ่ม "อาหารนานาชาติ" (ไทย/ญี่ปุ่น/เกาหลี/จีน/อิตาเลียน/อินเดีย) และ "ตามประเภท" ไว้ด้วยกัน เลือกง่าย ไม่รก',
+    ],
+    en:[
+      '🧹 **Tidier food search** — the whole row of 16 category chips is now a single **dropdown filter**, with "By cuisine" (Thai/Japanese/Korean/…) and "By type" grouped together — cleaner and easier to scan',
+    ],
+  },
   '2.29.2':{
     th:[
       '🍽️ **เพิ่มหมวด "ทั้งหมด"** ในหน้าค้นหาอาหาร — รวมอาหารทุกหมวด + อาหารที่เพิ่มเอง ไว้ที่ตัวกรองแรก และเลือกให้อัตโนมัติเมื่อเปิดหน้า',
