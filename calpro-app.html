@@ -500,6 +500,45 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .cmp-table tr:last-child td{border-bottom:none;}
 .win{color:var(--green);font-weight:600;}.lose{color:var(--accent);}
 
+/* ── SKELETON / SHIMMER ── */
+.skel{background:var(--surface2);border-radius:8px;position:relative;overflow:hidden;}
+.skel-line{height:11px;margin:7px 0;}
+.skel-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;}
+.skel-circle{width:34px;height:34px;border-radius:50%;background:var(--surface2);flex:none;position:relative;overflow:hidden;}
+.skel-flex{flex:1;min-width:0;}
+/* instant state: gentle pulse. After a delay JS adds .shimmering → moving sheen */
+.skel-wrap .skel,.skel-wrap .skel-circle{animation:skelPulse 1.1s ease-in-out infinite;}
+@keyframes skelPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.skel-wrap.shimmering .skel,.skel-wrap.shimmering .skel-circle{animation:none;}
+.skel-wrap.shimmering .skel::after,.skel-wrap.shimmering .skel-circle::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--text) 14%,transparent),transparent);animation:shimmer 1.15s infinite;}
+@keyframes shimmer{100%{transform:translateX(100%);}}
+
+/* ── TOOLTIP (custom · replaces native title=) ── */
+.tip-pop{position:fixed;z-index:320;background:var(--text);color:var(--bg);font-size:.7rem;font-weight:500;padding:5px 9px;border-radius:7px;pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .14s,transform .14s;max-width:230px;line-height:1.45;box-shadow:0 4px 16px rgba(0,0,0,.3);text-align:center;}
+.tip-pop.show{opacity:1;transform:translateY(0);}
+.tip-pop::after{content:'';position:absolute;left:var(--tip-ax,50%);margin-left:-5px;border:5px solid transparent;}
+.tip-pop.below::after{bottom:100%;border-bottom-color:var(--text);}
+.tip-pop.above::after{top:100%;border-top-color:var(--text);}
+
+/* ── ACCORDION ── */
+.acc{border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;background:var(--surface);}
+.acc-hd{display:flex;align-items:center;gap:9px;padding:13px 14px;cursor:pointer;user-select:none;font-size:.9rem;font-weight:600;color:var(--text);}
+.acc-hd .acc-chev{margin-left:auto;transition:transform .28s;color:var(--muted);font-size:.72rem;}
+.acc.open .acc-chev{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.2,.6,.2,1);}
+.acc-body-inner{padding:0 14px 13px;font-size:.82rem;color:var(--muted);line-height:1.65;}
+
+/* ── CUSTOM DIALOG (replaces alert/confirm/prompt) ── */
+.dlg-card{max-width:350px;}
+.dlg-title{font-size:1rem;font-weight:700;margin-bottom:8px;}
+.dlg-msg{font-size:.85rem;color:var(--muted);line-height:1.6;white-space:pre-line;margin-bottom:16px;}
+.dlg-btns{display:flex;gap:8px;}
+.dlg-btns>button{flex:1;}
+.dlg-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:10px;font-size:.9rem;font-family:inherit;outline:none;margin-bottom:14px;}
+.dlg-input:focus{border-color:var(--accent);}
+.dlg-input.hide{display:none;}
+.dlg-title.hide,.dlg-msg.hide{display:none;}
+
 /* ── PAGE HEADERS ── */
 .page-hd{display:flex;align-items:center;gap:6px;margin:4px 0 14px;}
 .page-hd h2{font-size:1.05rem;font-weight:700;}
@@ -647,7 +686,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
       <button class="icon-btn hide" id="iosRefreshBtn" onclick="iosRefresh()" title="Refresh" aria-label="Refresh page">
         <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
       </button>
-      <button class="icon-btn" id="modeToggle" onclick="toggleMode()" title="สลับธีมมืด/สว่าง" aria-label="Toggle dark/light mode">
+      <button class="icon-btn" id="modeToggle" onclick="toggleMode()" data-tip="สลับธีมมืด/สว่าง" aria-label="Toggle dark/light mode">
         <svg viewBox="0 0 24 24" id="modeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
       </button>
     </div>
@@ -883,7 +922,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
       <div class="profile-hero" id="profileHero">
         <div class="profile-hero-banner" id="profileBanner"></div>
         <div class="profile-hero-body">
-          <div class="profile-avatar-lg" id="profileAvatar" onclick="openAvatarModal()" title="คลิกเพื่อเปลี่ยน">?</div>
+          <div class="profile-avatar-lg" id="profileAvatar" onclick="openAvatarModal()" data-tip="คลิกเพื่อเปลี่ยนรูปประจำตัว">?</div>
           <div class="profile-hero-info">
             <div class="profile-display-name" id="profileName2">—</div>
             <div class="profile-level-row">
@@ -1641,7 +1680,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.26.0';
+const APP_VERSION = '2.27.0';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2421,6 +2460,127 @@ function showToast(msg, ms=2200){
   if(toastTimer)clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>{el.classList.remove('show');toastTimer=null;},ms);
 }
+
+// ═══ CUSTOM DIALOGS — Promise-based, replace native alert/confirm/prompt ═══
+let _dlgResolve=null;
+function _ensureDlg(){
+  let bg=document.getElementById('appDlg');
+  if(bg)return bg;
+  bg=document.createElement('div');
+  bg.className='modal-bg hide'; bg.id='appDlg';
+  bg.innerHTML='<div class="modal dlg-card" role="dialog" aria-modal="true">'+
+    '<div class="dlg-title" id="dlgTitle"></div>'+
+    '<div class="dlg-msg" id="dlgMsg"></div>'+
+    '<input class="dlg-input hide" id="dlgInput">'+
+    '<div class="dlg-btns" id="dlgBtns"></div></div>';
+  document.body.appendChild(bg);
+  // click backdrop = cancel
+  bg.addEventListener('click',e=>{if(e.target===bg)_dlgClose(null);});
+  return bg;
+}
+function _dlgClose(val){
+  const bg=document.getElementById('appDlg'); if(bg)bg.classList.add('hide');
+  const r=_dlgResolve; _dlgResolve=null; if(r)r(val);
+}
+// title/msg + buttons[{label,val,kind}] + optional input
+function _showDlg({title,msg,buttons,input}){
+  const bg=_ensureDlg();
+  document.getElementById('dlgTitle').textContent=title||'';
+  document.getElementById('dlgTitle').style.display=title?'block':'none';
+  document.getElementById('dlgMsg').textContent=msg||'';
+  const inp=document.getElementById('dlgInput');
+  if(input){inp.classList.remove('hide');inp.type=input.password?'password':'text';inp.placeholder=input.placeholder||'';inp.value=input.value||'';}
+  else inp.classList.add('hide');
+  const btns=document.getElementById('dlgBtns'); btns.innerHTML='';
+  buttons.forEach(b=>{
+    const el=document.createElement('button');
+    el.className=b.kind==='primary'?'btn':b.kind==='danger'?'btn btn-danger':'btn-sec';
+    el.textContent=b.label;
+    el.onclick=()=>{ const v=b.returnInput?(inp.value||''):b.val; _dlgClose(v); };
+    btns.appendChild(el);
+  });
+  bg.classList.remove('hide');
+  if(input)setTimeout(()=>inp.focus(),60);
+  return new Promise(res=>{_dlgResolve=res;});
+}
+function appAlert(msg,opts={}){
+  const isEn=settings.lang==='en';
+  return _showDlg({title:opts.title,msg,buttons:[{label:opts.okText||(isEn?'OK':'ตกลง'),val:true,kind:'primary'}]});
+}
+function appConfirm(msg,opts={}){
+  const isEn=settings.lang==='en';
+  return _showDlg({title:opts.title,msg,buttons:[
+    {label:opts.cancelText||(isEn?'Cancel':'ยกเลิก'),val:false,kind:'sec'},
+    {label:opts.okText||(isEn?'Confirm':'ยืนยัน'),val:true,kind:opts.danger?'danger':'primary'},
+  ]}).then(v=>v===true);
+}
+function appPrompt(msg,opts={}){
+  const isEn=settings.lang==='en';
+  return _showDlg({title:opts.title,msg,input:{placeholder:opts.placeholder,value:opts.value,password:opts.password},buttons:[
+    {label:isEn?'Cancel':'ยกเลิก',val:null,kind:'sec'},
+    {label:opts.okText||(isEn?'OK':'ตกลง'),returnInput:true,kind:'primary'},
+  ]});
+}
+
+// ═══ SKELETON LOADER ═══
+// Returns markup for n placeholder rows (leaderboard-style). Mount it, then
+// call to upgrade to a moving shimmer if loading drags on.
+function skeletonRows(n=5){
+  let rows='';
+  for(let i=0;i<n;i++){
+    rows+='<div class="skel-row"><div class="skel-circle"></div>'+
+      '<div class="skel-flex"><div class="skel skel-line" style="width:55%"></div><div class="skel skel-line" style="width:32%"></div></div>'+
+      '<div class="skel skel-line" style="width:28px;height:18px"></div></div>';
+  }
+  return `<div class="skel-wrap" data-skel="1">${rows}</div>`;
+}
+// Show skeleton in el; after `delay` ms (still loading) escalate to shimmer.
+// Returns a token; pass it to skeletonDone() to cancel the escalation timer.
+function showSkeleton(el,n=5,delay=700){
+  if(!el)return null;
+  el.innerHTML=skeletonRows(n);
+  const wrap=el.querySelector('.skel-wrap');
+  const timer=setTimeout(()=>{ if(wrap&&wrap.isConnected)wrap.classList.add('shimmering'); },delay);
+  return timer;
+}
+function skeletonDone(timer){ if(timer)clearTimeout(timer); }
+
+// ═══ TOOLTIP — custom, triggered by [data-tip] (replaces native title=) ═══
+let _tipEl=null,_tipTimer=null;
+function _tipShow(target){
+  const txt=target.getAttribute('data-tip'); if(!txt)return;
+  if(!_tipEl){_tipEl=document.createElement('div');_tipEl.className='tip-pop';document.body.appendChild(_tipEl);}
+  _tipEl.textContent=txt;
+  _tipEl.classList.remove('show','above','below');
+  _tipEl.style.left='-9999px';_tipEl.style.top='0px';
+  const r=target.getBoundingClientRect();
+  const tw=_tipEl.offsetWidth, th=_tipEl.offsetHeight;
+  const cx=r.left+r.width/2;
+  const left=Math.min(Math.max(8,cx-tw/2), window.innerWidth-tw-8);
+  const above=r.top>th+14;
+  _tipEl.classList.add(above?'above':'below');
+  _tipEl.style.setProperty('--tip-ax',(cx-left)+'px');
+  _tipEl.style.left=left+'px';
+  _tipEl.style.top=(above? r.top-th-8 : r.bottom+8)+'px';
+  requestAnimationFrame(()=>{ if(_tipEl)_tipEl.classList.add('show'); });
+}
+function _tipHide(){ if(_tipEl)_tipEl.classList.remove('show'); }
+document.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)_tipShow(t);});
+document.addEventListener('mouseout',e=>{if(e.target.closest&&e.target.closest('[data-tip]'))_tipHide();});
+document.addEventListener('focusin',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)_tipShow(t);});
+document.addEventListener('focusout',_tipHide);
+document.addEventListener('touchstart',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t){_tipShow(t);clearTimeout(_tipTimer);_tipTimer=setTimeout(_tipHide,1800);}},{passive:true});
+window.addEventListener('scroll',_tipHide,{passive:true});
+
+// ═══ ACCORDION ═══
+// <div class="acc"><div class="acc-hd" onclick="accToggle(this)">…<span class="acc-chev">▾</span></div>
+//   <div class="acc-body"><div class="acc-body-inner">…</div></div></div>
+function accToggle(hd){
+  const acc=hd.closest('.acc'); if(!acc)return;
+  const body=acc.querySelector('.acc-body');
+  const open=acc.classList.toggle('open');
+  body.style.maxHeight = open ? (body.firstElementChild.offsetHeight+2)+'px' : '0px';
+}
 function calcStreak(entries_by_day){
   let s=0;
   for(let i=0;i<90;i++){const d=new Date();d.setDate(d.getDate()-i);const k=dateKey(d);if((entries_by_day[k]||[]).length)s++;else break;}
@@ -2503,7 +2663,7 @@ function saveEntries_LS(){
   try{ syncEarnedBadges(allEntries); }catch{}
 }
 // Clear meal photos older than 30 days — frees localStorage quota
-function cleanOldPhotos(){
+async function cleanOldPhotos(){
   const isEn=settings.lang==='en';
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
   const cutoffKey=dateKey(cutoff);
@@ -2520,7 +2680,7 @@ function cleanOldPhotos(){
   if(!removed){
     showToast(isEn?'No old photos to remove':'ไม่มีรูปเก่าที่ต้องลบ');return;
   }
-  if(!confirm((isEn?`Remove ${removed} photo(s) older than 30 days?`:`ลบรูป ${removed} รายการที่เก่ากว่า 30 วัน?`)))return;
+  if(!await appConfirm(isEn?`Remove ${removed} photo(s) older than 30 days?`:`ลบรูป ${removed} รายการที่เก่ากว่า 30 วัน?`,{danger:true}))return;
   // Re-run delete since user might have added/changed between (idempotent)
   lsSave(LS_ENTRIES,allEntries);
   // Reload current day entries reference
@@ -2530,8 +2690,8 @@ function cleanOldPhotos(){
   scheduleAutoSync?.('cleanPhotos');
 }
 
-function resetAllData(){
-  if (!confirm(settings.lang==='en'?'Reset ALL data (profile + food + weight + water)? This cannot be undone.':'ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหาร + น้ำหนัก + น้ำดื่ม)? ไม่สามารถกู้คืนได้')) return;
+async function resetAllData(){
+  if(!await appConfirm(settings.lang==='en'?'Reset ALL data (profile + food + weight + water)? This cannot be undone.':'ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหาร + น้ำหนัก + น้ำดื่ม)? ไม่สามารถกู้คืนได้',{danger:true}))return;
   localStorage.removeItem(LS_PROFILE);
   localStorage.removeItem(LS_ENTRIES);
   localStorage.removeItem(LS_WEIGHTS);
@@ -2577,7 +2737,7 @@ function exportData(){
 function importData(file){
   if(!file)return;
   const reader=new FileReader();
-  reader.onload=(e)=>{
+  reader.onload=async (e)=>{
     try{
       const data=JSON.parse(e.target.result);
       if(data.app!=='CalPro'&&data.app!=='CalPro+')throw new Error(settings.lang==='en'?'Not a CalPro+ file':'ไฟล์ไม่ใช่ของ CalPro+');
@@ -2588,7 +2748,7 @@ function importData(file){
       const msg=settings.lang==='en'
         ?`Import from v${data.version||'?'} (${exportDate})\nThis will replace all current data (${numDays} days)\n\nContinue?`
         :`นำเข้าจากไฟล์ v${data.version||'?'} (${exportDate})\nจะแทนที่ข้อมูลปัจจุบันทั้งหมด (${numDays} วัน)\n\nต้องการดำเนินการต่อ?`;
-      if(!confirm(msg))return;
+      if(!await appConfirm(msg,{danger:true}))return;
       lsSave(LS_PROFILE,data.profile);
       lsSave(LS_ENTRIES,data.entries);
       if(data.weights)lsSave(LS_WEIGHTS,data.weights);
@@ -2880,10 +3040,10 @@ function savePresetFromToday(){
   renderQuickList();
   showToast(t('preset_saved'));
 }
-function deletePreset(id){
+async function deletePreset(id){
   const p=presets.find(x=>x.id===id);if(!p)return;
   const isEn=settings.lang==='en';
-  if(!confirm(isEn?`Delete set "${p.name}"?`:`ลบชุด "${p.name}"?`))return;
+  if(!await appConfirm(isEn?`Delete set "${p.name}"?`:`ลบชุด "${p.name}"?`,{danger:true}))return;
   presets=presets.filter(x=>x.id!==id);
   lsSave(LS_PRESETS,presets);
   renderQuickList();
@@ -3185,11 +3345,11 @@ async function submitAuth(){
   }
 }
 async function signOutCloud(){
-  if(!confirm(settings.lang==='en'?'Sign out? Local data stays.':'ออกจากระบบ? ข้อมูลในเครื่องยังอยู่ครับ'))return;
+  if(!await appConfirm(settings.lang==='en'?'Sign out? Local data stays.':'ออกจากระบบ? ข้อมูลในเครื่องยังอยู่ครับ'))return;
   await sb.auth.signOut();
 }
 async function deleteCloudAccount(){
-  if(!confirm(settings.lang==='en'?'Delete cloud data ONLY (local data stays)?':'ลบเฉพาะข้อมูลใน cloud (ข้อมูลในเครื่องยังอยู่)?'))return;
+  if(!await appConfirm(settings.lang==='en'?'Delete cloud data ONLY (local data stays)?':'ลบเฉพาะข้อมูลใน cloud (ข้อมูลในเครื่องยังอยู่)?',{danger:true}))return;
   try{
     const uid=cloudUser.id;
     await Promise.all([
@@ -3294,8 +3454,11 @@ function setSyncStatus(s){
   const ind=document.getElementById('syncDot');
   if(!ind)return;
   ind.className='sync-dot s-'+s;
-  const titles={idle:'',syncing:'กำลังซิงค์...',synced:'ซิงค์แล้ว ✓',error:'ซิงค์ผิดพลาด',offline:'ออฟไลน์'};
-  ind.title=titles[s]||'';
+  const isEn=settings.lang==='en';
+  const titles=isEn
+    ?{idle:'Not synced',syncing:'Syncing…',synced:'Synced ✓',error:'Sync error',offline:'Offline'}
+    :{idle:'ยังไม่ซิงค์',syncing:'กำลังซิงค์...',synced:'ซิงค์แล้ว ✓',error:'ซิงค์ผิดพลาด',offline:'ออฟไลน์'};
+  ind.setAttribute('data-tip',titles[s]||'');
 }
 // Debounced auto-sync (called after every local mutation)
 function scheduleAutoSync(reason){
@@ -3399,7 +3562,7 @@ async function renderAllUsersLeaderboard(){
   const body=document.getElementById('friendsBody');
   if(!card||!body)return;
   card.style.display='block';
-  body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_loading_all')}</div>`;
+  const _skel=showSkeleton(body,6);   // shimmer kicks in if loading drags past 700ms
   try{
     // Need an sb client to query — it's loaded lazily, so wait if needed.
     const client=sb||await ensureSupabase(8000);
@@ -3438,6 +3601,7 @@ async function renderAllUsersLeaderboard(){
     // Client-side safety net: when we fell back to the raw table, drop
     // nameless rows (every anon session that synced pre-fix left one). The
     // RPC already filters these, so this is a no-op on the RPC path.
+    skeletonDone(_skel);   // data is in — stop the shimmer escalation
     let profiles=profilesRes.data||[];
     if(!usedRpc)profiles=profiles.filter(p=>p.display_name&&p.display_name.trim());
     if(!profiles.length){body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('lb_no_users')}</div>`;return;}
@@ -3547,10 +3711,11 @@ async function renderFriendsCard(){
     body.innerHTML=`<div class="empty" style="padding:24px 12px;font-size:.82rem;line-height:1.6;text-align:center">${t('lb_signin_needed')}<br><button class="btn-sec" onclick="navTo('settings')" style="margin-top:12px;font-size:.78rem;padding:7px 14px">${t('lb_go_signin')}</button></div>`;
     return;
   }
-  body.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${settings.lang==='en'?'Loading...':'กำลังโหลด...'}</div>`;
+  const _skelF=showSkeleton(body,4);
   try{
     // Load friends list
     const {data:fr}=await sb.from('friends').select('friend_id, profiles!friends_friend_id_fkey(id,display_name,avatar,goal_cal)').eq('user_id',cloudUser.id);
+    skeletonDone(_skelF);
     const friendsList=(fr||[]).map(x=>x.profiles).filter(Boolean);
     // Build leaderboard: self + friends
     const allUsers=[{id:cloudUser.id,display_name:userProfile?.display_name||t('you'),avatar:userProfile?.avatar,goal_cal:userProfile?.goal_cal||1800},...friendsList];
@@ -3659,7 +3824,7 @@ async function doAddFriend(friendId,friendName){
   }catch(e){showToast(e.message||String(e));}
 }
 async function removeFriend(friendId,friendName){
-  if(!confirm(t('fr_confirm_remove').replace('%n',friendName)))return;
+  if(!await appConfirm(t('fr_confirm_remove').replace('%n',friendName),{danger:true}))return;
   try{
     const {error}=await sb.from('friends').delete().eq('user_id',cloudUser.id).eq('friend_id',friendId);
     if(error)throw error;
@@ -3729,7 +3894,7 @@ async function diagnoseSync(){
       ?`⚠️ Database needs migration (${migrationReason})\n\nFix:\n1. Open https://supabase.com/dashboard/project/pbtxshodaeztptegkguy/sql/new\n2. Paste contents of calpro-database-v2.7-migration.sql\n3. Run\n4. Come back and tap "Diagnose" again\n\n`
       :`⚠️ ต้อง run migration SQL (สาเหตุ: ${migrationReason})\n\nวิธีแก้:\n1. เปิด https://supabase.com/dashboard/project/pbtxshodaeztptegkguy/sql/new\n2. วาง calpro-database-v2.7-migration.sql (มีในโฟลเดอร์โปรเจกต์)\n3. กด Run\n4. กลับมากด "ตรวจสอบ" อีกครั้ง\n\n`);
   }
-  alert(prefix+results.join('\n'));
+  appAlert(prefix+results.join('\n'),{title:settings.lang==='en'?'Diagnose':'ตรวจสอบ'});
 }
 
 // Helper: wrap a Supabase promise with a timeout
@@ -4800,8 +4965,13 @@ function renderHelp(){
       '<b>แชร์ความสำเร็จ</b> (ในหน้าวิเคราะห์): รูปคล้ายกัน แสดง streak + เหรียญที่ได้รับ',
     ]},
   ];
-  body.innerHTML=sections.map(s=>
-    `<div class="card help-sec"><h4>${s.ico} <span>${s.title}</span></h4><ol>${s.items.map(it=>`<li>${it}</li>`).join('')}</ol></div>`
+  // Render as accordions — first section open by default so the page isn't
+  // a wall of collapsed rows on landing.
+  body.innerHTML=sections.map((s,i)=>
+    `<div class="acc${i===0?' open':''}">`+
+      `<div class="acc-hd" onclick="accToggle(this)">${s.ico} <span>${s.title}</span><span class="acc-chev">▾</span></div>`+
+      `<div class="acc-body"${i===0?' style="max-height:1200px"':''}><div class="acc-body-inner"><ol style="margin:0;padding-left:18px">${s.items.map(it=>`<li style="margin-bottom:4px">${it}</li>`).join('')}</ol></div></div>`+
+    `</div>`
   ).join('');
 }
 
@@ -7768,13 +7938,13 @@ requestNotifPermOnLaunch();  // ask permission once on first launch · disable m
 // Soft gate — client-side only, can be bypassed via DevTools. Intended as a
 // "for developer use" sign, not a security boundary.
 const DEV_PASSWORD='8757044175';
-function enterDevMode(){
+async function enterDevMode(){
   closeDrawer();
   // Already unlocked this session → jump straight in
   if(sessionStorage.getItem('calpro_dev_unlocked')==='1'){
     navTo('dev');return;
   }
-  const pw=prompt('Developer password:');
+  const pw=await appPrompt('',{title:'Developer mode',placeholder:'Password',password:true});
   if(pw==null)return;                 // user cancelled
   if(pw===DEV_PASSWORD){
     sessionStorage.setItem('calpro_dev_unlocked','1');
@@ -8043,6 +8213,20 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.27.0':{
+    th:[
+      '💀 **Skeleton loading + shimmer** — เปลี่ยนหน้าที่ต้องโหลด (กระดานผู้นำ) โชว์โครงร่างทันที · ถ้านานเกินมี shimmer วิ่ง',
+      '📐 **Accordion** — หน้าวิธีใช้งานยุบ/ขยายได้ ไม่รกตา',
+      '💬 **กล่อง popup เองทั้งหมด** — เลิกใช้ alert/confirm/prompt ของระบบ · สวย เข้ากับธีม',
+      '💡 **Tooltip ใหม่** — แตะ/ชี้ไอคอนเพื่อดูคำอธิบาย (เลิกใช้ title ของเบราว์เซอร์)',
+    ],
+    en:[
+      '💀 **Skeleton loading + shimmer** — data pages (leaderboard) show placeholders instantly · shimmer kicks in if it drags',
+      '📐 **Accordion** — the Help page now collapses/expands cleanly',
+      '💬 **Fully custom dialogs** — replaced native alert/confirm/prompt · themed + polished',
+      '💡 **New tooltips** — tap/hover icons for hints (replaces browser title=)',
+    ],
+  },
   '2.26.0':{
     th:[
       '⚖️ **แนวโน้มน้ำหนักใหม่ทั้งหมด** — คำนวณจากสมดุลพลังงานจริง (กิน − TDEE − ออกกำลังกาย) · ยึดกับน้ำหนักที่ชั่งจริง · มีพยากรณ์ 7 วันข้างหน้า (เส้นปะ)',
