@@ -118,15 +118,22 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-overlay.open{opacity:1;pointer-events:auto;}
 .drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border-right:1px solid rgba(255,255,255,.08);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);box-shadow:10px 0 44px rgba(0,0,0,.55);}
 .drawer.open{transform:translateX(0);}
-.drawer-hd{padding:20px 18px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
-.drawer-hd .user-avatar{width:80px;height:80px;font-size:2rem;margin:0 0 6px;}
-.drawer-hd .user-avatar::after{width:24px;height:24px;font-size:.7rem;}
-.drawer-name{font-size:.95rem;font-weight:600;}
-.drawer-email{font-size:.7rem;color:var(--muted);}
-.drawer-nav{flex:1;padding:8px 0;}
-.drawer-sect{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:14px 18px 6px;font-weight:600;}
-.drawer-item{display:flex;align-items:center;gap:12px;width:auto;margin:1px 10px;border-radius:13px;padding:11px 12px;background:none;border:none;color:var(--text);font-size:.9rem;font-family:inherit;cursor:pointer;text-align:left;transition:background .15s;}
+/* FB-style user card header */
+.drawer-hd{display:flex;align-items:center;gap:12px;text-align:left;margin:10px 10px 6px;padding:12px;border-radius:15px;background:var(--surface2);cursor:pointer;transition:opacity .15s;}
+.drawer-hd:active{opacity:.85;}
+.drawer-hd .user-avatar{width:52px;height:52px;font-size:1.5rem;margin:0;flex-shrink:0;}
+.drawer-hd .user-avatar::after{width:18px;height:18px;font-size:.58rem;}
+.drawer-hd .dh-info{flex:1;min-width:0;}
+.drawer-name{font-size:1rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.drawer-email{font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.drawer-hd .dh-chev{color:var(--muted);font-size:1.2rem;flex-shrink:0;}
+.drawer-nav{flex:1;padding:6px 0;}
+.drawer-sect{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:14px 20px 6px;font-weight:600;}
+.drawer-item{display:flex;align-items:center;gap:12px;width:auto;margin:1px 10px;border-radius:13px;padding:8px 10px;background:none;border:none;color:var(--text);font-size:.9rem;font-family:inherit;cursor:pointer;text-align:left;transition:background .15s;}
 .drawer-item:hover,.drawer-item.active{background:var(--surface2);}
+.drawer-item .di-ico{font-size:1.05rem;width:38px;height:38px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+.drawer-item:hover .di-ico,.drawer-item.active .di-ico{background:var(--border);}
+.drawer-item>span:not(.di-ico):not(.di-arrow){flex:1;min-width:0;}
 .drawer-item .di-ico{font-size:1.15rem;width:24px;text-align:center;flex-shrink:0;}
 .drawer-item .di-arrow{margin-left:auto;color:var(--muted);font-size:.8rem;}
 .drawer-divider{height:1px;background:var(--border);margin:8px 18px;}
@@ -375,25 +382,35 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .tip{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:9px;padding:10px;margin-top:9px;font-size:.75rem;line-height:1.6;}
 .tip strong{color:var(--accent);}
 /* ═══ STEAM-STYLE PROFILE (v2.21) ═══ */
-.profile-hero{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;position:relative;}
-.profile-hero-banner{height:88px;background:linear-gradient(135deg,var(--banner-color,#ff6b6b),color-mix(in srgb,var(--banner-color,#ff6b6b) 60%,#000));position:relative;}
+.profile-hero{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:10px;position:relative;}
+.profile-hero-banner{height:134px;background:linear-gradient(135deg,var(--banner-color,#ff6b6b),color-mix(in srgb,var(--banner-color,#ff6b6b) 55%,#000));position:relative;}
 .profile-hero-banner::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 60%);}
-.profile-hero-body{padding:0 16px 14px;display:flex;gap:14px;margin-top:-46px;position:relative;z-index:1;}
-.profile-avatar-lg{width:92px;height:92px;border-radius:50%;background:var(--surface2);border:4px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:var(--accent);cursor:pointer;overflow:hidden;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.18);transition:transform .15s;user-select:none;}
+/* FB-style: avatar overlaps bottom-left of the cover, name+stats stack below */
+.profile-hero-body{padding:0 16px 14px;margin-top:-46px;position:relative;z-index:1;}
+.profile-avatar-wrap{position:relative;width:92px;height:92px;}
+.profile-avatar-lg{width:92px;height:92px;border-radius:50%;background:var(--surface2);border:4px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:var(--accent);cursor:pointer;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.18);transition:transform .15s;user-select:none;}
 .profile-avatar-lg:hover{transform:scale(1.04);}
 .profile-avatar-lg img{width:100%;height:100%;object-fit:cover;}
-.profile-hero-info{flex:1;min-width:0;padding-top:48px;}
-.profile-display-name{font-size:1.15rem;font-weight:700;color:var(--text);line-height:1.2;}
-.profile-level-row{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:.74rem;}
+/* Camera badges (edit avatar / edit cover) — FB style */
+.profile-cam{position:absolute;background:var(--surface2);border:2px solid var(--surface);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:.82rem;line-height:1;cursor:pointer;padding:0;color:var(--text);box-shadow:0 2px 6px rgba(0,0,0,.3);}
+.profile-cam-av{right:-2px;bottom:-2px;}
+.profile-cam-cover{top:12px;right:12px;width:34px;height:34px;background:rgba(0,0,0,.5);border:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;font-size:.92rem;z-index:2;}
+.profile-hero-info{margin-top:9px;min-width:0;}
+.profile-display-name{font-size:1.4rem;font-weight:800;color:var(--text);line-height:1.2;}
+.profile-level-row{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:.74rem;flex-wrap:wrap;}
 .profile-level-badge{background:var(--accent);color:#fff;padding:2px 8px;border-radius:99px;font-weight:700;font-size:.66rem;letter-spacing:.4px;}
 .profile-level-title{display:inline-block;background:rgba(34,197,94,.16);color:#22c55e;font-weight:700;font-size:.66rem;padding:3px 11px;border-radius:99px;letter-spacing:.02em;}
-.profile-level-progress{font-size:.66rem;color:var(--muted);margin-top:2px;opacity:.85;}
+.profile-statline{font-size:.82rem;color:var(--muted);margin-top:8px;line-height:1.55;}
+.profile-statline b{color:var(--text);font-weight:700;}
+.profile-statline:empty{display:none;}
+.profile-level-progress{font-size:.66rem;color:var(--muted);margin-top:4px;opacity:.85;}
 .profile-level-progress:empty{display:none;}
-.profile-bio{font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;white-space:pre-wrap;word-break:break-word;}
+.profile-bio{font-size:.84rem;color:var(--text);margin-top:8px;line-height:1.5;white-space:pre-wrap;word-break:break-word;}
 .profile-bio:empty{display:none;}
-.profile-hero-actions{display:flex;gap:6px;padding:0 14px 12px;}
-.profile-action-btn{flex:1;font-size:.78rem;padding:7px;}
-.profile-action-btn:last-child{flex:0 0 42px;}
+.profile-hero-actions{display:flex;gap:8px;padding:12px 14px 14px;}
+.profile-action-primary,.profile-action-btn{flex:1;font-size:.84rem;padding:9px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;}
+.profile-action-primary{background:var(--blue);color:#fff;border:none;}
+.profile-action-primary:active{opacity:.85;}
 .profile-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
 .profile-stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 6px;text-align:center;}
 .pst-icon{font-size:1.1rem;line-height:1;}
@@ -991,22 +1008,28 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <!-- ─── Hero card (Steam-style) ─── -->
       <div class="profile-hero" id="profileHero">
-        <div class="profile-hero-banner" id="profileBanner"></div>
+        <div class="profile-hero-banner" id="profileBanner">
+          <button class="profile-cam profile-cam-cover" onclick="document.getElementById('bannerImgUpload').click()" aria-label="แก้ไขพื้นหลัง" title="แก้ไขพื้นหลัง">📷</button>
+        </div>
         <div class="profile-hero-body">
-          <div class="profile-avatar-lg" id="profileAvatar" onclick="openAvatarModal()" data-tip="คลิกเพื่อเปลี่ยนรูปประจำตัว">?</div>
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar-lg" id="profileAvatar" onclick="openAvatarModal()" data-tip="คลิกเพื่อเปลี่ยนรูปประจำตัว">?</div>
+            <button class="profile-cam profile-cam-av" onclick="openAvatarModal()" aria-label="แก้ไขรูปโปรไฟล์" title="แก้ไขรูปโปรไฟล์">📷</button>
+          </div>
           <div class="profile-hero-info">
             <div class="profile-display-name" id="profileName2">—</div>
             <div class="profile-level-row">
               <span class="profile-level-badge" id="profileLevelBadge">Lv 1</span>
               <span class="profile-level-title" id="profileLevelTitle">Newcomer</span>
             </div>
+            <div class="profile-statline" id="profileStatLine"></div>
             <div class="profile-level-progress" id="profileLevelProgress"></div>
             <div class="profile-bio" id="profileBioView" data-i18n="bio_empty_self">ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม</div>
           </div>
         </div>
         <div class="profile-hero-actions">
+          <button class="profile-action-primary" onclick="shareAchievements()">📤 <span id="profileShareLbl">แชร์</span></button>
           <button class="btn-sec profile-action-btn" onclick="toggleProfileEdit()"><span data-i18n="edit_profile">✏️ แก้ไขโปรไฟล์</span></button>
-          <button class="btn-sec profile-action-btn" onclick="shareAchievements()" title="แชร์โปรไฟล์">📤</button>
         </div>
       </div>
       <!-- ─── Stats showcase (4 mini cards) ─── -->
@@ -1724,29 +1747,32 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- DRAWER (slide-out menu) -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <aside class="drawer" id="drawer">
-  <div class="drawer-hd">
-    <div class="user-avatar" id="drawerAvatar" onclick="openAvatarModal()">?</div>
-    <div class="drawer-name" id="drawerName">—</div>
-    <div class="drawer-email" id="drawerEmail">—</div>
+  <div class="drawer-hd" onclick="navTo('profile')">
+    <div class="user-avatar" id="drawerAvatar">?</div>
+    <div class="dh-info">
+      <div class="drawer-name" id="drawerName">—</div>
+      <div class="drawer-email" id="drawerEmail">—</div>
+    </div>
+    <span class="dh-chev">›</span>
   </div>
   <nav class="drawer-nav">
     <div class="drawer-sect" data-i18n="account_section">บัญชี</div>
-    <button class="drawer-item" onclick="navTo('profile')"><span data-i18n="profile">โปรไฟล์</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span data-i18n="friends_only">เพื่อน</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="navTo('profile')"><span class="di-ico">👤</span><span data-i18n="profile">โปรไฟล์</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" id="drawerFriendsBtn" onclick="navTo('friends')"><span class="di-ico">👥</span><span data-i18n="friends_only">เพื่อน</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect drawer-tools-row" data-i18n="tools_section">เครื่องมือ</div>
-    <button class="drawer-item drawer-tools-row" onclick="openQuickWater()"><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item drawer-tools-row" onclick="closeDrawer();openWorkoutModal()"><span data-i18n="workouts">ออกกำลังกาย</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item drawer-tools-row" onclick="navTo('profile');setTimeout(()=>document.querySelector('#mWaist')?.scrollIntoView({behavior:'smooth',block:'center'}),300)"><span data-i18n="body_measurements">สัดส่วนร่างกาย</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="openQuickWater()"><span class="di-ico">💧</span><span data-i18n="water">น้ำดื่ม</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="closeDrawer();openWorkoutModal()"><span class="di-ico">🏃</span><span data-i18n="workouts">ออกกำลังกาย</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item drawer-tools-row" onclick="navTo('profile');setTimeout(()=>document.querySelector('#mWaist')?.scrollIntoView({behavior:'smooth',block:'center'}),300)"><span class="di-ico">📏</span><span data-i18n="body_measurements">สัดส่วนร่างกาย</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect" data-i18n="settings_section">การตั้งค่า</div>
-    <button class="drawer-item" onclick="navTo('settings')"><span data-i18n="settings">ตั้งค่า</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="navTo('settings')"><span class="di-ico">⚙️</span><span data-i18n="settings">ตั้งค่า</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
-    <button class="drawer-item" onclick="navTo('help')"><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="openFeedback()"><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="enterDevMode()"><span>🔧 Developer</span><span class="di-arrow">›</span></button>
-    <button class="drawer-item" onclick="navTo('about')"><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="navTo('help')"><span class="di-ico">❓</span><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="openFeedback()"><span class="di-ico">💬</span><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="enterDevMode()"><span class="di-ico">🔧</span><span>Developer</span><span class="di-arrow">›</span></button>
+    <button class="drawer-item" onclick="navTo('about')"><span class="di-ico">ℹ️</span><span data-i18n="about">เกี่ยวกับ</span><span class="di-arrow">›</span></button>
   </nav>
   <div class="drawer-foot">CalPro+ <span class="ver-tag">v2.23.0 BETA</span></div>
 </aside>
@@ -1766,7 +1792,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.31.5';
+const APP_VERSION = '2.32.0';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
@@ -5949,6 +5975,16 @@ function renderProfileUI(){
   // Level title stays on the badge row; the "N more points to Lv X" progress
   // moves to its own line below so it doesn't crowd the title.
   document.getElementById('profileLevelTitle').textContent=lvl.title;
+  // FB-style inline stat line — quick summary combining CalPro metrics.
+  const isEn2=settings.lang==='en';
+  const statLine=document.getElementById('profileStatLine');
+  if(statLine){
+    statLine.innerHTML=isEn2
+      ? `🔥 <b>${streak}</b> day streak · 📝 <b>${days}</b> logged · 🏅 <b>${earned.length}</b> badges`
+      : `🔥 <b>${streak}</b> วันติด · 📝 <b>${days}</b> วันบันทึก · 🏅 <b>${earned.length}</b> เหรียญ`;
+  }
+  const shareLbl=document.getElementById('profileShareLbl');
+  if(shareLbl)shareLbl.textContent=isEn2?'Share':'แชร์';
   const progEl=document.getElementById('profileLevelProgress');
   if(progEl){
     progEl.textContent=lvl.nextAt
@@ -8575,6 +8611,16 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.32.0':{
+    th:[
+      '👤 **หน้าโปรไฟล์โฉมใหม่สไตล์โซเชียล** — รูปปก + รูปโปรไฟล์ซ้อนมุมซ้าย (มีปุ่มกล้องแก้รูป/พื้นหลัง) · แถวสถิติย่อ · ปุ่ม แชร์ + แก้ไขโปรไฟล์',
+      '📂 **เมนูด้านข้างใหม่** — การ์ดผู้ใช้ด้านบน (แตะไปโปรไฟล์) + รายการมีไอคอนวงกลมประจำเมนู',
+    ],
+    en:[
+      '👤 **Refreshed social-style profile** — cover photo + overlapping avatar (with camera buttons to edit picture/cover) · quick stat line · Share + Edit profile buttons',
+      '📂 **New side menu** — a tappable user card on top + circular icon tiles for each item',
+    ],
+  },
   '2.31.0':{
     th:[
       '🌈 **วงแหวนแคลอรี่ไล่สีสเปกตรัม** (ฟ้า→เขียว→เหลือง) เมื่อยังอยู่ในเป้า · ใกล้เป้าเป็นเหลือง · เกินเป็นแดง',
