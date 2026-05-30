@@ -1710,7 +1710,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.28.3';
+const APP_VERSION = '2.28.4';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -3860,13 +3860,15 @@ async function addFriendPrompt(){
   if(!cloudUser||cloudUser.is_anonymous===true){showToast(t('not_signed_in'));return;}
   document.getElementById('frSearchInput').value='';
   document.getElementById('frSearchResults').innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('fr_search_short')}</div>`;
-  // Cache current friends so we can show "already added" badge
-  try{
-    const {data}=await sb.from('friends').select('friend_id').eq('user_id',cloudUser.id);
-    _frCurrentIds=new Set((data||[]).map(x=>x.friend_id));
-  }catch{_frCurrentIds=new Set();}
+  // Open the modal IMMEDIATELY — never make the user wait on the network just to
+  // see it. The friend-id cache (used only for "already added" badges) then
+  // loads in the background, time-boxed so a slow network can't hang the open.
   document.getElementById('addFriendModal').classList.remove('hide');
   setTimeout(()=>document.getElementById('frSearchInput').focus(),100);
+  try{
+    const {data}=await withTimeout(sb.from('friends').select('friend_id').eq('user_id',cloudUser.id),8000,'friends cache');
+    _frCurrentIds=new Set((data||[]).map(x=>x.friend_id));
+  }catch{_frCurrentIds=new Set();}
 }
 function closeAddFriend(){document.getElementById('addFriendModal').classList.add('hide');}
 let _frSearchTimer=null;
@@ -3884,7 +3886,7 @@ function renderFriendSearch(q){
     try{
       // Match either email exact or display_name ILIKE
       const orExpr=`email.eq.${txt},display_name.ilike.%${txt.replace(/[%,]/g,'')}%`;
-      const {data,error}=await sb.from('profiles').select('id,display_name,email,avatar').or(orExpr).limit(20);
+      const {data,error}=await withTimeout(sb.from('profiles').select('id,display_name,email,avatar').or(orExpr).limit(20),8000,'user search');
       if(error)throw error;
       const list=(data||[]).slice(0,10);
       if(!list.length){w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('fr_no_results')}</div>`;return;}
@@ -3899,7 +3901,8 @@ function renderFriendSearch(q){
       }).join('');
       w.querySelectorAll('button[data-action="add"]').forEach(b=>b.onclick=()=>doAddFriend(b.dataset.fid,b.dataset.fname));
     }catch(e){
-      w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem;color:var(--accent)">${e.message||e}</div>`;
+      const msg=/timed out/i.test(e.message||'')?(settings.lang==='en'?'⏳ Slow network — type to retry':'⏳ เน็ตช้า · พิมพ์ใหม่เพื่อลองอีกครั้ง'):(e.message||e);
+      w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem;color:var(--accent)">${escapeHtml(String(msg))}</div>`;
     }
   },250);
 }
@@ -6068,16 +6071,22 @@ async function openFriendProfile(userId,displayName,avatar){
     // Fetch profile with v2.24 columns (banner_image, persisted_badges, weight)
     // — fall back to the v2.21 column set if the schema is older.
     let prof=null;
+    // Every query is time-boxed so a slow/dead network triggers the catch (which
+    // shows an error) instead of leaving the modal stuck on the "loading…"
+    // placeholders forever. A *timeout* skips the schema fallbacks (they'd only
+    // stall too); a genuine column error still falls through to the older sets.
     try{
-      const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,weight,bio,banner_color,banner_image,persisted_badges').eq('id',userId).maybeSingle();
+      const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,weight,bio,banner_color,banner_image,persisted_badges').eq('id',userId).maybeSingle(),8000,'friend profile');
       if(r.error)throw r.error;
       prof=r.data;
-    }catch{
+    }catch(e1){
+      if(/timed out/i.test(e1.message||''))throw e1;
       try{
-        const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,bio,banner_color').eq('id',userId).maybeSingle();
+        const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,bio,banner_color').eq('id',userId).maybeSingle(),8000,'friend profile');
         prof=r.data;
-      }catch{
-        const r=await sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type').eq('id',userId).maybeSingle();
+      }catch(e2){
+        if(/timed out/i.test(e2.message||''))throw e2;
+        const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type').eq('id',userId).maybeSingle(),8000,'friend profile');
         prof=r.data;
       }
     }
@@ -6090,10 +6099,10 @@ async function openFriendProfile(userId,displayName,avatar){
     //    totals RPC (SECURITY DEFINER, bypasses RLS) — the SAME source the
     //    leaderboard uses, so the profile's streak/on-track now MATCH the
     //    leaderboard instead of contradicting it.
-    const [entriesRes,totalsRes]=await Promise.all([
+    const [entriesRes,totalsRes]=await withTimeout(Promise.all([
       sb.from('food_entries').select('entry_date,calories,protein,carbs,fat').eq('user_id',userId),
       sb.rpc('get_public_daily_totals',{_days:60}).then(r=>r,()=>({data:null})),
-    ]);
+    ]),8000,'friend stats');
     const ebd={};
     const directRows=entriesRes.data||[];
     if(directRows.length){
@@ -6159,7 +6168,10 @@ async function openFriendProfile(userId,displayName,avatar){
       bg.innerHTML=`<div class="profile-badge-empty">${isEn?'No badges yet':'ยังไม่มีเหรียญตรา'}</div>`;
     }
   }catch(e){
-    document.getElementById('fpBadgesGrid').innerHTML=`<div class="profile-badge-empty" style="color:var(--accent)">${escapeHtml(e.message||t('fp_err'))}</div>`;
+    // Timeout → calm "slow network" hint; anything else → the actual message.
+    const msg=/timed out/i.test(e.message||'')?(isEn?'⏳ Slow network — tap to retry':'⏳ เน็ตช้า · แตะเพื่อลองใหม่'):(e.message||t('fp_err'));
+    const lt=document.getElementById('fpLevelTitle');if(lt)lt.textContent='';
+    document.getElementById('fpBadgesGrid').innerHTML=`<div class="profile-badge-empty" style="color:var(--accent)">${escapeHtml(msg)}</div>`;
   }
 }
 function closeFriendProfile(){document.getElementById('friendProfileModal').classList.add('hide');}
@@ -8389,6 +8401,18 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.28.4':{
+    th:[
+      '🔌 **ขยายการกันค้างไปทุกหน้าที่ดึงเน็ต** — ตรวจทุกหน้า: หน้าหลัก/วิเคราะห์/โปรไฟล์/ตั้งค่า/TDEE/เพิ่มอาหาร อ่านจากเครื่องล้วน เปิดทันทีอยู่แล้ว · กระดานผู้นำมี skeleton+timeout อยู่แล้ว',
+      '👤 **โปรไฟล์เพื่อน + ค้นหาเพื่อน ไม่ค้างอีก** — ใส่ timeout 8 วิทุกการดึงข้อมูล ถ้าเน็ตช้าโชว์ "⏳ เน็ตช้า · แตะลองใหม่" แทนการค้างที่ "loading…" ตลอด',
+      '➕ **ปุ่มเพิ่มเพื่อนเปิดทันที** — เดิมต้องรอโหลดรายชื่อเพื่อนก่อนหน้าต่างถึงเปิด (เน็ตค้าง = กดแล้วเงียบ) ตอนนี้เปิดก่อน โหลดทีหลัง',
+    ],
+    en:[
+      '🔌 **Extended the no-hang pattern to every networked view** — audited all pages: Today/Analysis/Profile/Settings/TDEE/Add read purely from device and already open instantly; the leaderboard already had skeleton + timeouts',
+      '👤 **Friend profile + friend search no longer hang** — 8s timeout on every fetch; a slow network shows "⏳ slow · tap to retry" instead of sticking on "loading…" forever',
+      '➕ **Add-friend button opens instantly** — it used to wait for the friend-list query before the sheet appeared (a stalled network meant nothing happened on tap); now it opens first and loads after',
+    ],
+  },
   '2.28.3':{
     th:[
       '⚡ **หน้า Developer โหลดทันที** — ย้ายการนับข้อมูลคลาวด์ (profiles/food_entries) ออกไปทำหลังหน้าขึ้นแล้ว หน้าจึงไม่รอเน็ตเลย (เดิมถ้าเน็ตช้าจะค้าง)',
