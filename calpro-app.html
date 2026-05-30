@@ -248,6 +248,13 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.82rem;padding:2px;line-height:1;transition:color .15s;}
 .del:hover{color:var(--accent);}
 .empty{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0;line-height:1.7;}
+/* Rich empty state — icon + message + optional CTA, guides the first action */
+.empty-state{text-align:center;padding:30px 16px;}
+.empty-state .es-ico{font-size:2.6rem;line-height:1;margin-bottom:10px;opacity:.9;}
+.empty-state .es-title{font-size:.92rem;font-weight:600;color:var(--text);margin-bottom:4px;}
+.empty-state .es-sub{font-size:.76rem;color:var(--muted);line-height:1.55;margin-bottom:14px;}
+.empty-state .es-cta{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;border:none;border-radius:99px;padding:9px 20px;font-size:.84rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;}
+.empty-state .es-cta:hover{opacity:.9;}.empty-state .es-cta:active{transform:scale(.96);}
 
 /* ── QUICK ADD TABS ── */
 .qtab{flex:1;padding:7px;text-align:center;font-size:.78rem;border-radius:7px;cursor:pointer;color:var(--muted);border:none;background:none;font-family:inherit;transition:all .2s;}
@@ -1680,7 +1687,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.27.0';
+const APP_VERSION = '2.27.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2847,7 +2854,7 @@ function showPage(id,btn){
   if(id==='today'){loadEntries();renderToday();}
   if(id==='analysis')renderAnalysis();
   if(id==='tdee')syncTDEEFromProfile();
-  if(id==='add'){renderQuickList();refreshAiQuotaInline();}
+  if(id==='add'){renderQuickList();refreshAiQuotaInline();applyDefaultMeal();}
   if(id==='settings')renderSettings();
   if(id==='help')renderHelp();
   if(id==='dev')renderDev();
@@ -5218,7 +5225,18 @@ function renderToday(){
   renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();
   renderAdSlot('today-1',document.querySelector('[data-ad-slot="today-1"]'));
   const log=document.getElementById('foodLog');
-  if(!E.length){log.innerHTML=`<div class="empty">${t('no_entries')}<br>${t('press_add')}</div>`;return;}
+  if(!E.length){
+    // Rich empty state — guide the very first action instead of a blank list.
+    const isToday=currentDate===todayKey();
+    const isEn2=settings.lang==='en';
+    log.innerHTML=`<div class="empty-state">`+
+      `<div class="es-ico">🍽️</div>`+
+      `<div class="es-title">${isToday?t('no_entries'):(isEn2?'No entries on this day':'วันนี้ยังไม่มีรายการ')}</div>`+
+      `<div class="es-sub">${isEn2?'Log your first meal — it only takes a tap':'บันทึกมื้อแรกของวัน · แค่แตะเดียว'}</div>`+
+      `<button class="es-cta" onclick="goToAddFood()"><span style="font-size:1.05rem;line-height:1">＋</span> ${isEn2?'Log food':'บันทึกอาหาร'}</button>`+
+    `</div>`;
+    return;
+  }
   log.innerHTML='';
   const MEAL_KEYS={'เช้า':'morning','กลางวัน':'lunch','เย็น':'dinner','ของว่าง':'snack'};
   ['เช้า','กลางวัน','เย็น','ของว่าง'].forEach(meal=>{
@@ -8110,6 +8128,20 @@ function devLogToConsole(){
 }
 
 // Quick-add: jump to Add tab + focus the search box so the keyboard pops on mobile
+// Friction-saver: auto-pick the meal that matches the time of day so the
+// user doesn't have to change the dropdown on every log.
+//   04–11 เช้า · 11–16 กลางวัน · 16–22 เย็น · ที่เหลือ ของว่าง
+function defaultMealForNow(){
+  const h=new Date().getHours();
+  if(h>=4&&h<11)return 'เช้า';
+  if(h>=11&&h<16)return 'กลางวัน';
+  if(h>=16&&h<22)return 'เย็น';
+  return 'ของว่าง';
+}
+function applyDefaultMeal(){
+  const sel=document.getElementById('mealSel');
+  if(sel)sel.value=defaultMealForNow();
+}
 function goToAddFood(){
   showPage('add',document.querySelector('.bnt[data-tab="add"]'));
   setTimeout(()=>{
@@ -8213,6 +8245,16 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.27.1':{
+    th:[
+      '⏱️ **เลือกมื้ออัตโนมัติตามเวลา** — เปิดหน้าเพิ่มอาหารตอนเช้า/เที่ยง/เย็น จะเลือกมื้อให้เลย · ตัด 1 แตะทุกครั้งที่บันทึก',
+      '🍽️ **หน้าว่างชวนลงมือ** — วันที่ยังไม่บันทึก มีปุ่ม "บันทึกอาหาร" ให้กดเริ่มได้ทันที',
+    ],
+    en:[
+      '⏱️ **Auto-pick meal by time** — opening Add Food in the morning/noon/evening preselects the right meal · saves a tap on every log',
+      '🍽️ **Actionable empty state** — days with no entries show a "Log food" button to start right away',
+    ],
+  },
   '2.27.0':{
     th:[
       '💀 **Skeleton loading + shimmer** — เปลี่ยนหน้าที่ต้องโหลด (กระดานผู้นำ) โชว์โครงร่างทันที · ถ้านานเกินมี shimmer วิ่ง',
