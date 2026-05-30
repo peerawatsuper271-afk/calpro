@@ -1725,7 +1725,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.29.1';
+const APP_VERSION = '2.29.2';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
@@ -2388,8 +2388,8 @@ const FOODS=[
 // Food-search category filters. Neutral food icons + localized TEXT labels —
 // the old country-flag emoji (🇹🇭🇯🇵…) rendered inconsistently across devices
 // and weren't a readable filter. renderCatBtns() shows "icon + label" chips.
-const CATS={thai:'🍜',japanese:'🍣',korean:'🍲',chinese:'🥟',italian:'🍝',indian:'🍛',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
-const CAT_LABELS={thai:{th:'ไทย',en:'Thai'},japanese:{th:'ญี่ปุ่น',en:'Japanese'},korean:{th:'เกาหลี',en:'Korean'},chinese:{th:'จีน',en:'Chinese'},italian:{th:'อิตาเลียน',en:'Italian'},indian:{th:'อินเดีย',en:'Indian'},fastfood:{th:'ฟาสต์ฟู้ด',en:'Fast food'},healthy:{th:'เฮลตี้',en:'Healthy'},drink:{th:'เครื่องดื่ม',en:'Drink'},dessert:{th:'ของหวาน',en:'Dessert'},fruit:{th:'ผลไม้',en:'Fruit'},seafood:{th:'ทะเล',en:'Seafood'},snack:{th:'ขนม',en:'Snack'},veggie:{th:'ผัก',en:'Veggie'},custom:{th:'ของฉัน',en:'Mine'}};
+const CATS={all:'🍽️',thai:'🍜',japanese:'🍣',korean:'🍲',chinese:'🥟',italian:'🍝',indian:'🍛',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
+const CAT_LABELS={all:{th:'ทั้งหมด',en:'All'},thai:{th:'ไทย',en:'Thai'},japanese:{th:'ญี่ปุ่น',en:'Japanese'},korean:{th:'เกาหลี',en:'Korean'},chinese:{th:'จีน',en:'Chinese'},italian:{th:'อิตาเลียน',en:'Italian'},indian:{th:'อินเดีย',en:'Indian'},fastfood:{th:'ฟาสต์ฟู้ด',en:'Fast food'},healthy:{th:'เฮลตี้',en:'Healthy'},drink:{th:'เครื่องดื่ม',en:'Drink'},dessert:{th:'ของหวาน',en:'Dessert'},fruit:{th:'ผลไม้',en:'Fruit'},seafood:{th:'ทะเล',en:'Seafood'},snack:{th:'ขนม',en:'Snack'},veggie:{th:'ผัก',en:'Veggie'},custom:{th:'ของฉัน',en:'Mine'}};
 const MEAL_ICONS={เช้า:'🌅',กลางวัน:'☀️',เย็น:'🌙',ของว่าง:'🍎'};
 const BADGES=[
   {id:'streak3',ico:'🔥',name:'3 วันติด',name_en:'3-day streak',cond:u=>calcStreak(u)>=3},
@@ -2486,7 +2486,7 @@ const EXERCISES = [
   {n:'ขึ้นบันได',e:'Stair Climbing',met:8.0},
 ];
 let currentDate = todayKey();
-let activeCat = 'thai';
+let activeCat = 'all';
 let settings = {theme:'light', accent:'#ff6b6b', lang:'th', font:'prompt', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','profile','settings'], aiProvider:'proxy'};
 
 // Bottom-nav tab catalog — id → { icon SVG path, i18n key }
@@ -3161,6 +3161,8 @@ function applyPreset(id){
   scheduleAutoSync?.('applyPreset');
 }
 function renderCatResults(cat){
+  // "All" = every built-in food + the user's custom foods
+  if(cat==='all'){renderResults(allFoods());return;}
   // Include user's custom foods in their own pseudo-category
   if(cat==='custom'){renderResults(customFoods);return;}
   renderResults(FOODS.filter(f=>f.cat===cat));
@@ -8450,6 +8452,14 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.29.2':{
+    th:[
+      '🍽️ **เพิ่มหมวด "ทั้งหมด"** ในหน้าค้นหาอาหาร — รวมอาหารทุกหมวด + อาหารที่เพิ่มเอง ไว้ที่ตัวกรองแรก และเลือกให้อัตโนมัติเมื่อเปิดหน้า',
+    ],
+    en:[
+      '🍽️ **New "All" filter** on the food-search page — combines every category plus your custom foods; shown first and selected by default',
+    ],
+  },
   '2.29.1':{
     th:[
       '🔖 **ตัวกรองหมวดอาหารใหม่** — หน้าค้นหาเปลี่ยนจากปุ่มธงประเทศ (🇹🇭🇯🇵) มาเป็นชิปตัวกรองมีชื่อกำกับ (เช่น "ไทย", "ญี่ปุ่น") อ่านง่ายขึ้น แสดงผลตรงกันทุกเครื่อง',
