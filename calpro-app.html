@@ -24,9 +24,9 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
-  --bg:#0f0f14;--surface:#1a1a24;--surface2:#22222e;--border:#2e2e3e;
-  --accent:#ff6b6b;--green:#51cf66;--blue:#74c0fc;--amber:#ffa94d;
-  --purple:#b197fc;--text:#e8e8f0;--muted:#6868a0;--r:14px;
+  --bg:#000000;--surface:#121212;--surface2:#1e1e1e;--border:#262626;
+  --accent:#ff6b6b;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;
+  --purple:#a78bfa;--text:#f5f5f7;--muted:#8e8e93;--r:18px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 /* iOS Safari: kill double-tap zoom + 300ms click delay on interactive UI,
@@ -49,12 +49,13 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
   *{transition-duration:.01ms !important;animation-duration:.01ms !important;}
 }
 
-/* ── BOTTOM NAV ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
-.bnt{flex:1;padding:10px 4px 8px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);font-size:.68rem;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s,transform .12s;}
-.bnt:active{transform:scale(.92);}
-.bnt svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.bnt.active{color:var(--accent);}
+/* ── BOTTOM NAV — floating glass capsule, icon-only, monochrome active pill ── */
+.bnav{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:452px;margin:0 auto;background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid rgba(255,255,255,.08);border-radius:26px;display:flex;gap:4px;padding:7px;z-index:50;box-shadow:0 12px 36px rgba(0,0,0,.55);}
+.bnt{flex:1;padding:11px 4px;border-radius:18px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:color .15s,background .18s,transform .12s;}
+.bnt span{display:none;}
+.bnt:active{transform:scale(.9);}
+.bnt svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.bnt.active{color:var(--text);background:var(--surface2);}
 .icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
 /* ── SYNC INDICATOR ── */
@@ -127,7 +128,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-foot{padding:14px 18px;border-top:1px solid var(--border);font-size:.66rem;color:var(--muted);text-align:center;}
 
 /* ── CARD ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:9px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 15px;margin-bottom:10px;}
 .card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
 
@@ -1726,7 +1727,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.29.3';
+const APP_VERSION = '2.30.0';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
@@ -2409,7 +2410,7 @@ const BADGES=[
   {id:'master',ico:'👑',name:'Master',name_en:'Master',cond:(u,o)=>earnedBadges(u,o).length>=5},
 ];
 const THEMES={
-  dark:{bg:'#0f0f14',s:'#1a1a24',s2:'#22222e',b:'#2e2e3e',t:'#e8e8f0',m:'#6868a0',mode:'dark'},
+  dark:{bg:'#000000',s:'#121212',s2:'#1e1e1e',b:'#262626',t:'#f5f5f7',m:'#8e8e93',mode:'dark'},
   night:{bg:'#080810',s:'#11111a',s2:'#191922',b:'#252530',t:'#ddddf5',m:'#5555a0',mode:'dark'},
   // Accent-tinted dark themes (replace forest/warm/ocean)
   rose:{bg:'#140b0e',s:'#1f1217',s2:'#2a181d',b:'#3a2027',t:'#f5d8de',m:'#a06070',mode:'dark'},
@@ -8467,6 +8468,18 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.30.0':{
+    th:[
+      '🎨 **โฉมใหม่ทั้งแอป** — โทน**ดำสนิท** การ์ดขอบมนใหญ่ ตัวหนังสือขาวคม เทรนด์มินิมอล',
+      '🛟 **แถบเมนูล่างลอยเป็นแคปซูลกระจก** ไอคอนล้วน · ปุ่มที่เลือกอยู่ไฮไลต์เป็นแคปซูลเทานุ่ม',
+      '🟢 ปรับชุดสีให้สดสะอาดขึ้น (เขียว/ฟ้า/เหลือง) บนพื้นดำ',
+    ],
+    en:[
+      '🎨 **Full visual refresh** — true-black theme, big rounded cards, crisp white type, a cleaner minimal look',
+      '🛟 **Floating glass capsule bottom bar** — icon-only, with the active tab in a soft grey pill',
+      '🟢 Refreshed, more vivid accent palette (green/blue/amber) on pure black',
+    ],
+  },
   '2.29.3':{
     th:[
       '🧹 **หน้าค้นหาอาหารโล่งขึ้น** — รวมปุ่มหมวดทั้งแถว (16 ปุ่ม) เป็น **ตัวกรองแบบ dropdown อันเดียว** · จัดกลุ่ม "อาหารนานาชาติ" (ไทย/ญี่ปุ่น/เกาหลี/จีน/อิตาเลียน/อินเดีย) และ "ตามประเภท" ไว้ด้วยกัน เลือกง่าย ไม่รก',
