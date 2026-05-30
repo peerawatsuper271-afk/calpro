@@ -284,8 +284,9 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .sbox input:focus{border-color:var(--accent);}
 .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none;}
 .cats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
-.cbt{background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:4px 9px;font-size:.68rem;cursor:pointer;font-family:inherit;transition:all .15s;}
-.cbt.active,.cbt:hover{border-color:var(--blue);color:var(--blue);}
+.cbt{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 11px;font-size:.72rem;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.cbt .cbt-ico{font-size:.92rem;line-height:1;}
+.cbt.active,.cbt:hover{border-color:var(--blue);color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,var(--surface2));}
 .sres{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
 .sri{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .15s;}
 .sri:hover{border-color:var(--accent);}
@@ -1724,7 +1725,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.29.0';
+const APP_VERSION = '2.29.1';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
@@ -2384,7 +2385,11 @@ const FOODS=[
   {n:'ปลาแซลมอนซาชิมิ',e:'Salmon Sashimi (5 pcs)',c:220,p:24,cb:0,f:13,a:100,cat:'seafood'},
   {n:'หอยลายผัดฉ่า',e:'Stir-fried Clams',c:240,p:22,cb:8,f:14,a:200,cat:'seafood'},
 ];
-const CATS={thai:'🇹🇭',japanese:'🇯🇵',korean:'🇰🇷',chinese:'🇨🇳',italian:'🇮🇹',indian:'🇮🇳',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
+// Food-search category filters. Neutral food icons + localized TEXT labels —
+// the old country-flag emoji (🇹🇭🇯🇵…) rendered inconsistently across devices
+// and weren't a readable filter. renderCatBtns() shows "icon + label" chips.
+const CATS={thai:'🍜',japanese:'🍣',korean:'🍲',chinese:'🥟',italian:'🍝',indian:'🍛',fastfood:'🍔',healthy:'🥗',drink:'🥤',dessert:'🍰',fruit:'🍎',seafood:'🦐',snack:'🍿',veggie:'🥦',custom:'📝'};
+const CAT_LABELS={thai:{th:'ไทย',en:'Thai'},japanese:{th:'ญี่ปุ่น',en:'Japanese'},korean:{th:'เกาหลี',en:'Korean'},chinese:{th:'จีน',en:'Chinese'},italian:{th:'อิตาเลียน',en:'Italian'},indian:{th:'อินเดีย',en:'Indian'},fastfood:{th:'ฟาสต์ฟู้ด',en:'Fast food'},healthy:{th:'เฮลตี้',en:'Healthy'},drink:{th:'เครื่องดื่ม',en:'Drink'},dessert:{th:'ของหวาน',en:'Dessert'},fruit:{th:'ผลไม้',en:'Fruit'},seafood:{th:'ทะเล',en:'Seafood'},snack:{th:'ขนม',en:'Snack'},veggie:{th:'ผัก',en:'Veggie'},custom:{th:'ของฉัน',en:'Mine'}};
 const MEAL_ICONS={เช้า:'🌅',กลางวัน:'☀️',เย็น:'🌙',ของว่าง:'🍎'};
 const BADGES=[
   {id:'streak3',ico:'🔥',name:'3 วันติด',name_en:'3-day streak',cond:u=>calcStreak(u)>=3},
@@ -2907,7 +2912,7 @@ function showPage(id,btn){
     today:()=>{loadEntries();renderToday();},
     analysis:renderAnalysis,
     tdee:syncTDEEFromProfile,
-    add:()=>{renderQuickList();refreshAiQuotaInline();applyDefaultMeal();},
+    add:()=>{renderCatBtns();renderQuickList();refreshAiQuotaInline();applyDefaultMeal();},
     settings:renderSettings,
     help:renderHelp,
     dev:renderDev,
@@ -3012,9 +3017,12 @@ function doSearch(v){
 }
 function renderCatBtns(){
   const w=document.getElementById('catBtns');w.innerHTML='';
+  const isEn=settings.lang==='en';
   Object.entries(CATS).forEach(([k,ico])=>{
     const b=document.createElement('button');b.className='cbt'+(k===activeCat?' active':'');
-    b.dataset.cat=k;b.textContent=ico;b.title=k;
+    const lab=(CAT_LABELS[k]&&CAT_LABELS[k][isEn?'en':'th'])||k;
+    b.dataset.cat=k;b.title=lab;
+    b.innerHTML=`<span class="cbt-ico">${ico}</span>${escapeHtml(lab)}`;
     b.onclick=()=>{document.getElementById('searchInput').value='';activeCat=k;renderCatBtns();renderCatResults(k);};
     w.appendChild(b);
   });
@@ -8442,6 +8450,14 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.29.1':{
+    th:[
+      '🔖 **ตัวกรองหมวดอาหารใหม่** — หน้าค้นหาเปลี่ยนจากปุ่มธงประเทศ (🇹🇭🇯🇵) มาเป็นชิปตัวกรองมีชื่อกำกับ (เช่น "ไทย", "ญี่ปุ่น") อ่านง่ายขึ้น แสดงผลตรงกันทุกเครื่อง',
+    ],
+    en:[
+      '🔖 **New food-category filters** — the search page now uses labeled filter chips ("Thai", "Japanese", …) instead of country-flag emoji, which are clearer and render consistently across devices',
+    ],
+  },
   '2.29.0':{
     th:[
       '📲 **แอป Android อัปเดตเองได้แล้ว** — เมื่อมีเวอร์ชั่นใหม่ แอปจะเด้งให้ดาวน์โหลด & ติดตั้งทันที ไม่ต้องไปหาโหลดเอง (เว็บอัปเดตอัตโนมัติอยู่แล้ว)',
