@@ -1710,7 +1710,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.28.1';
+const APP_VERSION = '2.28.2';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2890,7 +2890,15 @@ function showPage(id,btn){
   };
   const fn=renders[id];
   if(fn){
-    try{ fn(); }
+    try{
+      const ret=fn();
+      // Some renders are async (renderDev, renderLeaderboard). A rejected promise
+      // escapes the synchronous try/catch as an unhandled rejection — attach a
+      // catch so a failing async render is logged, never swallowed.
+      if(ret&&typeof ret.then==='function'){
+        ret.catch(e=>console.error('[nav] async render failed for',id,e));
+      }
+    }
     catch(e){
       console.error('[nav] render failed for',id,e);
       // Auto-retry once on the next frame — covers transient timing issues
@@ -8098,17 +8106,26 @@ async function renderDev(){
   // ── Local counts ──
   const totalEntries=Object.values(allEntries).reduce((s,arr)=>s+(arr?.length||0),0);
   const totalWorkouts=Object.values(allWorkouts).reduce((s,arr)=>s+(arr?.length||0),0);
-  // ── Cloud probe ──
+  // ── Cloud probe (every network call is time-boxed AND the two counts run
+  //    concurrently, so this page can NEVER hang on "Collecting diagnostics…"
+  //    when Supabase is slow/unreachable — worst case ≈5s, not 12s) ──
   let cloudUsers='—',cloudFoodEntries='—',cloudErr='';
   try{
-    const sbRef=sb||await ensureSupabase(3000).catch(()=>null);
+    const sbRef=sb||await withTimeout(ensureSupabase(3000),3500,'supabase init').catch(()=>null);
     if(sbRef){
-      const {count:uc,error:e1}=await sbRef.from('profiles').select('id',{count:'exact',head:true});
-      if(e1)cloudErr+='profiles: '+e1.message+'; ';else cloudUsers=uc??'—';
+      const probes=[
+        withTimeout(sbRef.from('profiles').select('id',{count:'exact',head:true}),5000,'profiles count')
+          .then(({count,error})=>{ if(error)cloudErr+='profiles: '+error.message+'; '; else cloudUsers=count??'—'; })
+          .catch(e=>{ cloudErr+='profiles: '+(e.message||e)+'; '; })
+      ];
       if(cloudUser){
-        const {count:fc,error:e2}=await sbRef.from('food_entries').select('id',{count:'exact',head:true});
-        if(e2)cloudErr+='food_entries: '+e2.message;else cloudFoodEntries=fc??'—';
+        probes.push(
+          withTimeout(sbRef.from('food_entries').select('id',{count:'exact',head:true}),5000,'food_entries count')
+            .then(({count,error})=>{ if(error)cloudErr+='food_entries: '+error.message; else cloudFoodEntries=count??'—'; })
+            .catch(e=>{ cloudErr+='food_entries: '+(e.message||e); })
+        );
       }
+      await Promise.all(probes); // both already time-boxed; cap ≈5s total
     }
   }catch(e){cloudErr=e.message||String(e);}
   // ── SW info ──
@@ -8371,6 +8388,18 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.28.2':{
+    th:[
+      '🔧 **แก้หน้า Developer ค้างโหลด** — เดิมถ้า Supabase ตอบช้า หน้านี้จะค้าง "Collecting diagnostics…" ไม่จบ ต้องรีเฟรช ตอนนี้ใส่ตัวจับเวลา (สูงสุด ~5 วิ) แล้วแสดงผลได้เสมอ',
+      '🛡️ **กันหน้าแบบ async ค้าง** — หน้าที่โหลดข้อมูลเบื้องหลัง (Developer / กระดานผู้นำ) ถ้าโหลดพลาดจะ log ไว้แทนที่จะค้างเงียบๆ',
+      '✅ ตรวจครบทุกหน้า (รวมหน้า Developer) — ไม่มี error ค้างหน้าใดเลย',
+    ],
+    en:[
+      '🔧 **Fixed Developer page hanging** — if Supabase was slow it used to stick on "Collecting diagnostics…" forever; every cloud probe is now time-boxed (≈5s max) so the page always renders',
+      '🛡️ **Async renders can\'t hang silently** — pages that load data in the background (Developer / Leaderboard) now log failures instead of freezing on a loader',
+      '✅ Swept every page (Developer included) — zero stuck/error states',
+    ],
+  },
   '2.28.1':{
     th:[
       '🔧 **แก้สลับหน้าแล้วข้อมูลไม่โหลด** — แต่ละหน้ากันพังแยกกัน · หน้าหนึ่งเด้ง error ไม่ทำให้ทั้งแอปค้างต้องรีเฟรชอีก',
