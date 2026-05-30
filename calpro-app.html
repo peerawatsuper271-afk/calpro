@@ -300,6 +300,26 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .fl input,.fl select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-size:.85rem;outline:none;font-family:inherit;}
 .fl input:focus,.fl select:focus{border-color:var(--accent);}
 .fl select option{background:var(--surface2);}
+/* ── CUSTOM SELECT (replaces the OS-native <select> picker) ── */
+select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;pointer-events:none;clip:rect(0 0 0 0);overflow:hidden;}
+.cs-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px;font-size:.85rem;font-family:inherit;cursor:pointer;text-align:left;transition:border-color .15s;}
+.cs-trigger:active{border-color:var(--muted);}
+.cs-trigger .cs-val{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cs-chev{width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.cs-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:210;opacity:0;transition:opacity .2s;display:flex;align-items:flex-end;justify-content:center;}
+.cs-ov.show{opacity:1;}
+.cs-sheet{width:100%;max-width:480px;background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:22px 22px 0 0;max-height:74vh;overflow-y:auto;padding:6px 8px calc(14px + env(safe-area-inset-bottom));transform:translateY(20px);transition:transform .26s cubic-bezier(.2,.6,.2,1);box-shadow:0 -10px 40px rgba(0,0,0,.5);}
+.cs-ov.show .cs-sheet{transform:translateY(0);}
+.cs-grip{width:38px;height:4px;border-radius:99px;background:var(--border);margin:8px auto 4px;}
+.cs-title{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:6px 12px 4px;}
+.cs-grp{font-size:.7rem;color:var(--muted);font-weight:600;padding:11px 12px 4px;}
+.cs-opt{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:none;border:none;color:var(--text);font-family:inherit;font-size:.9rem;padding:11px 12px;border-radius:13px;cursor:pointer;text-align:left;transition:background .12s;}
+.cs-opt:active{background:var(--surface2);}
+.cs-opt.on{background:var(--surface2);}
+.cs-opt-lb{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cs-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;position:relative;transition:border-color .15s;}
+.cs-opt.on .cs-radio{border-color:var(--green);}
+.cs-opt.on .cs-radio::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--green);}
 
 /* ── BIO FIELD (modern textarea + progress + counter) ── */
 .bio-field{margin-top:10px;}
@@ -1727,7 +1747,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.30.0';
+const APP_VERSION = '2.30.1';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
@@ -3037,12 +3057,75 @@ function renderCatFilter(){
     opt('custom');
   const lbl=document.getElementById('catFilterLabel');
   if(lbl)lbl.textContent=isEn?'Food category':'ประเภทอาหาร';
+  customizeSelect(sel);          // wrap once (idempotent)
+  if(sel._csSync)sel._csSync();  // options were just rebuilt → refresh trigger label
   renderCatResults(activeCat);
 }
 function onCatFilterChange(cat){
   const si=document.getElementById('searchInput');if(si)si.value='';
   activeCat=cat;
   renderCatResults(cat);
+}
+
+// ═══ CUSTOM SELECT — themed bottom-sheet picker (replaces the OS-native one) ═══
+// Wraps any <select>: hides the native control, shows a styled trigger, and on
+// tap opens an in-app bottom sheet built from the select's own options/optgroups.
+// The underlying <select> stays the source of truth — picking a row sets its
+// value + fires input/change, so every existing handler keeps working. We also
+// patch the element's `value` setter so programmatic changes refresh the trigger.
+function customizeSelect(sel){
+  if(!sel||sel.dataset.cs==='1')return;
+  sel.dataset.cs='1';
+  sel.classList.add('cs-native');
+  const trig=document.createElement('button');
+  trig.type='button';trig.className='cs-trigger';
+  trig.innerHTML='<span class="cs-val"></span><svg class="cs-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+  sel.insertAdjacentElement('afterend',trig);
+  const sync=()=>{const o=sel.options[sel.selectedIndex];trig.querySelector('.cs-val').textContent=o?o.textContent.trim():'';};
+  sel._csSync=sync;sync();
+  sel.addEventListener('change',sync);
+  // Reflect programmatic `el.value = ...` on the trigger (no change event fires).
+  try{
+    const d=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
+    if(d&&d.configurable!==false){
+      Object.defineProperty(sel,'value',{configurable:true,get(){return d.get.call(this);},set(v){d.set.call(this,v);sync();}});
+    }
+  }catch(e){}
+  trig.addEventListener('click',e=>{e.preventDefault();openSelectSheet(sel);});
+}
+function customizeAllSelects(root){
+  (root||document).querySelectorAll('select:not([data-cs="1"])').forEach(customizeSelect);
+}
+function openSelectSheet(sel){
+  const esc=document.querySelector('.cs-ov');if(esc)esc.remove();
+  const ov=document.createElement('div');ov.className='cs-ov';
+  const sheet=document.createElement('div');sheet.className='cs-sheet';
+  const optRow=(o)=>`<button type="button" class="cs-opt${o.value===sel.value?' on':''}" data-val="${escapeHtml(o.value)}"><span class="cs-opt-lb">${escapeHtml(o.textContent.trim())}</span><span class="cs-radio"></span></button>`;
+  let html='<div class="cs-grip"></div>';
+  const lblEl=sel.closest('.fl')?.querySelector('label');
+  if(lblEl&&lblEl.textContent.trim())html+=`<div class="cs-title">${escapeHtml(lblEl.textContent.trim())}</div>`;
+  [...sel.children].forEach(node=>{
+    if(node.tagName==='OPTGROUP'){
+      html+=`<div class="cs-grp">${escapeHtml(node.label)}</div>`;
+      [...node.children].forEach(o=>{if(o.tagName==='OPTION')html+=optRow(o);});
+    }else if(node.tagName==='OPTION'){html+=optRow(node);}
+  });
+  sheet.innerHTML=html;
+  ov.appendChild(sheet);document.body.appendChild(ov);
+  void ov.offsetWidth;          // force reflow so the slide-up transition always plays
+  ov.classList.add('show');
+  const close=()=>{ov.classList.remove('show');document.removeEventListener('keydown',onKey);setTimeout(()=>ov.remove(),240);};
+  const onKey=e=>{if(e.key==='Escape'){e.stopPropagation();close();}};
+  document.addEventListener('keydown',onKey);
+  ov.addEventListener('click',e=>{if(e.target===ov)close();});
+  sheet.querySelectorAll('.cs-opt').forEach(row=>row.addEventListener('click',()=>{
+    if(sel.value!==row.dataset.val){
+      sel.value=row.dataset.val;
+      sel.dispatchEvent(new Event('input',{bubbles:true}));
+      sel.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    close();
+  }));
 }
 function allFoods(){return [...FOODS,...customFoods];}
 function findFood(name){return allFoods().find(f=>f.n===name);}
@@ -4369,6 +4452,7 @@ async function syncFromCloud(){
 function openWorkoutModal(){
   const sel=document.getElementById('wkType');sel.innerHTML='';
   EXERCISES.forEach((ex,i)=>{const o=document.createElement('option');o.value=i;o.textContent=settings.lang==='en'?`${ex.e} · ${ex.n}`:`${ex.n} · ${ex.e}`;sel.appendChild(o);});
+  customizeSelect(sel);if(sel._csSync)sel._csSync();   // themed picker + refresh label
   document.getElementById('wkMin').value=30;
   recalcWorkoutKcal();
   sel.oninput=recalcWorkoutKcal;
@@ -7821,6 +7905,7 @@ function renderAiSettingsBody(){
           : `🔒 Key + รูปทุกภาพถูกส่ง<b>ตรงไปยัง ${escapeHtml(cfg.label)}</b> จากเครื่องคุณ — ไม่ผ่านเซิร์ฟเวอร์ของเรา · ต้นทุน: ${escapeHtml(cfg.costPerImage||'?')}`))+
     `</div>`;
   body.innerHTML=inner;
+  customizeSelect(body.querySelector('select'));   // themed provider picker
 }
 // ─── PHOTO → AI VISION FLOW ───
 // Refresh the small "เหลือ N/20 รูป AI วันนี้" chip below the AI button
@@ -8426,6 +8511,8 @@ if('serviceWorker' in navigator){
 setTimeout(checkWhatsNew,1200);
 // Native APK only: poll GitHub Releases for a newer build + prompt to install.
 setTimeout(checkApkUpdate,3000);
+// Upgrade every native <select> to the themed bottom-sheet picker (no OS popup).
+customizeAllSelects();
 // First-launch onboarding (only if profile is empty + flag not set)
 setTimeout(()=>{if(shouldShowOnboarding())openOnboard();},700);
 
@@ -8468,6 +8555,14 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.30.1':{
+    th:[
+      '🎛️ **เมนูเลือก (dropdown) เป็นของแอปเอง** — เลิกใช้ตัวเลือกของระบบที่ตัวใหญ่/สีไม่เข้าธีม · เปลี่ยนเป็น sheet เด้งขึ้นมาธีมเดียวกับแอป ตัวอักษรเล็กลง อ่านสบาย (มื้ออาหาร · ประเภทอาหาร · เพศ · กิจกรรม ฯลฯ)',
+    ],
+    en:[
+      '🎛️ **In-app dropdowns** — replaced the OS-native picker (oversized, off-theme) with a themed bottom-sheet that matches the app, with smaller, cleaner text (meal · food category · gender · activity, etc.)',
+    ],
+  },
   '2.30.0':{
     th:[
       '🎨 **โฉมใหม่ทั้งแอป** — โทน**ดำสนิท** การ์ดขอบมนใหญ่ ตัวหนังสือขาวคม เทรนด์มินิมอล',
