@@ -1,5 +1,5 @@
 // CalPro Service Worker — offline cache
-const VERSION = '2.28.4';
+const VERSION = '2.28.5';
 const CACHE = 'calpro-v' + VERSION;
 const ASSETS = [
   './',
@@ -11,9 +11,14 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  // FORCE UPDATE: activate the new worker immediately instead of waiting for the
+  // user to confirm. Combined with clients.claim() on activate + the page's
+  // controllerchange→reload listener, every user is auto-pulled to the latest
+  // version the moment they open the app — no "update available?" prompt. They
+  // see the "What's new" popup afterwards instead.
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => null))
-    // No skipWaiting — wait for user to confirm update via toast
   );
 });
 

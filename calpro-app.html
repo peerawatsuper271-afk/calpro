@@ -1710,7 +1710,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.28.4';
+const APP_VERSION = '2.28.5';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -8343,20 +8343,27 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('sw.js').then(reg=>{
-      // If a new SW was already installed before this page loaded, prompt straight away
+      // FORCE UPDATE — never ask. If a newer worker is already waiting, tell it to
+      // take over now; otherwise the SW self-skipWaitings on install. Either way
+      // controllerchange fires and reloads into the new version automatically,
+      // and checkWhatsNew() then shows the "What's new" popup.
       if(reg.waiting&&navigator.serviceWorker.controller){
-        showUpdateModal(reg.waiting);
+        reg.waiting.postMessage({type:'SKIP_WAITING'});
       }
-      // Detect new worker installing
       reg.addEventListener('updatefound',()=>{
         const nw=reg.installing;if(!nw)return;
         nw.addEventListener('statechange',()=>{
           if(nw.state==='installed'&&navigator.serviceWorker.controller){
-            // New version ready · prompt user with the update modal
-            showUpdateModal(nw);
+            nw.postMessage({type:'SKIP_WAITING'});   // apply immediately, no modal
           }
         });
       });
+      // Proactively poll for a new SW on first load + whenever the tab regains
+      // focus, so even long-lived / backgrounded sessions get force-updated fast
+      // instead of lingering on an old version.
+      const poll=()=>{reg.update().catch(()=>{});};
+      poll();
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll();});
     }).catch(()=>{});
   });
 }
@@ -8393,14 +8400,27 @@ document.addEventListener('keydown',(e)=>{
     }
   }
 });
-// ═══ APP UPDATE FLOW ═══
+// ═══ APP UPDATE FLOW (FORCE-UPDATE · no prompt) ═══
 // Three pieces work together:
-//   1. SW 'updatefound' → showUpdateModal(worker) — user picks update-now / later
-//   2. checkForUpdates() — manual trigger from About page
+//   1. New SW self-skipWaitings (sw.js) + page posts SKIP_WAITING on updatefound
+//      → controllerchange reloads into the new version automatically. No modal.
+//   2. checkForUpdates() — manual trigger from About page; also auto-applies.
 //   3. checkWhatsNew() — on every load compare lastSeenVersion vs APP_VERSION;
-//                        if user just upgraded, pop CHANGELOG entries
+//                        if user just upgraded, pop CHANGELOG entries (this is
+//                        what the user sees instead of an "update?" prompt).
+//   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.28.5':{
+    th:[
+      '⚡ **อัปเดตอัตโนมัติทันที** — แอปจะอัปเดตเป็นเวอร์ชั่นล่าสุดให้เองเมื่อเปิด ไม่ต้องกดยืนยันอีก แล้วโชว์หน้านี้ "มีอะไรใหม่" ให้ดูแทน',
+      '🔄 **ดึงเวอร์ชั่นใหม่ตอนกลับเข้าแอป** — ใครยังค้างเวอร์ชั่นเก่าจะถูกพาขึ้นล่าสุดอัตโนมัติ ไม่ตกค้างอีก',
+    ],
+    en:[
+      '⚡ **Instant auto-update** — the app now upgrades itself to the latest version on open (no "update now?" prompt) and shows you this "What\'s new" instead',
+      '🔄 **Re-checks on return** — anyone still on an old build gets pulled forward to the latest automatically',
+    ],
+  },
   '2.28.4':{
     th:[
       '🔌 **ขยายการกันค้างไปทุกหน้าที่ดึงเน็ต** — ตรวจทุกหน้า: หน้าหลัก/วิเคราะห์/โปรไฟล์/ตั้งค่า/TDEE/เพิ่มอาหาร อ่านจากเครื่องล้วน เปิดทันทีอยู่แล้ว · กระดานผู้นำมี skeleton+timeout อยู่แล้ว',
@@ -8994,14 +9014,15 @@ async function checkForUpdates(){
     }
     showToast(t('checking_updates'),2000);
     await reg.update();
-    // After update(), the browser populates installing / waiting if there's a new version
+    // FORCE UPDATE — apply on the spot, no "update now?" prompt. The SW takes
+    // over → controllerchange reloads → "What's new" popup shows after.
     if(reg.waiting){
-      setTimeout(()=>showUpdateModal(reg.waiting),400);
+      reg.waiting.postMessage({type:'SKIP_WAITING'});
     }else if(reg.installing){
       const inst=reg.installing;
       inst.addEventListener('statechange',()=>{
         if(inst.state==='installed'&&navigator.serviceWorker.controller){
-          showUpdateModal(inst);
+          inst.postMessage({type:'SKIP_WAITING'});
         }else if(inst.state==='installed'&&!navigator.serviceWorker.controller){
           // First install — no current controller to upgrade from
           showToast(t('latest_version'));
