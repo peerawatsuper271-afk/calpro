@@ -1710,7 +1710,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.28.0';
+const APP_VERSION = '2.28.1';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -2866,23 +2866,38 @@ function toggleNavTab(id){
 
 // ═══ PAGE NAV ═══
 function showPage(id,btn){
+  const target=document.getElementById('pg-'+id);
+  if(!target){console.warn('[nav] unknown page',id);return;}   // never blank-screen
   document.querySelectorAll('.app .screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.bnt').forEach(b=>b.classList.remove('active'));
-  document.getElementById('pg-'+id).classList.add('active');
+  target.classList.add('active');
   if(btn)btn.classList.add('active');
   // Also highlight matching bottom-nav button if any
   document.querySelectorAll('.bnt').forEach(b=>{if(b.dataset.tab===id)b.classList.add('active');});
-  // Today gets a fresh render too — otherwise switching tabs shows a stale
-  // DOM (water count, food log, macros) until the user manually refreshes.
-  if(id==='today'){loadEntries();renderToday();}
-  if(id==='analysis')renderAnalysis();
-  if(id==='tdee')syncTDEEFromProfile();
-  if(id==='add'){renderQuickList();refreshAiQuotaInline();applyDefaultMeal();}
-  if(id==='settings')renderSettings();
-  if(id==='help')renderHelp();
-  if(id==='dev')renderDev();
-  if(id==='friends')renderLeaderboard();
-  if(id==='profile')renderProfileUI();
+  // Render the page's data. Each render is isolated in try/catch so ONE failing
+  // render can never break navigation or leave the app needing a manual reload
+  // (this was the "switch page → data won't load, must refresh" bug).
+  const renders={
+    today:()=>{loadEntries();renderToday();},
+    analysis:renderAnalysis,
+    tdee:syncTDEEFromProfile,
+    add:()=>{renderQuickList();refreshAiQuotaInline();applyDefaultMeal();},
+    settings:renderSettings,
+    help:renderHelp,
+    dev:renderDev,
+    friends:renderLeaderboard,
+    profile:renderProfileUI,
+  };
+  const fn=renders[id];
+  if(fn){
+    try{ fn(); }
+    catch(e){
+      console.error('[nav] render failed for',id,e);
+      // Auto-retry once on the next frame — covers transient timing issues
+      // (e.g. a layout measurement that wasn't ready). Still safe if it fails.
+      requestAnimationFrame(()=>{ try{ fn(); }catch(e2){ console.error('[nav] retry failed',id,e2); } });
+    }
+  }
 }
 
 // ═══ DATE ═══
@@ -3404,21 +3419,23 @@ async function deleteCloudAccount(){
 
 // Refresh whatever page the user is currently on (after sync, lang change, etc.)
 function refreshActivePage(){
-  const active=document.querySelector('.app .screen.active')?.id||'';
-  if(active==='pg-today')renderToday();
-  else if(active==='pg-add')renderQuickList();
-  else if(active==='pg-analysis')renderAnalysis();
-  else if(active==='pg-tdee')syncTDEEFromProfile();
-  else if(active==='pg-profile')renderProfileUI();
-  else if(active==='pg-settings')renderSettings();
-  else if(active==='pg-friends')renderLeaderboard();
-  else if(active==='pg-help')renderHelp();
-  // header always
-  const name=userProfile?.display_name||t('you');
-  const hdr=document.getElementById('hdrSub');
-  if(hdr)hdr.textContent=name+' · '+(userProfile?.goal_cal||1800).toLocaleString()+' kcal'+dayUnitShort();
-  // drawer if open
-  if(document.getElementById('drawer')?.classList.contains('open'))renderDrawerHeader();
+  try{
+    const active=document.querySelector('.app .screen.active')?.id||'';
+    if(active==='pg-today'){loadEntries();renderToday();}
+    else if(active==='pg-add')renderQuickList();
+    else if(active==='pg-analysis')renderAnalysis();
+    else if(active==='pg-tdee')syncTDEEFromProfile();
+    else if(active==='pg-profile')renderProfileUI();
+    else if(active==='pg-settings')renderSettings();
+    else if(active==='pg-friends')renderLeaderboard();
+    else if(active==='pg-help')renderHelp();
+    // header always
+    const name=userProfile?.display_name||t('you');
+    const hdr=document.getElementById('hdrSub');
+    if(hdr)hdr.textContent=name+' · '+(userProfile?.goal_cal||1800).toLocaleString()+' kcal'+dayUnitShort();
+    // drawer if open
+    if(document.getElementById('drawer')?.classList.contains('open'))renderDrawerHeader();
+  }catch(e){ console.error('[refreshActivePage]',e); }
 }
 
 // Auth state listener — set up once Supabase SDK is loaded
@@ -3515,16 +3532,30 @@ function startPeriodicSync(){
   periodicTimer=setInterval(async ()=>{
     if(!cloudUser||!navigator.onLine||syncing)return;
     syncing=true;setSyncStatus('syncing');
-    try{await syncFromCloud();await syncToCloud();setSyncStatus('synced');}
+    try{
+      await syncFromCloud();await syncToCloud();setSyncStatus('synced');
+      // CRITICAL: a background PULL brought fresh data into memory/localStorage,
+      // but the visible page still shows the OLD render → re-render so the user
+      // sees new data without a manual reload (the "must refresh" complaint).
+      refreshActivePage();
+    }
     catch(e){setSyncStatus('error');}
     finally{syncing=false;}
   },5*60*1000);
 }
-// Sync on tab focus
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'&&cloudUser&&!syncing&&navigator.onLine){
-    scheduleAutoSync('visibilitychange');
-  }
+// Returning to the app → PULL fresh data (e.g. logged on another device) and
+// re-render the visible page, then push. Was push-only before, so changes made
+// elsewhere only appeared after a manual reload.
+document.addEventListener('visibilitychange',async ()=>{
+  if(document.visibilityState!=='visible'||!cloudUser||syncing||!navigator.onLine)return;
+  syncing=true;setSyncStatus('syncing');
+  try{
+    await syncFromCloud();
+    refreshActivePage();
+    await syncToCloud();
+    setSyncStatus('synced');
+  }catch(e){setSyncStatus('error');console.warn('[focus-sync]',e?.message||e);}
+  finally{syncing=false;}
 });
 // Online/offline indicator
 window.addEventListener('online',()=>{setSyncStatus(cloudUser?'synced':'offline');if(cloudUser)scheduleAutoSync('online');});
@@ -3618,18 +3649,21 @@ async function renderAllUsersLeaderboard(){
     // AI camera + offline-sync features and would otherwise flood the public
     // board as nameless "Test User" rows). Fall back to a direct query +
     // client-side nameless filter if the RPC isn't deployed yet.
-    let profilesRes=await client.rpc('get_public_profiles');
+    // withTimeout(10s) on every network call so the page can never hang on the
+    // skeleton forever — if the network stalls it throws → the catch shows a
+    // retry button instead of leaving the user stuck (the "must refresh" bug).
+    let profilesRes=await withTimeout(client.rpc('get_public_profiles'),10000,'profiles RPC');
     let usedRpc=!profilesRes.error&&Array.isArray(profilesRes.data);
     if(!usedRpc){
-      profilesRes=await client.from('profiles').select('id,display_name,avatar,goal_cal,weight,banner_color,banner_image,bio,persisted_badges').limit(200);
+      profilesRes=await withTimeout(client.from('profiles').select('id,display_name,avatar,goal_cal,weight,banner_color,banner_image,bio,persisted_badges').limit(200),10000,'profiles fallback');
       if(profilesRes.error&&/banner_image|persisted_badges|weight/i.test(profilesRes.error.message||'')){
-        profilesRes=await client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200);
+        profilesRes=await withTimeout(client.from('profiles').select('id,display_name,avatar,goal_cal,banner_color,bio').limit(200),10000,'profiles min');
       }
     }
-    const [totalsRes,friendsRes]=await Promise.all([
+    const [totalsRes,friendsRes]=await withTimeout(Promise.all([
       client.rpc('get_public_daily_totals',{_days:60}),
       friendsPromise,
-    ]);
+    ]),10000,'totals+friends');
     const friendIdSet=new Set((friendsRes?.data||[]).map(r=>r.friend_id));
     // Keep the cache used by the Add Friend search modal in sync — saves a
     // round-trip when the modal opens right after.
@@ -3732,7 +3766,15 @@ async function renderAllUsersLeaderboard(){
       };
     });
   }catch(e){
-    body.innerHTML=`<div class="empty" style="padding:10px 0;color:var(--accent)">${escapeHtml(e.message||String(e))}</div>`;
+    skeletonDone(_skel);
+    const isEn=settings.lang==='en';
+    body.innerHTML=`<div class="empty-state" style="padding:24px 16px">`+
+      `<div class="es-ico">📡</div>`+
+      `<div class="es-title">${isEn?'Couldn\'t load the leaderboard':'โหลดกระดานผู้นำไม่สำเร็จ'}</div>`+
+      `<div class="es-sub">${isEn?'Check your connection and try again':'เช็คอินเทอร์เน็ตแล้วลองใหม่'}</div>`+
+      `<button class="es-cta" onclick="renderAllUsersLeaderboard()">🔄 ${isEn?'Retry':'ลองใหม่'}</button>`+
+    `</div>`;
+    console.warn('[leaderboard]',e?.message||e);
   }
 }
 async function renderFriendsCard(){
@@ -3749,15 +3791,15 @@ async function renderFriendsCard(){
   }
   const _skelF=showSkeleton(body,4);
   try{
-    // Load friends list
-    const {data:fr}=await sb.from('friends').select('friend_id, profiles!friends_friend_id_fkey(id,display_name,avatar,goal_cal)').eq('user_id',cloudUser.id);
+    // Load friends list (timeout so the skeleton never hangs forever)
+    const {data:fr}=await withTimeout(sb.from('friends').select('friend_id, profiles!friends_friend_id_fkey(id,display_name,avatar,goal_cal)').eq('user_id',cloudUser.id),10000,'friends list');
     skeletonDone(_skelF);
     const friendsList=(fr||[]).map(x=>x.profiles).filter(Boolean);
     // Build leaderboard: self + friends
     const allUsers=[{id:cloudUser.id,display_name:userProfile?.display_name||t('you'),avatar:userProfile?.avatar,goal_cal:userProfile?.goal_cal||1800},...friendsList];
     const scores=[];
     for(const u of allUsers){
-      const {data}=await sb.from('food_entries').select('entry_date,calories').eq('user_id',u.id);
+      const {data}=await withTimeout(sb.from('food_entries').select('entry_date,calories').eq('user_id',u.id),10000,'friend entries');
       const ebd={};(data||[]).forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);});
       // Per-user goal — keeps "days on track" consistent across viewers
       const opts={goal:u.goal_cal};
@@ -3790,7 +3832,17 @@ async function renderFriendsCard(){
     body.querySelectorAll('.lb-item[data-openfid]').forEach(row=>{
       row.onclick=()=>openFriendProfile(row.dataset.openfid,row.dataset.openfname);
     });
-  }catch(e){body.innerHTML=`<div class="empty" style="padding:10px 0">โหลดไม่สำเร็จ: ${e.message}</div>`;}
+  }catch(e){
+    skeletonDone(_skelF);
+    const isEn=settings.lang==='en';
+    body.innerHTML=`<div class="empty-state" style="padding:24px 16px">`+
+      `<div class="es-ico">📡</div>`+
+      `<div class="es-title">${isEn?'Couldn\'t load friends':'โหลดเพื่อนไม่สำเร็จ'}</div>`+
+      `<div class="es-sub">${isEn?'Check your connection and try again':'เช็คอินเทอร์เน็ตแล้วลองใหม่'}</div>`+
+      `<button class="es-cta" onclick="renderFriendsCard()">🔄 ${isEn?'Retry':'ลองใหม่'}</button>`+
+    `</div>`;
+    console.warn('[friends]',e?.message||e);
+  }
 }
 // Open the dedicated Add Friend modal (replaces the old prompt())
 let _frCurrentIds=new Set();   // cached friend ids for "already" detection
@@ -8319,6 +8371,18 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.28.1':{
+    th:[
+      '🔧 **แก้สลับหน้าแล้วข้อมูลไม่โหลด** — แต่ละหน้ากันพังแยกกัน · หน้าหนึ่งเด้ง error ไม่ทำให้ทั้งแอปค้างต้องรีเฟรชอีก',
+      '🔄 **อัปเดตข้อมูลเองหลังซิงค์** — ดึงข้อมูลใหม่จากคลาวด์ (สลับแอป/ทุก 5 นาที) แล้วรีเฟรชหน้าที่เปิดอยู่ให้อัตโนมัติ',
+      '📡 **กระดานผู้นำไม่ค้างโหลด** — ถ้าเน็ตช้าเกิน 10 วิ มีปุ่ม "ลองใหม่" ให้กด ไม่ต้องรีเฟรชทั้งแอป',
+    ],
+    en:[
+      '🔧 **Fixed "switch page → data won\'t load"** — each page render is isolated, so one failing screen can no longer freeze the app into needing a reload',
+      '🔄 **Auto-refresh after sync** — pulling fresh cloud data (on app focus / every 5 min) now re-renders the open page automatically',
+      '📡 **Leaderboard never hangs** — if the network stalls past 10s you get a "Retry" button instead of an endless skeleton',
+    ],
+  },
   '2.28.0':{
     th:[
       '⚡ **เพิ่มด่วน 1 แตะ** — แถวอาหารล่าสุด/โปรด บนหน้าแรก · แตะครั้งเดียวบันทึกเลย (เลือกมื้อตามเวลาให้) · วงแหวนอัปเดตทันที',
