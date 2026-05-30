@@ -1562,6 +1562,20 @@ select,textarea{font-size:max(16px,1rem)!important;}
   </div>
 </div>
 
+<!-- NATIVE APK UPDATE MODAL — only shown inside the Android app when a newer
+     release is available on GitHub. The web/PWA never sees this (SW updates it). -->
+<div class="modal-bg hide" id="apkUpdateModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="apkUpdateTitle">📲 มีเวอร์ชั่นใหม่</h3>
+      <button class="mc-close" onclick="closeApkUpdate()">✕</button>
+    </div>
+    <div id="apkUpdateBody" style="font-size:.84rem;line-height:1.6;color:var(--muted);max-height:48vh;overflow-y:auto;margin-bottom:4px"></div>
+    <button class="btn" id="apkUpdateBtn" style="margin-top:10px" onclick="doApkUpdate()" data-url="">⬇️ ดาวน์โหลด & ติดตั้ง</button>
+    <button class="btn-sec" style="margin-top:8px" onclick="closeApkUpdate()" id="apkUpdateLater">ภายหลัง</button>
+  </div>
+</div>
+
 <!-- FEEDBACK MODAL — opens an email draft to the developer -->
 <div class="modal-bg hide" id="feedbackModal">
   <div class="modal">
@@ -1710,7 +1724,19 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.28.5';
+const APP_VERSION = '2.29.0';
+
+// ═══ NATIVE APK AUTO-UPDATE ═══
+// The Android APK bundles the web assets, so (unlike the web, which the Service
+// Worker force-updates) it can't refresh itself. On native we poll the GitHub
+// Releases API for a newer build and pop a "download & install" prompt.
+// When the app ships to a store, set `storeUrl` and the prompt deep-links there
+// instead of downloading the APK — no other code change needed.
+const APK_UPDATE = {
+  releasesApi: 'https://api.github.com/repos/peerawatsuper271-afk/calpro/releases/latest',
+  apkUrl: 'https://github.com/peerawatsuper271-afk/calpro/releases/latest/download/calpro-plus.apk',
+  storeUrl: null,   // e.g. 'https://play.google.com/store/apps/details?id=com.calpro.app'
+};
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -6245,7 +6271,10 @@ function applyTheme(){
       document.documentElement.dataset.native='1';
       const sb=cap.Plugins?.StatusBar;
       if(sb){
-        sb.setBackgroundColor({color:th.bg}).catch(()=>{});
+        // Edge-to-edge: keep the status bar transparent and draw the app behind
+        // it so the clock/battery stay visible over the app's own background.
+        // (body already has safe-area-inset padding so nothing is occluded.)
+        sb.setOverlaysWebView?.({overlay:true}).catch(()=>{});
         sb.setStyle({style:th.mode==='light'?'LIGHT':'DARK'}).catch(()=>{});
       }
     }
@@ -8369,6 +8398,8 @@ if('serviceWorker' in navigator){
 }
 // Show changelog popup if user just upgraded
 setTimeout(checkWhatsNew,1200);
+// Native APK only: poll GitHub Releases for a newer build + prompt to install.
+setTimeout(checkApkUpdate,3000);
 // First-launch onboarding (only if profile is empty + flag not set)
 setTimeout(()=>{if(shouldShowOnboarding())openOnboard();},700);
 
@@ -8411,6 +8442,16 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.29.0':{
+    th:[
+      '📲 **แอป Android อัปเดตเองได้แล้ว** — เมื่อมีเวอร์ชั่นใหม่ แอปจะเด้งให้ดาวน์โหลด & ติดตั้งทันที ไม่ต้องไปหาโหลดเอง (เว็บอัปเดตอัตโนมัติอยู่แล้ว)',
+      '🖥️ **โหมดเต็มจอ (ขอบจรดขอบ)** — เนื้อหายืดเต็มจอจรดขอบบน-ล่าง ดูทันสมัยขึ้น ยังเห็นนาฬิกา/แบตตามปกติ',
+    ],
+    en:[
+      '📲 **The Android app can update itself now** — when a new version is out it pops up to download & install right away, no hunting for the file (the web already auto-updates)',
+      '🖥️ **Edge-to-edge fullscreen** — content now stretches to the top/bottom edges for a more modern look, with the clock/battery still visible',
+    ],
+  },
   '2.28.5':{
     th:[
       '⚡ **อัปเดตอัตโนมัติทันที** — แอปจะอัปเดตเป็นเวอร์ชั่นล่าสุดให้เองเมื่อเปิด ไม่ต้องกดยืนยันอีก แล้วโชว์หน้านี้ "มีอะไรใหม่" ให้ดูแทน',
@@ -9086,6 +9127,52 @@ function checkWhatsNew(){
   }
   lsSave('calpro_last_seen_version',APP_VERSION);
 }
+
+// ═══ NATIVE APK AUTO-UPDATE (Android sideload) ═══
+// Web/PWA force-updates via the Service Worker; the bundled APK can't, so here
+// we poll GitHub Releases for a newer build and prompt to download + install it.
+async function checkApkUpdate(){
+  const cap=window.Capacitor;
+  if(!cap?.isNativePlatform?.())return;            // native APK only
+  try{
+    const res=await withTimeout(fetch(APK_UPDATE.releasesApi,{headers:{'Accept':'application/vnd.github+json'}}),8000,'release check');
+    if(!res.ok)return;
+    const rel=await res.json();
+    const latest=String(rel.tag_name||'').replace(/^v/i,'').trim();
+    if(!latest||verCmp(latest,APP_VERSION)<=0)return;   // already up to date
+    // Prefer the .apk asset URL on the release; fall back to the stable
+    // "latest download" path.
+    let url=APK_UPDATE.apkUrl;
+    const asset=(rel.assets||[]).find(a=>/\.apk$/i.test(a.name||''));
+    if(asset&&asset.browser_download_url)url=asset.browser_download_url;
+    showApkUpdate(latest,url,rel.body||'');
+  }catch(e){ /* offline / rate-limited — silent, retry next launch */ }
+}
+function showApkUpdate(version,url,notes){
+  const isEn=settings.lang==='en';
+  // If the app is in a store, deep-link there instead of sideloading the APK.
+  const inStore=!!APK_UPDATE.storeUrl;
+  const target=inStore?APK_UPDATE.storeUrl:url;
+  document.getElementById('apkUpdateTitle').textContent=(isEn?'📲 New version ':'📲 มีเวอร์ชั่นใหม่ ')+'v'+version;
+  const clean=String(notes||'').split('\n').map(l=>l.replace(/\*\*([^*]+)\*\*/g,'$1').trim()).filter(l=>l&&!/^#/.test(l)).slice(0,6);
+  const body=document.getElementById('apkUpdateBody');
+  body.innerHTML=
+    `<div style="margin-bottom:8px">${isEn?'A newer version is available':'มีเวอร์ชั่นใหม่กว่าให้อัปเดต'} (v${escapeHtml(version)}).<br>${isEn?"You're on":'คุณใช้'} v${APP_VERSION}.</div>`+
+    (clean.length?`<ul style="margin:6px 0 0;padding-left:18px">${clean.map(l=>`<li style="margin-bottom:3px">${escapeHtml(l.replace(/^[-*•]\s*/,''))}</li>`).join('')}</ul>`:'');
+  const btn=document.getElementById('apkUpdateBtn');
+  btn.dataset.url=target;
+  btn.textContent=inStore?(isEn?'⬇️ Open store':'⬇️ ไปที่สโตร์'):(isEn?'⬇️ Download & install':'⬇️ ดาวน์โหลด & ติดตั้ง');
+  document.getElementById('apkUpdateLater').textContent=isEn?'Later':'ภายหลัง';
+  document.getElementById('apkUpdateModal').classList.remove('hide');
+}
+function doApkUpdate(){
+  const url=document.getElementById('apkUpdateBtn').dataset.url;
+  if(!url)return;
+  // Open in the system browser → starts the APK download (or opens the store).
+  // Capacitor routes the '_system' target to the external browser.
+  try{ window.open(url,'_system'); }catch(e){ location.href=url; }
+}
+function closeApkUpdate(){document.getElementById('apkUpdateModal').classList.add('hide');}
 </script>
 </body>
 </html>

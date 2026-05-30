@@ -14,6 +14,9 @@ concurrency:
   group: android-debug-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write   # needed to publish the APK to a GitHub Release
+
 jobs:
   build:
     name: Build APK
@@ -54,6 +57,17 @@ jobs:
             npx cap add android
           fi
 
+      - name: Enable edge-to-edge (overwrite MainActivity)
+        run: |
+          # Draw the WebView behind the (transparent) status + navigation bars so
+          # the app uses the full screen, while the clock/battery stay visible.
+          # We copy a complete, known-good MainActivity over the generated one
+          # (no fragile in-place sed) — appId package is com.calpro.app.
+          MA_DIR="android/app/src/main/java/com/calpro/app"
+          mkdir -p "$MA_DIR"
+          cp android-overrides/MainActivity.java "$MA_DIR/MainActivity.java"
+          echo "Wrote edge-to-edge MainActivity:"; cat "$MA_DIR/MainActivity.java"
+
       - name: Prepare resources/ for capacitor-assets
         run: |
           mkdir -p resources
@@ -73,6 +87,7 @@ jobs:
           # Sync versionName from APP_VERSION constant in calpro-app.html
           VERSION=$(grep -oP "APP_VERSION = '\K[0-9.]+" calpro-app.html | head -1)
           echo "App version: $VERSION"
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
           GRADLE_FILE="android/app/build.gradle"
           if [ -f "$GRADLE_FILE" ]; then
             # Replace versionName line; versionCode = build number for monotonic ordering
@@ -107,15 +122,34 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+      # Publish to a GitHub Release so the in-app auto-updater has a stable,
+      # public download URL: .../releases/latest/download/calpro-plus.apk
+      # The fixed asset name is what the app's APK_UPDATE.apkUrl points at.
+      - name: Stage APK with a stable name
+        run: cp "${{ steps.apk.outputs.path }}" calpro-plus.apk
+
+      - name: Publish APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.APP_VERSION }}
+          name: CalPro+ v${{ env.APP_VERSION }}
+          body: |
+            CalPro+ v${{ env.APP_VERSION }} — Android debug APK.
+            Installed users are prompted to update automatically in-app.
+          files: calpro-plus.apk
+          make_latest: true
+          fail_on_unmatched_files: true
+
       - name: Summary
         run: |
-          echo "## ✅ APK built" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ APK built · v${APP_VERSION}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Download from the **Artifacts** section at the top of this run page." >> $GITHUB_STEP_SUMMARY
+          echo "**Public download (used by the in-app updater):**" >> $GITHUB_STEP_SUMMARY
+          echo "\`https://github.com/${{ github.repository }}/releases/latest/download/calpro-plus.apk\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Direct artifact name: \`calpro-plus-debug-apk\`" >> $GITHUB_STEP_SUMMARY
+          echo "Also attached to the run as artifact \`calpro-plus-debug-apk\`." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Install on Android phone:" >> $GITHUB_STEP_SUMMARY
-          echo "1. Enable **Install unknown apps** for your file manager" >> $GITHUB_STEP_SUMMARY
+          echo "1. Enable **Install unknown apps** for your browser/file manager" >> $GITHUB_STEP_SUMMARY
           echo "2. Open the .apk file → Install" >> $GITHUB_STEP_SUMMARY
           echo "3. Launch **CalPro+** from your home screen" >> $GITHUB_STEP_SUMMARY
