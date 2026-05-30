@@ -1710,7 +1710,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.28.2';
+const APP_VERSION = '2.28.3';
 
 // ═══ SUPABASE CONFIG ═══
 const SUPABASE_URL = 'https://pbtxshodaeztptegkguy.supabase.co';
@@ -8106,28 +8106,11 @@ async function renderDev(){
   // ── Local counts ──
   const totalEntries=Object.values(allEntries).reduce((s,arr)=>s+(arr?.length||0),0);
   const totalWorkouts=Object.values(allWorkouts).reduce((s,arr)=>s+(arr?.length||0),0);
-  // ── Cloud probe (every network call is time-boxed AND the two counts run
-  //    concurrently, so this page can NEVER hang on "Collecting diagnostics…"
-  //    when Supabase is slow/unreachable — worst case ≈5s, not 12s) ──
-  let cloudUsers='—',cloudFoodEntries='—',cloudErr='';
-  try{
-    const sbRef=sb||await withTimeout(ensureSupabase(3000),3500,'supabase init').catch(()=>null);
-    if(sbRef){
-      const probes=[
-        withTimeout(sbRef.from('profiles').select('id',{count:'exact',head:true}),5000,'profiles count')
-          .then(({count,error})=>{ if(error)cloudErr+='profiles: '+error.message+'; '; else cloudUsers=count??'—'; })
-          .catch(e=>{ cloudErr+='profiles: '+(e.message||e)+'; '; })
-      ];
-      if(cloudUser){
-        probes.push(
-          withTimeout(sbRef.from('food_entries').select('id',{count:'exact',head:true}),5000,'food_entries count')
-            .then(({count,error})=>{ if(error)cloudErr+='food_entries: '+error.message; else cloudFoodEntries=count??'—'; })
-            .catch(e=>{ cloudErr+='food_entries: '+(e.message||e); })
-        );
-      }
-      await Promise.all(probes); // both already time-boxed; cap ≈5s total
-    }
-  }catch(e){cloudErr=e.message||String(e);}
+  // ── Cloud probe is intentionally NOT awaited here — the network counts run
+  //    AFTER the page renders (see probeCloudCounts() below) and patch their
+  //    rows in place. This way a slow/unreachable Supabase can never delay or
+  //    block the diagnostics page; the cloud rows simply fill in (or show
+  //    "⏳ เน็ตช้า") a moment later. ──
   // ── SW info ──
   let swState='—',swCacheName='—';
   try{
@@ -8172,9 +8155,9 @@ async function renderDev(){
       row('Sync status',(typeof syncStatus!=='undefined'?syncStatus:'?'))+
       row('Signed in',cloudUser?'yes':'no')+
       (cloudUser?row('Account',cloudUser.email||cloudUser.id):'')+
-      row('Total users (Supabase)',cloudUsers)+
-      (cloudUser?row('My food_entries rows',cloudFoodEntries):'')+
-      (cloudErr?`<div class="dev-row"><span style="color:var(--accent)">Error</span><span style="color:var(--accent)">${escapeHtml(cloudErr.slice(0,200))}</span></div>`:'')+
+      `<div class="dev-row"><span>Total users (Supabase)</span><span id="devCloudUsers">⏳ กำลังตรวจ…</span></div>`+
+      (cloudUser?`<div class="dev-row"><span>My food_entries rows</span><span id="devCloudFood">⏳ กำลังตรวจ…</span></div>`:'')+
+      `<div class="dev-row" id="devCloudNoteRow" style="display:none"><span style="color:var(--accent)">หมายเหตุ</span><span id="devCloudNote" style="color:var(--accent)"></span></div>`+
     `</div>`+
     `<div class="card"><h3>⚙️ Settings (raw)</h3>`+
       `<pre class="dev-pre">${escapeHtml(JSON.stringify(settings,null,2))}</pre>`+
@@ -8214,6 +8197,24 @@ async function renderDev(){
       `<button class="btn-sec" onclick="checkForUpdates()" style="width:100%;margin-bottom:6px">🔍 Check for app update</button>`+
       `<button class="btn-danger" onclick="lockDevMode()" style="width:100%">🔒 Lock developer mode</button>`+
     `</div>`;
+  // ── Deferred cloud counts — runs AFTER the page is on screen so the network
+  //    never blocks render. Patches the placeholder rows in place; if the user
+  //    has already navigated away the getElementById guards make it a no-op.
+  //    A slow network shows a calm "⏳ เน็ตช้า" instead of a scary red Error. ──
+  (async()=>{
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    const note=(msg)=>{const r=document.getElementById('devCloudNoteRow'),s=document.getElementById('devCloudNote');if(r&&s){s.textContent=msg;r.style.display='';}};
+    try{
+      const sbRef=sb||await withTimeout(ensureSupabase(3000),3500,'supabase init').catch(()=>null);
+      if(!sbRef){ set('devCloudUsers','—'); set('devCloudFood','—'); note('ออฟไลน์ / ยังไม่ได้เชื่อมต่อ Supabase'); return; }
+      const probe=(tbl,id)=> withTimeout(sbRef.from(tbl).select('id',{count:'exact',head:true}),8000,tbl)
+        .then(({count,error})=>{ if(error){set(id,'⚠️');note(tbl+': '+error.message);} else set(id,count??'—'); })
+        .catch(e=>{ if(/timed out/i.test(e.message||'')){set(id,'⏳ เน็ตช้า');} else {set(id,'⚠️');note(tbl+': '+(e.message||e));} });
+      const ps=[probe('profiles','devCloudUsers')];
+      if(cloudUser) ps.push(probe('food_entries','devCloudFood'));
+      await Promise.all(ps);
+    }catch(e){ note(e.message||String(e)); }
+  })();
 }
 function devLogToConsole(){
   console.group('CalPro+ '+APP_VERSION+' — state dump');
@@ -8388,6 +8389,16 @@ document.addEventListener('keydown',(e)=>{
 //                        if user just upgraded, pop CHANGELOG entries
 
 const CHANGELOG={
+  '2.28.3':{
+    th:[
+      '⚡ **หน้า Developer โหลดทันที** — ย้ายการนับข้อมูลคลาวด์ (profiles/food_entries) ออกไปทำหลังหน้าขึ้นแล้ว หน้าจึงไม่รอเน็ตเลย (เดิมถ้าเน็ตช้าจะค้าง)',
+      '🟡 **เน็ตช้าโชว์ "⏳ เน็ตช้า" แทน Error แดง** — การนับเป็นข้อมูลเสริม ถ้าช้า/หมดเวลาแสดงนุ่มๆ ไม่ทำให้ดูเหมือนแอปพัง (พบว่า count แบบ exact ของ Supabase ช้าเมื่อเน็ตไม่ดี)',
+    ],
+    en:[
+      '⚡ **Developer page renders instantly** — the cloud counts (profiles/food_entries) now run AFTER the page is on screen and fill in their rows, so a slow network never delays the page',
+      '🟡 **Slow network shows a calm "⏳ slow" instead of a red Error** — the counts are an optional extra; if Supabase\'s exact-count HEAD request is slow it degrades gracefully instead of looking like a crash',
+    ],
+  },
   '2.28.2':{
     th:[
       '🔧 **แก้หน้า Developer ค้างโหลด** — เดิมถ้า Supabase ตอบช้า หน้านี้จะค้าง "Collecting diagnostics…" ไม่จบ ต้องรีเฟรช ตอนนี้ใส่ตัวจับเวลา (สูงสุด ~5 วิ) แล้วแสดงผลได้เสมอ',
