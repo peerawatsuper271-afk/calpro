@@ -56,8 +56,11 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .bnt:active{transform:scale(.9);}
 .bnt svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .bnt.active{color:var(--text);background:var(--surface2);}
-/* (nav-scrim removed in v2.31.4 — a backdrop-filter blur over the pure-#000
-   background rendered a faint green tint at the bottom on some GPUs/WebViews.) */
+/* Bottom scrim — a smooth fade to the app background so content dissolves behind
+   the floating nav (the reference's bottom look). Pure gradient, NO backdrop
+   blur: blur over a pure-#000 backdrop rendered a green tint on some GPUs, so we
+   fade instead. z-index 39 = under the FAB (40) + nav (50), over page content. */
+.nav-scrim{position:fixed;left:0;right:0;bottom:0;height:calc(84px + env(safe-area-inset-bottom));z-index:39;pointer-events:none;background:linear-gradient(to top,var(--bg) 12%,transparent);}
 .icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
 /* ── SYNC INDICATOR ── */
@@ -1749,6 +1752,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 </aside>
 
 <!-- BOTTOM NAV (rendered dynamically from settings.navTabs) -->
+<div class="nav-scrim" aria-hidden="true"></div>
 <div class="bnav" id="mainNav"></div>
 
 <!-- PHOTO VIEWER -->
@@ -1762,7 +1766,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.31.4';
+const APP_VERSION = '2.31.5';
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
