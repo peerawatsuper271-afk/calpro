@@ -138,6 +138,10 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-item:hover .di-ico,.drawer-item.active .di-ico{background:var(--border);}
 .drawer-item>span:not(.di-ico):not(.di-arrow){flex:1;min-width:0;}
 .drawer-item .di-ico svg{width:20px;height:20px;color:var(--text);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+/* Generic inline line-icon (Feather-style) — drop-in replacement for UI emojis.
+   Sizes to surrounding font (1em) + inherits text color via currentColor. */
+.ic{display:inline-flex;align-items:center;justify-content:center;vertical-align:-.16em;line-height:0;flex-shrink:0;}
+.ic svg{width:1.05em;height:1.05em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;overflow:visible;}
 .drawer-item .di-arrow{margin-left:auto;color:var(--muted);font-size:.8rem;}
 .drawer-divider{height:1px;background:var(--border);margin:8px 18px;}
 .drawer-foot{padding:14px 18px;border-top:1px solid var(--border);font-size:.66rem;color:var(--muted);text-align:center;}
@@ -469,7 +473,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .user-avatar{width:108px;height:108px;border-radius:50%;background:rgba(255,107,107,.15);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:700;color:var(--accent);margin:0 auto 14px;cursor:pointer;overflow:hidden;position:relative;transition:transform .15s;user-select:none;box-shadow:0 4px 12px rgba(0,0,0,.15);}
 .user-avatar:hover{transform:scale(1.04);}
 .user-avatar img{width:100%;height:100%;object-fit:cover;}
-.user-avatar::after{content:'✏️';position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+.user-avatar::after{content:'';position:absolute;bottom:0;right:0;width:30px;height:30px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);}
+/* pencil glyph tinted with --accent via mask (themeable) */
+.user-avatar::before{content:'';position:absolute;bottom:5px;right:5px;width:14px;height:14px;z-index:1;background:var(--accent);-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='none'%20stroke='%23000'%20stroke-width='2.4'%20stroke-linecap='round'%20stroke-linejoin='round'%20d='M12%2020h9M16.5%203.5a2.12%202.12%200%200%201%203%203L7%2019l-4%201%201-4z'/%3E%3C/svg%3E")center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='none'%20stroke='%23000'%20stroke-width='2.4'%20stroke-linecap='round'%20stroke-linejoin='round'%20d='M12%2020h9M16.5%203.5a2.12%202.12%200%200%201%203%203L7%2019l-4%201%201-4z'/%3E%3C/svg%3E")center/contain no-repeat;}
 .avatar-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:12px;}
 .av-opt{aspect-ratio:1;border-radius:50%;border:2px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;transition:all .15s;font-family:inherit;}
 .av-opt:hover{border-color:var(--accent);transform:scale(1.1);}
@@ -836,7 +842,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="ad-slot" data-ad-slot="today-1"></div>
       <!-- Quick-add: tap a recent/favorite food to log it in one tap -->
       <div class="qadd-wrap hide" id="quickAddWrap">
-        <div class="qadd-lbl">⚡ <span data-i18n="quick_add">เพิ่มด่วน</span></div>
+        <div class="qadd-lbl"><span class="ic" data-ic="zap"></span> <span data-i18n="quick_add">เพิ่มด่วน</span></div>
         <div class="qadd-row" id="quickAddRow"></div>
       </div>
       <div id="foodLog"></div>
@@ -847,7 +853,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         </h3>
         <div id="workoutsList"></div>
       </div>
-      <button class="btn-sec" onclick="shareDaily()" style="width:100%;margin-top:8px" data-i18n="share_today">📤 แชร์สรุปวันนี้</button>
+      <button class="btn-sec" onclick="shareDaily()" style="width:100%;margin-top:8px"><span class="ic" data-ic="share"></span> <span data-i18n="share_today">แชร์สรุปวันนี้</span></button>
       <!-- Floating Add-Food button — visible only on Today (parent .screen toggles display) -->
       <button class="fab" id="addFoodFab" onclick="goToAddFood()" aria-label="Add food" title="เพิ่มอาหาร">
         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
@@ -858,10 +864,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <div class="screen" id="pg-add">
       <div class="card">
         <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
-        <div class="sbox"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"></div>
+        <div class="sbox"><span class="si ic" data-ic="search"></span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
-          <button class="btn-sec" onclick="openBarcodeModal()" style="font-size:.82rem" data-i18n="scan_barcode">📷 บาร์โค้ด</button>
-          <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem" data-i18n="ai_photo_btn">🤖 ถ่ายรูป AI</button>
+          <button class="btn-sec" onclick="openBarcodeModal()" style="font-size:.82rem"><span class="ic" data-ic="barcode"></span> <span data-i18n="scan_barcode">บาร์โค้ด</span></button>
+          <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem"><span class="ic" data-ic="ai"></span> <span data-i18n="ai_photo_btn">ถ่ายรูป AI</span></button>
         </div>
         <div id="aiQuotaInline" style="font-size:.66rem;color:var(--muted);text-align:right;margin-bottom:8px;padding-right:4px;min-height:14px"></div>
         <div class="fl" id="catFilterWrap" style="margin-bottom:9px">
@@ -886,24 +892,24 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
           <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);cursor:pointer;user-select:none">
-            <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> <span data-i18n="save_lib">💾 บันทึกลงไลบรารี</span>
+            <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> <span class="ic" data-ic="save"></span> <span data-i18n="save_lib">บันทึกลงไลบรารี</span>
           </label>
-          <button type="button" class="photo-btn" onclick="document.getElementById('photoUpload').click()" data-i18n="attach_photo">📷 แนบรูป</button>
+          <button type="button" class="photo-btn" onclick="document.getElementById('photoUpload').click()"><span class="ic" data-ic="image"></span> <span data-i18n="attach_photo">แนบรูป</span></button>
           <input type="file" id="photoUpload" accept="image/*" hidden onchange="loadPhotoForEntry(this.files[0])">
           <img id="photoPreview" class="photo-preview" alt="">
         </div>
         <button class="btn" onclick="addManual()" data-i18n="btn_add">+ เพิ่มอาหาร</button>
       </div>
       <div class="card">
-        <h3 data-i18n="recipe_title">🍲 สร้างสูตรอาหาร</h3>
+        <h3><span class="ic" data-ic="utensils"></span> <span data-i18n="recipe_title">สร้างสูตรอาหาร</span></h3>
         <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="recipe_sub">รวมหลายส่วนผสมเป็นเมนูเดียว · บันทึกลงไลบรารีเพื่อใช้ซ้ำได้</div>
         <button class="btn-sec" onclick="openRecipeModal()" style="width:100%" data-i18n="recipe_open">+ สร้างสูตรใหม่</button>
       </div>
       <div class="card" id="quickAddCard">
         <div style="display:flex;gap:5px;background:var(--surface2);border-radius:9px;padding:3px;margin-bottom:10px">
-          <button class="qtab active" data-qtab="fav" onclick="setQuickTab('fav')" data-i18n="quick_fav">⭐ ของโปรด</button>
-          <button class="qtab" data-qtab="recent" onclick="setQuickTab('recent')" data-i18n="quick_recent">🕘 ล่าสุด</button>
-          <button class="qtab" data-qtab="presets" onclick="setQuickTab('presets')" data-i18n="quick_presets">🍱 ชุดอาหาร</button>
+          <button class="qtab active" data-qtab="fav" onclick="setQuickTab('fav')"><span class="ic" data-ic="star"></span> <span data-i18n="quick_fav">ของโปรด</span></button>
+          <button class="qtab" data-qtab="recent" onclick="setQuickTab('recent')"><span class="ic" data-ic="clock"></span> <span data-i18n="quick_recent">ล่าสุด</span></button>
+          <button class="qtab" data-qtab="presets" onclick="setQuickTab('presets')"><span class="ic" data-ic="package"></span> <span data-i18n="quick_presets">ชุดอาหาร</span></button>
         </div>
         <div id="quickList"></div>
       </div>
@@ -940,14 +946,14 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="card">
         <h3 data-i18n="badges">เหรียญตรา</h3>
         <div class="bdg-g" id="bdgGrid"></div>
-        <button class="btn-sec" onclick="shareAchievements()" style="width:100%;margin-top:10px" data-i18n="share_ach">🏆 แชร์ความสำเร็จ</button>
+        <button class="btn-sec" onclick="shareAchievements()" style="width:100%;margin-top:10px"><span class="ic" data-ic="trophy"></span> <span data-i18n="share_ach">แชร์ความสำเร็จ</span></button>
       </div>
     </div>
 
     <!-- TDEE CALCULATOR -->
     <div class="screen" id="pg-tdee">
       <div class="card" style="display:flex;align-items:center;gap:12px">
-        <div style="font-size:1.8rem;line-height:1;flex:none">🔥</div>
+        <div style="font-size:1.8rem;line-height:1;flex:none"><span class="ic" data-ic="flame"></span></div>
         <div style="min-width:0">
           <div style="font-size:.95rem;font-weight:700" data-i18n="tdee_title">เครื่องคำนวณ TDEE</div>
           <div style="font-size:.68rem;color:var(--muted);margin-top:2px;line-height:1.35" data-i18n="tdee_sub">Total Daily Energy Expenditure — พลังงานที่ร่างกายเผาผลาญต่อวัน</div>
@@ -974,9 +980,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <div>
           <div class="sec-lbl" data-i18n="goal_title">เป้าหมาย</div>
           <div class="gchips">
-            <button class="gchip active" data-tg="lose" onclick="pickTGoal(this)" data-i18n="goal_lose">🔥 ลดน้ำหนัก</button>
-            <button class="gchip" data-tg="maintain" onclick="pickTGoal(this)" data-i18n="goal_maintain">⚖️ คงน้ำหนัก</button>
-            <button class="gchip" data-tg="gain" onclick="pickTGoal(this)" data-i18n="goal_gain">💪 เพิ่มกล้ามเนื้อ</button>
+            <button class="gchip active" data-tg="lose" onclick="pickTGoal(this)"><span class="ic" data-ic="flame"></span> <span data-i18n="goal_lose">ลดน้ำหนัก</span></button>
+            <button class="gchip" data-tg="maintain" onclick="pickTGoal(this)"><span class="ic" data-ic="scale"></span> <span data-i18n="goal_maintain">คงน้ำหนัก</span></button>
+            <button class="gchip" data-tg="gain" onclick="pickTGoal(this)"><span class="ic" data-ic="dumbbell"></span> <span data-i18n="goal_gain">เพิ่มกล้ามเนื้อ</span></button>
           </div>
         </div>
       </div>
@@ -1023,12 +1029,12 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <!-- ─── Hero card (Steam-style) ─── -->
       <div class="profile-hero" id="profileHero">
         <div class="profile-hero-banner" id="profileBanner">
-          <button class="profile-cam profile-cam-cover" onclick="document.getElementById('bannerImgUpload').click()" aria-label="แก้ไขพื้นหลัง" title="แก้ไขพื้นหลัง">📷</button>
+          <button class="profile-cam profile-cam-cover" onclick="document.getElementById('bannerImgUpload').click()" aria-label="แก้ไขพื้นหลัง" title="แก้ไขพื้นหลัง"><span class="ic" data-ic="camera"></span></button>
         </div>
         <div class="profile-hero-body">
           <div class="profile-avatar-wrap">
             <div class="profile-avatar-lg" id="profileAvatar" onclick="openAvatarModal()" data-tip="คลิกเพื่อเปลี่ยนรูปประจำตัว">?</div>
-            <button class="profile-cam profile-cam-av" onclick="openAvatarModal()" aria-label="แก้ไขรูปโปรไฟล์" title="แก้ไขรูปโปรไฟล์">📷</button>
+            <button class="profile-cam profile-cam-av" onclick="openAvatarModal()" aria-label="แก้ไขรูปโปรไฟล์" title="แก้ไขรูปโปรไฟล์"><span class="ic" data-ic="camera"></span></button>
           </div>
           <div class="profile-hero-info">
             <div class="profile-display-name" id="profileName2">—</div>
@@ -1042,16 +1048,16 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           </div>
         </div>
         <div class="profile-hero-actions">
-          <button class="profile-action-primary" onclick="shareAchievements()">📤 <span id="profileShareLbl">แชร์</span></button>
-          <button class="btn-sec profile-action-btn" onclick="toggleProfileEdit()"><span data-i18n="edit_profile">✏️ แก้ไขโปรไฟล์</span></button>
+          <button class="profile-action-primary" onclick="shareAchievements()"><span class="ic" data-ic="share"></span> <span id="profileShareLbl">แชร์</span></button>
+          <button class="btn-sec profile-action-btn" onclick="toggleProfileEdit()"><span class="ic" data-ic="edit"></span> <span data-i18n="edit_profile">แก้ไขโปรไฟล์</span></button>
         </div>
       </div>
       <!-- ─── Stats showcase (4 mini cards) ─── -->
       <div class="profile-stats-grid" id="profileStatsGrid">
-        <div class="profile-stat-tile"><div class="pst-icon">🔥</div><div class="pst-val" id="pstStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon">📝</div><div class="pst-val" id="pstDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon">🎯</div><div class="pst-val" id="pstOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon">🏆</div><div class="pst-val" id="pstScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="flame"></span></div><div class="pst-val" id="pstStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="note"></span></div><div class="pst-val" id="pstDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="target"></span></div><div class="pst-val" id="pstOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="trophy"></span></div><div class="pst-val" id="pstScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
       </div>
       <!-- ─── Badges showcase ─── -->
       <div class="card">
@@ -1060,7 +1066,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <!-- ─── Goal showcase ─── -->
       <div class="card" id="profileGoalCard">
-        <h3 data-i18n="my_goal">🎯 เป้าหมายของฉัน</h3>
+        <h3><span class="ic" data-ic="target"></span> <span data-i18n="my_goal">เป้าหมายของฉัน</span></h3>
         <div class="profile-goal-row">
           <div class="profile-goal-cell"><div class="pgc-lbl" data-i18n="goal_type_lbl">ประเภท</div><div class="pgc-val" id="pgcGoalType">—</div></div>
           <div class="profile-goal-cell"><div class="pgc-lbl">TDEE</div><div class="pgc-val" id="pgcTDEE">—</div></div>
@@ -1108,8 +1114,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="card">
         <h3 data-i18n="language">ภาษา</h3>
         <div class="lang-row">
-          <button class="lbtn" data-lang="th" onclick="setLang('th')">🇹🇭 ไทย</button>
-          <button class="lbtn" data-lang="en" onclick="setLang('en')">🇬🇧 English</button>
+          <button class="lbtn" data-lang="th" onclick="setLang('th')">ไทย</button>
+          <button class="lbtn" data-lang="en" onclick="setLang('en')">English</button>
         </div>
       </div>
       <div class="card">
@@ -1143,11 +1149,11 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           </div>
           <label class="switch"><input type="checkbox" id="recapToggle" onchange="toggleReminder('recap')"><span class="slider"></span></label>
         </div>
-        <button class="btn-sec" onclick="testNotification()" style="width:100%;margin-top:10px;font-size:.82rem" data-i18n="test_notif">🔔 ทดสอบส่งแจ้งเตือน</button>
+        <button class="btn-sec" onclick="testNotification()" style="width:100%;margin-top:10px;font-size:.82rem"><span class="ic" data-ic="bell"></span> <span data-i18n="test_notif">ทดสอบส่งแจ้งเตือน</span></button>
         <div id="notifStatus" style="font-size:.7rem;color:var(--muted);margin-top:6px;text-align:center"></div>
       </div>
       <div class="card">
-        <h3 data-i18n="ai_settings_title">🤖 AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)</h3>
+        <h3><span class="ic" data-ic="ai"></span> <span data-i18n="ai_settings_title">AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)</span></h3>
         <div style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:10px" data-i18n="ai_settings_sub">ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)</div>
         <div id="aiSettingsBody"></div>
       </div>
@@ -1166,11 +1172,11 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="card">
         <h3 data-i18n="manage_data">จัดการข้อมูล</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <button class="btn-sec" onclick="exportData()">📤 Export</button>
-          <button class="btn-sec" onclick="document.getElementById('importFile').click()">📥 Import</button>
+          <button class="btn-sec" onclick="exportData()"><span class="ic" data-ic="upload"></span> Export</button>
+          <button class="btn-sec" onclick="document.getElementById('importFile').click()"><span class="ic" data-ic="download"></span> Import</button>
         </div>
         <input type="file" id="importFile" accept="application/json,.json" hidden onchange="importData(this.files[0])">
-        <button class="btn-sec" onclick="cleanOldPhotos()" style="width:100%;margin-bottom:8px" data-i18n="clean_photos">🧹 ลบรูปอาหารเก่า (>30 วัน)</button>
+        <button class="btn-sec" onclick="cleanOldPhotos()" style="width:100%;margin-bottom:8px"><span class="ic" data-ic="trash"></span> <span data-i18n="clean_photos">ลบรูปอาหารเก่า (>30 วัน)</span></button>
         <button class="btn-danger" onclick="resetAllData()" data-i18n="reset_all">ล้างข้อมูลทั้งหมด</button>
       </div>
     </div>
@@ -1183,8 +1189,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <div class="card" id="friendsCard">
         <div class="period-tabs" role="tablist" aria-label="leaderboard scope" style="margin-bottom:12px">
-          <button class="ptab active" data-lbtab="friends" onclick="setLbTab('friends')" data-i18n="lb_friends">👥 เพื่อน</button>
-          <button class="ptab" data-lbtab="all" onclick="setLbTab('all')" data-i18n="lb_global">🌍 ทั้งหมด</button>
+          <button class="ptab active" data-lbtab="friends" onclick="setLbTab('friends')"><span class="ic" data-ic="users"></span> <span data-i18n="lb_friends">เพื่อน</span></button>
+          <button class="ptab" data-lbtab="all" onclick="setLbTab('all')"><span class="ic" data-ic="globe"></span> <span data-i18n="lb_global">ทั้งหมด</span></button>
         </div>
         <div id="friendsBody"></div>
       </div>
@@ -1197,13 +1203,13 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <h2 data-i18n="about">เกี่ยวกับ</h2>
       </div>
       <div class="card" style="text-align:center;padding:24px 14px">
-        <div style="font-size:3.5rem;margin-bottom:6px">🔥</div>
+        <div style="font-size:3.5rem;margin-bottom:6px;color:var(--accent)"><span class="ic" data-ic="flame"></span></div>
         <div style="font-size:1.4rem;font-weight:700">Cal<span style="color:var(--accent)">Pro+</span></div>
         <div style="font-size:.8rem;color:var(--muted);margin-top:4px"><span class="ver-tag">v2.23.0 BETA</span></div>
         <div style="font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.6;max-width:280px;margin:14px auto 0" data-i18n="about_desc">ติดตามแคลอรี่ คำนวณ TDEE และควบคุมน้ำหนัก · ฟรี · ไม่ต้องล็อคอิน · เก็บข้อมูลในเครื่อง</div>
-        <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%" data-i18n="check_updates">🔄 ตรวจหาเวอร์ชันใหม่</button>
+        <button class="btn-sec" onclick="checkForUpdates()" style="margin-top:14px;width:100%"><span class="ic" data-ic="sync"></span> <span data-i18n="check_updates">ตรวจหาเวอร์ชันใหม่</span></button>
         <div style="font-size:.66rem;color:var(--muted);margin-top:6px" data-i18n="check_updates_sub">ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง</div>
-        <button class="btn-sec" onclick="showWhatsNew(['__current__'])" style="margin-top:10px;width:100%" data-i18n="whats_new_title">✨ มีอะไรใหม่</button>
+        <button class="btn-sec" onclick="showWhatsNew(['__current__'])" style="margin-top:10px;width:100%"><span class="ic" data-ic="sparkle"></span> <span data-i18n="whats_new_title">มีอะไรใหม่</span></button>
       </div>
       <div class="card">
         <h3 data-i18n="about_links">ลิงก์</h3>
@@ -1226,7 +1232,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <div class="screen" id="pg-dev">
       <div class="page-hd">
         <button class="back-btn" onclick="navTo('today')">‹</button>
-        <h2>🔧 Developer Mode</h2>
+        <h2><span class="ic" data-ic="code"></span> Developer Mode</h2>
       </div>
       <div id="devBody"></div>
     </div>
@@ -1246,7 +1252,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- SMART GOAL MODAL -->
 <div class="modal-bg hide" id="smartGoalModal">
   <div class="modal">
-    <div class="modal-hdr"><h3 data-i18n="smart_goal">💡 ปรับเป้าหมายอัตโนมัติ?</h3><button class="mc-close" onclick="closeSmartGoal()">✕</button></div>
+    <div class="modal-hdr"><h3><span class="ic" data-ic="sparkle"></span> <span data-i18n="smart_goal">ปรับเป้าหมายอัตโนมัติ?</span></h3><button class="mc-close" onclick="closeSmartGoal()"><span class="ic" data-ic="x"></span></button></div>
     <div id="smartGoalBody" style="font-size:.85rem;line-height:1.6;color:var(--text);margin-bottom:14px"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn-sec" onclick="closeSmartGoal()" data-i18n="later">ทีหลัง</button>
@@ -1258,7 +1264,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- WEEKLY RECAP MODAL -->
 <div class="modal-bg hide" id="recapModal">
   <div class="modal">
-    <div class="modal-hdr"><h3 data-i18n="recap_title">📅 สรุปสัปดาห์ที่แล้ว</h3><button class="mc-close" onclick="closeRecap()">✕</button></div>
+    <div class="modal-hdr"><h3><span class="ic" data-ic="calendar"></span> <span data-i18n="recap_title">สรุปสัปดาห์ที่แล้ว</span></h3><button class="mc-close" onclick="closeRecap()"><span class="ic" data-ic="x"></span></button></div>
     <div id="recapBody" style="font-size:.85rem;line-height:1.7"></div>
     <button class="btn" onclick="closeRecap()" style="margin-top:14px" data-i18n="got_it">รับทราบ</button>
   </div>
@@ -1267,7 +1273,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- AUTH MODAL -->
 <div class="modal-bg hide" id="authModal">
   <div class="modal">
-    <div class="modal-hdr"><h3><span id="authTitle">เชื่อมต่อบัญชี</span></h3><button class="mc-close" onclick="closeAuthModal()">✕</button></div>
+    <div class="modal-hdr"><h3><span id="authTitle">เชื่อมต่อบัญชี</span></h3><button class="mc-close" onclick="closeAuthModal()"><span class="ic" data-ic="x"></span></button></div>
     <div style="font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:12px" data-i18n="cloud_help">
       เชื่อมต่อเพื่อ sync ข้อมูลข้ามเครื่อง · ฟรี · ลบบัญชีได้ตลอด
     </div>
@@ -1295,7 +1301,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- QUICK WATER MODAL -->
 <div class="modal-bg hide" id="quickWaterModal">
   <div class="modal">
-    <div class="modal-hdr"><h3 data-i18n="water">น้ำดื่ม</h3><button class="mc-close" onclick="closeQuickWater()">✕</button></div>
+    <div class="modal-hdr"><h3 data-i18n="water">น้ำดื่ม</h3><button class="mc-close" onclick="closeQuickWater()"><span class="ic" data-ic="x"></span></button></div>
     <div style="text-align:center;padding:14px 0">
       <div style="font-size:.74rem;color:var(--muted);margin-bottom:6px" id="quickWaterDate">—</div>
       <div style="font-size:2.4rem;font-weight:700;margin-bottom:4px"><span id="quickWaterCount">0</span> / <span id="quickWaterGoal">8</span></div>
@@ -1326,7 +1332,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- ADD FRIEND MODAL — search by email or display name -->
 <div class="modal-bg hide" id="addFriendModal">
   <div class="modal" style="max-width:400px">
-    <div class="modal-hdr"><h3 data-i18n="add_friend_title">เพิ่มเพื่อน</h3><button class="mc-close" onclick="closeAddFriend()" aria-label="Close">✕</button></div>
+    <div class="modal-hdr"><h3 data-i18n="add_friend_title">เพิ่มเพื่อน</h3><button class="mc-close" onclick="closeAddFriend()" aria-label="Close"><span class="ic" data-ic="x"></span></button></div>
     <div style="font-size:.74rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="add_friend_sub">ค้นหาด้วยอีเมลหรือชื่อที่แสดง</div>
     <div style="display:flex;gap:6px;margin-bottom:10px">
       <input type="text" id="frSearchInput" placeholder="aa@example.com / John" oninput="renderFriendSearch(this.value)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;outline:none">
@@ -1339,12 +1345,12 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
      of pg-profile to avoid the confusing inline expand/collapse pattern) -->
 <div class="modal-bg hide" id="profileEditModal">
   <div class="modal" style="max-width:480px">
-    <div class="modal-hdr"><h3 data-i18n="edit_profile_long">✏️ แก้ไขโปรไฟล์</h3><button class="mc-close" onclick="closeProfileEdit()" aria-label="Close">✕</button></div>
+    <div class="modal-hdr"><h3><span class="ic" data-ic="edit"></span> <span data-i18n="edit_profile_long">แก้ไขโปรไฟล์</span></h3><button class="mc-close" onclick="closeProfileEdit()" aria-label="Close"><span class="ic" data-ic="x"></span></button></div>
     <!-- Banner color picker -->
     <div class="sec-lbl" data-i18n="banner_color">สีแบนเนอร์</div>
     <div class="banner-color-grid" id="bannerColorGrid"></div>
     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-      <button type="button" class="btn-sec" onclick="document.getElementById('bannerImgUpload').click()" style="flex:1;font-size:.74rem;padding:7px"><span data-i18n="banner_image">📷 หรืออัปโหลดรูปแบนเนอร์</span></button>
+      <button type="button" class="btn-sec" onclick="document.getElementById('bannerImgUpload').click()" style="flex:1;font-size:.74rem;padding:7px"><span class="ic" data-ic="image"></span> <span data-i18n="banner_image">หรืออัปโหลดรูปแบนเนอร์</span></button>
       <button type="button" class="btn-sec" id="bannerRemoveBtn" onclick="removeBannerImage()" style="font-size:.74rem;padding:7px;display:none" data-i18n="banner_remove">ลบรูป</button>
       <input type="file" id="bannerImgUpload" accept="image/*" hidden onchange="uploadBannerImage(this.files[0])">
     </div>
@@ -1383,9 +1389,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <div style="margin-bottom:10px">
       <div class="sec-lbl" data-i18n="goal_title">เป้าหมาย</div>
       <div class="gchips">
-        <button class="gchip active" data-g="lose" onclick="pickGoal(this)" data-i18n="goal_lose">🔥 ลดน้ำหนัก</button>
-        <button class="gchip" data-g="maintain" onclick="pickGoal(this)" data-i18n="goal_maintain">⚖️ คงน้ำหนัก</button>
-        <button class="gchip" data-g="gain" onclick="pickGoal(this)" data-i18n="goal_gain">💪 เพิ่มกล้ามเนื้อ</button>
+        <button class="gchip active" data-g="lose" onclick="pickGoal(this)"><span class="ic" data-ic="flame"></span> <span data-i18n="goal_lose">ลดน้ำหนัก</span></button>
+        <button class="gchip" data-g="maintain" onclick="pickGoal(this)"><span class="ic" data-ic="scale"></span> <span data-i18n="goal_maintain">คงน้ำหนัก</span></button>
+        <button class="gchip" data-g="gain" onclick="pickGoal(this)"><span class="ic" data-ic="dumbbell"></span> <span data-i18n="goal_gain">เพิ่มกล้ามเนื้อ</span></button>
       </div>
     </div>
     <button class="btn" onclick="saveProfile()" style="width:100%" data-i18n="save_calc">บันทึกและคำนวณ</button>
@@ -1424,8 +1430,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <div class="modal-bg hide" id="barcodeModal">
   <div class="modal" style="max-width:400px">
     <div class="modal-hdr">
-      <h3 data-i18n="scan_barcode">📷 สแกนบาร์โค้ด</h3>
-      <button class="mc-close" onclick="closeBarcodeModal()" aria-label="Close">✕</button>
+      <h3><span class="ic" data-ic="barcode"></span> <span data-i18n="scan_barcode">สแกนบาร์โค้ด</span></h3>
+      <button class="mc-close" onclick="closeBarcodeModal()" aria-label="Close"><span class="ic" data-ic="x"></span></button>
     </div>
     <div style="font-size:.74rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="barcode_hint">หันกล้องไปที่บาร์โค้ดของสินค้า · ข้อมูลจากฐาน OpenFoodFacts</div>
     <div style="position:relative;background:#000;border-radius:9px;overflow:hidden;aspect-ratio:4/3;margin-bottom:8px">
@@ -1466,8 +1472,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <div class="modal-bg hide" id="friendProfileModal" role="dialog" aria-modal="true" aria-labelledby="fpName">
   <div class="modal" style="max-width:440px;padding:0;overflow:hidden">
     <div class="modal-hdr fp-hdr">
-      <h3><span data-i18n="friend_profile_title">👤 โปรไฟล์เพื่อน</span></h3>
-      <button class="mc-close" onclick="closeFriendProfile()" aria-label="ปิดโปรไฟล์เพื่อน">✕</button>
+      <h3><span class="ic" data-ic="user"></span> <span data-i18n="friend_profile_title">โปรไฟล์เพื่อน</span></h3>
+      <button class="mc-close" onclick="closeFriendProfile()" aria-label="ปิดโปรไฟล์เพื่อน"><span class="ic" data-ic="x"></span></button>
     </div>
     <div class="profile-hero" style="border-radius:0;border:none;margin-bottom:0">
       <div class="profile-hero-banner" id="fpBanner"></div>
@@ -1485,10 +1491,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     </div>
     <div class="fp-content">
       <div class="profile-stats-grid">
-        <div class="profile-stat-tile"><div class="pst-icon">🔥</div><div class="pst-val" id="fpStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon">📝</div><div class="pst-val" id="fpDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon">🎯</div><div class="pst-val" id="fpOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon">🏆</div><div class="pst-val" id="fpScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="flame"></span></div><div class="pst-val" id="fpStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="note"></span></div><div class="pst-val" id="fpDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="target"></span></div><div class="pst-val" id="fpOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
+        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="trophy"></span></div><div class="pst-val" id="fpScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
       </div>
       <div style="margin-top:10px">
         <div style="font-size:.78rem;font-weight:600;margin-bottom:6px"><span data-i18n="badges_showcase">🏅 เหรียญตรา</span> <span style="font-size:.66rem;color:var(--muted);font-weight:400" id="fpBadgeCount">(0)</span></div>
@@ -1496,7 +1502,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
         <button class="btn-sec" onclick="closeFriendProfile()"><span data-i18n="close">ปิด</span></button>
-        <button class="btn-sec" onclick="sendFriendCheer()"><span data-i18n="send_cheer">👏 ส่งกำลังใจ</span></button>
+        <button class="btn-sec" onclick="sendFriendCheer()"><span class="ic" data-ic="heart"></span> <span data-i18n="send_cheer">ส่งกำลังใจ</span></button>
       </div>
     </div>
   </div>
@@ -1506,14 +1512,14 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <div class="modal-bg hide" id="aiPhotoModal">
   <div class="modal" style="max-width:420px">
     <div class="modal-hdr">
-      <h3 data-i18n="ai_photo_title">🤖 ถ่ายรูปอาหาร · AI ประเมิน</h3>
-      <button class="mc-close" onclick="closeAiPhotoModal()" aria-label="Close">✕</button>
+      <h3><span class="ic" data-ic="ai"></span> <span data-i18n="ai_photo_title">ถ่ายรูปอาหาร · AI ประเมิน</span></h3>
+      <button class="mc-close" onclick="closeAiPhotoModal()" aria-label="Close"><span class="ic" data-ic="x"></span></button>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
       <div style="font-size:.74rem;color:var(--muted);line-height:1.5;flex:1;min-width:200px" data-i18n="ai_photo_hint">ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก</div>
       <span id="aiUsageChip" style="font-size:.66rem;background:var(--surface2);color:var(--accent);padding:4px 10px;border-radius:99px;white-space:nowrap;font-weight:600">—</span>
     </div>
-    <div style="font-size:.68rem;color:var(--amber, #f59f00);background:rgba(245,159,0,.08);border-left:3px solid var(--amber, #f59f00);padding:6px 9px;border-radius:6px;margin-bottom:10px;line-height:1.5" data-i18n="ai_relogin_notice">📌 หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)</div>
+    <div style="font-size:.68rem;color:var(--amber, #f59f00);background:rgba(245,159,0,.08);border-left:3px solid var(--amber, #f59f00);padding:6px 9px;border-radius:6px;margin-bottom:10px;line-height:1.5"><span class="ic" data-ic="info"></span> <span data-i18n="ai_relogin_notice">หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)</span></div>
     <input type="file" id="aiPhotoFile" accept="image/*" capture="environment" onchange="handleAiPhotoSelect(this)" style="display:block;width:100%;font-size:.82rem;margin-bottom:10px">
     <img id="aiPhotoPreview" alt="" style="display:none;width:100%;max-height:240px;object-fit:contain;border-radius:9px;background:var(--surface2);margin-bottom:8px">
     <div id="aiPhotoStatus" style="font-size:.78rem;color:var(--muted);text-align:center;margin:6px 0;min-height:20px;display:flex;align-items:center;justify-content:center;gap:8px"></div>
@@ -1525,8 +1531,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <div class="modal-bg hide" id="recipeModal">
   <div class="modal" style="max-width:420px">
     <div class="modal-hdr">
-      <h3 data-i18n="recipe_title">🍲 สร้างสูตรอาหาร</h3>
-      <button class="mc-close" onclick="closeRecipeModal()" aria-label="Close">✕</button>
+      <h3><span class="ic" data-ic="utensils"></span> <span data-i18n="recipe_title">สร้างสูตรอาหาร</span></h3>
+      <button class="mc-close" onclick="closeRecipeModal()" aria-label="Close"><span class="ic" data-ic="x"></span></button>
     </div>
     <div class="fgrid g2" style="margin-bottom:8px">
       <div class="fl"><label data-i18n="recipe_name">ชื่อสูตร</label><input type="text" id="rcpName" placeholder="เช่น ผัดไทยโฮมเมด" data-i18n="recipe_name_ph"></div>
@@ -1539,7 +1545,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <div id="rcpSearchResults" style="max-height:140px;overflow-y:auto;margin-bottom:10px"></div>
     <div id="rcpIngredients"></div>
     <div id="rcpTotals" style="background:var(--surface2);border-radius:9px;padding:10px;margin:10px 0;font-size:.84rem"></div>
-    <button class="btn" onclick="saveRecipe()"><span data-i18n="recipe_save">💾 บันทึกสูตร</span></button>
+    <button class="btn" onclick="saveRecipe()"><span class="ic" data-ic="save"></span> <span data-i18n="recipe_save">บันทึกสูตร</span></button>
   </div>
 </div>
 
@@ -1550,7 +1556,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <!-- Slide 1: Welcome -->
       <div class="ob-slide" data-step="1">
         <div style="text-align:center">
-          <div style="font-size:3.6rem;margin-bottom:6px">🔥</div>
+          <div style="font-size:3.6rem;margin-bottom:6px;color:var(--accent)"><span class="ic" data-ic="flame"></span></div>
           <h3 style="margin:0">Cal<span style="color:var(--accent)">Pro+</span></h3>
           <div style="font-size:.82rem;color:var(--muted);margin:10px 0 16px;line-height:1.6" data-i18n="ob_welcome">ยินดีต้อนรับ! แอปนี้ช่วยติดตามแคลอรี่ + คำนวณ TDEE ฟรี · ไม่ต้องล็อกอิน · ทำงาน offline</div>
           <div style="font-size:.74rem;color:var(--muted);line-height:1.6" data-i18n="ob_welcome_sub">มาตั้งค่าง่ายๆ 3 ขั้นตอนกัน</div>
@@ -1583,16 +1589,16 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <h3 style="margin:0 0 6px 0" data-i18n="ob_goal_title">เป้าหมายของคุณ</h3>
         <div style="font-size:.74rem;color:var(--muted);margin-bottom:14px;line-height:1.5" data-i18n="ob_goal_sub">เลือกเป้าหมายเพื่อคำนวณแคลอรี่/วัน</div>
         <div style="display:grid;grid-template-columns:1fr;gap:8px">
-          <button class="gchip ob-goal-chip" data-g="lose" onclick="pickObGoal(this)" data-i18n="goal_lose">🔥 ลดน้ำหนัก</button>
-          <button class="gchip ob-goal-chip active" data-g="maintain" onclick="pickObGoal(this)" data-i18n="goal_maintain">⚖️ คงน้ำหนัก</button>
-          <button class="gchip ob-goal-chip" data-g="gain" onclick="pickObGoal(this)" data-i18n="goal_gain">💪 เพิ่มกล้ามเนื้อ</button>
+          <button class="gchip ob-goal-chip" data-g="lose" onclick="pickObGoal(this)"><span class="ic" data-ic="flame"></span> <span data-i18n="goal_lose">ลดน้ำหนัก</span></button>
+          <button class="gchip ob-goal-chip active" data-g="maintain" onclick="pickObGoal(this)"><span class="ic" data-ic="scale"></span> <span data-i18n="goal_maintain">คงน้ำหนัก</span></button>
+          <button class="gchip ob-goal-chip" data-g="gain" onclick="pickObGoal(this)"><span class="ic" data-ic="dumbbell"></span> <span data-i18n="goal_gain">เพิ่มกล้ามเนื้อ</span></button>
         </div>
         <div id="obGoalPreview" style="margin-top:12px;padding:12px;background:var(--surface2);border-radius:9px;font-size:.84rem;text-align:center"></div>
       </div>
       <!-- Slide 4: Done -->
       <div class="ob-slide hide" data-step="4">
         <div style="text-align:center">
-          <div style="font-size:3rem;margin-bottom:8px">🎉</div>
+          <div style="font-size:3rem;margin-bottom:8px;color:var(--accent)"><span class="ic" data-ic="sparkle"></span></div>
           <h3 style="margin:0 0 8px 0" data-i18n="ob_done_title">พร้อมใช้งานแล้ว!</h3>
           <div id="obSummary" style="font-size:.86rem;color:var(--muted);line-height:1.7;margin-bottom:12px"></div>
           <div style="font-size:.74rem;color:var(--muted);line-height:1.6" data-i18n="ob_done_tip">เริ่มจากแท็บ <b>+ เพิ่ม</b> ด้านล่าง → ค้นหาอาหาร → กดเลือก → ตั้งจำนวนเท่า → เพิ่ม</div>
@@ -1615,7 +1621,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- UPDATE AVAILABLE MODAL — shown when SW detects a new version -->
 <div class="modal-bg hide" id="updateModal">
   <div class="modal" style="text-align:center">
-    <div style="font-size:2.6rem;margin-bottom:6px">🔄</div>
+    <div style="font-size:2.6rem;margin-bottom:6px;color:var(--accent)"><span class="ic" data-ic="sync"></span></div>
     <h3 style="margin:0 0 6px 0" data-i18n="update_title">มีเวอร์ชันใหม่</h3>
     <div style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.5" data-i18n="update_body">CalPro+ เวอร์ชันใหม่พร้อมติดตั้งแล้ว · รีสตาร์ทแอปเพื่ออัปเดตทันที?</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -1629,8 +1635,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <div class="modal-bg hide" id="whatsNewModal">
   <div class="modal">
     <div class="modal-hdr">
-      <h3 data-i18n="whats_new_title">✨ มีอะไรใหม่</h3>
-      <button class="mc-close" onclick="closeWhatsNew()">✕</button>
+      <h3><span class="ic" data-ic="sparkle"></span> <span data-i18n="whats_new_title">มีอะไรใหม่</span></h3>
+      <button class="mc-close" onclick="closeWhatsNew()"><span class="ic" data-ic="x"></span></button>
     </div>
     <div id="whatsNewBody" style="font-size:.84rem;line-height:1.7;max-height:55vh;overflow-y:auto"></div>
     <button class="btn" style="margin-top:10px" onclick="closeWhatsNew()" data-i18n="got_it">รับทราบ</button>
@@ -1642,11 +1648,11 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <div class="modal-bg hide" id="apkUpdateModal">
   <div class="modal">
     <div class="modal-hdr">
-      <h3 id="apkUpdateTitle">📲 มีเวอร์ชั่นใหม่</h3>
-      <button class="mc-close" onclick="closeApkUpdate()">✕</button>
+      <h3 id="apkUpdateTitle"><span class="ic" data-ic="smartphone"></span> มีเวอร์ชั่นใหม่</h3>
+      <button class="mc-close" onclick="closeApkUpdate()"><span class="ic" data-ic="x"></span></button>
     </div>
     <div id="apkUpdateBody" style="font-size:.84rem;line-height:1.6;color:var(--muted);max-height:48vh;overflow-y:auto;margin-bottom:4px"></div>
-    <button class="btn" id="apkUpdateBtn" style="margin-top:10px" onclick="doApkUpdate()" data-url="">⬇️ ดาวน์โหลด & ติดตั้ง</button>
+    <button class="btn" id="apkUpdateBtn" style="margin-top:10px" onclick="doApkUpdate()" data-url=""><span class="ic" data-ic="download"></span> ดาวน์โหลด & ติดตั้ง</button>
     <button class="btn-sec" style="margin-top:8px" onclick="closeApkUpdate()" id="apkUpdateLater">ภายหลัง</button>
   </div>
 </div>
@@ -1654,7 +1660,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- FEEDBACK MODAL — opens an email draft to the developer -->
 <div class="modal-bg hide" id="feedbackModal">
   <div class="modal">
-    <div class="modal-hdr"><h3 data-i18n="feedback">ส่งคำแนะนำ</h3><button class="mc-close" onclick="closeFeedback()">✕</button></div>
+    <div class="modal-hdr"><h3 data-i18n="feedback">ส่งคำแนะนำ</h3><button class="mc-close" onclick="closeFeedback()"><span class="ic" data-ic="x"></span></button></div>
     <div style="font-size:.74rem;color:var(--muted);margin-bottom:10px;line-height:1.5" data-i18n="feedback_sub">แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา</div>
     <div class="fl" style="margin-bottom:8px">
       <label data-i18n="feedback_subject">หัวเรื่อง</label>
@@ -1664,7 +1670,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <label data-i18n="feedback_body">ข้อความ</label>
       <textarea id="fbBody" rows="6" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:10px 12px;font-size:.88rem;outline:none;font-family:inherit;resize:vertical;min-height:100px" placeholder="พิมพ์ข้อความที่นี่..." data-i18n="feedback_body_ph"></textarea>
     </div>
-    <button class="btn" onclick="sendFeedback()"><span data-i18n="feedback_send">📧 ส่งทางอีเมล</span></button>
+    <button class="btn" onclick="sendFeedback()"><span class="ic" data-ic="mail"></span> <span data-i18n="feedback_send">ส่งทางอีเมล</span></button>
     <div style="font-size:.66rem;color:var(--muted);margin-top:8px;text-align:center">peerawat_pee123@hotmail.co.th</div>
   </div>
 </div>
@@ -1672,7 +1678,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- PORTION MODAL — lets the user pick a quantity before adding a food -->
 <div class="modal-bg hide" id="portionModal">
   <div class="modal">
-    <div class="modal-hdr"><h3 id="portionName">—</h3><button class="mc-close" onclick="closePortionModal()">✕</button></div>
+    <div class="modal-hdr"><h3 id="portionName">—</h3><button class="mc-close" onclick="closePortionModal()"><span class="ic" data-ic="x"></span></button></div>
     <div id="portionBase" style="font-size:.74rem;color:var(--muted);text-align:center;margin-bottom:8px">—</div>
     <div class="qty-chips" id="portionChips">
       <button data-q="0.5" onclick="setPortion(0.5)">0.5×</button>
@@ -1701,7 +1707,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- WORKOUT MODAL -->
 <div class="modal-bg hide" id="workoutModal">
   <div class="modal">
-    <div class="modal-hdr"><h3><span data-i18n="add_workout">เพิ่มออกกำลังกาย</span></h3><button class="mc-close" onclick="closeWorkoutModal()">✕</button></div>
+    <div class="modal-hdr"><h3><span data-i18n="add_workout">เพิ่มออกกำลังกาย</span></h3><button class="mc-close" onclick="closeWorkoutModal()"><span class="ic" data-ic="x"></span></button></div>
     <div class="fl" style="margin-bottom:10px">
       <label data-i18n="workouts">ออกกำลังกาย</label>
       <select id="wkType"></select>
@@ -1717,7 +1723,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- EDIT FOOD MODAL -->
 <div class="modal-bg hide" id="editModal">
   <div class="modal">
-    <div class="modal-hdr"><h3 data-i18n="edit_entry">แก้ไขรายการ</h3><button class="mc-close" onclick="closeEditModal()">✕</button></div>
+    <div class="modal-hdr"><h3 data-i18n="edit_entry">แก้ไขรายการ</h3><button class="mc-close" onclick="closeEditModal()"><span class="ic" data-ic="x"></span></button></div>
     <input type="hidden" id="editId">
     <div class="fgrid g2">
       <div class="fl"><label data-i18n="food_name">ชื่ออาหาร</label><input type="text" id="eName"></div>
@@ -1744,12 +1750,12 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <!-- AVATAR MODAL -->
 <div class="modal-bg hide" id="avatarModal">
   <div class="modal">
-    <div class="modal-hdr"><h3 data-i18n="change_avatar">เปลี่ยนรูปประจำตัว</h3><button class="mc-close" onclick="closeAvatarModal()">✕</button></div>
+    <div class="modal-hdr"><h3 data-i18n="change_avatar">เปลี่ยนรูปประจำตัว</h3><button class="mc-close" onclick="closeAvatarModal()"><span class="ic" data-ic="x"></span></button></div>
     <div class="sec-lbl" data-i18n="cute_avatars">เลือกอวาตาร์น่ารัก ๆ</div>
     <div class="avatar-grid" id="avatarGrid"></div>
     <div class="sec-lbl" data-i18n="or">หรือ</div>
     <input type="file" id="avatarUpload" accept="image/*" hidden onchange="uploadAvatar(this.files[0])">
-    <button class="btn" onclick="document.getElementById('avatarUpload').click()" data-i18n="upload_photo">📷 อัพโหลดรูป</button>
+    <button class="btn" onclick="document.getElementById('avatarUpload').click()"><span class="ic" data-ic="image"></span> <span data-i18n="upload_photo">อัพโหลดรูป</span></button>
     <button class="btn-sec" onclick="resetAvatar()" style="margin-top:8px;width:100%" data-i18n="use_initial">ใช้ตัวอักษรแรก</button>
   </div>
 </div>
@@ -1803,7 +1809,96 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.32.1';
+const APP_VERSION = '2.32.2';
+
+// ═══ LINE-ICON SYSTEM (Feather-style) ═══
+// Central map of monochrome line icons that replace UI emojis app-wide, matching
+// the bottom-nav style (stroke=currentColor, 24-grid). Two ways to use them:
+//   • Static markup:  <span class="ic" data-ic="search"></span>  → filled by fillIcons()
+//   • JS-built HTML:   icoSvg('search')  → returns the <span class="ic"><svg>…</span>
+// NOTE: meal icons, meal-type pickers, achievement badges, the "tips" bulb and the
+// Ads block intentionally keep their colorful emoji — they're not in this map.
+const ICONS = {
+  search:'<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  barcode:'<path d="M3 5v14M7 5v14M11 5v14M14 5v14M18 5v14M21 5v14"/>',
+  ai:'<rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4M9 3h6"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M2 12v3M22 12v3"/>',
+  share:'<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>',
+  save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+  edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>',
+  zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  sync:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+  sparkle:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  bell:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  alert:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  checkcircle:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  chart:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  trending:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  scale:'<path d="M12 3v18M5 7h14M5 7l-3 7a4 4 0 0 0 6 0L5 7zM19 7l-3 7a4 4 0 0 0 6 0l-3-7zM7 21h10"/>',
+  target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  droplet:'<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>',
+  activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  ruler:'<path d="M21.3 8.7l-5.6-5.6a1 1 0 0 0-1.4 0L2.7 14.3a1 1 0 0 0 0 1.4l5.6 5.6a1 1 0 0 0 1.4 0L21.3 10.1a1 1 0 0 0 0-1.4z"/><path d="M7.5 10.5l2 2M10.5 7.5l2 2M13.5 4.5l2 2M4.5 13.5l2 2"/>',
+  user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  award:'<circle cx="12" cy="8" r="6"/><path d="M15.79 12.7L17 22l-5-3-5 3 1.21-9.3"/>',
+  note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 4H4v2a3 3 0 0 0 3 3M17 4h3v2a3 3 0 0 1-3 3"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  github:'<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>',
+  message:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+  help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  sun:'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+  moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  filter:'<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+  bolt:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  eye:'<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>',
+  clipboard:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+  heart:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  login:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+  refresh:'<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>',
+  utensils:'<path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
+  package:'<path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12"/>',
+  code:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  smartphone:'<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/>',
+  mappin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  dumbbell:'<path d="M6.5 6.5 17.5 17.5M3 7l2-2 3 3-2 2zM7 3l2-2M2 8l-1 1M16 16l3 3 2-2-3-3zM21 17l1-1M16 22l-1-1"/>',
+  home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  cloud:'<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
+  rocket:'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09zM12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+};
+function icoSvg(name, extraCls){
+  const p = ICONS[name];
+  if(!p) return '';
+  return '<span class="ic'+(extraCls?' '+extraCls:'')+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg></span>';
+}
+function fillIcons(root){
+  (root||document).querySelectorAll('[data-ic]').forEach(el=>{
+    if(el.getAttribute('data-ic-done')!==null) return;
+    const p = ICONS[el.dataset.ic];
+    if(p){ el.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>'; el.setAttribute('data-ic-done',''); }
+  });
+}
 
 // ═══ NATIVE APK AUTO-UPDATE ═══
 // The Android APK bundles the web assets, so (unlike the web, which the Service
@@ -1930,20 +2025,20 @@ const I18N = {
     morning:'เช้า',lunch:'กลางวัน',dinner:'เย็น',snack:'ของว่าง',
     morning_opt:'🌅 เช้า',lunch_opt:'☀️ กลางวัน',dinner_opt:'🌙 เย็น',snack_opt:'🍎 ของว่าง',
     no_entries:'ยังไม่มีรายการ',press_add:'กด ➕ เพื่อบันทึกอาหาร',quick_add:'เพิ่มด่วน',added_quick:'เพิ่มแล้ว',
-    quick_fav:'⭐ ของโปรด',quick_recent:'🕘 ล่าสุด',
+    quick_fav:'ของโปรด',quick_recent:'ล่าสุด',
     search_food:'ค้นหาอาหาร',search_ph:'พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)...',
     no_food:'ไม่พบอาหาร',no_fav:'ยังไม่มีของโปรด · กด ⭐ ในผลค้นหา',no_recent:'ยังไม่มีรายการล่าสุด · เพิ่มอาหารดูสิ',
     meal:'มื้ออาหาร',
     manual:'กรอกเอง',food_name:'ชื่ออาหาร',name_ph:'ชื่อ...',cal:'แคลอรี่',cal_ph:'kcal',
     protein_g:'โปรตีน (g)',carbs_g:'คาร์บ (g)',fat_g:'ไขมัน (g)',
-    save_lib:'💾 บันทึกลงไลบรารี',attach_photo:'📷 แนบรูป',btn_add:'+ เพิ่มอาหาร',
+    save_lib:'บันทึกลงไลบรารี',attach_photo:'แนบรูป',btn_add:'+ เพิ่มอาหาร',
     cal_7d:'แคลอรี่ 7 วัน',weight_30d:'น้ำหนัก 30 วัน',water_7d:'น้ำดื่ม 7 วัน',projection_title:'แนวโน้มน้ำหนัก 30 วัน + พยากรณ์',
     days_logged:'บันทึก',avg_per_day:'เฉลี่ย/วัน',days_over:'วันเกินเป้า',days_on:'วันในเป้า',
-    summary:'สรุป',advice:'คำแนะนำ',badges:'เหรียญตรา',share_today:'📤 แชร์สรุปวันนี้',share_ach:'🏆 แชร์ความสำเร็จ',
+    summary:'สรุป',advice:'คำแนะนำ',badges:'เหรียญตรา',share_today:'แชร์สรุปวันนี้',share_ach:'แชร์ความสำเร็จ',
     tdee_title:'เครื่องคำนวณ TDEE',tdee_sub:'Total Daily Energy Expenditure — พลังงานที่ร่างกายเผาผลาญต่อวัน',
     fill_info:'กรอกข้อมูล',gender:'เพศ',male:'ชาย',female:'หญิง',age:'อายุ (ปี)',
     weight_kg:'น้ำหนัก (กก.)',height_cm:'ส่วนสูง (ซม.)',activity_lvl:'ระดับกิจกรรม',goal_title:'เป้าหมาย',
-    goal_lose:'🔥 ลดน้ำหนัก',goal_maintain:'⚖️ คงน้ำหนัก',goal_gain:'💪 เพิ่มกล้ามเนื้อ',
+    goal_lose:'ลดน้ำหนัก',goal_maintain:'คงน้ำหนัก',goal_gain:'เพิ่มกล้ามเนื้อ',
     your_tdee:'ค่า TDEE ของคุณ',kcal_per_day:'kcal / วัน',bmr:'BMR',goal_per_day:'เป้าหมาย/วัน',
     macros_rec:'โปรตีน · คาร์บ · ไขมัน แนะนำ',apply_as_goal:'ใช้ค่านี้เป็นเป้าหมาย',
     personal_info:'ข้อมูลส่วนตัว',name:'ชื่อ',goal_weight_kg:'เป้าหมาย (กก.)',
@@ -1954,7 +2049,7 @@ const I18N = {
     enter_ph:'กรอก...',weight_trend_hint:'บันทึกอย่างน้อย 2 วันเพื่อดูแนวโน้ม',
     no_workouts:'ยังไม่มีการออกกำลังกาย',
     edit:'แก้ไข',del:'ลบ',edit_entry:'แก้ไขรายการ',change_avatar:'เปลี่ยนรูปประจำตัว',
-    cute_avatars:'เลือกอวาตาร์น่ารัก ๆ',or:'หรือ',upload_photo:'📷 อัพโหลดรูป',use_initial:'ใช้ตัวอักษรแรก',
+    cute_avatars:'เลือกอวาตาร์น่ารัก ๆ',or:'หรือ',upload_photo:'อัพโหลดรูป',use_initial:'ใช้ตัวอักษรแรก',
     workouts:'ออกกำลังกาย',add_workout:'+ เพิ่มออกกำลังกาย',duration_min:'นาที',kcal_burned:'kcal เผาผลาญ',
     body_measurements:'สัดส่วนร่างกาย',waist:'รอบเอว',hip:'รอบสะโพก',chest:'รอบอก',neck:'รอบคอ',bodyfat:'ไขมัน %',
     measure_history:'ครั้งล่าสุด',
@@ -1964,40 +2059,40 @@ const I18N = {
     friends:'เพื่อน + Leaderboard',not_signed_in:'ยังไม่เชื่อมต่อ · ข้อมูลอยู่ในเบราว์เซอร์นี้เท่านั้น',
     last_sync:'ซิงค์ล่าสุด',sync_now:'ซิงค์เลย',sign_out:'ออกจากระบบ',delete_cloud:'ลบข้อมูลใน cloud',
     streak:'Streak',on_track:'ในเป้า',days:'วัน',
-    smart_goal:'💡 ปรับเป้าหมายอัตโนมัติ?',recap_title:'📅 สรุปสัปดาห์ที่แล้ว',
+    smart_goal:'ปรับเป้าหมายอัตโนมัติ?',recap_title:'📅 สรุปสัปดาห์ที่แล้ว',
     no_measure_yet:'กรอกรอบเอว + รอบคอ (+สะโพกสำหรับผู้หญิง) เพื่อคำนวณ % ไขมัน',
     weekly_recap_logged:'วันที่บันทึก',weekly_recap_change:'น้ำหนัก',weekly_recap_water_avg:'น้ำดื่มเฉลี่ย',
     add_friend:'+ เพิ่มเพื่อนด้วยอีเมล',later:'ทีหลัง',apply_now:'ปรับให้เลย',got_it:'รับทราบ',
     act_1:'ไม่ค่อยออกกำลังกาย',act_2:'เบา 1–3 วัน/สัปดาห์',act_3:'ปานกลาง 3–5 วัน/สัปดาห์',act_4:'หนัก 6–7 วัน/สัปดาห์',act_5:'หนักมาก / งานใช้แรง',
     tact_1:'นั่งทำงาน · ไม่ออกกำลังกาย (×1.2)',tact_2:'เบา · 1–3 วัน/สัปดาห์ (×1.375)',tact_3:'ปานกลาง · 3–5 วัน/สัปดาห์ (×1.55)',tact_4:'หนัก · 6–7 วัน/สัปดาห์ (×1.725)',tact_5:'หนักมาก · งานใช้แรง (×1.9)',
     name_ph_profile:'ชื่อ',goal_label:'เป้าหมาย',
-    test_notif:'🔔 ทดสอบส่งแจ้งเตือน',customize_nav:'ปรับแต่งแถบล่าง',customize_nav_sub:'เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้',locked:'ติดตั้งไว้',
+    test_notif:'ทดสอบส่งแจ้งเตือน',customize_nav:'ปรับแต่งแถบล่าง',customize_nav_sub:'เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้',locked:'ติดตั้งไว้',
     account_section:'บัญชี',tools_section:'เครื่องมือ',settings_section:'การตั้งค่า',other_section:'อื่น ๆ',friends_only:'เพื่อน',about:'เกี่ยวกับ',
     appearance:'รูปลักษณ์',compact_mode:'โหมดกะทัดรัด',compact_mode_sub:'ลดช่องว่าง · เห็นข้อมูลได้มากขึ้นต่อหน้า',
     simple_mode:'โหมดใช้งานง่าย',simple_mode_sub:'เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น',
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
     streak_saver:'เตือนรักษา streak',streak_saver_sub:'push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)',
-    edit_profile:'✏️ แก้ไขโปรไฟล์',edit_profile_long:'✏️ แก้ไขโปรไฟล์',
+    edit_profile:'แก้ไขโปรไฟล์',edit_profile_long:'✏️ แก้ไขโปรไฟล์',
     bio_label:'เกี่ยวกับฉัน',bio_empty_self:'ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม',bio_empty_friend:'(เพื่อนยังไม่ใส่คำอธิบาย)',
     banner_color:'สีแบนเนอร์',
     badges_showcase:'🏅 เหรียญตราที่ได้รับ',
-    my_goal:'🎯 เป้าหมายของฉัน',goal_type_lbl:'ประเภท',goal_label2:'เป้า/วัน',weight_progress:'น้ำหนัก',
+    my_goal:'เป้าหมายของฉัน',goal_type_lbl:'ประเภท',goal_label2:'เป้า/วัน',weight_progress:'น้ำหนัก',
     streak_lbl:'streak',days_lbl:'วันที่บันทึก',on_track_lbl:'อยู่ในเป้า',score_lbl:'คะแนน',
     send_cheer:'👏 ส่งกำลังใจ',cheer_sent:'ส่งกำลังใจให้ %n แล้ว 👏',
     lvl_newcomer:'มือใหม่',lvl_starter:'นักสะสมสตรีค',lvl_regular:'ขาประจำ',lvl_pro:'มืออาชีพ',lvl_master:'มาสเตอร์',lvl_champion:'แชมป์เปี้ยน',lvl_veteran:'ผู้เก๋าเกม',lvl_elite:'ระดับเอลีท',lvl_mythic:'ระดับมิทิก',lvl_legend:'ตำนาน',
     lvl_progress:'อีก %n คะแนนถึง Lv %l',lvl_maxed:'ระดับสูงสุด · เก่งเทพ!',
     crop_title:'ปรับตำแหน่งรูป',crop_hint:'ลากเพื่อเลื่อน · เลื่อน slider เพื่อซูม',crop_zoom:'ซูม',crop_reset:'รีเซ็ต',crop_cancel:'ยกเลิก',crop_apply:'✓ ใช้รูปนี้',
     period_7d:'7 วัน',period_30d:'1 เดือน',cal_30d:'แคลอรี่ 30 วัน',water_30d:'น้ำดื่ม 30 วัน',
-    lb_friends:'👥 เพื่อน',lb_global:'🌍 ทั้งหมด',lb_loading_all:'กำลังโหลดอันดับทั้งหมด...',lb_no_users:'ยังไม่มีผู้ใช้คนอื่น',
+    lb_friends:'เพื่อน',lb_global:'ทั้งหมด',lb_loading_all:'กำลังโหลดอันดับทั้งหมด...',lb_no_users:'ยังไม่มีผู้ใช้คนอื่น',
     lb_signin_needed:'🔒 กรุณาล็อกอินก่อนเพื่อดูเพื่อน + เพิ่มเพื่อน',lb_go_signin:'ไปหน้าตั้งค่า → Cloud Sync',
     fp_loading:'กำลังโหลดโปรไฟล์...',fp_err:'โหลดโปรไฟล์ไม่สำเร็จ',
     dev_unlocked:'🔧 ปลดล็อก Developer mode',dev_locked:'ล็อก Developer mode แล้ว',dev_wrong_pw:'รหัสผ่านไม่ถูกต้อง',dev_dumped:'ดัมป์ใน console แล้ว',
     sign_in_first:'กรุณาเข้าสู่ระบบก่อน',
     friend_profile_title:'👤 โปรไฟล์เพื่อน',close:'ปิด',
     banner_image:'หรืออัปโหลดรูปแบนเนอร์',banner_remove:'ลบรูปแบนเนอร์',
-    ai_settings_title:'🤖 AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)',
+    ai_settings_title:'AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)',
     ai_settings_sub:'ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)',
-    ai_photo_btn:'🤖 ถ่ายรูป AI',ai_photo_title:'🤖 ถ่ายรูปอาหาร · AI ประเมิน',
+    ai_photo_btn:'ถ่ายรูป AI',ai_photo_title:'🤖 ถ่ายรูปอาหาร · AI ประเมิน',
     ai_photo_hint:'ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก',
     ai_relogin_notice:'📌 หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)',
     smart_goal_pref:'ปรับเป้าหมายอัตโนมัติ',smart_goal_pref_sub:'แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า',
@@ -2009,19 +2104,19 @@ const I18N = {
     help_title:'วิธีใช้งาน',health_tips:'คำแนะนำสุขภาพวันนี้',
     portion_label:'จำนวน (เท่า)',portion_amount:'ปริมาณ',font_setting:'ฟอนต์',font_system:'ค่าเริ่มต้น',
     ad_label:'โฆษณา',ad_dismiss_aria:'ปิดโฆษณา',
-    feedback:'ส่งคำแนะนำ',feedback_sub:'แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา',feedback_subject:'หัวเรื่อง',feedback_body:'ข้อความ',feedback_send:'📧 ส่งทางอีเมล',feedback_subj_ph:'เช่น “อยากให้เพิ่มเมนูใหม่...”',feedback_body_ph:'พิมพ์ข้อความที่นี่...',
+    feedback:'ส่งคำแนะนำ',feedback_sub:'แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา',feedback_subject:'หัวเรื่อง',feedback_body:'ข้อความ',feedback_send:'ส่งทางอีเมล',feedback_subj_ph:'เช่น “อยากให้เพิ่มเมนูใหม่...”',feedback_body_ph:'พิมพ์ข้อความที่นี่...',
     update_title:'มีเวอร์ชันใหม่',update_body:'CalPro+ เวอร์ชันใหม่พร้อมติดตั้งแล้ว · รีสตาร์ทแอปเพื่ออัปเดตทันที?',update_later:'ไว้ทีหลัง',update_now:'อัปเดตเลย',
-    whats_new_title:'✨ มีอะไรใหม่',check_updates:'🔄 ตรวจหาเวอร์ชันใหม่',check_updates_sub:'ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง',checking_updates:'กำลังตรวจสอบ...',latest_version:'คุณใช้เวอร์ชันล่าสุดอยู่แล้ว ✓',
-    clean_photos:'🧹 ลบรูปอาหารเก่า (>30 วัน)',
-    quick_presets:'🍱 ชุดอาหาร',preset_save_today:'+ บันทึกอาหารวันนี้เป็นชุด',preset_name_ph:'ตั้งชื่อชุด เช่น "มื้อเช้าปกติ"',preset_no_items:'ยังไม่มีชุด · ลองเพิ่มอาหารวันนี้แล้วกด "บันทึกเป็นชุด"',preset_added:'เพิ่ม %n รายการจากชุด ✓',preset_deleted:'ลบชุดแล้ว',preset_empty_day:'ยังไม่มีอาหารที่บันทึกวันนี้',preset_saved:'บันทึกชุดแล้ว ✓',
+    whats_new_title:'มีอะไรใหม่',check_updates:'ตรวจหาเวอร์ชันใหม่',check_updates_sub:'ตรวจว่ามี CalPro+ เวอร์ชันใหม่หรือยัง',checking_updates:'กำลังตรวจสอบ...',latest_version:'คุณใช้เวอร์ชันล่าสุดอยู่แล้ว ✓',
+    clean_photos:'ลบรูปอาหารเก่า (>30 วัน)',
+    quick_presets:'ชุดอาหาร',preset_save_today:'+ บันทึกอาหารวันนี้เป็นชุด',preset_name_ph:'ตั้งชื่อชุด เช่น "มื้อเช้าปกติ"',preset_no_items:'ยังไม่มีชุด · ลองเพิ่มอาหารวันนี้แล้วกด "บันทึกเป็นชุด"',preset_added:'เพิ่ม %n รายการจากชุด ✓',preset_deleted:'ลบชุดแล้ว',preset_empty_day:'ยังไม่มีอาหารที่บันทึกวันนี้',preset_saved:'บันทึกชุดแล้ว ✓',
     ob_welcome:'ยินดีต้อนรับ! แอปนี้ช่วยติดตามแคลอรี่ + คำนวณ TDEE ฟรี · ไม่ต้องล็อกอิน · ทำงาน offline',ob_welcome_sub:'มาตั้งค่าง่ายๆ 3 ขั้นตอนกัน',
     ob_profile_title:'ข้อมูลพื้นฐาน',ob_profile_sub:'ใช้คำนวณ TDEE/BMR ที่แม่นยำ · ปรับได้ทีหลัง',
     ob_goal_title:'เป้าหมายของคุณ',ob_goal_sub:'เลือกเป้าหมายเพื่อคำนวณแคลอรี่/วัน',
     ob_done_title:'พร้อมใช้งานแล้ว!',ob_done_tip:'เริ่มจากแท็บ <b>+ เพิ่ม</b> ด้านล่าง → ค้นหาอาหาร → กดเลือก → ตั้งจำนวนเท่า → เพิ่ม',
     ob_back:'ย้อนกลับ',ob_next:'ถัดไป',ob_start:'เริ่มใช้งาน',ob_skip:'ข้ามไปก่อน',ob_fillall:'กรอกข้อมูลให้ครบก่อน',
     add_friend_title:'เพิ่มเพื่อน',add_friend_sub:'ค้นหาด้วยอีเมลหรือชื่อที่แสดง',fr_no_results:'ไม่พบผู้ใช้',fr_search_short:'พิมพ์อย่างน้อย 2 ตัวอักษร',fr_already:'มีในรายชื่อเพื่อนแล้ว',fr_self:'นี่คือคุณ',fr_added:'เพิ่ม %n เป็นเพื่อนแล้ว ✓',fr_removed:'ลบ %n ออกจากเพื่อนแล้ว',fr_confirm_remove:'ลบ "%n" ออกจากเพื่อน?',
-    scan_barcode:'📷 สแกนบาร์โค้ด',barcode_hint:'หันกล้องไปที่บาร์โค้ดของสินค้า · ข้อมูลจากฐาน OpenFoodFacts',barcode_or_manual:'หรือพิมพ์รหัสเอง',barcode_lookup:'ค้นหา',barcode_starting:'กำลังเปิดกล้อง...',barcode_scanning:'ส่องบาร์โค้ดในกรอบ',barcode_no_camera:'ไม่สามารถเปิดกล้องได้ · ใช้การพิมพ์รหัสแทน',barcode_lib_fail:'โหลดตัวสแกนไม่สำเร็จ · ลองอีกครั้งเมื่อมีอินเทอร์เน็ต',barcode_found:'พบ',barcode_notfound:'ไม่พบสินค้านี้ในฐาน',barcode_lookup_err:'ค้นหาไม่สำเร็จ · ตรวจอินเทอร์เน็ตและลองใหม่',barcode_invalid:'กรอกรหัสบาร์โค้ดให้ถูกต้อง',
-    recipe_title:'🍲 สร้างสูตรอาหาร',recipe_sub:'รวมหลายส่วนผสมเป็นเมนูเดียว · บันทึกลงไลบรารีเพื่อใช้ซ้ำได้',recipe_open:'+ สร้างสูตรใหม่',
+    scan_barcode:'สแกนบาร์โค้ด',barcode_hint:'หันกล้องไปที่บาร์โค้ดของสินค้า · ข้อมูลจากฐาน OpenFoodFacts',barcode_or_manual:'หรือพิมพ์รหัสเอง',barcode_lookup:'ค้นหา',barcode_starting:'กำลังเปิดกล้อง...',barcode_scanning:'ส่องบาร์โค้ดในกรอบ',barcode_no_camera:'ไม่สามารถเปิดกล้องได้ · ใช้การพิมพ์รหัสแทน',barcode_lib_fail:'โหลดตัวสแกนไม่สำเร็จ · ลองอีกครั้งเมื่อมีอินเทอร์เน็ต',barcode_found:'พบ',barcode_notfound:'ไม่พบสินค้านี้ในฐาน',barcode_lookup_err:'ค้นหาไม่สำเร็จ · ตรวจอินเทอร์เน็ตและลองใหม่',barcode_invalid:'กรอกรหัสบาร์โค้ดให้ถูกต้อง',
+    recipe_title:'สร้างสูตรอาหาร',recipe_sub:'รวมหลายส่วนผสมเป็นเมนูเดียว · บันทึกลงไลบรารีเพื่อใช้ซ้ำได้',recipe_open:'+ สร้างสูตรใหม่',
     recipe_name:'ชื่อสูตร',recipe_name_ph:'เช่น ผัดไทยโฮมเมด',recipe_servings:'จำนวนเสิร์ฟ',recipe_ingredients:'ส่วนผสม',recipe_save:'💾 บันทึกสูตร',recipe_no_ing:'ยังไม่มีส่วนผสม · ค้นหาด้านบนเพื่อเพิ่ม',recipe_per_serving:'ต่อ 1 เสิร์ฟ',recipe_total:'รวมทั้งหมด',recipe_need_name:'กรุณาตั้งชื่อสูตร',recipe_need_ing:'กรุณาเพิ่มส่วนผสม',recipe_saved:'บันทึกสูตรลงไลบรารีแล้ว ✓',
   },
   en:{
@@ -2032,20 +2127,20 @@ const I18N = {
     morning:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',
     morning_opt:'🌅 Breakfast',lunch_opt:'☀️ Lunch',dinner_opt:'🌙 Dinner',snack_opt:'🍎 Snack',
     no_entries:'No entries yet',press_add:'Press ➕ to log food',quick_add:'Quick add',added_quick:'Added',
-    quick_fav:'⭐ Favorites',quick_recent:'🕘 Recent',
+    quick_fav:'Favorites',quick_recent:'Recent',
     search_food:'Search Food',search_ph:'Type food name (TH/EN)...',
     no_food:'No food found',no_fav:'No favorites yet · tap ⭐ on a result',no_recent:'No recent items · log something to populate this',
     meal:'Meal',
     manual:'Manual Entry',food_name:'Food name',name_ph:'Name...',cal:'Calories',cal_ph:'kcal',
     protein_g:'Protein (g)',carbs_g:'Carbs (g)',fat_g:'Fat (g)',
-    save_lib:'💾 Save to my library',attach_photo:'📷 Attach photo',btn_add:'+ Add food',
+    save_lib:'Save to my library',attach_photo:'Attach photo',btn_add:'+ Add food',
     cal_7d:'7-day Calories',weight_30d:'30-day Weight',water_7d:'7-day Water',projection_title:'30-day weight trend + forecast',
     days_logged:'Days logged',avg_per_day:'Avg / day',days_over:'Over goal',days_on:'On goal',
-    summary:'Summary',advice:'Tips',badges:'Badges',share_today:'📤 Share today',share_ach:'🏆 Share achievements',
+    summary:'Summary',advice:'Tips',badges:'Badges',share_today:'Share today',share_ach:'Share achievements',
     tdee_title:'TDEE Calculator',tdee_sub:'Total Daily Energy Expenditure — calories your body burns per day',
     fill_info:'Your info',gender:'Gender',male:'Male',female:'Female',age:'Age (yrs)',
     weight_kg:'Weight (kg)',height_cm:'Height (cm)',activity_lvl:'Activity level',goal_title:'Goal',
-    goal_lose:'🔥 Lose weight',goal_maintain:'⚖️ Maintain',goal_gain:'💪 Build muscle',
+    goal_lose:'Lose weight',goal_maintain:'Maintain',goal_gain:'Build muscle',
     your_tdee:'Your TDEE',kcal_per_day:'kcal / day',bmr:'BMR',goal_per_day:'Daily goal',
     macros_rec:'Recommended macros',apply_as_goal:'Use as my goal',
     personal_info:'Personal info',name:'Name',goal_weight_kg:'Goal (kg)',
@@ -2056,7 +2151,7 @@ const I18N = {
     enter_ph:'Enter...',weight_trend_hint:'Log at least 2 days to see trend',
     no_workouts:'No workouts logged yet',
     edit:'Edit',del:'Delete',edit_entry:'Edit entry',change_avatar:'Change avatar',
-    cute_avatars:'Pick a cute avatar',or:'Or',upload_photo:'📷 Upload photo',use_initial:'Use initial letter',
+    cute_avatars:'Pick a cute avatar',or:'Or',upload_photo:'Upload photo',use_initial:'Use initial letter',
     workouts:'Workouts',add_workout:'+ Add workout',duration_min:'min',kcal_burned:'kcal burned',
     body_measurements:'Body measurements',waist:'Waist',hip:'Hip',chest:'Chest',neck:'Neck',bodyfat:'Body fat %',
     measure_history:'Recent measurements',
@@ -2066,40 +2161,40 @@ const I18N = {
     friends:'Friends + Leaderboard',not_signed_in:'Not signed in · Data stored in this browser only',
     last_sync:'Last sync',sync_now:'Sync now',sign_out:'Sign out',delete_cloud:'Delete cloud data',
     streak:'Streak',on_track:'On track',days:'days',
-    smart_goal:'💡 Adjust goal automatically?',recap_title:'📅 Last week summary',
+    smart_goal:'Adjust goal automatically?',recap_title:'📅 Last week summary',
     no_measure_yet:'Enter waist + neck (+ hip for women) to calculate body fat %',
     weekly_recap_logged:'Days logged',weekly_recap_change:'Weight',weekly_recap_water_avg:'Avg water',
     add_friend:'+ Add friend by email',later:'Later',apply_now:'Apply',got_it:'Got it',
     act_1:'Sedentary',act_2:'Light · 1–3 days/wk',act_3:'Moderate · 3–5 days/wk',act_4:'Active · 6–7 days/wk',act_5:'Very active / heavy labor',
     tact_1:'Sedentary (×1.2)',tact_2:'Light · 1–3 days/wk (×1.375)',tact_3:'Moderate · 3–5 days/wk (×1.55)',tact_4:'Active · 6–7 days/wk (×1.725)',tact_5:'Very active / heavy labor (×1.9)',
     name_ph_profile:'Name',goal_label:'Goal',
-    test_notif:'🔔 Send test notification',customize_nav:'Customize bottom bar',customize_nav_sub:'Pick up to 5 tabs · "Today" is pinned',locked:'pinned',
+    test_notif:'Send test notification',customize_nav:'Customize bottom bar',customize_nav_sub:'Pick up to 5 tabs · "Today" is pinned',locked:'pinned',
     account_section:'Account',tools_section:'Tools',settings_section:'Settings',other_section:'Other',friends_only:'Friends',about:'About',
     appearance:'Appearance',compact_mode:'Compact mode',compact_mode_sub:'Tighter spacing · more info per screen',
     simple_mode:'Simple mode',simple_mode_sub:'Focus on calorie ring + meals · larger fonts · hides other widgets',
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
     streak_saver:'Streak saver',streak_saver_sub:'21:30 push if not logged yet + streak ≥ 3 days (APK only)',
-    edit_profile:'✏️ Edit profile',edit_profile_long:'✏️ Edit profile',
+    edit_profile:'Edit profile',edit_profile_long:'✏️ Edit profile',
     bio_label:'About me',bio_empty_self:'No bio yet · tap Edit profile to add one',bio_empty_friend:'(No bio yet)',
     banner_color:'Banner color',
     badges_showcase:'🏅 Badges earned',
-    my_goal:'🎯 My goal',goal_type_lbl:'Type',goal_label2:'Daily',weight_progress:'Weight',
+    my_goal:'My goal',goal_type_lbl:'Type',goal_label2:'Daily',weight_progress:'Weight',
     streak_lbl:'streak',days_lbl:'logged',on_track_lbl:'on track',score_lbl:'score',
     send_cheer:'👏 Send cheer',cheer_sent:'Sent cheer to %n 👏',
     lvl_newcomer:'Newcomer',lvl_starter:'Streak starter',lvl_regular:'Regular',lvl_pro:'Pro',lvl_master:'Master',lvl_champion:'Champion',lvl_veteran:'Veteran',lvl_elite:'Elite',lvl_mythic:'Mythic',lvl_legend:'Legend',
     lvl_progress:'%n more to Lv %l',lvl_maxed:'Max level · godlike!',
     crop_title:'Adjust image',crop_hint:'Drag to move · slider to zoom',crop_zoom:'Zoom',crop_reset:'Reset',crop_cancel:'Cancel',crop_apply:'✓ Apply',
     period_7d:'7 days',period_30d:'30 days',cal_30d:'30-day calories',water_30d:'30-day water',
-    lb_friends:'👥 Friends',lb_global:'🌍 Global',lb_loading_all:'Loading global ranking...',lb_no_users:'No other users yet',
+    lb_friends:'Friends',lb_global:'Global',lb_loading_all:'Loading global ranking...',lb_no_users:'No other users yet',
     lb_signin_needed:'🔒 Sign in to see friends + add new ones',lb_go_signin:'Go to Settings → Cloud Sync',
     fp_loading:'Loading profile...',fp_err:'Failed to load profile',
     dev_unlocked:'🔧 Developer mode unlocked',dev_locked:'Developer mode locked',dev_wrong_pw:'Wrong password',dev_dumped:'Dumped to console',
     sign_in_first:'Sign in first',
     friend_profile_title:'👤 Friend profile',close:'Close',
     banner_image:'or upload banner image',banner_remove:'Remove banner image',
-    ai_settings_title:'🤖 AI food vision (bring your own key)',
+    ai_settings_title:'AI food vision (bring your own key)',
     ai_settings_sub:'Snap a photo → AI estimates kcal/macros · uses your own API key (Claude/OpenAI/Gemini)',
-    ai_photo_btn:'🤖 AI photo',ai_photo_title:'🤖 Photo · AI estimate',
+    ai_photo_btn:'AI photo',ai_photo_title:'🤖 Photo · AI estimate',
     ai_photo_hint:'Take one food photo · AI will estimate name/kcal/macros · review + edit before saving',
     ai_relogin_notice:'📌 Note: if AI camera doesn\'t work, please sign out and sign back in (Settings → Cloud Sync)',
     smart_goal_pref:'Auto goal adjustment',smart_goal_pref_sub:'Popup every 4 weeks if weight trend deviates',
@@ -2111,19 +2206,19 @@ const I18N = {
     help_title:'How to use',health_tips:'Health insights today',
     portion_label:'Quantity (×)',portion_amount:'Amount',font_setting:'Font',font_system:'System default',
     ad_label:'Ad',ad_dismiss_aria:'Dismiss ad',
-    feedback:'Send feedback',feedback_sub:'Share suggestions/bugs with the developer',feedback_subject:'Subject',feedback_body:'Message',feedback_send:'📧 Send via email',feedback_subj_ph:'e.g. "Please add more foods..."',feedback_body_ph:'Type your message here...',
+    feedback:'Send feedback',feedback_sub:'Share suggestions/bugs with the developer',feedback_subject:'Subject',feedback_body:'Message',feedback_send:'Send via email',feedback_subj_ph:'e.g. "Please add more foods..."',feedback_body_ph:'Type your message here...',
     update_title:'New version available',update_body:'A new version of CalPro+ is ready · Restart now to apply?',update_later:'Later',update_now:'Update now',
-    whats_new_title:'✨ What\'s new',check_updates:'🔄 Check for updates',check_updates_sub:'See if a new CalPro+ version is available',checking_updates:'Checking...',latest_version:'You\'re on the latest version ✓',
-    clean_photos:'🧹 Clear photos older than 30 days',
-    quick_presets:'🍱 Sets',preset_save_today:'+ Save today as a set',preset_name_ph:'Name this set e.g. "Usual breakfast"',preset_no_items:'No sets yet · log some food today and tap "Save as set"',preset_added:'Added %n items from set ✓',preset_deleted:'Set deleted',preset_empty_day:'No food logged today yet',preset_saved:'Set saved ✓',
+    whats_new_title:'What\'s new',check_updates:'Check for updates',check_updates_sub:'See if a new CalPro+ version is available',checking_updates:'Checking...',latest_version:'You\'re on the latest version ✓',
+    clean_photos:'Clear photos older than 30 days',
+    quick_presets:'Sets',preset_save_today:'+ Save today as a set',preset_name_ph:'Name this set e.g. "Usual breakfast"',preset_no_items:'No sets yet · log some food today and tap "Save as set"',preset_added:'Added %n items from set ✓',preset_deleted:'Set deleted',preset_empty_day:'No food logged today yet',preset_saved:'Set saved ✓',
     ob_welcome:'Welcome! Track your calories + calculate TDEE for free · No login · Works offline',ob_welcome_sub:'Let\'s set up in 3 quick steps',
     ob_profile_title:'Your basics',ob_profile_sub:'Used for accurate TDEE/BMR · editable later',
     ob_goal_title:'Your goal',ob_goal_sub:'Pick a goal to calculate your daily calorie target',
     ob_done_title:'You\'re all set!',ob_done_tip:'Start from the <b>+ Add</b> tab below → search a food → tap → pick a portion → add',
     ob_back:'Back',ob_next:'Next',ob_start:'Start using',ob_skip:'Skip for now',ob_fillall:'Please fill in all fields first',
     add_friend_title:'Add friend',add_friend_sub:'Search by email or display name',fr_no_results:'No users found',fr_search_short:'Type at least 2 characters',fr_already:'Already in your friends list',fr_self:'That\'s you',fr_added:'Added %n as a friend ✓',fr_removed:'Removed %n from friends',fr_confirm_remove:'Remove "%n" from friends?',
-    scan_barcode:'📷 Scan barcode',barcode_hint:'Aim the camera at a product\'s barcode · data from OpenFoodFacts',barcode_or_manual:'Or enter the code manually',barcode_lookup:'Lookup',barcode_starting:'Starting camera...',barcode_scanning:'Hold a barcode inside the frame',barcode_no_camera:'Camera unavailable · use manual entry',barcode_lib_fail:'Scanner library failed to load · retry when online',barcode_found:'Found',barcode_notfound:'Product not found in database',barcode_lookup_err:'Lookup failed · check internet and retry',barcode_invalid:'Enter a valid barcode',
-    recipe_title:'🍲 Create recipe',recipe_sub:'Combine multiple ingredients into one item · saves to your library for reuse',recipe_open:'+ Create new recipe',
+    scan_barcode:'Scan barcode',barcode_hint:'Aim the camera at a product\'s barcode · data from OpenFoodFacts',barcode_or_manual:'Or enter the code manually',barcode_lookup:'Lookup',barcode_starting:'Starting camera...',barcode_scanning:'Hold a barcode inside the frame',barcode_no_camera:'Camera unavailable · use manual entry',barcode_lib_fail:'Scanner library failed to load · retry when online',barcode_found:'Found',barcode_notfound:'Product not found in database',barcode_lookup_err:'Lookup failed · check internet and retry',barcode_invalid:'Enter a valid barcode',
+    recipe_title:'Create recipe',recipe_sub:'Combine multiple ingredients into one item · saves to your library for reuse',recipe_open:'+ Create new recipe',
     recipe_name:'Recipe name',recipe_name_ph:'e.g. Homemade Pad Thai',recipe_servings:'Servings',recipe_ingredients:'Ingredients',recipe_save:'💾 Save recipe',recipe_no_ing:'No ingredients yet · search above to add',recipe_per_serving:'per serving',recipe_total:'Total',recipe_need_name:'Please name the recipe',recipe_need_ing:'Please add ingredients',recipe_saved:'Recipe saved to library ✓',
   }
 };
@@ -3254,7 +3349,7 @@ function renderPresetsTab(w){
     const totP=Math.round(p.foods.reduce((s,f)=>s+(+f.protein||0),0));
     return `<div class="sri" data-pid="${p.id}" style="cursor:pointer">`+
       `<div style="flex:1"><div class="sri-n">${escapeHtml(p.name)}</div><div class="sri-m">${p.foods.length} ${isEn?'items':'รายการ'} · ${t('protein')} ${totP}g</div></div>`+
-      `<div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${totCal}</div><button class="del" data-action="del" title="${t('del')}" style="background:none;border:none;color:var(--muted);font-size:.9rem;cursor:pointer;padding:4px 6px">✕</button></div>`+
+      `<div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${totCal}</div><button class="del" data-action="del" title="${t('del')}" style="background:none;border:none;color:var(--muted);font-size:.9rem;cursor:pointer;padding:4px 6px"><span class="ic" data-ic="x"></span></button></div>`+
     `</div>`;
   }).join('');
   // Wire events
@@ -3778,11 +3873,11 @@ function renderCloudStatus(){
       `<div style="font-size:.82rem;margin-bottom:4px">✓ <strong>${cloudUser.email}</strong></div>`+
       `<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">${t('last_sync')}: ${lastTxt}</div>`+
       `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">`+
-        `<button class="btn-sec" onclick="manualSync()" ${syncing?'disabled':''}>${syncing?'⏳ ...':'🔄 '+t('sync_now')}</button>`+
+        `<button class="btn-sec" onclick="manualSync()" ${syncing?'disabled':''}>${syncing?'⏳ ...':icoSvg('sync')+' '+t('sync_now')}</button>`+
         `<button class="btn-sec" onclick="signOutCloud()">${t('sign_out')}</button>`+
       `</div>`+
       `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">`+
-        `<button class="btn-sec" onclick="diagnoseSync()" style="font-size:.74rem;padding:7px">🔍 ${isEn?'Diagnose':'ตรวจสอบ'}</button>`+
+        `<button class="btn-sec" onclick="diagnoseSync()" style="font-size:.74rem;padding:7px">${icoSvg('search')} ${isEn?'Diagnose':'ตรวจสอบ'}</button>`+
         `<button class="btn-danger" onclick="deleteCloudAccount()" style="font-size:.74rem;padding:7px">${t('delete_cloud')}</button>`+
       `</div>`;
   }else{
@@ -3971,7 +4066,7 @@ async function renderAllUsersLeaderboard(){
       `<div class="es-ico">📡</div>`+
       `<div class="es-title">${isEn?'Couldn\'t load the leaderboard':'โหลดกระดานผู้นำไม่สำเร็จ'}</div>`+
       `<div class="es-sub">${isEn?'Check your connection and try again':'เช็คอินเทอร์เน็ตแล้วลองใหม่'}</div>`+
-      `<button class="es-cta" onclick="renderAllUsersLeaderboard()">🔄 ${isEn?'Retry':'ลองใหม่'}</button>`+
+      `<button class="es-cta" onclick="renderAllUsersLeaderboard()">${icoSvg('sync')} ${isEn?'Retry':'ลองใหม่'}</button>`+
     `</div>`;
     console.warn('[leaderboard]',e?.message||e);
   }
@@ -4014,7 +4109,7 @@ async function renderFriendsCard(){
       const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
       const meTag=settings.lang==='en'?' (You)':' (คุณ)';
       const safeName=escapeHtml(u.display_name||'?');
-      const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px">✕</button>`;
+      const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px"><span class="ic" data-ic="x"></span></button>`;
       const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}" role="button" tabindex="0" aria-label="ดูโปรไฟล์ ${safeName}"`;
       html+=`<div class="lb-item${isMe?' me':''}"${clickAttr} style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;${isMe?'border-color:var(--accent);background:rgba(255,107,107,.04)':''}">`+
         `<div style="width:22px;text-align:center;font-weight:700">${rank}</div>`+
@@ -4038,7 +4133,7 @@ async function renderFriendsCard(){
       `<div class="es-ico">📡</div>`+
       `<div class="es-title">${isEn?'Couldn\'t load friends':'โหลดเพื่อนไม่สำเร็จ'}</div>`+
       `<div class="es-sub">${isEn?'Check your connection and try again':'เช็คอินเทอร์เน็ตแล้วลองใหม่'}</div>`+
-      `<button class="es-cta" onclick="renderFriendsCard()">🔄 ${isEn?'Retry':'ลองใหม่'}</button>`+
+      `<button class="es-cta" onclick="renderFriendsCard()">${icoSvg('sync')} ${isEn?'Retry':'ลองใหม่'}</button>`+
     `</div>`;
     console.warn('[friends]',e?.message||e);
   }
@@ -4553,7 +4648,7 @@ function renderWorkoutsList(){
   list.forEach(w=>{
     const name=settings.lang==='en'&&w.name_en?w.name_en:w.name;
     const div=document.createElement('div');div.className='fi';
-    div.innerHTML=`<div class="fi-l"><div class="fi-n">${name}</div><div class="fi-m">${w.minutes} ${t('duration_min')}</div></div><div class="fi-r"><div><div class="fi-c" style="color:var(--green)">-${w.kcal}</div><div class="fi-u">kcal</div></div><button class="del" onclick="delWorkout('${w.id}')">✕</button></div>`;
+    div.innerHTML=`<div class="fi-l"><div class="fi-n">${name}</div><div class="fi-m">${w.minutes} ${t('duration_min')}</div></div><div class="fi-r"><div><div class="fi-c" style="color:var(--green)">-${w.kcal}</div><div class="fi-u">kcal</div></div><button class="del" onclick="delWorkout('${w.id}')"><span class="ic" data-ic="x"></span></button></div>`;
     wrap.appendChild(div);
   });
 }
@@ -4898,7 +4993,7 @@ function renderRcpIngredients(){
     return `<div class="sri" style="padding:6px 8px;gap:6px">`+
       `<div style="flex:1;min-width:0"><div class="sri-n" style="font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${foodDisplayName(ing.f)}</div><div class="sri-m" style="font-size:.66rem">${cal} kcal</div></div>`+
       `<input type="number" min="0.1" max="20" step="0.1" value="${ing.qty}" data-idx="${i}" class="rcp-qty" style="width:55px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px;font-family:inherit;font-size:.78rem;text-align:center">`+
-      `<button class="del" data-rem="${i}" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:4px 6px">✕</button>`+
+      `<button class="del" data-rem="${i}" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:4px 6px"><span class="ic" data-ic="x"></span></button>`+
     `</div>`;
   }).join('');
   w.querySelectorAll('.rcp-qty').forEach(el=>{
@@ -5119,48 +5214,48 @@ function renderHelp(){
   const body=document.getElementById('helpBody');if(!body)return;
   const isEn=settings.lang==='en';
   const sections=isEn?[
-    {ico:'🚀',title:'Getting started',items:[
+    {ico:'rocket',title:'Getting started',items:[
       'Open <b>Profile</b> first and enter your age, weight, height, gender, and activity level.',
       'Pick a <b>goal</b>: lose, maintain, or gain. Your daily calorie target is calculated automatically.',
       'All data lives in this browser — no login required. Optional Cloud Sync syncs across devices.',
     ]},
-    {ico:'🏠',title:'Today page (the ring)',items:[
+    {ico:'home',title:'Today page (the ring)',items:[
       'The big number in the ring is <b>net calories</b> (food eaten − calories burned by workouts).',
       'Add food with the <b>+ tab</b> below, or quick-tap a favorite/recent item.',
       'Tap <b>+ / −</b> on the water card after each glass.',
       '<b>💡 Health tips</b> below the water card update with your day — protein, water, meal balance, etc.',
     ]},
-    {ico:'➕',title:'Logging food',items:[
+    {ico:'plus',title:'Logging food',items:[
       'Search the built-in database (<b>250 foods</b>, TH + EN names).',
       '<b>⭐ Star</b> any result to add it to your Favorites for one-tap re-logging.',
       'Use <b>Manual entry</b> for foods not in the database; check <b>"Save to library"</b> to keep them.',
       'Pick the meal slot (Breakfast/Lunch/Dinner/Snack) — defaults to current time-of-day.',
       'Attach a photo (optional). Edit or delete any entry from the food log.',
     ]},
-    {ico:'🤖',title:'AI food photo',items:[
+    {ico:'ai',title:'AI food photo',items:[
       'On Add Food, tap <b>🤖 AI photo</b> · take or pick a photo of your meal.',
       'AI estimates the dish name + kcal + macros · review then tap <b>Use these values</b> to prefill the form.',
       'Free for members: 20 photos/day. If AI isn\'t working, try signing out and back in.',
       'Power users: put your own API key (Claude / OpenAI / Gemini) in Settings to skip the daily limit.',
     ]},
-    {ico:'🎮',title:'Profile (Steam-style)',items:[
+    {ico:'user',title:'Profile (Steam-style)',items:[
       'Hero card shows: avatar · display name · <b>level badge</b> (Lv 1-6) · bio.',
       'Stats showcase: 🔥 streak · 📝 days logged · 🎯 on track · 🏆 score.',
       'Tap <b>✏️ Edit profile</b> to change banner color · add a bio · update personal info.',
       'Level computed from your streak + days logged + days on track. Reach Lv 6 for 👑 Legend.',
     ]},
-    {ico:'👥',title:'Friends + profile viewing',items:[
+    {ico:'users',title:'Friends + profile viewing',items:[
       'Add friends in <b>Friends</b> (drawer) by searching their email or display name.',
       'Tap any row in the leaderboard to <b>open that friend\'s profile</b> · see their banner, bio, level, stats + badges.',
       'Tap <b>👏 Send cheer</b> to encourage them.',
       'Remove a friend with the ✕ button on the right of their row.',
     ]},
-    {ico:'🏋️',title:'Workouts',items:[
+    {ico:'dumbbell',title:'Workouts',items:[
       'On the workouts card on Today, tap <b>+ Add</b>.',
       'Pick an exercise type and minutes — calories burned are calculated from MET × your weight.',
       'Burned kcal show as <b>−Y 🏋️</b> under the ring and reduce the net number above.',
     ]},
-    {ico:'📊',title:'Analysis page',items:[
+    {ico:'chart',title:'Analysis page',items:[
       '<b>7-day calories</b>: bar chart of how each day compared to your goal.',
       '<b>Projected weight trend</b>: line chart that <b>forecasts</b> your weight using only food + workout data (1 kg ≈ 7700 kcal). No daily weighing needed.',
       'Solid line = past 14 days, dashed = next 14 days at your average pace.',
@@ -5168,71 +5263,71 @@ function renderHelp(){
       '<b>7-day water</b>: blue bars fill higher when you drink more.',
       'Tips card explains what to adjust.',
     ]},
-    {ico:'🔥',title:'TDEE calculator',items:[
+    {ico:'flame',title:'TDEE calculator',items:[
       'Live calculator using the Harris-Benedict revised (1984) formula.',
       'Change any input to see your BMR + TDEE recalculate instantly.',
       'Tap <b>Use as my goal</b> to save the recommended daily target into your profile.',
     ]},
-    {ico:'☁️',title:'Cloud Sync (optional)',items:[
+    {ico:'cloud',title:'Cloud Sync (optional)',items:[
       'Go to <b>Settings → Cloud Sync</b> and sign up with email + password (no other info needed).',
       'After login, the app syncs automatically every few minutes plus after every meal/workout edit.',
       '<b>Diagnose</b> button shows table health — run the migration SQL it links to if needed.',
       'You can <b>delete cloud data</b> anytime — local data stays on your device.',
     ]},
-    {ico:'⚙️',title:'Settings & tips',items:[
+    {ico:'gear',title:'Settings & tips',items:[
       '<b>Simple Mode</b> hides advanced widgets and shows just the ring + food log + the daily-share button.',
       '<b>Bottom nav</b> is customizable — pick up to 5 tabs in Settings.',
       'Switch language between Thai and English anytime.',
       'Themes: 5 dark + 3 light. Pick an accent color separately.',
       'Notifications: enable meal reminders, smart-goal popup, weekly recap.',
     ]},
-    {ico:'📤',title:'Sharing',items:[
+    {ico:'share',title:'Sharing',items:[
       '<b>Share today</b> renders a 1080×1350 image card (ring + macros + invite) and shares via your system share sheet — or downloads + copies the caption if sharing files is not supported.',
       '<b>Share achievements</b> (Analysis page) makes a similar card with streak + badges earned.',
     ]},
   ]:[
-    {ico:'🚀',title:'เริ่มต้นใช้งาน',items:[
+    {ico:'rocket',title:'เริ่มต้นใช้งาน',items:[
       'เปิดหน้า <b>โปรไฟล์</b> กรอกเพศ อายุ น้ำหนัก ส่วนสูง และระดับกิจกรรม',
       'เลือก <b>เป้าหมาย</b>: ลดน้ำหนัก / คงน้ำหนัก / เพิ่มกล้าม · ระบบจะคำนวณแคลอรี่/วันให้อัตโนมัติ',
       'ข้อมูลทั้งหมดเก็บในเครื่อง ไม่ต้องล็อกอิน · ถ้าอยากซิงค์ข้ามเครื่องเปิด Cloud Sync เพิ่มได้',
     ]},
-    {ico:'🏠',title:'หน้าวันนี้ (วงกลม)',items:[
+    {ico:'home',title:'หน้าวันนี้ (วงกลม)',items:[
       'เลขใหญ่กลางวงคือ <b>แคลอรี่สุทธิ</b> (อาหารที่กิน − แคลอรี่จากการออกกำลังกาย)',
       'เพิ่มอาหารผ่านแถบ <b>+ เพิ่ม</b> หรือกดของโปรด/ล่าสุดได้',
       'น้ำดื่ม: กด <b>+ / −</b> ทุกครั้งหลังดื่ม',
       '<b>💡 คำแนะนำสุขภาพ</b> ใต้แถบน้ำ จะปรับตามข้อมูลแต่ละวัน — โปรตีน, มื้อ, น้ำ ฯลฯ',
     ]},
-    {ico:'➕',title:'การบันทึกอาหาร',items:[
+    {ico:'plus',title:'การบันทึกอาหาร',items:[
       'ค้นหาจากฐานข้อมูล <b>250 รายการ</b> (ชื่อไทย/อังกฤษ)',
       'กด <b>⭐</b> เพิ่มของโปรดเพื่อกดบันทึกซ้ำได้ในแตะเดียว',
       'ใช้ <b>กรอกเอง</b> สำหรับอาหารที่ไม่มีในฐาน — ติ๊ก <b>"บันทึกลงไลบรารี"</b> เพื่อเก็บไว้ใช้ครั้งหน้า',
       'เลือกมื้อ (เช้า/กลางวัน/เย็น/ของว่าง) — ระบบเดาให้ตามเวลาปัจจุบัน',
       'แนบรูปได้ (ไม่บังคับ) · แก้ไข/ลบรายการจาก log ได้เลย',
     ]},
-    {ico:'🤖',title:'AI ถ่ายรูปอาหาร',items:[
+    {ico:'ai',title:'AI ถ่ายรูปอาหาร',items:[
       'ในหน้าเพิ่มอาหาร กด <b>🤖 ถ่ายรูป AI</b> · ถ่ายรูปหรือเลือกรูปอาหาร',
       'AI ประเมินชื่อ + แคล + มาโครให้ · ตรวจสอบและกด <b>ใช้ค่านี้</b> → กรอกฟอร์มอัตโนมัติ',
       'ผู้สมาชิกใช้ฟรี 20 รูป/วัน · ถ้า AI ไม่ทำงานลองออกจากระบบแล้วล็อกอินใหม่',
       'ขั้นสูง: ใส่ API key ของตัวเอง (Claude / OpenAI / Gemini) ใน Settings เพื่อใช้เกิน limit',
     ]},
-    {ico:'🎮',title:'โปรไฟล์ (สไตล์ Steam)',items:[
+    {ico:'user',title:'โปรไฟล์ (สไตล์ Steam)',items:[
       'การ์ดด้านบนแสดง: avatar · ชื่อ · <b>level badge</b> (Lv 1-6) · bio',
       'Stats showcase: 🔥 streak · 📝 วันที่บันทึก · 🎯 อยู่ในเป้า · 🏆 คะแนน',
       'กด <b>✏️ แก้ไขโปรไฟล์</b> เพื่อเปลี่ยน banner color · ใส่ bio · แก้ข้อมูลส่วนตัว',
       'Level คำนวณจาก streak + วันที่บันทึก + วันที่อยู่ในเป้า · ขึ้นได้ถึง Lv 6 👑 ตำนาน',
     ]},
-    {ico:'👥',title:'เพื่อน + ดูโปรไฟล์เพื่อน',items:[
+    {ico:'users',title:'เพื่อน + ดูโปรไฟล์เพื่อน',items:[
       'เพิ่มเพื่อนในหน้า <b>Friends</b> (จาก drawer) ค้นด้วยอีเมลหรือชื่อ',
       'กดที่แถวเพื่อนใน leaderboard → <b>เปิดโปรไฟล์เขาได้เลย</b> · เห็น banner, bio, level, stats + badges',
       'กด <b>👏 ส่งกำลังใจ</b> เพื่อให้กำลังใจเพื่อน',
       'กด ✕ ทางขวาเพื่อลบเพื่อน',
     ]},
-    {ico:'🏋️',title:'ออกกำลังกาย',items:[
+    {ico:'dumbbell',title:'ออกกำลังกาย',items:[
       'กด <b>+ เพิ่ม</b> ที่การ์ดออกกำลังกายในหน้าวันนี้',
       'เลือกประเภทกิจกรรม + นาที — แคลอรี่ที่เผาคำนวณจาก MET × น้ำหนักของคุณ',
       'แคลที่เผาจะแสดง <b>−Y 🏋️</b> ใต้วงกลม และจะหักจากเลขสุทธิด้านบนทันที',
     ]},
-    {ico:'📊',title:'หน้าวิเคราะห์',items:[
+    {ico:'chart',title:'หน้าวิเคราะห์',items:[
       '<b>แคลอรี่ 7 วัน</b>: แท่งกราฟเทียบแต่ละวันกับเป้าหมาย',
       '<b>แนวโน้มน้ำหนัก</b>: คำนวณจากสมดุลพลังงาน — กิน − TDEE − ออกกำลังกาย (1 กก. ≈ 7700 kcal) · ยึดกับน้ำหนักที่ชั่งจริงถ้ามี',
       'เส้นทึบ = 30 วันย้อนหลัง · เส้นปะ = พยากรณ์ 7 วันข้างหน้าจากการกินล่าสุด · จุด = ครั้งที่ชั่งจริง',
@@ -5240,25 +5335,25 @@ function renderHelp(){
       '<b>น้ำดื่ม 7 วัน</b>: แท่งสีฟ้าสูงตามจำนวนแก้วที่ดื่ม',
       'การ์ดคำแนะนำจะบอกว่าควรปรับอะไร',
     ]},
-    {ico:'🔥',title:'เครื่องคำนวณ TDEE',items:[
+    {ico:'flame',title:'เครื่องคำนวณ TDEE',items:[
       'คำนวณด้วยสูตร Harris-Benedict (revised 1984) แบบ real-time',
       'พิมพ์เปลี่ยนค่าใดๆ ตัวเลข BMR/TDEE จะอัปเดตทันที',
       'กด <b>ใช้ค่านี้เป็นเป้าหมาย</b> เพื่อบันทึกเข้าโปรไฟล์',
     ]},
-    {ico:'☁️',title:'Cloud Sync (เลือกเปิด)',items:[
+    {ico:'cloud',title:'Cloud Sync (เลือกเปิด)',items:[
       'ไปที่ <b>ตั้งค่า → Cloud Sync</b> สมัครด้วยอีเมล + รหัสผ่าน (ไม่ต้องกรอกข้อมูลส่วนตัวอื่น)',
       'หลังเข้าสู่ระบบ ข้อมูลจะ sync อัตโนมัติทุกๆ สองสามนาที + ทุกครั้งหลังเพิ่ม/แก้อาหาร',
       'ปุ่ม <b>ตรวจสอบ</b> บอกสถานะตาราง · ถ้าเจอ migration ค้างจะมีลิงก์ให้รัน SQL',
       '<b>ลบข้อมูลใน cloud</b> ได้ตลอดเวลา · ข้อมูลในเครื่องยังอยู่ครบ',
     ]},
-    {ico:'⚙️',title:'การตั้งค่า + เทคนิค',items:[
+    {ico:'gear',title:'การตั้งค่า + เทคนิค',items:[
       '<b>โหมดใช้งานง่าย</b>: ซ่อนวิดเจ็ตอื่นๆ เหลือแค่วงกลม + log + ปุ่มแชร์',
       '<b>แถบล่าง</b>: ปรับเองได้ เลือกได้สูงสุด 5 แท็บในหน้าตั้งค่า',
       'สลับภาษาไทย/อังกฤษได้ตลอด',
       'ธีม: มืด 5 + สว่าง 3 · เลือกสี accent แยกได้',
       'การเตือน: เปิดเตือนมื้ออาหาร, ปรับเป้าอัตโนมัติ, สรุปรายสัปดาห์',
     ]},
-    {ico:'📤',title:'การแชร์',items:[
+    {ico:'share',title:'การแชร์',items:[
       '<b>แชร์สรุปวันนี้</b>: สร้างรูป 1080×1350 (วงแหวน + macro + คำเชิญ) แล้วแชร์ผ่าน system share — หรือดาวน์โหลด + คัดลอกข้อความถ้าระบบไม่รองรับการแชร์ไฟล์',
       '<b>แชร์ความสำเร็จ</b> (ในหน้าวิเคราะห์): รูปคล้ายกัน แสดง streak + เหรียญที่ได้รับ',
     ]},
@@ -5267,7 +5362,7 @@ function renderHelp(){
   // a wall of collapsed rows on landing.
   body.innerHTML=sections.map((s,i)=>
     `<div class="acc${i===0?' open':''}">`+
-      `<div class="acc-hd" onclick="accToggle(this)">${s.ico} <span>${s.title}</span><span class="acc-chev">▾</span></div>`+
+      `<div class="acc-hd" onclick="accToggle(this)">${icoSvg(s.ico)} <span>${s.title}</span><span class="acc-chev">▾</span></div>`+
       `<div class="acc-body"${i===0?' style="max-height:1200px"':''}><div class="acc-body-inner"><ol style="margin:0;padding-left:18px">${s.items.map(it=>`<li style="margin-bottom:4px">${it}</li>`).join('')}</ol></div></div>`+
     `</div>`
   ).join('');
@@ -5417,7 +5512,7 @@ function renderReminderBanner(){
   const msg=settings.lang==='en'
     ?`Past ${missed.hour}:00 · <strong>${mealName}</strong> not logged yet`
     :`เลย${missed.hour}:00 แล้ว · ยังไม่ได้บันทึก<strong>มื้อ${missed.meal}</strong>`;
-  wrap.innerHTML=`<div class="banner"><div class="b-ico">${missed.emoji}</div><div class="b-txt">${msg}</div><button class="b-x" onclick="dismissReminder()">✕</button></div>`;
+  wrap.innerHTML=`<div class="banner"><div class="b-ico">${missed.emoji}</div><div class="b-txt">${msg}</div><button class="b-x" onclick="dismissReminder()"><span class="ic" data-ic="x"></span></button></div>`;
   wrap.querySelector('.banner').onclick=(e)=>{if(e.target.classList.contains('b-x'))return; showPage('add',document.querySelectorAll('.bnt')[1]); document.getElementById('mealSel').value=missed.meal;};
 }
 function dismissReminder(){
@@ -5547,7 +5642,7 @@ function renderToday(){
       const isIdbPhoto=item.photo&&item.photo.startsWith('idb:');
       const inlineSrc=item.photo&&!isIdbPhoto?` src="${item.photo}"`:'';
       const photoHtml=item.photo?`<img${inlineSrc} class="fi-photo" data-id="${item.id}" alt="">`:'';
-      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="${t('edit')}">✏️</button><button class="del" onclick="delFood('${item.id}')" title="${t('del')}">✕</button></div>`;
+      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="${t('edit')}">${icoSvg('edit')}</button><button class="del" onclick="delFood('${item.id}')" title="${t('del')}"><span class="ic" data-ic="x"></span></button></div>`;
       if(item.photo){
         const imgEl=div.querySelector('.fi-photo');
         imgEl.onclick=()=>openPhotoViewer(item.photo);
@@ -5991,8 +6086,8 @@ function renderProfileUI(){
   const statLine=document.getElementById('profileStatLine');
   if(statLine){
     statLine.innerHTML=isEn2
-      ? `🔥 <b>${streak}</b> day streak · 📝 <b>${days}</b> logged · 🏅 <b>${earned.length}</b> badges`
-      : `🔥 <b>${streak}</b> วันติด · 📝 <b>${days}</b> วันบันทึก · 🏅 <b>${earned.length}</b> เหรียญ`;
+      ? `${icoSvg('flame')} <b>${streak}</b> day streak · ${icoSvg('note')} <b>${days}</b> logged · 🏅 <b>${earned.length}</b> badges`
+      : `${icoSvg('flame')} <b>${streak}</b> วันติด · ${icoSvg('note')} <b>${days}</b> วันบันทึก · 🏅 <b>${earned.length}</b> เหรียญ`;
   }
   const shareLbl=document.getElementById('profileShareLbl');
   if(shareLbl)shareLbl.textContent=isEn2?'Share':'แชร์';
@@ -6023,8 +6118,8 @@ function renderProfileUI(){
     bg.innerHTML=`<div class="profile-badge-empty">${isEn?'No badges yet — keep logging to earn them!':'ยังไม่มีเหรียญตรา — บันทึกอาหารต่อเนื่องเพื่อปลดล็อก!'}</div>`;
   }
   // ── Goal showcase ──
-  const goalTypeLbl={lose:isEn?'🔥 Lose':'🔥 ลดน้ำหนัก',maintain:isEn?'⚖️ Maintain':'⚖️ คงน้ำหนัก',gain:isEn?'💪 Gain':'💪 เพิ่มกล้าม'}[p.goal_type||'lose'];
-  document.getElementById('pgcGoalType').textContent=goalTypeLbl;
+  const goalTypeLbl={lose:isEn?`${icoSvg('flame')} Lose`:`${icoSvg('flame')} ลดน้ำหนัก`,maintain:isEn?`${icoSvg('scale')} Maintain`:`${icoSvg('scale')} คงน้ำหนัก`,gain:isEn?`${icoSvg('dumbbell')} Gain`:`${icoSvg('dumbbell')} เพิ่มกล้าม`}[p.goal_type||'lose'];
+  document.getElementById('pgcGoalType').innerHTML=goalTypeLbl;
   // TDEE compute (centralized helper)
   const tdee=Math.round(profileTDEE(p));
   document.getElementById('pgcTDEE').textContent=tdee?tdee.toLocaleString():'—';
@@ -7983,7 +8078,7 @@ function renderAiSettingsBody(){
   inner+=
     `<div style="display:flex;gap:8px;margin-top:8px">`+
       (isProxy?'':`<button class="btn-sec" onclick="aiSaveKey()" style="flex:1">💾 ${isEn?'Save key':'บันทึก key'}</button>`)+
-      `<button class="btn-sec" onclick="testAiConnection()" style="flex:1">🔌 ${isEn?'Test':'ทดสอบ'}</button>`+
+      `<button class="btn-sec" onclick="testAiConnection()" style="flex:1">${icoSvg('link')} ${isEn?'Test':'ทดสอบ'}</button>`+
     `</div>`+
     `<div id="aiTestStatus" style="font-size:.74rem;text-align:center;margin-top:6px;min-height:18px"></div>`+
     `<div style="font-size:.7rem;color:var(--muted);margin-top:10px;line-height:1.5;padding:8px;background:var(--surface2);border-radius:6px">`+
@@ -8267,6 +8362,13 @@ applyFont(settings.font||'prompt');
 applyLang();
 renderBottomNav();
 showApp();
+fillIcons();   // swap all static [data-ic] placeholders for their line-icon SVG
+// Dynamically-rendered HTML (food log, lists, modals) also uses [data-ic]
+// placeholders — auto-fill them on any DOM insertion (rAF-debounced, idempotent).
+try{
+  const _icObs=new MutationObserver(()=>{ if(_icObs._raf)cancelAnimationFrame(_icObs._raf); _icObs._raf=requestAnimationFrame(()=>fillIcons()); });
+  _icObs.observe(document.body,{childList:true,subtree:true});
+}catch(e){}
 // Growth hooks (Epic 1) — run AFTER showApp() so all globals are populated.
 parseReferralOnLoad();    // handle ?ref= URL param + welcome toast
 dailyCheckInToast();      // congratulate active-streak users on app open
@@ -8436,9 +8538,9 @@ async function renderDev(){
     })()+
     `<div class="card"><h3>🛠️ Actions</h3>`+
       `<button class="btn-sec" onclick="devLogToConsole()" style="width:100%;margin-bottom:6px">📋 Dump full state to console</button>`+
-      `<button class="btn-sec" onclick="renderDev()" style="width:100%;margin-bottom:6px">🔄 Refresh diagnostics</button>`+
-      `<button class="btn-sec" onclick="checkForUpdates()" style="width:100%;margin-bottom:6px">🔍 Check for app update</button>`+
-      `<button class="btn-danger" onclick="lockDevMode()" style="width:100%">🔒 Lock developer mode</button>`+
+      `<button class="btn-sec" onclick="renderDev()" style="width:100%;margin-bottom:6px">${icoSvg('sync')} Refresh diagnostics</button>`+
+      `<button class="btn-sec" onclick="checkForUpdates()" style="width:100%;margin-bottom:6px">${icoSvg('search')} Check for app update</button>`+
+      `<button class="btn-danger" onclick="lockDevMode()" style="width:100%">${icoSvg('lock')} Lock developer mode</button>`+
     `</div>`;
   // ── Deferred cloud counts — runs AFTER the page is on screen so the network
   //    never blocks render. Patches the placeholder rows in place; if the user
@@ -8646,6 +8748,18 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.32.2':{
+    th:[
+      '🎨 **เปลี่ยนอีโมจิทั่วทั้งแอปเป็นไอคอนเส้น (SVG)** — ปุ่ม · หัวข้อ · เมนู · แท็บ · หน้าวิธีใช้ · โมดัล ฯลฯ ใช้ไอคอนเส้นสไตล์เดียวกับแถบล่าง ดูสะอาด/ทันสมัย/คมทุกความละเอียด',
+      '🏅 **คงอีโมจิเดิมไว้เฉพาะส่วนที่เป็นเอกลักษณ์**: เหรียญรางวัล · ระดับ · ไอคอนมื้ออาหาร/ประเภทมื้อ · คำแนะนำสุขภาพ · อวาตาร์ · โฆษณา',
+      '🚩 ตัดธงภาษา 🇹🇭🇬🇧 ออก (เหลือชื่อ "ไทย / English") เพราะไม่มีไอคอนเส้นแทนได้สื่อความหมาย',
+    ],
+    en:[
+      '🎨 **App-wide UI emojis swapped for line icons (SVG)** — buttons · headers · menus · tabs · the Help page · modals now use the same line-icon style as the bottom nav · crisp at any resolution',
+      '🏅 **Kept as emoji on purpose**: achievement badges · levels · meal & meal-type icons · health tips · avatars · ads',
+      '🚩 Dropped the 🇹🇭🇬🇧 language flags (kept the "ไทย / English" labels) — no meaningful line-icon equivalent',
+    ],
+  },
   '2.32.1':{
     th:[
       '✂️ **ปรับรูปโปรไฟล์/พื้นหลังแบบลากซูมเอง** — เปิดหน้าครอปสไตล์โซเชียล (ลากเลื่อน + แถบซูม) · รูปโปรไฟล์ครอปเป็นวงกลม · รูปพื้นหลังครอป 4:1 ก่อนบันทึก (เลิกครอปกึ่งกลางอัตโนมัติ)',
