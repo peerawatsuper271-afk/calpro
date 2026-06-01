@@ -24,9 +24,16 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
-  --bg:#000000;--surface:#121212;--surface2:#1e1e1e;--border:#262626;
+  --bg:#0d0f1a;--surface:#1b1e30;--surface2:#262a42;--border:#363c5c;
   --accent:#ff6b6b;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;
-  --purple:#a78bfa;--text:#f5f5f7;--muted:#8e8e93;--r:18px;
+  --purple:#a78bfa;--text:#eceefb;--muted:#9398b8;--r:18px;
+  /* ── Glassmorphism tokens — translucent surfaces frosted over a soft gradient bg ── */
+  --glass:color-mix(in srgb, var(--surface) 60%, transparent);
+  --glass2:color-mix(in srgb, var(--surface2) 60%, transparent);
+  --glass-solid:color-mix(in srgb, var(--surface) 82%, transparent);
+  --glass-bd:color-mix(in srgb, var(--text) 14%, transparent);
+  --glass-blur:18px;
+  --glass-sh:0 8px 30px rgba(8,10,28,.22);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 /* iOS Safari: kill double-tap zoom + 300ms click delay on interactive UI,
@@ -34,7 +41,9 @@
    gestures allowed (tap/pan), double-tap/long-press zoom disabled. */
 html{touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:var(--bg);}
 button,input,select,textarea,a,label,.bnt,.icon-btn,.sri,.fi,.drawer-item,.qtab,.gchip,.ac-dot,.th-swatch,.font-chip,.ob-goal-chip,.ob-dot,.wd,.water-ctrl button{touch-action:manipulation;}
-body{background:var(--bg);color:var(--text);font-family:var(--app-font,'Segoe UI','Noto Sans Thai',sans-serif);min-height:100vh;padding-top:max(env(safe-area-inset-top),24px);-webkit-text-size-adjust:100%;}
+body{background:radial-gradient(125% 85% at 8% -5%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 55%),radial-gradient(120% 80% at 96% 4%,color-mix(in srgb,var(--blue) 15%,transparent),transparent 50%),radial-gradient(145% 95% at 50% 106%,color-mix(in srgb,var(--purple) 16%,transparent),transparent 60%),var(--bg);background-attachment:fixed;color:var(--text);font-family:var(--app-font,'Segoe UI','Noto Sans Thai',sans-serif);min-height:100vh;padding-top:max(env(safe-area-inset-top),24px);-webkit-text-size-adjust:100%;}
+/* High-contrast a11y theme keeps a solid bg (no soft gradient) */
+html[data-hc="1"] body{background:var(--bg);}
 /* Native APK: when running inside Capacitor, body padding is handled via JS; this is fallback for browsers/PWA */
 html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 .app{max-width:480px;margin:0 auto;padding:0 14px 80px;padding-bottom:calc(86px + env(safe-area-inset-bottom));}
@@ -147,7 +156,11 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-foot{padding:14px 18px;border-top:1px solid var(--border);font-size:.66rem;color:var(--muted);text-align:center;}
 
 /* ── CARD ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 15px;margin-bottom:10px;}
+.card{background:var(--glass);-webkit-backdrop-filter:blur(var(--glass-blur));backdrop-filter:blur(var(--glass-blur));border:1px solid var(--glass-bd);border-radius:18px;padding:14px 15px;margin-bottom:10px;box-shadow:var(--glass-sh);}
+/* Light mode → more opaque glass so text stays legible on a bright backdrop */
+html[data-mode="light"]{--glass:color-mix(in srgb,var(--surface) 74%,transparent);--glass2:color-mix(in srgb,var(--surface2) 72%,transparent);--glass-solid:color-mix(in srgb,var(--surface) 88%,transparent);--glass-bd:color-mix(in srgb,var(--text) 10%,transparent);--glass-sh:0 8px 30px rgba(70,80,130,.12);}
+/* High-contrast → solid opaque surfaces, no blur (a11y) */
+html[data-hc="1"] .card,html[data-hc="1"] .modal,html[data-hc="1"] .bnav,html[data-hc="1"] .drawer,html[data-hc="1"] .profile-hero,html[data-hc="1"] .profile-stat-tile,html[data-hc="1"] .qadd-chip{background:var(--surface)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--border)!important;}
 .card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
 
@@ -282,7 +295,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .qadd-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:700;display:flex;align-items:center;gap:4px;}
 .qadd-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 .qadd-row::-webkit-scrollbar{display:none;}
-.qadd-chip{flex:none;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 11px;cursor:pointer;transition:border-color .15s,transform .1s,background .15s;}
+.qadd-chip{flex:none;display:flex;align-items:center;gap:8px;background:var(--glass2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--glass-bd);border-radius:12px;padding:8px 11px;cursor:pointer;transition:border-color .15s,transform .1s,background .15s;}
 .qadd-chip:hover{border-color:var(--accent);}
 .qadd-chip:active{transform:scale(.94);}
 .qadd-chip .qa-txt{min-width:0;}
@@ -389,7 +402,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .tip{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:9px;padding:10px;margin-top:9px;font-size:.75rem;line-height:1.6;}
 .tip strong{color:var(--accent);}
 /* ═══ STEAM-STYLE PROFILE (v2.21) ═══ */
-.profile-hero{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:10px;position:relative;}
+.profile-hero{background:var(--glass);-webkit-backdrop-filter:blur(var(--glass-blur));backdrop-filter:blur(var(--glass-blur));border:1px solid var(--glass-bd);border-radius:18px;overflow:hidden;margin-bottom:10px;position:relative;box-shadow:var(--glass-sh);}
 .profile-hero-banner{height:134px;background:linear-gradient(135deg,var(--banner-color,#ff6b6b),color-mix(in srgb,var(--banner-color,#ff6b6b) 55%,#000));position:relative;}
 .profile-hero-banner::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 60%);}
 /* FB-style: avatar overlaps bottom-left of the cover, name+stats stack below */
@@ -419,7 +432,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .profile-action-primary{background:var(--blue);color:#fff;border:none;}
 .profile-action-primary:active{opacity:.85;}
 .profile-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
-.profile-stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 6px;text-align:center;}
+.profile-stat-tile{background:var(--glass2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--glass-bd);border-radius:11px;padding:10px 6px;text-align:center;}
 .pst-icon{font-size:1.1rem;line-height:1;}
 .pst-val{font-size:1.05rem;font-weight:700;color:var(--text);margin-top:4px;}
 .pst-lbl{font-size:.6rem;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
@@ -670,9 +683,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .lbtn.active{border-color:var(--accent);color:var(--accent);background:rgba(255,107,107,.08);}
 
 /* ── MODAL ── */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;}
+.modal-bg{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;}
 .modal-bg.hide{display:none;}
-.modal{background:var(--surface);border-radius:18px;padding:18px 16px 22px;width:100%;max-width:480px;max-height:calc(100vh - 28px);overflow-y:auto;animation:mup .22s ease;box-shadow:0 12px 40px rgba(0,0,0,.45);}
+.modal{background:var(--glass-solid);-webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);border:1px solid var(--glass-bd);border-radius:20px;padding:18px 16px 22px;width:100%;max-width:480px;max-height:calc(100vh - 28px);overflow-y:auto;animation:mup .22s ease;box-shadow:0 18px 50px rgba(8,10,28,.42);}
 @keyframes mup{from{transform:scale(.96) translateY(8px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
 @keyframes cpspin{to{transform:rotate(360deg)}}
 .modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
@@ -1809,7 +1822,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.32.2';
+const APP_VERSION = '2.33.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2072,7 +2085,7 @@ const I18N = {
     simple_mode:'โหมดใช้งานง่าย',simple_mode_sub:'เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น',
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
     streak_saver:'เตือนรักษา streak',streak_saver_sub:'push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)',
-    edit_profile:'แก้ไขโปรไฟล์',edit_profile_long:'✏️ แก้ไขโปรไฟล์',
+    edit_profile:'แก้ไขโปรไฟล์',edit_profile_long:'แก้ไขโปรไฟล์',
     bio_label:'เกี่ยวกับฉัน',bio_empty_self:'ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม',bio_empty_friend:'(เพื่อนยังไม่ใส่คำอธิบาย)',
     banner_color:'สีแบนเนอร์',
     badges_showcase:'🏅 เหรียญตราที่ได้รับ',
@@ -2174,7 +2187,7 @@ const I18N = {
     simple_mode:'Simple mode',simple_mode_sub:'Focus on calorie ring + meals · larger fonts · hides other widgets',
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
     streak_saver:'Streak saver',streak_saver_sub:'21:30 push if not logged yet + streak ≥ 3 days (APK only)',
-    edit_profile:'Edit profile',edit_profile_long:'✏️ Edit profile',
+    edit_profile:'Edit profile',edit_profile_long:'Edit profile',
     bio_label:'About me',bio_empty_self:'No bio yet · tap Edit profile to add one',bio_empty_friend:'(No bio yet)',
     banner_color:'Banner color',
     badges_showcase:'🏅 Badges earned',
@@ -2581,15 +2594,18 @@ const BADGES=[
   {id:'master',ico:'👑',name:'Master',name_en:'Master',cond:(u,o)=>earnedBadges(u,o).length>=5},
 ];
 const THEMES={
-  dark:{bg:'#000000',s:'#121212',s2:'#1e1e1e',b:'#262626',t:'#f5f5f7',m:'#8e8e93',mode:'dark'},
-  night:{bg:'#080810',s:'#11111a',s2:'#191922',b:'#252530',t:'#ddddf5',m:'#5555a0',mode:'dark'},
-  // Accent-tinted dark themes (replace forest/warm/ocean)
-  rose:{bg:'#140b0e',s:'#1f1217',s2:'#2a181d',b:'#3a2027',t:'#f5d8de',m:'#a06070',mode:'dark'},
-  sky:{bg:'#0b1018',s:'#141c25',s2:'#1c2632',b:'#28384a',t:'#d8e4f0',m:'#6080a8',mode:'dark'},
-  violet:{bg:'#110b18',s:'#1a1428',s2:'#251c36',b:'#322650',t:'#e0d8f0',m:'#7868a8',mode:'dark'},
-  light:{bg:'#fafafd',s:'#ffffff',s2:'#f0f0f5',b:'#e0e0ea',t:'#1a1a24',m:'#7878a0',mode:'light'},
-  cream:{bg:'#fbf6ec',s:'#ffffff',s2:'#f4ecd8',b:'#e6d8b8',t:'#3a2a14',m:'#8a7050',mode:'light'},
-  mint:{bg:'#f0f8f2',s:'#ffffff',s2:'#e2efe6',b:'#bfd6c5',t:'#0c2418',m:'#5a8870',mode:'light'},
+  // Soft glass-friendly palettes — bg is a gentle tinted dark (never pure #000,
+  // which made backdrop-blur render a green tint on some GPUs) so the frosted
+  // surfaces read cleanly over the soft gradient backdrop.
+  dark:{bg:'#0d0f1a',s:'#1b1e30',s2:'#262a42',b:'#363c5c',t:'#eceefb',m:'#9398b8',mode:'dark'},
+  night:{bg:'#080810',s:'#13131f',s2:'#1d1d2e',b:'#2a2a42',t:'#ddddf5',m:'#6a6aa8',mode:'dark'},
+  // Accent-tinted dark themes
+  rose:{bg:'#160d12',s:'#241620',s2:'#311d2b',b:'#45283b',t:'#f6dde6',m:'#b27c90',mode:'dark'},
+  sky:{bg:'#0a0f18',s:'#16202e',s2:'#1f2c3e',b:'#2e4058',t:'#dbe7f4',m:'#7798ba',mode:'dark'},
+  violet:{bg:'#100c1a',s:'#1d1730',s2:'#282040',b:'#3a2e5e',t:'#e6ddf6',m:'#8a7aba',mode:'dark'},
+  light:{bg:'#eef1fb',s:'#ffffff',s2:'#f3f5fd',b:'#dde2f2',t:'#1c2030',m:'#6c7290',mode:'light'},
+  cream:{bg:'#f7f1e6',s:'#fffdf9',s2:'#f5edda',b:'#e9dcc4',t:'#3a2c18',m:'#94795a',mode:'light'},
+  mint:{bg:'#e9f5ed',s:'#fbfffc',s2:'#e7f2eb',b:'#c9ded0',t:'#10261a',m:'#5e8a74',mode:'light'},
   // ♿ High-contrast — WCAG AAA-style · pure black bg + white text + thick borders
   contrast:{bg:'#000000',s:'#0c0c0c',s2:'#181818',b:'#ffffff',t:'#ffffff',m:'#cccccc',mode:'dark',hc:true},
 };
@@ -8748,6 +8764,18 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.33.0':{
+    th:[
+      '🪟 **ดีไซน์ใหม่สไตล์กระจกฝ้า (glassmorphism) ทั้งแอป** — การ์ด · เมนู · โมดัล · แถบล่าง เป็นพื้นผิวกึ่งโปร่งเบลอ ลอยเหนือพื้นหลังไล่สีพาสเทลนุ่มๆ ดูทันสมัยขึ้นทุกหน้า',
+      '🎨 **ปรับชุดธีมใหม่ให้เข้ากับกระจก** — โทนอ่อนละมุน (เลิกใช้ดำสนิท) ทั้งธีมมืดและสว่าง · สลับธีม/โหมด + เลือกสี accent ได้เหมือนเดิม',
+      '♿ ธีม "คมชัด" ยังคงพื้นทึบคอนทราสต์สูงเพื่อการเข้าถึง (ไม่ใช้กระจก)',
+    ],
+    en:[
+      '🪟 **App-wide frosted-glass (glassmorphism) redesign** — cards · menus · modals · the bottom bar are now translucent blurred surfaces floating over a soft pastel gradient',
+      '🎨 **Reworked theme palettes to suit the glass** — gentle soft tones (no more pure black) across dark & light · theme/mode switching + accent picker still work',
+      '♿ The "High-contrast" theme keeps solid opaque surfaces for accessibility (no glass)',
+    ],
+  },
   '2.32.2':{
     th:[
       '🎨 **เปลี่ยนอีโมจิทั่วทั้งแอปเป็นไอคอนเส้น (SVG)** — ปุ่ม · หัวข้อ · เมนู · แท็บ · หน้าวิธีใช้ · โมดัล ฯลฯ ใช้ไอคอนเส้นสไตล์เดียวกับแถบล่าง ดูสะอาด/ทันสมัย/คมทุกความละเอียด',
