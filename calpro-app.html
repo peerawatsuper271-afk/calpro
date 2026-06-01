@@ -1828,7 +1828,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.2';
+const APP_VERSION = '2.33.3';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2078,7 +2078,7 @@ const I18N = {
     friends:'เพื่อน + Leaderboard',not_signed_in:'ยังไม่เชื่อมต่อ · ข้อมูลอยู่ในเบราว์เซอร์นี้เท่านั้น',
     last_sync:'ซิงค์ล่าสุด',sync_now:'ซิงค์เลย',sign_out:'ออกจากระบบ',delete_cloud:'ลบข้อมูลใน cloud',
     streak:'Streak',on_track:'ในเป้า',days:'วัน',
-    smart_goal:'ปรับเป้าหมายอัตโนมัติ?',recap_title:'📅 สรุปสัปดาห์ที่แล้ว',
+    smart_goal:'ปรับเป้าหมายอัตโนมัติ?',recap_title:'สรุปสัปดาห์ที่แล้ว',
     no_measure_yet:'กรอกรอบเอว + รอบคอ (+สะโพกสำหรับผู้หญิง) เพื่อคำนวณ % ไขมัน',
     weekly_recap_logged:'วันที่บันทึก',weekly_recap_change:'น้ำหนัก',weekly_recap_water_avg:'น้ำดื่มเฉลี่ย',
     add_friend:'+ เพิ่มเพื่อนด้วยอีเมล',later:'ทีหลัง',apply_now:'ปรับให้เลย',got_it:'รับทราบ',
@@ -2094,26 +2094,26 @@ const I18N = {
     edit_profile:'แก้ไขโปรไฟล์',edit_profile_long:'แก้ไขโปรไฟล์',
     bio_label:'เกี่ยวกับฉัน',bio_empty_self:'ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม',bio_empty_friend:'(เพื่อนยังไม่ใส่คำอธิบาย)',
     banner_color:'สีแบนเนอร์',
-    badges_showcase:'🏅 เหรียญตราที่ได้รับ',
+    badges_showcase:'เหรียญตราที่ได้รับ',
     my_goal:'เป้าหมายของฉัน',goal_type_lbl:'ประเภท',goal_label2:'เป้า/วัน',weight_progress:'น้ำหนัก',
     streak_lbl:'streak',days_lbl:'วันที่บันทึก',on_track_lbl:'อยู่ในเป้า',score_lbl:'คะแนน',
-    send_cheer:'👏 ส่งกำลังใจ',cheer_sent:'ส่งกำลังใจให้ %n แล้ว 👏',
+    send_cheer:'ส่งกำลังใจ',cheer_sent:'ส่งกำลังใจให้ %n แล้ว',
     lvl_newcomer:'มือใหม่',lvl_starter:'นักสะสมสตรีค',lvl_regular:'ขาประจำ',lvl_pro:'มืออาชีพ',lvl_master:'มาสเตอร์',lvl_champion:'แชมป์เปี้ยน',lvl_veteran:'ผู้เก๋าเกม',lvl_elite:'ระดับเอลีท',lvl_mythic:'ระดับมิทิก',lvl_legend:'ตำนาน',
     lvl_progress:'อีก %n คะแนนถึง Lv %l',lvl_maxed:'ระดับสูงสุด · เก่งเทพ!',
     crop_title:'ปรับตำแหน่งรูป',crop_hint:'ลากเพื่อเลื่อน · เลื่อน slider เพื่อซูม',crop_zoom:'ซูม',crop_reset:'รีเซ็ต',crop_cancel:'ยกเลิก',crop_apply:'✓ ใช้รูปนี้',
     period_7d:'7 วัน',period_30d:'1 เดือน',cal_30d:'แคลอรี่ 30 วัน',water_30d:'น้ำดื่ม 30 วัน',
     lb_friends:'เพื่อน',lb_global:'ทั้งหมด',lb_loading_all:'กำลังโหลดอันดับทั้งหมด...',lb_no_users:'ยังไม่มีผู้ใช้คนอื่น',
-    lb_signin_needed:'🔒 กรุณาล็อกอินก่อนเพื่อดูเพื่อน + เพิ่มเพื่อน',lb_go_signin:'ไปหน้าตั้งค่า → Cloud Sync',
+    lb_signin_needed:'กรุณาล็อกอินก่อนเพื่อดูเพื่อน + เพิ่มเพื่อน',lb_go_signin:'ไปหน้าตั้งค่า → Cloud Sync',
     fp_loading:'กำลังโหลดโปรไฟล์...',fp_err:'โหลดโปรไฟล์ไม่สำเร็จ',
     dev_unlocked:'🔧 ปลดล็อก Developer mode',dev_locked:'ล็อก Developer mode แล้ว',dev_wrong_pw:'รหัสผ่านไม่ถูกต้อง',dev_dumped:'ดัมป์ใน console แล้ว',
     sign_in_first:'กรุณาเข้าสู่ระบบก่อน',
-    friend_profile_title:'👤 โปรไฟล์เพื่อน',close:'ปิด',
+    friend_profile_title:'โปรไฟล์เพื่อน',close:'ปิด',
     banner_image:'หรืออัปโหลดรูปแบนเนอร์',banner_remove:'ลบรูปแบนเนอร์',
     ai_settings_title:'AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)',
     ai_settings_sub:'ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)',
-    ai_photo_btn:'ถ่ายรูป AI',ai_photo_title:'🤖 ถ่ายรูปอาหาร · AI ประเมิน',
+    ai_photo_btn:'ถ่ายรูป AI',ai_photo_title:'ถ่ายรูปอาหาร · AI ประเมิน',
     ai_photo_hint:'ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก',
-    ai_relogin_notice:'📌 หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)',
+    ai_relogin_notice:'หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)',
     smart_goal_pref:'ปรับเป้าหมายอัตโนมัติ',smart_goal_pref_sub:'แสดง popup ทุก 4 สัปดาห์ถ้าน้ำหนักไม่เป็นไปตามเป้า',
     weekly_recap_pref:'สรุปรายสัปดาห์',weekly_recap_pref_sub:'popup ทุกวันจันทร์เช้า',
     water_goal_cfg:'เป้าหมายน้ำดื่ม',
@@ -2136,7 +2136,7 @@ const I18N = {
     add_friend_title:'เพิ่มเพื่อน',add_friend_sub:'ค้นหาด้วยอีเมลหรือชื่อที่แสดง',fr_no_results:'ไม่พบผู้ใช้',fr_search_short:'พิมพ์อย่างน้อย 2 ตัวอักษร',fr_already:'มีในรายชื่อเพื่อนแล้ว',fr_self:'นี่คือคุณ',fr_added:'เพิ่ม %n เป็นเพื่อนแล้ว ✓',fr_removed:'ลบ %n ออกจากเพื่อนแล้ว',fr_confirm_remove:'ลบ "%n" ออกจากเพื่อน?',
     scan_barcode:'สแกนบาร์โค้ด',barcode_hint:'หันกล้องไปที่บาร์โค้ดของสินค้า · ข้อมูลจากฐาน OpenFoodFacts',barcode_or_manual:'หรือพิมพ์รหัสเอง',barcode_lookup:'ค้นหา',barcode_starting:'กำลังเปิดกล้อง...',barcode_scanning:'ส่องบาร์โค้ดในกรอบ',barcode_no_camera:'ไม่สามารถเปิดกล้องได้ · ใช้การพิมพ์รหัสแทน',barcode_lib_fail:'โหลดตัวสแกนไม่สำเร็จ · ลองอีกครั้งเมื่อมีอินเทอร์เน็ต',barcode_found:'พบ',barcode_notfound:'ไม่พบสินค้านี้ในฐาน',barcode_lookup_err:'ค้นหาไม่สำเร็จ · ตรวจอินเทอร์เน็ตและลองใหม่',barcode_invalid:'กรอกรหัสบาร์โค้ดให้ถูกต้อง',
     recipe_title:'สร้างสูตรอาหาร',recipe_sub:'รวมหลายส่วนผสมเป็นเมนูเดียว · บันทึกลงไลบรารีเพื่อใช้ซ้ำได้',recipe_open:'+ สร้างสูตรใหม่',
-    recipe_name:'ชื่อสูตร',recipe_name_ph:'เช่น ผัดไทยโฮมเมด',recipe_servings:'จำนวนเสิร์ฟ',recipe_ingredients:'ส่วนผสม',recipe_save:'💾 บันทึกสูตร',recipe_no_ing:'ยังไม่มีส่วนผสม · ค้นหาด้านบนเพื่อเพิ่ม',recipe_per_serving:'ต่อ 1 เสิร์ฟ',recipe_total:'รวมทั้งหมด',recipe_need_name:'กรุณาตั้งชื่อสูตร',recipe_need_ing:'กรุณาเพิ่มส่วนผสม',recipe_saved:'บันทึกสูตรลงไลบรารีแล้ว ✓',
+    recipe_name:'ชื่อสูตร',recipe_name_ph:'เช่น ผัดไทยโฮมเมด',recipe_servings:'จำนวนเสิร์ฟ',recipe_ingredients:'ส่วนผสม',recipe_save:'บันทึกสูตร',recipe_no_ing:'ยังไม่มีส่วนผสม · ค้นหาด้านบนเพื่อเพิ่ม',recipe_per_serving:'ต่อ 1 เสิร์ฟ',recipe_total:'รวมทั้งหมด',recipe_need_name:'กรุณาตั้งชื่อสูตร',recipe_need_ing:'กรุณาเพิ่มส่วนผสม',recipe_saved:'บันทึกสูตรลงไลบรารีแล้ว ✓',
   },
   en:{
     welcome:'Welcome',you:'You',today:'Today',yesterday:'Yesterday',
@@ -2180,7 +2180,7 @@ const I18N = {
     friends:'Friends + Leaderboard',not_signed_in:'Not signed in · Data stored in this browser only',
     last_sync:'Last sync',sync_now:'Sync now',sign_out:'Sign out',delete_cloud:'Delete cloud data',
     streak:'Streak',on_track:'On track',days:'days',
-    smart_goal:'Adjust goal automatically?',recap_title:'📅 Last week summary',
+    smart_goal:'Adjust goal automatically?',recap_title:'Last week summary',
     no_measure_yet:'Enter waist + neck (+ hip for women) to calculate body fat %',
     weekly_recap_logged:'Days logged',weekly_recap_change:'Weight',weekly_recap_water_avg:'Avg water',
     add_friend:'+ Add friend by email',later:'Later',apply_now:'Apply',got_it:'Got it',
@@ -2196,26 +2196,26 @@ const I18N = {
     edit_profile:'Edit profile',edit_profile_long:'Edit profile',
     bio_label:'About me',bio_empty_self:'No bio yet · tap Edit profile to add one',bio_empty_friend:'(No bio yet)',
     banner_color:'Banner color',
-    badges_showcase:'🏅 Badges earned',
+    badges_showcase:'Badges earned',
     my_goal:'My goal',goal_type_lbl:'Type',goal_label2:'Daily',weight_progress:'Weight',
     streak_lbl:'streak',days_lbl:'logged',on_track_lbl:'on track',score_lbl:'score',
-    send_cheer:'👏 Send cheer',cheer_sent:'Sent cheer to %n 👏',
+    send_cheer:'Send cheer',cheer_sent:'Sent cheer to %n',
     lvl_newcomer:'Newcomer',lvl_starter:'Streak starter',lvl_regular:'Regular',lvl_pro:'Pro',lvl_master:'Master',lvl_champion:'Champion',lvl_veteran:'Veteran',lvl_elite:'Elite',lvl_mythic:'Mythic',lvl_legend:'Legend',
     lvl_progress:'%n more to Lv %l',lvl_maxed:'Max level · godlike!',
     crop_title:'Adjust image',crop_hint:'Drag to move · slider to zoom',crop_zoom:'Zoom',crop_reset:'Reset',crop_cancel:'Cancel',crop_apply:'✓ Apply',
     period_7d:'7 days',period_30d:'30 days',cal_30d:'30-day calories',water_30d:'30-day water',
     lb_friends:'Friends',lb_global:'Global',lb_loading_all:'Loading global ranking...',lb_no_users:'No other users yet',
-    lb_signin_needed:'🔒 Sign in to see friends + add new ones',lb_go_signin:'Go to Settings → Cloud Sync',
+    lb_signin_needed:'Sign in to see friends + add new ones',lb_go_signin:'Go to Settings → Cloud Sync',
     fp_loading:'Loading profile...',fp_err:'Failed to load profile',
     dev_unlocked:'🔧 Developer mode unlocked',dev_locked:'Developer mode locked',dev_wrong_pw:'Wrong password',dev_dumped:'Dumped to console',
     sign_in_first:'Sign in first',
-    friend_profile_title:'👤 Friend profile',close:'Close',
+    friend_profile_title:'Friend profile',close:'Close',
     banner_image:'or upload banner image',banner_remove:'Remove banner image',
     ai_settings_title:'AI food vision (bring your own key)',
     ai_settings_sub:'Snap a photo → AI estimates kcal/macros · uses your own API key (Claude/OpenAI/Gemini)',
-    ai_photo_btn:'AI photo',ai_photo_title:'🤖 Photo · AI estimate',
+    ai_photo_btn:'AI photo',ai_photo_title:'Photo · AI estimate',
     ai_photo_hint:'Take one food photo · AI will estimate name/kcal/macros · review + edit before saving',
-    ai_relogin_notice:'📌 Note: if AI camera doesn\'t work, please sign out and sign back in (Settings → Cloud Sync)',
+    ai_relogin_notice:'Note: if AI camera doesn\'t work, please sign out and sign back in (Settings → Cloud Sync)',
     smart_goal_pref:'Auto goal adjustment',smart_goal_pref_sub:'Popup every 4 weeks if weight trend deviates',
     weekly_recap_pref:'Weekly recap',weekly_recap_pref_sub:'Popup every Monday morning',
     water_goal_cfg:'Water goal',
@@ -2238,7 +2238,7 @@ const I18N = {
     add_friend_title:'Add friend',add_friend_sub:'Search by email or display name',fr_no_results:'No users found',fr_search_short:'Type at least 2 characters',fr_already:'Already in your friends list',fr_self:'That\'s you',fr_added:'Added %n as a friend ✓',fr_removed:'Removed %n from friends',fr_confirm_remove:'Remove "%n" from friends?',
     scan_barcode:'Scan barcode',barcode_hint:'Aim the camera at a product\'s barcode · data from OpenFoodFacts',barcode_or_manual:'Or enter the code manually',barcode_lookup:'Lookup',barcode_starting:'Starting camera...',barcode_scanning:'Hold a barcode inside the frame',barcode_no_camera:'Camera unavailable · use manual entry',barcode_lib_fail:'Scanner library failed to load · retry when online',barcode_found:'Found',barcode_notfound:'Product not found in database',barcode_lookup_err:'Lookup failed · check internet and retry',barcode_invalid:'Enter a valid barcode',
     recipe_title:'Create recipe',recipe_sub:'Combine multiple ingredients into one item · saves to your library for reuse',recipe_open:'+ Create new recipe',
-    recipe_name:'Recipe name',recipe_name_ph:'e.g. Homemade Pad Thai',recipe_servings:'Servings',recipe_ingredients:'Ingredients',recipe_save:'💾 Save recipe',recipe_no_ing:'No ingredients yet · search above to add',recipe_per_serving:'per serving',recipe_total:'Total',recipe_need_name:'Please name the recipe',recipe_need_ing:'Please add ingredients',recipe_saved:'Recipe saved to library ✓',
+    recipe_name:'Recipe name',recipe_name_ph:'e.g. Homemade Pad Thai',recipe_servings:'Servings',recipe_ingredients:'Ingredients',recipe_save:'Save recipe',recipe_no_ing:'No ingredients yet · search above to add',recipe_per_serving:'per serving',recipe_total:'Total',recipe_need_name:'Please name the recipe',recipe_need_ing:'Please add ingredients',recipe_saved:'Recipe saved to library ✓',
   }
 };
 function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
@@ -3339,7 +3339,7 @@ function renderQuickList(){
     const isEn=settings.lang==='en';
     const isFavTab=activeQTab==='fav';
     w.innerHTML=`<div class="empty-state" style="padding:22px 16px">`+
-      `<div class="es-ico">${isFavTab?'⭐':'🕘'}</div>`+
+      `<div class="es-ico">${isFavTab?icoSvg('star'):icoSvg('clock')}</div>`+
       `<div class="es-title">${isFavTab?(isEn?'No favorites yet':'ยังไม่มีของโปรด'):(isEn?'No recent foods':'ยังไม่มีรายการล่าสุด')}</div>`+
       `<div class="es-sub">${isFavTab?(isEn?'Tap the ★ on any food to pin it here':'กด ★ ที่อาหารเพื่อปักหมุดไว้ตรงนี้'):(isEn?'Foods you log will show up here for quick re-adding':'อาหารที่บันทึกจะมาอยู่ตรงนี้ เพิ่มซ้ำได้เร็ว')}</div>`+
     `</div>`;
@@ -4085,7 +4085,7 @@ async function renderAllUsersLeaderboard(){
     skeletonDone(_skel);
     const isEn=settings.lang==='en';
     body.innerHTML=`<div class="empty-state" style="padding:24px 16px">`+
-      `<div class="es-ico">📡</div>`+
+      `<div class="es-ico">${icoSvg('alert')}</div>`+
       `<div class="es-title">${isEn?'Couldn\'t load the leaderboard':'โหลดกระดานผู้นำไม่สำเร็จ'}</div>`+
       `<div class="es-sub">${isEn?'Check your connection and try again':'เช็คอินเทอร์เน็ตแล้วลองใหม่'}</div>`+
       `<button class="es-cta" onclick="renderAllUsersLeaderboard()">${icoSvg('sync')} ${isEn?'Retry':'ลองใหม่'}</button>`+
@@ -4152,7 +4152,7 @@ async function renderFriendsCard(){
     skeletonDone(_skelF);
     const isEn=settings.lang==='en';
     body.innerHTML=`<div class="empty-state" style="padding:24px 16px">`+
-      `<div class="es-ico">📡</div>`+
+      `<div class="es-ico">${icoSvg('alert')}</div>`+
       `<div class="es-title">${isEn?'Couldn\'t load friends':'โหลดเพื่อนไม่สำเร็จ'}</div>`+
       `<div class="es-sub">${isEn?'Check your connection and try again':'เช็คอินเทอร์เน็ตแล้วลองใหม่'}</div>`+
       `<button class="es-cta" onclick="renderFriendsCard()">${icoSvg('sync')} ${isEn?'Retry':'ลองใหม่'}</button>`+
@@ -5640,7 +5640,7 @@ function renderToday(){
     const isToday=currentDate===todayKey();
     const isEn2=settings.lang==='en';
     log.innerHTML=`<div class="empty-state">`+
-      `<div class="es-ico">🍽️</div>`+
+      `<div class="es-ico">${icoSvg('utensils')}</div>`+
       `<div class="es-title">${isToday?t('no_entries'):(isEn2?'No entries on this day':'วันนี้ยังไม่มีรายการ')}</div>`+
       `<div class="es-sub">${isEn2?'Log your first meal — it only takes a tap':'บันทึกมื้อแรกของวัน · แค่แตะเดียว'}</div>`+
       `<button class="es-cta" onclick="goToAddFood()"><span style="font-size:1.05rem;line-height:1">＋</span> ${isEn2?'Log food':'บันทึกอาหาร'}</button>`+
@@ -6108,8 +6108,8 @@ function renderProfileUI(){
   const statLine=document.getElementById('profileStatLine');
   if(statLine){
     statLine.innerHTML=isEn2
-      ? `${icoSvg('flame')} <b>${streak}</b> day streak · ${icoSvg('note')} <b>${days}</b> logged · 🏅 <b>${earned.length}</b> badges`
-      : `${icoSvg('flame')} <b>${streak}</b> วันติด · ${icoSvg('note')} <b>${days}</b> วันบันทึก · 🏅 <b>${earned.length}</b> เหรียญ`;
+      ? `${icoSvg('flame')} <b>${streak}</b> day streak · ${icoSvg('note')} <b>${days}</b> logged · ${icoSvg('award')} <b>${earned.length}</b> badges`
+      : `${icoSvg('flame')} <b>${streak}</b> วันติด · ${icoSvg('note')} <b>${days}</b> วันบันทึก · ${icoSvg('award')} <b>${earned.length}</b> เหรียญ`;
   }
   const shareLbl=document.getElementById('profileShareLbl');
   if(shareLbl)shareLbl.textContent=isEn2?'Share':'แชร์';
@@ -7484,7 +7484,7 @@ function parseReferralOnLoad(){
     localStorage.setItem('calpro_referred_at',new Date().toISOString());
     const isEn=settings.lang==='en';
     setTimeout(()=>{
-      showToast(isEn?'🎁 A friend invited you to CalPro+':'🎁 เพื่อนคุณเชิญคุณมา CalPro+',3500);
+      showToast(isEn?'A friend invited you to CalPro+':'เพื่อนคุณเชิญคุณมา CalPro+',3500);
     },1500);
   }catch(e){console.warn('[referral] parse failed:',e.message);}
 }
@@ -7525,7 +7525,7 @@ function celebrateMilestoneIfNew(){
     localStorage.setItem('calpro_milestones_shared',JSON.stringify(celebrated));
     const isEn=settings.lang==='en';
     // Small intro toast then open share sheet
-    showToast(isEn?`🎉 ${ms}-day milestone — share it!`:`🎉 ครบ ${ms} วันติด — แชร์ความสำเร็จ!`,3000);
+    showToast(isEn?`${ms}-day milestone — share it!`:`ครบ ${ms} วันติด — แชร์ความสำเร็จ!`,3000);
     setTimeout(()=>{try{shareAchievements();}catch(e){console.warn('[milestone] share failed:',e.message);}},1200);
   }catch(e){console.warn('[milestone] check failed:',e.message);}
 }
@@ -8082,7 +8082,7 @@ function renderAiSettingsBody(){
   if(isProxy){
     inner+=
       `<div style="background:var(--surface2);padding:10px;border-radius:9px;margin:8px 0;font-size:.78rem;line-height:1.5">`+
-        `<div style="font-weight:600;margin-bottom:4px">🎁 ${isEn?'Free for everyone — no setup needed':'ฟรีสำหรับทุกคน · ไม่ต้องตั้งค่าอะไรเลย'}</div>`+
+        `<div style="font-weight:600;margin-bottom:4px">${isEn?'Free for everyone — no setup needed':'ฟรีสำหรับทุกคน · ไม่ต้องตั้งค่าอะไรเลย'}</div>`+
         `<div style="color:var(--muted)">${isEn?'CalPro+ handles the key on the server · 20 photos/day per user':'ระบบจัดการ key ฝั่งเซิร์ฟเวอร์ให้ · 20 รูป/วัน/คน'}</div>`+
         (usageNote?`<div style="margin-top:6px;font-weight:600;color:var(--accent)">${usageNote}</div>`:'')+
       `</div>`;
@@ -8106,11 +8106,11 @@ function renderAiSettingsBody(){
     `<div style="font-size:.7rem;color:var(--muted);margin-top:10px;line-height:1.5;padding:8px;background:var(--surface2);border-radius:6px">`+
       (isProxy
         ? (isEn
-          ? `🔒 Photos go through our Edge Function — the AI key never reaches your browser. We don't store the photos. Limit: <b>${escapeHtml(cfg.costPerImage||'')}</b>.`
-          : `🔒 รูปถูกส่งผ่าน Edge Function ของเรา · key ไม่ถูกแสดงในเบราว์เซอร์ · ไม่เก็บรูปของคุณ · จำกัด: <b>${escapeHtml(cfg.costPerImage||'')}</b>`)
+          ? `Photos go through our Edge Function — the AI key never reaches your browser. We don't store the photos. Limit: <b>${escapeHtml(cfg.costPerImage||'')}</b>.`
+          : `รูปถูกส่งผ่าน Edge Function ของเรา · key ไม่ถูกแสดงในเบราว์เซอร์ · ไม่เก็บรูปของคุณ · จำกัด: <b>${escapeHtml(cfg.costPerImage||'')}</b>`)
         : (isEn
-          ? `🔒 Your key + every photo are sent <b>directly to ${escapeHtml(cfg.label)}</b> from this device — they never touch our servers. Cost: ${escapeHtml(cfg.costPerImage||'?')}.`
-          : `🔒 Key + รูปทุกภาพถูกส่ง<b>ตรงไปยัง ${escapeHtml(cfg.label)}</b> จากเครื่องคุณ — ไม่ผ่านเซิร์ฟเวอร์ของเรา · ต้นทุน: ${escapeHtml(cfg.costPerImage||'?')}`))+
+          ? `Your key + every photo are sent <b>directly to ${escapeHtml(cfg.label)}</b> from this device — they never touch our servers. Cost: ${escapeHtml(cfg.costPerImage||'?')}.`
+          : `Key + รูปทุกภาพถูกส่ง<b>ตรงไปยัง ${escapeHtml(cfg.label)}</b> จากเครื่องคุณ — ไม่ผ่านเซิร์ฟเวอร์ของเรา · ต้นทุน: ${escapeHtml(cfg.costPerImage||'?')}`))+
     `</div>`;
   body.innerHTML=inner;
   customizeSelect(body.querySelector('select'));   // themed provider picker
@@ -8126,7 +8126,7 @@ function refreshAiQuotaInline(){
   // Only show for proxy provider — BYO-key users manage their own quota
   if((settings.aiProvider||'proxy')!=='proxy'){el.textContent='';return;}
   if(!isRegisteredUser()){
-    el.textContent=isEn?'🔒 AI photo requires sign-up · free 20/day after':'🔒 AI ถ่ายรูปต้องสมัครสมาชิกก่อน · ใช้ฟรี 20 รูป/วัน';
+    el.textContent=isEn?'AI photo requires sign-up · free 20/day after':'AI ถ่ายรูปต้องสมัครสมาชิกก่อน · ใช้ฟรี 20 รูป/วัน';
     el.style.color='var(--muted)';
     return;
   }
@@ -8181,7 +8181,7 @@ function openAiPhotoModal(){
   // For the free proxy provider — require a registered (non-anonymous) account.
   if(cfg.noKey){
     if(!isRegisteredUser()){
-      showToast(isEn?'🔒 AI photo is for registered members · please sign up':'🔒 AI ถ่ายรูปสำหรับสมาชิกที่สมัครแล้ว · กรุณาสมัครสมาชิกก่อน',4000);
+      showToast(isEn?'AI photo is for registered members · please sign up':'AI ถ่ายรูปสำหรับสมาชิกที่สมัครแล้ว · กรุณาสมัครสมาชิกก่อน',4000);
       setTimeout(()=>navTo('settings'),900);
       return;
     }
