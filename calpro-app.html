@@ -109,9 +109,11 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 /* ── HEADER ── */
 /* Sticky top header — stays pinned when scrolling. backdrop blur for nice
    overlap with content below. */
-/* Frameless header (iOS-26 style): no panel/border — content just softly
-   blurs under it on scroll (clear backdrop blur, no tint). */
-.hdr{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 0 12px;gap:8px;background:transparent;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+/* Frameless full-bleed header (iOS-26 style): spans edge-to-edge; the blur lives
+   on ::before with a vertical mask so it FADES OUT toward the bottom — no hard
+   line where the blur stops, content just dissolves into focus as you scroll. */
+.hdr{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;margin:0 -14px;padding:14px 14px 12px;gap:8px;background:transparent;}
+.hdr::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:linear-gradient(to bottom,#000 0%,#000 50%,transparent 100%);mask:linear-gradient(to bottom,#000 0%,#000 50%,transparent 100%);}
 .hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--border);opacity:.4;pointer-events:none;}
 /* iOS Safari zooms in when an input has font-size < 16px. Force min 16px on
    form controls so the keyboard never triggers a zoom. !important so that
@@ -163,7 +165,8 @@ select,textarea{font-size:max(16px,1rem)!important;}
 html[data-mode="light"]{--glass:color-mix(in srgb,var(--surface) 74%,transparent);--glass2:color-mix(in srgb,var(--surface2) 72%,transparent);--glass-solid:color-mix(in srgb,var(--surface) 88%,transparent);--glass-bd:color-mix(in srgb,var(--text) 10%,transparent);--glass-sh:0 8px 30px rgba(70,80,130,.13),inset 0 1px 0 rgba(255,255,255,.55);}
 /* High-contrast → solid opaque surfaces, no blur (a11y) */
 html[data-hc="1"] .card,html[data-hc="1"] .modal,html[data-hc="1"] .bnav,html[data-hc="1"] .drawer,html[data-hc="1"] .profile-hero,html[data-hc="1"] .profile-stat-tile,html[data-hc="1"] .qadd-chip{background:var(--surface)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--border)!important;}
-html[data-hc="1"] .hdr{background:var(--bg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+html[data-hc="1"] .hdr{background:var(--bg)!important;}
+html[data-hc="1"] .hdr::before{display:none;}
 html[data-hc="1"] .fab{background:var(--accent)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--accent)!important;}
 .card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
@@ -1828,7 +1831,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.3';
+const APP_VERSION = '2.33.4';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
