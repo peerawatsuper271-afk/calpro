@@ -33,7 +33,7 @@
   --glass-solid:color-mix(in srgb, var(--surface) 82%, transparent);
   --glass-bd:color-mix(in srgb, var(--text) 14%, transparent);
   --glass-blur:18px;
-  --glass-sh:0 8px 30px rgba(8,10,28,.22);
+  --glass-sh:0 8px 30px rgba(8,10,28,.22),inset 0 1px 0 color-mix(in srgb,#fff 16%,transparent);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 /* iOS Safari: kill double-tap zoom + 300ms click delay on interactive UI,
@@ -59,7 +59,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 }
 
 /* ── BOTTOM NAV — floating glass capsule, icon-only, monochrome active pill ── */
-.bnav{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:452px;margin:0 auto;background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:1px solid var(--glass-bd);border-radius:26px;display:flex;gap:4px;padding:7px;z-index:50;box-shadow:0 12px 36px rgba(8,10,28,.4);}
+.bnav{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:452px;margin:0 auto;background:color-mix(in srgb,var(--surface) 55%,transparent);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);border:1px solid var(--glass-bd);border-radius:28px;display:flex;gap:4px;padding:7px;z-index:50;box-shadow:0 14px 40px rgba(8,10,28,.4),inset 0 1px 0 color-mix(in srgb,#fff 24%,transparent);}
 .bnt{flex:1;padding:11px 4px;border-radius:18px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:color .15s,background .18s,transform .12s;}
 .bnt span{display:none;}
 .bnt:active{transform:scale(.9);}
@@ -109,7 +109,9 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 /* ── HEADER ── */
 /* Sticky top header — stays pinned when scrolling. backdrop blur for nice
    overlap with content below. */
-.hdr{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 10px 12px;margin:0 -10px;gap:8px;background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-bottom:1px solid var(--glass-bd);}
+/* Frameless header (iOS-26 style): no panel/border — content just softly
+   blurs under it on scroll (clear backdrop blur, no tint). */
+.hdr{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 0 12px;gap:8px;background:transparent;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
 .hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--border);opacity:.4;pointer-events:none;}
 /* iOS Safari zooms in when an input has font-size < 16px. Force min 16px on
    form controls so the keyboard never triggers a zoom. !important so that
@@ -125,7 +127,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 /* ── DRAWER ── */
 .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;backdrop-filter:blur(2px);}
 .drawer-overlay.open{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border-right:1px solid var(--glass-bd);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 62%,transparent);-webkit-backdrop-filter:blur(34px) saturate(1.8);backdrop-filter:blur(34px) saturate(1.8);border-right:1px solid var(--glass-bd);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
 /* Shadow ONLY while open — a closed drawer sits at translateX(-100%) with its
    right edge exactly at x=0, so a permanent box-shadow bled a faint dark band
    onto the left screen edge. Toggling it with .open kills that artifact. */
@@ -156,9 +158,9 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-foot{padding:14px 18px;border-top:1px solid var(--border);font-size:.66rem;color:var(--muted);text-align:center;}
 
 /* ── CARD ── */
-.card{background:var(--glass);-webkit-backdrop-filter:blur(var(--glass-blur));backdrop-filter:blur(var(--glass-blur));border:1px solid var(--glass-bd);border-radius:18px;padding:14px 15px;margin-bottom:10px;box-shadow:var(--glass-sh);}
+.card{background:var(--glass);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.5);backdrop-filter:blur(var(--glass-blur)) saturate(1.5);border:1px solid var(--glass-bd);border-radius:18px;padding:14px 15px;margin-bottom:10px;box-shadow:var(--glass-sh);}
 /* Light mode → more opaque glass so text stays legible on a bright backdrop */
-html[data-mode="light"]{--glass:color-mix(in srgb,var(--surface) 74%,transparent);--glass2:color-mix(in srgb,var(--surface2) 72%,transparent);--glass-solid:color-mix(in srgb,var(--surface) 88%,transparent);--glass-bd:color-mix(in srgb,var(--text) 10%,transparent);--glass-sh:0 8px 30px rgba(70,80,130,.12);}
+html[data-mode="light"]{--glass:color-mix(in srgb,var(--surface) 74%,transparent);--glass2:color-mix(in srgb,var(--surface2) 72%,transparent);--glass-solid:color-mix(in srgb,var(--surface) 88%,transparent);--glass-bd:color-mix(in srgb,var(--text) 10%,transparent);--glass-sh:0 8px 30px rgba(70,80,130,.13),inset 0 1px 0 rgba(255,255,255,.55);}
 /* High-contrast → solid opaque surfaces, no blur (a11y) */
 html[data-hc="1"] .card,html[data-hc="1"] .modal,html[data-hc="1"] .bnav,html[data-hc="1"] .drawer,html[data-hc="1"] .profile-hero,html[data-hc="1"] .profile-stat-tile,html[data-hc="1"] .qadd-chip{background:var(--surface)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--border)!important;}
 html[data-hc="1"] .hdr{background:var(--bg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
@@ -385,7 +387,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 /* ── BUTTONS ── */
 .btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .2s;}
 .btn:hover{opacity:.85;}
-.btn-sec{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 13px;font-size:.77rem;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-sec{background:var(--glass2);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--glass-bd);color:var(--text);border-radius:10px;padding:6px 13px;font-size:.77rem;cursor:pointer;font-family:inherit;transition:all .15s;}
 .btn-sec:hover{border-color:var(--accent);color:var(--accent);}
 .btn-danger{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 14px;font-size:.8rem;cursor:pointer;font-family:inherit;transition:all .2s;width:100%;margin-top:8px;}
 .btn-danger:hover{border-color:var(--accent);color:var(--accent);}
@@ -404,7 +406,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .tip{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:9px;padding:10px;margin-top:9px;font-size:.75rem;line-height:1.6;}
 .tip strong{color:var(--accent);}
 /* ═══ STEAM-STYLE PROFILE (v2.21) ═══ */
-.profile-hero{background:var(--glass);-webkit-backdrop-filter:blur(var(--glass-blur));backdrop-filter:blur(var(--glass-blur));border:1px solid var(--glass-bd);border-radius:18px;overflow:hidden;margin-bottom:10px;position:relative;box-shadow:var(--glass-sh);}
+.profile-hero{background:var(--glass);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.5);backdrop-filter:blur(var(--glass-blur)) saturate(1.5);border:1px solid var(--glass-bd);border-radius:18px;overflow:hidden;margin-bottom:10px;position:relative;box-shadow:var(--glass-sh);}
 .profile-hero-banner{height:134px;background:linear-gradient(135deg,var(--banner-color,#ff6b6b),color-mix(in srgb,var(--banner-color,#ff6b6b) 55%,#000));position:relative;}
 .profile-hero-banner::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 60%);}
 /* FB-style: avatar overlaps bottom-left of the cover, name+stats stack below */
@@ -687,7 +689,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 /* ── MODAL ── */
 .modal-bg{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;}
 .modal-bg.hide{display:none;}
-.modal{background:var(--glass-solid);-webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);border:1px solid var(--glass-bd);border-radius:20px;padding:18px 16px 22px;width:100%;max-width:480px;max-height:calc(100vh - 28px);overflow-y:auto;animation:mup .22s ease;box-shadow:0 18px 50px rgba(8,10,28,.42);}
+.modal{background:var(--glass-solid);-webkit-backdrop-filter:blur(30px) saturate(1.6);backdrop-filter:blur(30px) saturate(1.6);border:1px solid var(--glass-bd);border-radius:22px;padding:18px 16px 22px;width:100%;max-width:480px;max-height:calc(100vh - 28px);overflow-y:auto;animation:mup .22s ease;box-shadow:0 18px 50px rgba(8,10,28,.42),inset 0 1px 0 color-mix(in srgb,#fff 18%,transparent);}
 @keyframes mup{from{transform:scale(.96) translateY(8px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
 @keyframes cpspin{to{transform:rotate(360deg)}}
 .modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
@@ -709,11 +711,11 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
   right:18px;
   bottom:calc(86px + env(safe-area-inset-bottom) + 12px);
   width:58px;height:58px;border-radius:50%;
-  background:color-mix(in srgb,var(--accent) 62%,transparent);color:#fff;
-  border:1px solid color-mix(in srgb,#fff 38%,transparent);
-  -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
+  background:color-mix(in srgb,var(--accent) 90%,transparent);color:#fff;
+  border:1px solid color-mix(in srgb,#fff 50%,transparent);
+  -webkit-backdrop-filter:blur(12px) saturate(1.5);backdrop-filter:blur(12px) saturate(1.5);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 10px 30px color-mix(in srgb,var(--accent) 42%,transparent),inset 0 1px 0 rgba(255,255,255,.28);
+  box-shadow:0 12px 34px color-mix(in srgb,var(--accent) 62%,transparent),inset 0 1.5px 1px rgba(255,255,255,.5);
   cursor:pointer;z-index:40;
   transition:transform .15s cubic-bezier(.2,.6,.2,1),box-shadow .25s;
 }
@@ -1826,7 +1828,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.1';
+const APP_VERSION = '2.33.2';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -8768,6 +8770,20 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.33.2':{
+    th:[
+      '✨ **ยกระดับเป็นกระจกใสสไตล์ iOS ทั้งแอป** — เบลอหนักขึ้น · โปร่งขึ้น · มีขอบเรืองแสง (specular) ทุกพื้นผิว · ให้ความรู้สึก liquid glass',
+      '🔝 **แถบหัวเอากรอบ/พื้นหลังออก** — โปร่งใสลอยเหนือเนื้อหาแบบ iOS (ไม่มีแผงทึบ/เส้นกรอบแล้ว)',
+      '➕ **ปุ่มลอย (FAB) สีเข้มสดขึ้น** — ไม่จางอีกต่อไป + เพิ่มประกายแสงแบบกระจก',
+      '🧊 **แถบล่าง + เมนูข้างเป็น liquid glass** · ปุ่มรองเป็นกระจกโปร่งให้เข้าชุดกัน',
+    ],
+    en:[
+      '✨ **Leveled-up to iOS-style liquid glass across the app** — heavier blur · clearer surfaces · specular edge highlights everywhere',
+      '🔝 **Header dropped its frame/background** — fully transparent, floating over content (iOS-style frameless)',
+      '➕ **Floating button (FAB) is bolder** — no longer washed out + a glass sheen',
+      '🧊 **Bottom bar + side drawer are now liquid glass** · secondary buttons turned translucent to match',
+    ],
+  },
   '2.33.1':{
     th:[
       '🪟 **แถบหัว (header) เป็นกระจกฝ้าแล้ว** — โปร่งเบลอ เปลี่ยนสีตามธีม + มีเส้นคั่นบางๆ (เดิมเป็นแถบทึบไม่เข้ากับกระจก)',
