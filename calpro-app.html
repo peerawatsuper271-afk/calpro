@@ -59,7 +59,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 }
 
 /* ── BOTTOM NAV — floating glass capsule, icon-only, monochrome active pill ── */
-.bnav{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:452px;margin:0 auto;background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.08);border-radius:26px;display:flex;gap:4px;padding:7px;z-index:50;box-shadow:0 12px 36px rgba(0,0,0,.55);}
+.bnav{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:452px;margin:0 auto;background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:1px solid var(--glass-bd);border-radius:26px;display:flex;gap:4px;padding:7px;z-index:50;box-shadow:0 12px 36px rgba(8,10,28,.4);}
 .bnt{flex:1;padding:11px 4px;border-radius:18px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:color .15s,background .18s,transform .12s;}
 .bnt span{display:none;}
 .bnt:active{transform:scale(.9);}
@@ -109,7 +109,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 /* ── HEADER ── */
 /* Sticky top header — stays pinned when scrolling. backdrop blur for nice
    overlap with content below. */
-.hdr{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 0 12px;gap:8px;background:var(--bg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+.hdr{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 10px 12px;margin:0 -10px;gap:8px;background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-bottom:1px solid var(--glass-bd);}
 .hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--border);opacity:.4;pointer-events:none;}
 /* iOS Safari zooms in when an input has font-size < 16px. Force min 16px on
    form controls so the keyboard never triggers a zoom. !important so that
@@ -125,7 +125,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 /* ── DRAWER ── */
 .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;backdrop-filter:blur(2px);}
 .drawer-overlay.open{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border-right:1px solid rgba(255,255,255,.08);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border-right:1px solid var(--glass-bd);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
 /* Shadow ONLY while open — a closed drawer sits at translateX(-100%) with its
    right edge exactly at x=0, so a permanent box-shadow bled a faint dark band
    onto the left screen edge. Toggling it with .open kills that artifact. */
@@ -161,6 +161,8 @@ select,textarea{font-size:max(16px,1rem)!important;}
 html[data-mode="light"]{--glass:color-mix(in srgb,var(--surface) 74%,transparent);--glass2:color-mix(in srgb,var(--surface2) 72%,transparent);--glass-solid:color-mix(in srgb,var(--surface) 88%,transparent);--glass-bd:color-mix(in srgb,var(--text) 10%,transparent);--glass-sh:0 8px 30px rgba(70,80,130,.12);}
 /* High-contrast → solid opaque surfaces, no blur (a11y) */
 html[data-hc="1"] .card,html[data-hc="1"] .modal,html[data-hc="1"] .bnav,html[data-hc="1"] .drawer,html[data-hc="1"] .profile-hero,html[data-hc="1"] .profile-stat-tile,html[data-hc="1"] .qadd-chip{background:var(--surface)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--border)!important;}
+html[data-hc="1"] .hdr{background:var(--bg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+html[data-hc="1"] .fab{background:var(--accent)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--accent)!important;}
 .card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
 
@@ -707,9 +709,11 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
   right:18px;
   bottom:calc(86px + env(safe-area-inset-bottom) + 12px);
   width:58px;height:58px;border-radius:50%;
-  background:var(--accent);color:#fff;border:none;
+  background:color-mix(in srgb,var(--accent) 62%,transparent);color:#fff;
+  border:1px solid color-mix(in srgb,#fff 38%,transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 22px rgba(0,0,0,.28);
+  box-shadow:0 10px 30px color-mix(in srgb,var(--accent) 42%,transparent),inset 0 1px 0 rgba(255,255,255,.28);
   cursor:pointer;z-index:40;
   transition:transform .15s cubic-bezier(.2,.6,.2,1),box-shadow .25s;
 }
@@ -1822,7 +1826,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.0';
+const APP_VERSION = '2.33.1';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -8764,6 +8768,18 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.33.1':{
+    th:[
+      '🪟 **แถบหัว (header) เป็นกระจกฝ้าแล้ว** — โปร่งเบลอ เปลี่ยนสีตามธีม + มีเส้นคั่นบางๆ (เดิมเป็นแถบทึบไม่เข้ากับกระจก)',
+      '➕ **ปุ่มเพิ่มอาหารแบบลอย (FAB) เป็นกระจกใส** — โทน accent โปร่งเบลอ มีขอบ + แสงสะท้อนแบบกระจก',
+      '🎨 ขอบแถบล่าง/เมนูข้างปรับให้เห็นชัดทั้งธีมสว่างและมืด (เดิมเป็นสีขาว hardcode มองไม่เห็นในธีมสว่าง)',
+    ],
+    en:[
+      '🪟 **Header is now frosted glass** — translucent + blurred, adapts to the theme, with a hairline divider (was an opaque bar that broke the glass look)',
+      '➕ **Floating add button (FAB) is now clear glass** — translucent accent tint, blur, glass edge + sheen',
+      '🎨 Bottom-bar / drawer borders now adapt to light & dark (were a hardcoded white that vanished on light themes)',
+    ],
+  },
   '2.33.0':{
     th:[
       '🪟 **ดีไซน์ใหม่สไตล์กระจกฝ้า (glassmorphism) ทั้งแอป** — การ์ด · เมนู · โมดัล · แถบล่าง เป็นพื้นผิวกึ่งโปร่งเบลอ ลอยเหนือพื้นหลังไล่สีพาสเทลนุ่มๆ ดูทันสมัยขึ้นทุกหน้า',
