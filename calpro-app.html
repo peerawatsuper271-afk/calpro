@@ -512,6 +512,27 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
    line-height (matters in 30-day mode and zero-cal days). */
 .wb-l:empty,.wb-c:empty{display:none;}
 .wbars.is-month .wb-l,.wbars.is-month .wb-c{font-size:.52rem;}
+/* ── iOS Battery-style calorie bar chart ── */
+.iosc{margin-top:2px;}
+.iosc-plot{position:relative;height:var(--ch,130px);transition:height .25s;}
+.iosc-grid{position:absolute;inset:0;pointer-events:none;}
+.iosc-grid i{position:absolute;left:0;right:0;height:1px;background:color-mix(in srgb,var(--text) 8%,transparent);}
+.iosc-base{position:absolute;left:0;right:0;bottom:0;height:1px;background:color-mix(in srgb,var(--text) 20%,transparent);}
+.iosc-goal{position:absolute;left:0;right:0;border-top:1.5px dashed color-mix(in srgb,var(--accent) 62%,transparent);}
+.iosc-goal b{position:absolute;right:0;bottom:1px;font-size:.55rem;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--glass-solid) 82%,transparent);padding:0 4px;border-radius:5px;}
+.iosc-ymax{position:absolute;left:0;top:-7px;font-size:.55rem;color:var(--muted);}
+.iosc-bars{position:absolute;inset:0;display:flex;align-items:flex-end;gap:5px;}
+.iosc-bars.is-month{gap:1.5px;}
+.iosc-col{flex:1;height:100%;display:flex;align-items:flex-end;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.iosc-bar{width:100%;border-radius:5px 5px 0 0;min-height:3px;transition:height .5s,filter .15s,opacity .2s;box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -8px 12px rgba(0,0,0,.06);}
+.iosc-col.sel .iosc-bar{filter:brightness(1.16) saturate(1.08);}
+.iosc-col.dim .iosc-bar{opacity:.4;}
+.iosc-x{display:flex;gap:5px;margin-top:6px;}
+.iosc-x.is-month{gap:1.5px;}
+.iosc-x span{flex:1;text-align:center;font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;min-width:0;}
+.iosc-x.is-month span{font-size:.52rem;}
+.iosc-readout{text-align:center;font-size:.68rem;color:var(--muted);margin-top:8px;min-height:1.1em;line-height:1.3;}
+.iosc-readout b{color:var(--text);}
 /* Period tab pills — used on Analysis charts + Leaderboard for 7d/30d toggle */
 .period-tabs{display:inline-flex;background:var(--surface2);border-radius:99px;padding:3px;gap:2px;}
 .ptab{padding:4px 12px;border-radius:99px;border:none;background:transparent;color:var(--muted);font-size:.7rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
@@ -957,8 +978,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
             <button class="ptab" data-period="30" onclick="setCalPeriod('30')" data-i18n="period_30d">1 เดือน</button>
           </div>
         </div>
-        <div class="wbars" id="wBars"></div>
-        <div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)"><span>0</span><span id="goalLine"></span></div>
+        <div class="iosc" id="wBars"></div>
       </div>
       <div class="card"><h3 data-i18n="projection_title">แนวโน้มน้ำหนัก 30 วัน + พยากรณ์</h3><div class="lc-wrap" id="projChart"></div><div id="projSum" style="font-size:.74rem;color:var(--muted);margin-top:6px;text-align:center;line-height:1.5"></div></div>
       <div class="card">
@@ -1889,7 +1909,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.10';
+const APP_VERSION = '2.33.11';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -6016,6 +6036,34 @@ let _calPeriod=localStorage.getItem('cp_cal_period')||'7';
 let _waterPeriod=localStorage.getItem('cp_water_period')||'7';
 function setCalPeriod(p){_calPeriod=p;localStorage.setItem('cp_cal_period',p);document.querySelectorAll('[data-period]').forEach(b=>b.classList.toggle('active',b.dataset.period===p));renderAnalysis();}
 function setWaterPeriod(p){_waterPeriod=p;localStorage.setItem('cp_water_period',p);document.querySelectorAll('[data-wperiod]').forEach(b=>b.classList.toggle('active',b.dataset.wperiod===p));renderWaterStats();}
+// Tap-a-bar scrubber for the iOS-style calorie chart: highlights the selected
+// day, dims the rest, and shows that day's date + kcal (+ delta vs goal) in the
+// readout line. Tapping the same bar again restores the default average readout.
+let _calDays=[];
+function selectCalBar(idx){
+  const isEn=settings.lang==='en';
+  const cols=document.querySelectorAll('#wBars .iosc-col');
+  const target=cols[idx]; if(!target)return;
+  const ro=document.getElementById('calReadout');
+  const wasSel=target.classList.contains('sel');
+  cols.forEach(c=>{c.classList.remove('sel');c.classList.remove('dim');});
+  if(wasSel){
+    const act=_calDays.filter(x=>x.cal>0);
+    const avg=act.length?Math.round(act.reduce((s,x)=>s+x.cal,0)/act.length):0;
+    if(ro)ro.innerHTML=avg?`${t('avg_per_day')} <b>${avg.toLocaleString()} kcal</b> · ${isEn?'tap a bar for details':'แตะแท่งดูรายวัน'}`:(isEn?'No data yet':'ยังไม่มีข้อมูล');
+    return;
+  }
+  cols.forEach(c=>{if(c!==target)c.classList.add('dim');});
+  target.classList.add('sel');
+  const d=_calDays[idx];
+  if(ro&&d){
+    const dl=d.d.toLocaleDateString(isEn?'en-GB':'th-TH',{weekday:'short',day:'numeric',month:'short'});
+    const goal=userProfile?.goal_cal||1800;
+    const diff=d.cal-goal;
+    const tag=diff>0?`<span style="color:var(--accent)">+${diff.toLocaleString()}</span>`:`<span style="color:var(--green)">${diff.toLocaleString()}</span>`;
+    ro.innerHTML=d.cal?`<b>${dl}</b> · ${d.cal.toLocaleString()} kcal · ${tag} ${isEn?'vs goal':'จากเป้า'}`:`<b>${dl}</b> · ${isEn?'no data':'ไม่มีข้อมูล'}`;
+  }
+}
 function renderAnalysis(){
   renderProjectionChart();renderWaterStats();
   renderAdSlot('analysis-1',document.querySelector('[data-ad-slot="analysis-1"]'));
@@ -6038,35 +6086,38 @@ function renderAnalysis(){
     days.push({k,cal,label,d});
   }
   const goal=userProfile?.goal_cal||1800;
-  const maxCal=Math.max(...days.map(d=>d.cal),goal,100);
-  // Auto-resize chart height: if max cal value is >1.6× goal (a big binge day),
-  // expand the container so the tallest bar + labels still fit inside without
-  // overflowing upward into the title row above. Reserve ~28px for the day
-  // label + numeric value below each bar so even a maxed-out bar doesn't push
-  // the whole .wbw column above the chart's box.
-  const baseH=isMonth?140:100;
-  const overGoal=maxCal/goal;
-  const chartH=overGoal>2.5?Math.min(220,baseH+80):overGoal>1.8?baseH+40:overGoal>1.2?baseH+15:baseH;
-  // Reserve 34px below the bar for the day label + numeric value (line-heights
-  // ~14px each + 2px gap + tiny buffer). Without this the .wbw column total
-  // height exceeds the chart container's height and overflows upward into
-  // the title row above.
-  const barMax=chartH-38;
+  // iOS Battery-style plot: each bar is a % of a rounded "nice" max (peak +
+  // ~10% headroom, snapped to 250 kcal) so a binge day scales down instead of
+  // overflowing — no fragile pixel-resize math. Goal is a dashed reference line,
+  // faint horizontal gridlines sit behind, a solid baseline anchors the bottom,
+  // and tapping a bar reveals that day's value in the readout below.
+  const peak=Math.max(...days.map(d=>d.cal),goal,100);
+  const scale=Math.ceil((peak*1.1)/250)*250;
+  const plotH=isMonth?150:130;
+  const goalPct=Math.min(goal/scale*100,92);
+  const gridLines=[75,50,25].map(p=>`<i style="top:${p}%"></i>`).join('');
+  const barsHtml=days.map((d,idx)=>{
+    const p=Math.min(d.cal/scale,1);
+    const col=d.cal>goal?'var(--accent)':d.cal>0?'var(--green)':'var(--surface2)';
+    return `<div class="iosc-col" data-idx="${idx}" onclick="selectCalBar(${idx})"><div class="iosc-bar" style="height:${Math.max(p*100,1.5).toFixed(1)}%;background:${col}"></div></div>`;
+  }).join('');
+  const xHtml=days.map(d=>`<span>${d.label}</span>`).join('');
+  _calDays=days;
   const wb=document.getElementById('wBars');
-  wb.style.setProperty('--chart-h',chartH+'px');
-  wb.classList.toggle('is-month',isMonth);
-  wb.innerHTML='';
-  days.forEach(d=>{
-    const p=d.cal/maxCal;
-    const div=document.createElement('div');div.className='wbw';
-    // 30-day mode: hide per-bar numeric labels (won't fit in ~5px wide bars)
-    const calLabel=isMonth?'':(d.cal||'');
-    div.innerHTML=`<div class="wb" style="height:${Math.max(p*barMax,2).toFixed(1)}px;background:${d.cal>goal?'var(--accent)':d.cal>0?'var(--green)':'var(--surface2)'}"></div><div class="wb-l">${d.label}</div><div class="wb-c">${calLabel}</div>`;
-    wb.appendChild(div);
-  });
-  document.getElementById('goalLine').textContent=t('goal')+' '+goal.toLocaleString();
+  wb.innerHTML=
+    `<div class="iosc-plot" style="--ch:${plotH}px">`+
+      `<div class="iosc-grid">${gridLines}<div class="iosc-base"></div>`+
+        `<div class="iosc-goal" style="bottom:${goalPct.toFixed(1)}%"><b>${t('goal')} ${goal.toLocaleString()}</b></div>`+
+        `<span class="iosc-ymax">${scale.toLocaleString()}</span>`+
+      `</div>`+
+      `<div class="iosc-bars${isMonth?' is-month':''}">${barsHtml}</div>`+
+    `</div>`+
+    `<div class="iosc-x${isMonth?' is-month':''}">${xHtml}</div>`+
+    `<div class="iosc-readout" id="calReadout"></div>`;
   const act=days.filter(d=>d.cal>0);
   const avg=act.length?Math.round(act.reduce((s,d)=>s+d.cal,0)/act.length):0;
+  const _ro=document.getElementById('calReadout');
+  if(_ro)_ro.innerHTML=avg?`${t('avg_per_day')} <b>${avg.toLocaleString()} kcal</b> · ${isEn?'tap a bar for details':'แตะแท่งดูรายวัน'}`:(isEn?'No data yet — start logging!':'ยังไม่มีข้อมูล — เริ่มบันทึกเลย!');
   const over=days.filter(d=>d.cal>goal&&d.cal>0).length;
   const under=act.filter(d=>d.cal<=goal).length;
   const dayUnit=t('days');
