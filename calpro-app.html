@@ -710,6 +710,12 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .lang-row{display:flex;gap:8px;margin-bottom:12px;}
 .lbtn{flex:1;padding:8px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:.83rem;cursor:pointer;font-family:inherit;text-align:center;transition:all .15s;}
 .lbtn.active{border-color:var(--accent);color:var(--accent);background:rgba(255,107,107,.08);}
+/* iOS-style language picker rows (full-width, checkmark on active) */
+.lang-opt{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 15px;background:none;border:none;border-radius:0;color:var(--text);font-family:inherit;font-size:.95rem;cursor:pointer;text-align:left;gap:10px;}
+.lang-opt+.lang-opt{border-top:1px solid var(--glass-bd);}
+.lang-opt.active{background:color-mix(in srgb,var(--accent) 9%,transparent);color:var(--accent);}
+.lang-opt .lang-check{color:var(--accent);font-weight:800;font-size:1.05rem;opacity:0;transition:opacity .15s;}
+.lang-opt.active .lang-check{opacity:1;}
 
 /* ── MODAL ── */
 .modal-bg{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;}
@@ -741,6 +747,15 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .ios-group .theme-grid,.ios-group .accent-grid,.ios-group .font-grid,.ios-group .lang-row{margin-bottom:0;}
 .set-version{text-align:center;font-size:.72rem;color:var(--muted);margin:20px 0 8px;line-height:1.6;opacity:.85;}
 .set-version b{color:var(--text);font-weight:600;}
+/* Compact iOS-style edit-profile modal — groups read clean on the glass modal */
+#profileEditModal .ios-group{background:var(--surface2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border-color:var(--border);margin-bottom:4px;}
+#profileEditModal .set-sec{margin:13px 2px 6px;}
+#profileEditModal .set-sec:first-of-type{margin-top:0;}
+#profileEditModal .pgrid{gap:8px;margin-bottom:6px;}
+#profileEditModal .fl label{font-size:.65rem;margin-bottom:2px;}
+#profileEditModal .fl input,#profileEditModal .fl select{padding:6px 9px;font-size:.82rem;border-radius:9px;}
+#profileEditModal .gchip{padding:6px 11px;}
+#profileEditModal .ios-pad{padding:11px 12px;}
 /* ── Collapsible card header (profile badges) ── */
 .card-collapse-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:8px;}
 .card-collapse-hd h3{margin:0;}
@@ -1224,12 +1239,12 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <!-- SETTINGS · Language -->
     <div class="screen" id="pg-set-lang">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="language">ภาษา</h2></div>
-      <div class="ios-group"><div class="ios-pad">
-        <div class="lang-row">
-          <button class="lbtn" data-lang="th" onclick="setLang('th')">ไทย</button>
-          <button class="lbtn" data-lang="en" onclick="setLang('en')">English</button>
-        </div>
-      </div></div>
+      <div class="ios-group">
+        <button class="lbtn lang-opt" data-lang="th" onclick="setLang('th')"><span>🇹🇭 ภาษาไทย</span><span class="lang-check">✓</span></button>
+        <button class="lbtn lang-opt" data-lang="en" onclick="setLang('en')"><span>🇬🇧 English</span><span class="lang-check">✓</span></button>
+        <button class="lbtn lang-opt" data-lang="zh-Hans" onclick="setLang('zh-Hans')"><span>🇨🇳 简体中文</span><span class="lang-check">✓</span></button>
+        <button class="lbtn lang-opt" data-lang="zh-Hant" onclick="setLang('zh-Hant')"><span>🇹🇼 繁體中文</span><span class="lang-check">✓</span></button>
+      </div>
     </div>
 
     <!-- SETTINGS · Reminders -->
@@ -1474,54 +1489,59 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <div class="modal-bg hide" id="profileEditModal">
   <div class="modal" style="max-width:480px">
     <div class="modal-hdr"><h3><span class="ic" data-ic="edit"></span> <span data-i18n="edit_profile_long">แก้ไขโปรไฟล์</span></h3><button class="mc-close" onclick="closeProfileEdit()" aria-label="Close"><span class="ic" data-ic="x"></span></button></div>
-    <!-- Banner color picker -->
-    <div class="sec-lbl" data-i18n="banner_color">สีแบนเนอร์</div>
-    <div class="banner-color-grid" id="bannerColorGrid"></div>
-    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-      <button type="button" class="btn-sec" onclick="document.getElementById('bannerImgUpload').click()" style="flex:1;font-size:.74rem;padding:7px"><span class="ic" data-ic="image"></span> <span data-i18n="banner_image">หรืออัปโหลดรูปแบนเนอร์</span></button>
-      <button type="button" class="btn-sec" id="bannerRemoveBtn" onclick="removeBannerImage()" style="font-size:.74rem;padding:7px;display:none" data-i18n="banner_remove">ลบรูป</button>
-      <input type="file" id="bannerImgUpload" accept="image/*" hidden onchange="uploadBannerImage(this.files[0])">
-    </div>
-    <!-- Bio — modern look: borderless textarea over a card wrapper with
-         focus-glow + a thin gradient progress bar tracking 0/280 chars. -->
-    <div class="bio-field">
-      <label data-i18n="bio_label">เกี่ยวกับฉัน</label>
-      <div class="bio-wrap">
-        <textarea id="pBio" maxlength="280" rows="3" placeholder="เล่าเรื่องเป้าหมายของคุณ..." oninput="updateBioCount(this)"></textarea>
-        <div class="bio-meta">
-          <div class="bio-progress"><div class="bio-progress-fill" id="pBioFill"></div></div>
-          <div class="bio-count" id="pBioCountWrap"><span id="pBioCount">0</span> / 280</div>
+    <!-- Banner -->
+    <div class="set-sec" data-i18n="banner_color">สีแบนเนอร์</div>
+    <div class="ios-group"><div class="ios-pad">
+      <div class="banner-color-grid" id="bannerColorGrid"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button type="button" class="btn-sec" onclick="document.getElementById('bannerImgUpload').click()" style="flex:1;font-size:.74rem;padding:7px"><span class="ic" data-ic="image"></span> <span data-i18n="banner_image">หรืออัปโหลดรูปแบนเนอร์</span></button>
+        <button type="button" class="btn-sec" id="bannerRemoveBtn" onclick="removeBannerImage()" style="font-size:.74rem;padding:7px;display:none" data-i18n="banner_remove">ลบรูป</button>
+        <input type="file" id="bannerImgUpload" accept="image/*" hidden onchange="uploadBannerImage(this.files[0])">
+      </div>
+    </div></div>
+    <!-- Bio -->
+    <div class="set-sec" data-i18n="bio_label">เกี่ยวกับฉัน</div>
+    <div class="ios-group"><div class="ios-pad">
+      <div class="bio-field" style="margin:0">
+        <div class="bio-wrap">
+          <textarea id="pBio" maxlength="280" rows="3" placeholder="เล่าเรื่องเป้าหมายของคุณ..." oninput="updateBioCount(this)"></textarea>
+          <div class="bio-meta">
+            <div class="bio-progress"><div class="bio-progress-fill" id="pBioFill"></div></div>
+            <div class="bio-count" id="pBioCountWrap"><span id="pBioCount">0</span> / 280</div>
+          </div>
         </div>
       </div>
-    </div>
+    </div></div>
     <!-- Personal info -->
-    <div class="sec-lbl" style="margin-top:10px" data-i18n="personal_info">ข้อมูลส่วนตัว</div>
-    <div class="pgrid">
-      <div class="fl"><label data-i18n="name">ชื่อ</label><input type="text" id="pName" placeholder="ชื่อ" data-i18n="name_ph_profile"></div>
-      <div class="fl"><label data-i18n="gender">เพศ</label><select id="pGender"><option value="male" data-i18n="male">ชาย</option><option value="female" data-i18n="female">หญิง</option></select></div>
-      <div class="fl"><label data-i18n="age">อายุ</label><input type="number" id="pAge" placeholder="25"></div>
-      <div class="fl"><label data-i18n="weight_kg">น้ำหนัก (กก.)</label><input type="number" id="pWeight" placeholder="65"></div>
-      <div class="fl"><label data-i18n="height_cm">ส่วนสูง (ซม.)</label><input type="number" id="pHeight" placeholder="170"></div>
-      <div class="fl"><label data-i18n="goal_weight_kg">เป้าหมาย (กก.)</label><input type="number" id="pGoalW" placeholder="60"></div>
-    </div>
-    <div class="fl" style="margin-bottom:10px">
-      <label data-i18n="activity_lvl">การออกกำลังกาย</label>
-      <select id="pAct">
-        <option value="1.2" data-i18n="act_1">ไม่ค่อยออกกำลังกาย</option>
-        <option value="1.375" data-i18n="act_2">เบา 1–3 วัน/สัปดาห์</option>
-        <option value="1.55" selected data-i18n="act_3">ปานกลาง 3–5 วัน/สัปดาห์</option>
-        <option value="1.725" data-i18n="act_4">หนัก 6–7 วัน/สัปดาห์</option>
-        <option value="1.9" data-i18n="act_5">หนักมาก / งานใช้แรง</option>
-      </select>
-    </div>
-    <div style="margin-bottom:10px">
-      <div class="sec-lbl" data-i18n="goal_title">เป้าหมาย</div>
-      <div class="gchips">
+    <div class="set-sec" data-i18n="personal_info">ข้อมูลส่วนตัว</div>
+    <div class="ios-group"><div class="ios-pad">
+      <div class="pgrid">
+        <div class="fl"><label data-i18n="name">ชื่อ</label><input type="text" id="pName" placeholder="ชื่อ" data-i18n="name_ph_profile"></div>
+        <div class="fl"><label data-i18n="gender">เพศ</label><select id="pGender"><option value="male" data-i18n="male">ชาย</option><option value="female" data-i18n="female">หญิง</option></select></div>
+        <div class="fl"><label data-i18n="age">อายุ</label><input type="number" id="pAge" placeholder="25"></div>
+        <div class="fl"><label data-i18n="weight_kg">น้ำหนัก (กก.)</label><input type="number" id="pWeight" placeholder="65"></div>
+        <div class="fl"><label data-i18n="height_cm">ส่วนสูง (ซม.)</label><input type="number" id="pHeight" placeholder="170"></div>
+        <div class="fl"><label data-i18n="goal_weight_kg">เป้าหมาย (กก.)</label><input type="number" id="pGoalW" placeholder="60"></div>
+      </div>
+      <div class="fl" style="margin-bottom:0">
+        <label data-i18n="activity_lvl">การออกกำลังกาย</label>
+        <select id="pAct">
+          <option value="1.2" data-i18n="act_1">ไม่ค่อยออกกำลังกาย</option>
+          <option value="1.375" data-i18n="act_2">เบา 1–3 วัน/สัปดาห์</option>
+          <option value="1.55" selected data-i18n="act_3">ปานกลาง 3–5 วัน/สัปดาห์</option>
+          <option value="1.725" data-i18n="act_4">หนัก 6–7 วัน/สัปดาห์</option>
+          <option value="1.9" data-i18n="act_5">หนักมาก / งานใช้แรง</option>
+        </select>
+      </div>
+    </div></div>
+    <div class="set-sec" data-i18n="goal_title">เป้าหมาย</div>
+    <div class="ios-group"><div class="ios-pad">
+      <div class="gchips" style="margin-bottom:0">
         <button class="gchip active" data-g="lose" onclick="pickGoal(this)"><span class="ic" data-ic="flame"></span> <span data-i18n="goal_lose">ลดน้ำหนัก</span></button>
         <button class="gchip" data-g="maintain" onclick="pickGoal(this)"><span class="ic" data-ic="scale"></span> <span data-i18n="goal_maintain">คงน้ำหนัก</span></button>
         <button class="gchip" data-g="gain" onclick="pickGoal(this)"><span class="ic" data-ic="dumbbell"></span> <span data-i18n="goal_gain">เพิ่มกล้ามเนื้อ</span></button>
       </div>
-    </div>
+    </div></div>
     <button class="btn" onclick="saveProfile()" style="width:100%" data-i18n="save_calc">บันทึกและคำนวณ</button>
     <!-- Calc result lives inside the modal — shown after save, hidden again next open -->
     <div id="resultCard" style="display:none;margin-top:14px">
@@ -1540,17 +1560,19 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <div class="tip" id="tipBox"></div>
     </div>
-    <!-- Body measurements (was a second collapsed card; now a section in the modal) -->
-    <div class="sec-lbl" style="margin-top:16px" data-i18n="body_measurements">สัดส่วนร่างกาย</div>
-    <div class="pgrid">
-      <div class="fl"><label data-i18n="waist">รอบเอว (ซม.)</label><input type="number" id="mWaist" step="0.1" placeholder="80"></div>
-      <div class="fl"><label data-i18n="hip">รอบสะโพก (ซม.)</label><input type="number" id="mHip" step="0.1" placeholder="95"></div>
-      <div class="fl"><label data-i18n="chest">รอบอก (ซม.)</label><input type="number" id="mChest" step="0.1" placeholder="95"></div>
-      <div class="fl"><label data-i18n="neck">รอบคอ (ซม.)</label><input type="number" id="mNeck" step="0.1" placeholder="38"></div>
-    </div>
-    <button class="btn-sec" onclick="saveMeasurements()" style="width:100%;margin-top:6px" data-i18n="save">บันทึก</button>
-    <div id="bfResult" style="margin-top:10px;font-size:.78rem"></div>
-    <div id="measureHistory" style="margin-top:10px;font-size:.74rem;color:var(--muted)"></div>
+    <!-- Body measurements -->
+    <div class="set-sec" data-i18n="body_measurements">สัดส่วนร่างกาย</div>
+    <div class="ios-group"><div class="ios-pad">
+      <div class="pgrid" style="margin-bottom:8px">
+        <div class="fl"><label data-i18n="waist">รอบเอว (ซม.)</label><input type="number" id="mWaist" step="0.1" placeholder="80"></div>
+        <div class="fl"><label data-i18n="hip">รอบสะโพก (ซม.)</label><input type="number" id="mHip" step="0.1" placeholder="95"></div>
+        <div class="fl"><label data-i18n="chest">รอบอก (ซม.)</label><input type="number" id="mChest" step="0.1" placeholder="95"></div>
+        <div class="fl"><label data-i18n="neck">รอบคอ (ซม.)</label><input type="number" id="mNeck" step="0.1" placeholder="38"></div>
+      </div>
+      <button class="btn-sec" onclick="saveMeasurements()" style="width:100%" data-i18n="save">บันทึก</button>
+      <div id="bfResult" style="margin-top:10px;font-size:.78rem"></div>
+      <div id="measureHistory" style="margin-top:10px;font-size:.74rem;color:var(--muted)"></div>
+    </div></div>
   </div>
 </div>
 
@@ -1937,7 +1959,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.14';
+const APP_VERSION = '2.33.15';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2348,9 +2370,213 @@ const I18N = {
     scan_barcode:'Scan barcode',barcode_hint:'Aim the camera at a product\'s barcode · data from OpenFoodFacts',barcode_or_manual:'Or enter the code manually',barcode_lookup:'Lookup',barcode_starting:'Starting camera...',barcode_scanning:'Hold a barcode inside the frame',barcode_no_camera:'Camera unavailable · use manual entry',barcode_lib_fail:'Scanner library failed to load · retry when online',barcode_found:'Found',barcode_notfound:'Product not found in database',barcode_lookup_err:'Lookup failed · check internet and retry',barcode_invalid:'Enter a valid barcode',
     recipe_title:'Create recipe',recipe_sub:'Combine multiple ingredients into one item · saves to your library for reuse',recipe_open:'+ Create new recipe',
     recipe_name:'Recipe name',recipe_name_ph:'e.g. Homemade Pad Thai',recipe_servings:'Servings',recipe_ingredients:'Ingredients',recipe_save:'Save recipe',recipe_no_ing:'No ingredients yet · search above to add',recipe_per_serving:'per serving',recipe_total:'Total',recipe_need_name:'Please name the recipe',recipe_need_ing:'Please add ingredients',recipe_saved:'Recipe saved to library ✓',
+  },
+  'zh-Hans':{
+    welcome:'欢迎',you:'你',today:'今天',yesterday:'昨天',
+    home:'今天',add:'添加',analysis:'分析',tdee:'TDEE',profile:'我的',
+    cal_today:'千卡',goal:'目标',remaining:'剩余',entries:'项',
+    protein:'蛋白质',carbs:'碳水',fat:'脂肪',
+    morning:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐',
+    morning_opt:'🌅 早餐',lunch_opt:'☀️ 午餐',dinner_opt:'🌙 晚餐',snack_opt:'🍎 加餐',
+    no_entries:'还没有记录',press_add:'点击 ➕ 记录食物',quick_add:'快速添加',added_quick:'已添加',
+    quick_fav:'收藏',quick_recent:'最近',
+    search_food:'搜索食物',search_ph:'输入食物名称（中/英）...',
+    no_food:'未找到食物',no_fav:'还没有收藏 · 在结果上点 ⭐',no_recent:'还没有最近记录 · 记录一些来填充',
+    meal:'餐次',
+    manual:'手动输入',food_name:'食物名称',name_ph:'名称...',cal:'热量',cal_ph:'千卡',
+    protein_g:'蛋白质 (克)',carbs_g:'碳水 (克)',fat_g:'脂肪 (克)',
+    save_lib:'保存到我的食物库',attach_photo:'附加照片',btn_add:'+ 添加食物',
+    cal_7d:'7天热量',weight_30d:'30天体重',water_7d:'7天饮水',projection_title:'30天体重趋势 + 预测',
+    days_logged:'记录天数',avg_per_day:'日均',days_over:'超标',days_on:'达标',
+    summary:'摘要',advice:'建议',badges:'徽章',share_today:'分享今天',share_ach:'分享成就',
+    tdee_title:'TDEE 计算器',tdee_sub:'每日总能量消耗 — 身体每天燃烧的热量',
+    fill_info:'你的信息',gender:'性别',male:'男',female:'女',age:'年龄 (岁)',
+    weight_kg:'体重 (公斤)',height_cm:'身高 (厘米)',activity_lvl:'活动量',goal_title:'目标',
+    goal_lose:'减重',goal_maintain:'维持',goal_gain:'增肌',
+    your_tdee:'你的 TDEE',kcal_per_day:'千卡 / 天',bmr:'BMR',goal_per_day:'每日目标',
+    macros_rec:'推荐营养素',apply_as_goal:'设为我的目标',
+    personal_info:'个人信息',name:'名字',goal_weight_kg:'目标 (公斤)',
+    save_calc:'保存并计算',calc_result:'结果',
+    manage_data:'管理数据',export:'📤 导出',import:'📥 导入',reset_all:'清除所有数据',
+    settings:'设置',theme:'主题',display_sec:'显示',accent:'强调色',done:'完成',language:'语言',
+    water:'饮水',weight:'体重',cups:'杯',cups_unit:'杯',kg_unit:'公斤',save:'保存',cancel:'取消',
+    enter_ph:'输入...',weight_trend_hint:'至少记录 2 天才能看到趋势',
+    no_workouts:'还没有运动记录',
+    edit:'编辑',del:'删除',edit_entry:'编辑记录',change_avatar:'更换头像',
+    cute_avatars:'选个可爱头像',or:'或',upload_photo:'上传照片',use_initial:'使用首字母',
+    workouts:'运动',add_workout:'+ 添加运动',duration_min:'分钟',kcal_burned:'消耗千卡',
+    body_measurements:'身体围度',waist:'腰围',hip:'臀围',chest:'胸围',neck:'颈围',bodyfat:'体脂率 %',
+    measure_history:'最近测量',
+    bf_essential:'必需脂肪',bf_athlete:'运动员',bf_fitness:'健身',bf_average:'一般',bf_high:'偏高',
+    cloud_sync:'云同步',cloud_help:'跨设备同步数据 · 免费 · 随时删除账号',
+    login:'登录',signup:'注册',password:'密码',display_name:'显示名称',
+    friends:'好友 + 排行榜',not_signed_in:'未登录 · 数据仅存于此浏览器',
+    last_sync:'上次同步',sync_now:'立即同步',sign_out:'退出登录',delete_cloud:'删除云端数据',
+    streak:'连续',on_track:'达标',days:'天',
+    smart_goal:'自动调整目标？',recap_title:'上周总结',
+    no_measure_yet:'输入腰围 + 颈围（女性加臀围）来计算体脂率',
+    weekly_recap_logged:'记录天数',weekly_recap_change:'体重',weekly_recap_water_avg:'日均饮水',
+    add_friend:'+ 用邮箱添加好友',later:'稍后',apply_now:'应用',got_it:'知道了',
+    act_1:'久坐',act_2:'轻度 · 每周1–3天',act_3:'中度 · 每周3–5天',act_4:'活跃 · 每周6–7天',act_5:'非常活跃 / 体力劳动',
+    tact_1:'久坐 (×1.2)',tact_2:'轻度 · 每周1–3天 (×1.375)',tact_3:'中度 · 每周3–5天 (×1.55)',tact_4:'活跃 · 每周6–7天 (×1.725)',tact_5:'非常活跃 / 体力劳动 (×1.9)',
+    name_ph_profile:'名字',goal_label:'目标',
+    test_notif:'发送测试通知',customize_nav:'自定义底栏',customize_nav_sub:'最多选 5 个 · “今天” 固定显示',locked:'固定',
+    account_section:'账号',tools_section:'工具',settings_section:'设置',other_section:'其他',friends_only:'好友',about:'关于',
+    appearance:'外观',compact_mode:'紧凑模式',compact_mode_sub:'更紧凑的间距 · 每屏更多信息',
+    simple_mode:'简单模式',simple_mode_sub:'专注热量环 + 餐食 · 更大字体 · 隐藏其他组件',
+    reminders:'提醒',meal_reminders:'用餐提醒',meal_reminders_sub:'过了用餐时间还没记录时显示横幅',
+    streak_saver:'连续打卡提醒',streak_saver_sub:'21:30 若还没记录且连续 ≥ 3 天推送（仅 APK）',
+    edit_profile:'编辑资料',edit_profile_long:'编辑资料',
+    bio_label:'关于我',bio_empty_self:'还没有简介 · 点编辑资料添加',bio_empty_friend:'（还没有简介）',
+    banner_color:'横幅颜色',
+    badges_showcase:'已获得徽章',
+    my_goal:'我的目标',goal_type_lbl:'类型',goal_label2:'每日',weight_progress:'体重',
+    streak_lbl:'连续',days_lbl:'记录',on_track_lbl:'达标',score_lbl:'积分',
+    send_cheer:'送上鼓励',cheer_sent:'已为 %n 送上鼓励',
+    lvl_newcomer:'新手',lvl_starter:'打卡新星',lvl_regular:'常客',lvl_pro:'高手',lvl_master:'大师',lvl_champion:'冠军',lvl_veteran:'老将',lvl_elite:'精英',lvl_mythic:'神话',lvl_legend:'传奇',
+    lvl_progress:'再 %n 分升到 Lv %l',lvl_maxed:'满级 · 封神！',
+    crop_title:'调整图片',crop_hint:'拖动移动 · 滑块缩放',crop_zoom:'缩放',crop_reset:'重置',crop_cancel:'取消',crop_apply:'✓ 应用',
+    period_7d:'7天',period_30d:'30天',cal_30d:'30天热量',water_30d:'30天饮水',
+    lb_friends:'好友',lb_global:'全球',lb_loading_all:'正在加载全球排名...',lb_no_users:'还没有其他用户',
+    lb_signin_needed:'登录后可查看好友并添加新好友',lb_go_signin:'前往 设置 → 云同步',
+    fp_loading:'正在加载资料...',fp_err:'加载资料失败',
+    dev_unlocked:'🔧 已解锁开发者模式',dev_locked:'开发者模式已锁定',dev_wrong_pw:'密码错误',dev_dumped:'已输出到控制台',
+    sign_in_first:'请先登录',
+    friend_profile_title:'好友资料',close:'关闭',
+    banner_image:'或上传横幅图片',banner_remove:'移除横幅图片',
+    ai_settings_title:'AI 食物识别（使用你自己的密钥）',
+    ai_settings_sub:'拍张照 → AI 估算热量/营养素 · 使用你自己的 API 密钥（Claude/OpenAI/Gemini）',
+    ai_photo_btn:'AI 拍照',ai_photo_title:'照片 · AI 估算',
+    ai_photo_hint:'拍一张食物照片 · AI 会估算名称/热量/营养素 · 保存前可查看修改',
+    ai_relogin_notice:'提示：若 AI 相机无法使用，请退出后重新登录（设置 → 云同步）',
+    smart_goal_pref:'自动调整目标',smart_goal_pref_sub:'若体重趋势偏离，每 4 周弹窗提醒',
+    weekly_recap_pref:'每周总结',weekly_recap_pref_sub:'每周一早上弹窗',
+    water_goal_cfg:'饮水目标',
+    about_desc:'热量记录、TDEE 计算与体重管理 · 免费 · 无需登录 · 数据本地存储',
+    about_links:'链接',about_credits:'鸣谢',
+    theme_dark:'深色',theme_night:'夜间',theme_rose:'玫瑰',theme_sky:'天空',theme_violet:'紫罗兰',theme_light:'浅色',theme_cream:'奶油',theme_mint:'薄荷',theme_contrast:'高对比',
+    help_title:'使用方法',health_tips:'今日健康提示',
+    portion_label:'数量 (×)',portion_amount:'分量',font_setting:'字体',font_system:'系统默认',
+    ad_label:'广告',ad_dismiss_aria:'关闭广告',
+    feedback:'发送反馈',feedback_sub:'向开发者分享建议/问题',feedback_subject:'主题',feedback_body:'内容',feedback_send:'通过邮件发送',feedback_subj_ph:'例如 “请增加更多食物...”',feedback_body_ph:'在此输入你的内容...',
+    update_title:'有新版本',update_body:'CalPro+ 新版本已就绪 · 现在重启以应用？',update_later:'稍后',update_now:'立即更新',
+    whats_new_title:'更新内容',check_updates:'检查更新',check_updates_sub:'查看是否有新版 CalPro+',checking_updates:'检查中...',latest_version:'已是最新版本 ✓',
+    clean_photos:'清除 30 天前的照片',
+    quick_presets:'套餐',preset_save_today:'+ 把今天存为套餐',preset_name_ph:'给套餐起名，例如 “常吃早餐”',preset_no_items:'还没有套餐 · 今天记录一些食物再点“存为套餐”',preset_added:'已从套餐添加 %n 项 ✓',preset_deleted:'套餐已删除',preset_empty_day:'今天还没记录食物',preset_saved:'套餐已保存 ✓',
+    ob_welcome:'欢迎！免费记录热量 + 计算 TDEE · 无需登录 · 离线可用',ob_welcome_sub:'3 步快速设置',
+    ob_profile_title:'你的基本信息',ob_profile_sub:'用于精确计算 TDEE/BMR · 之后可修改',
+    ob_goal_title:'你的目标',ob_goal_sub:'选择目标来计算每日热量目标',
+    ob_done_title:'全部就绪！',ob_done_tip:'从下方 <b>+ 添加</b> 开始 → 搜索食物 → 点击 → 选分量 → 添加',
+    ob_back:'返回',ob_next:'下一步',ob_start:'开始使用',ob_skip:'暂时跳过',ob_fillall:'请先填写所有字段',
+    add_friend_title:'添加好友',add_friend_sub:'按邮箱或昵称搜索',fr_no_results:'未找到用户',fr_search_short:'至少输入 2 个字符',fr_already:'已在你的好友列表中',fr_self:'这是你自己',fr_added:'已添加 %n 为好友 ✓',fr_removed:'已将 %n 移出好友',fr_confirm_remove:'将 “%n” 移出好友？',
+    scan_barcode:'扫描条形码',barcode_hint:'将相机对准商品条形码 · 数据来自 OpenFoodFacts',barcode_or_manual:'或手动输入编码',barcode_lookup:'查询',barcode_starting:'正在启动相机...',barcode_scanning:'将条形码对准框内',barcode_no_camera:'相机不可用 · 请手动输入',barcode_lib_fail:'扫描库加载失败 · 联网后重试',barcode_found:'已找到',barcode_notfound:'数据库中未找到该商品',barcode_lookup_err:'查询失败 · 检查网络后重试',barcode_invalid:'请输入有效的条形码',
+    recipe_title:'创建食谱',recipe_sub:'把多种食材合成一项 · 保存到食物库以便复用',recipe_open:'+ 创建新食谱',
+    recipe_name:'食谱名称',recipe_name_ph:'例如 自制泰式炒河粉',recipe_servings:'份数',recipe_ingredients:'食材',recipe_save:'保存食谱',recipe_no_ing:'还没有食材 · 在上方搜索添加',recipe_per_serving:'每份',recipe_total:'合计',recipe_need_name:'请为食谱起名',recipe_need_ing:'请添加食材',recipe_saved:'食谱已保存到食物库 ✓',
+  },
+  'zh-Hant':{
+    welcome:'歡迎',you:'你',today:'今天',yesterday:'昨天',
+    home:'今天',add:'新增',analysis:'分析',tdee:'TDEE',profile:'我的',
+    cal_today:'大卡',goal:'目標',remaining:'剩餘',entries:'項',
+    protein:'蛋白質',carbs:'碳水',fat:'脂肪',
+    morning:'早餐',lunch:'午餐',dinner:'晚餐',snack:'點心',
+    morning_opt:'🌅 早餐',lunch_opt:'☀️ 午餐',dinner_opt:'🌙 晚餐',snack_opt:'🍎 點心',
+    no_entries:'還沒有記錄',press_add:'點擊 ➕ 記錄食物',quick_add:'快速新增',added_quick:'已新增',
+    quick_fav:'收藏',quick_recent:'最近',
+    search_food:'搜尋食物',search_ph:'輸入食物名稱（中/英）...',
+    no_food:'找不到食物',no_fav:'還沒有收藏 · 在結果上點 ⭐',no_recent:'還沒有最近記錄 · 記錄一些來填充',
+    meal:'餐別',
+    manual:'手動輸入',food_name:'食物名稱',name_ph:'名稱...',cal:'熱量',cal_ph:'大卡',
+    protein_g:'蛋白質 (克)',carbs_g:'碳水 (克)',fat_g:'脂肪 (克)',
+    save_lib:'儲存到我的食物庫',attach_photo:'附加照片',btn_add:'+ 新增食物',
+    cal_7d:'7天熱量',weight_30d:'30天體重',water_7d:'7天飲水',projection_title:'30天體重趨勢 + 預測',
+    days_logged:'記錄天數',avg_per_day:'日均',days_over:'超標',days_on:'達標',
+    summary:'摘要',advice:'建議',badges:'徽章',share_today:'分享今天',share_ach:'分享成就',
+    tdee_title:'TDEE 計算機',tdee_sub:'每日總能量消耗 — 身體每天燃燒的熱量',
+    fill_info:'你的資料',gender:'性別',male:'男',female:'女',age:'年齡 (歲)',
+    weight_kg:'體重 (公斤)',height_cm:'身高 (公分)',activity_lvl:'活動量',goal_title:'目標',
+    goal_lose:'減重',goal_maintain:'維持',goal_gain:'增肌',
+    your_tdee:'你的 TDEE',kcal_per_day:'大卡 / 天',bmr:'BMR',goal_per_day:'每日目標',
+    macros_rec:'建議營養素',apply_as_goal:'設為我的目標',
+    personal_info:'個人資料',name:'名字',goal_weight_kg:'目標 (公斤)',
+    save_calc:'儲存並計算',calc_result:'結果',
+    manage_data:'管理資料',export:'📤 匯出',import:'📥 匯入',reset_all:'清除所有資料',
+    settings:'設定',theme:'主題',display_sec:'顯示',accent:'強調色',done:'完成',language:'語言',
+    water:'飲水',weight:'體重',cups:'杯',cups_unit:'杯',kg_unit:'公斤',save:'儲存',cancel:'取消',
+    enter_ph:'輸入...',weight_trend_hint:'至少記錄 2 天才能看到趨勢',
+    no_workouts:'還沒有運動記錄',
+    edit:'編輯',del:'刪除',edit_entry:'編輯記錄',change_avatar:'更換頭像',
+    cute_avatars:'選個可愛頭像',or:'或',upload_photo:'上傳照片',use_initial:'使用首字母',
+    workouts:'運動',add_workout:'+ 新增運動',duration_min:'分鐘',kcal_burned:'消耗大卡',
+    body_measurements:'身體圍度',waist:'腰圍',hip:'臀圍',chest:'胸圍',neck:'頸圍',bodyfat:'體脂率 %',
+    measure_history:'最近測量',
+    bf_essential:'必需脂肪',bf_athlete:'運動員',bf_fitness:'健身',bf_average:'一般',bf_high:'偏高',
+    cloud_sync:'雲端同步',cloud_help:'跨裝置同步資料 · 免費 · 隨時刪除帳號',
+    login:'登入',signup:'註冊',password:'密碼',display_name:'顯示名稱',
+    friends:'好友 + 排行榜',not_signed_in:'未登入 · 資料僅存於此瀏覽器',
+    last_sync:'上次同步',sync_now:'立即同步',sign_out:'登出',delete_cloud:'刪除雲端資料',
+    streak:'連續',on_track:'達標',days:'天',
+    smart_goal:'自動調整目標？',recap_title:'上週總結',
+    no_measure_yet:'輸入腰圍 + 頸圍（女性加臀圍）來計算體脂率',
+    weekly_recap_logged:'記錄天數',weekly_recap_change:'體重',weekly_recap_water_avg:'日均飲水',
+    add_friend:'+ 用電郵新增好友',later:'稍後',apply_now:'套用',got_it:'知道了',
+    act_1:'久坐',act_2:'輕度 · 每週1–3天',act_3:'中度 · 每週3–5天',act_4:'活躍 · 每週6–7天',act_5:'非常活躍 / 體力勞動',
+    tact_1:'久坐 (×1.2)',tact_2:'輕度 · 每週1–3天 (×1.375)',tact_3:'中度 · 每週3–5天 (×1.55)',tact_4:'活躍 · 每週6–7天 (×1.725)',tact_5:'非常活躍 / 體力勞動 (×1.9)',
+    name_ph_profile:'名字',goal_label:'目標',
+    test_notif:'傳送測試通知',customize_nav:'自訂底欄',customize_nav_sub:'最多選 5 個 · 「今天」固定顯示',locked:'固定',
+    account_section:'帳號',tools_section:'工具',settings_section:'設定',other_section:'其他',friends_only:'好友',about:'關於',
+    appearance:'外觀',compact_mode:'緊湊模式',compact_mode_sub:'更緊湊的間距 · 每螢幕更多資訊',
+    simple_mode:'簡易模式',simple_mode_sub:'專注熱量環 + 餐食 · 更大字體 · 隱藏其他元件',
+    reminders:'提醒',meal_reminders:'用餐提醒',meal_reminders_sub:'過了用餐時間還沒記錄時顯示橫幅',
+    streak_saver:'連續打卡提醒',streak_saver_sub:'21:30 若還沒記錄且連續 ≥ 3 天推播（僅 APK）',
+    edit_profile:'編輯資料',edit_profile_long:'編輯資料',
+    bio_label:'關於我',bio_empty_self:'還沒有簡介 · 點編輯資料新增',bio_empty_friend:'（還沒有簡介）',
+    banner_color:'橫幅顏色',
+    badges_showcase:'已獲得徽章',
+    my_goal:'我的目標',goal_type_lbl:'類型',goal_label2:'每日',weight_progress:'體重',
+    streak_lbl:'連續',days_lbl:'記錄',on_track_lbl:'達標',score_lbl:'積分',
+    send_cheer:'送上鼓勵',cheer_sent:'已為 %n 送上鼓勵',
+    lvl_newcomer:'新手',lvl_starter:'打卡新星',lvl_regular:'常客',lvl_pro:'高手',lvl_master:'大師',lvl_champion:'冠軍',lvl_veteran:'老將',lvl_elite:'菁英',lvl_mythic:'神話',lvl_legend:'傳奇',
+    lvl_progress:'再 %n 分升到 Lv %l',lvl_maxed:'滿級 · 封神！',
+    crop_title:'調整圖片',crop_hint:'拖曳移動 · 滑桿縮放',crop_zoom:'縮放',crop_reset:'重設',crop_cancel:'取消',crop_apply:'✓ 套用',
+    period_7d:'7天',period_30d:'30天',cal_30d:'30天熱量',water_30d:'30天飲水',
+    lb_friends:'好友',lb_global:'全球',lb_loading_all:'正在載入全球排名...',lb_no_users:'還沒有其他使用者',
+    lb_signin_needed:'登入後可查看好友並新增好友',lb_go_signin:'前往 設定 → 雲端同步',
+    fp_loading:'正在載入資料...',fp_err:'載入資料失敗',
+    dev_unlocked:'🔧 已解鎖開發者模式',dev_locked:'開發者模式已鎖定',dev_wrong_pw:'密碼錯誤',dev_dumped:'已輸出到主控台',
+    sign_in_first:'請先登入',
+    friend_profile_title:'好友資料',close:'關閉',
+    banner_image:'或上傳橫幅圖片',banner_remove:'移除橫幅圖片',
+    ai_settings_title:'AI 食物辨識（使用你自己的金鑰）',
+    ai_settings_sub:'拍張照 → AI 估算熱量/營養素 · 使用你自己的 API 金鑰（Claude/OpenAI/Gemini）',
+    ai_photo_btn:'AI 拍照',ai_photo_title:'照片 · AI 估算',
+    ai_photo_hint:'拍一張食物照片 · AI 會估算名稱/熱量/營養素 · 儲存前可查看修改',
+    ai_relogin_notice:'提示：若 AI 相機無法使用，請登出後重新登入（設定 → 雲端同步）',
+    smart_goal_pref:'自動調整目標',smart_goal_pref_sub:'若體重趨勢偏離，每 4 週彈窗提醒',
+    weekly_recap_pref:'每週總結',weekly_recap_pref_sub:'每週一早上彈窗',
+    water_goal_cfg:'飲水目標',
+    about_desc:'熱量記錄、TDEE 計算與體重管理 · 免費 · 無需登入 · 資料本機儲存',
+    about_links:'連結',about_credits:'鳴謝',
+    theme_dark:'深色',theme_night:'夜間',theme_rose:'玫瑰',theme_sky:'天空',theme_violet:'紫羅蘭',theme_light:'淺色',theme_cream:'奶油',theme_mint:'薄荷',theme_contrast:'高對比',
+    help_title:'使用方法',health_tips:'今日健康提示',
+    portion_label:'數量 (×)',portion_amount:'分量',font_setting:'字型',font_system:'系統預設',
+    ad_label:'廣告',ad_dismiss_aria:'關閉廣告',
+    feedback:'傳送意見',feedback_sub:'向開發者分享建議/問題',feedback_subject:'主旨',feedback_body:'內容',feedback_send:'透過電郵傳送',feedback_subj_ph:'例如「請增加更多食物...」',feedback_body_ph:'在此輸入你的內容...',
+    update_title:'有新版本',update_body:'CalPro+ 新版本已就緒 · 現在重新啟動以套用？',update_later:'稍後',update_now:'立即更新',
+    whats_new_title:'更新內容',check_updates:'檢查更新',check_updates_sub:'查看是否有新版 CalPro+',checking_updates:'檢查中...',latest_version:'已是最新版本 ✓',
+    clean_photos:'清除 30 天前的照片',
+    quick_presets:'套餐',preset_save_today:'+ 把今天存為套餐',preset_name_ph:'為套餐命名，例如「常吃早餐」',preset_no_items:'還沒有套餐 · 今天記錄一些食物再點「存為套餐」',preset_added:'已從套餐新增 %n 項 ✓',preset_deleted:'套餐已刪除',preset_empty_day:'今天還沒記錄食物',preset_saved:'套餐已儲存 ✓',
+    ob_welcome:'歡迎！免費記錄熱量 + 計算 TDEE · 無需登入 · 離線可用',ob_welcome_sub:'3 步快速設定',
+    ob_profile_title:'你的基本資料',ob_profile_sub:'用於精確計算 TDEE/BMR · 之後可修改',
+    ob_goal_title:'你的目標',ob_goal_sub:'選擇目標來計算每日熱量目標',
+    ob_done_title:'全部就緒！',ob_done_tip:'從下方 <b>+ 新增</b> 開始 → 搜尋食物 → 點擊 → 選分量 → 新增',
+    ob_back:'返回',ob_next:'下一步',ob_start:'開始使用',ob_skip:'暫時略過',ob_fillall:'請先填寫所有欄位',
+    add_friend_title:'新增好友',add_friend_sub:'按電郵或暱稱搜尋',fr_no_results:'找不到使用者',fr_search_short:'至少輸入 2 個字元',fr_already:'已在你的好友清單中',fr_self:'這是你自己',fr_added:'已新增 %n 為好友 ✓',fr_removed:'已將 %n 移出好友',fr_confirm_remove:'將「%n」移出好友？',
+    scan_barcode:'掃描條碼',barcode_hint:'將相機對準商品條碼 · 資料來自 OpenFoodFacts',barcode_or_manual:'或手動輸入編碼',barcode_lookup:'查詢',barcode_starting:'正在啟動相機...',barcode_scanning:'將條碼對準框內',barcode_no_camera:'相機無法使用 · 請手動輸入',barcode_lib_fail:'掃描程式庫載入失敗 · 連網後重試',barcode_found:'已找到',barcode_notfound:'資料庫中找不到該商品',barcode_lookup_err:'查詢失敗 · 檢查網路後重試',barcode_invalid:'請輸入有效的條碼',
+    recipe_title:'建立食譜',recipe_sub:'把多種食材合成一項 · 儲存到食物庫以便重複使用',recipe_open:'+ 建立新食譜',
+    recipe_name:'食譜名稱',recipe_name_ph:'例如 自製泰式炒河粉',recipe_servings:'份數',recipe_ingredients:'食材',recipe_save:'儲存食譜',recipe_no_ing:'還沒有食材 · 在上方搜尋新增',recipe_per_serving:'每份',recipe_total:'合計',recipe_need_name:'請為食譜命名',recipe_need_ing:'請新增食材',recipe_saved:'食譜已儲存到食物庫 ✓',
   }
 };
-function t(k){return (I18N[settings.lang||'th']||I18N.th)[k]||k;}
+function t(k){const L=I18N[settings.lang]||I18N.th;return (L&&L[k])||I18N.en[k]||I18N.th[k]||k;}
 
 // ═══ STORAGE LAYER ═══
 const LS_PROFILE = 'calpro_profile';
@@ -6290,14 +6516,18 @@ function closeImgViewer(){const v=document.getElementById('imgViewer');if(v)v.cl
 function viewAvatar(){
   const p=userProfile||{};const av=p.avatar||'';
   const fallback=(((p.display_name||(cloudUser&&cloudUser.email)||'')[0])||'?').toString().toUpperCase();
-  const inner=(av&&av.startsWith('data:'))?`<img src="${escapeHtml(av)}" alt="avatar">`:`<div class="iv-emoji">${escapeHtml(av||fallback)}</div>`;
+  // Scale the avatar up to a clear, large square view (even if the stored
+  // image is small) so tapping it reads as a proper zoom-in.
+  const inner=(av&&av.startsWith('data:'))
+    ? `<img src="${escapeHtml(av)}" alt="avatar" style="width:min(82vw,440px);height:min(82vw,440px);border-radius:26px;object-fit:cover">`
+    : `<div class="iv-emoji">${escapeHtml(av||fallback)}</div>`;
   showImgViewer(inner);
 }
 function viewBanner(){
   const p=userProfile||{};const bi=p.banner_image||'';
   let inner;
-  if(bi&&bi.startsWith('data:')){inner=`<img src="${escapeHtml(bi)}" alt="banner">`;}
-  else{const c=safeCssColor(p.banner_color,'#ff6b6b');inner=`<div style="width:84vw;max-width:560px;aspect-ratio:3/1;border-radius:18px;background:linear-gradient(135deg,${c},color-mix(in srgb,${c} 55%,#000))"></div>`;}
+  if(bi&&bi.startsWith('data:')){inner=`<img src="${escapeHtml(bi)}" alt="banner" style="width:min(94vw,640px);max-height:80vh;object-fit:contain;border-radius:16px">`;}
+  else{const c=safeCssColor(p.banner_color,'#ff6b6b');inner=`<div style="width:min(94vw,640px);aspect-ratio:3/1;border-radius:18px;background:linear-gradient(135deg,${c},color-mix(in srgb,${c} 55%,#000))"></div>`;}
   showImgViewer(inner);
 }
 function renderProfileUI(){
