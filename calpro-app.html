@@ -810,7 +810,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <div class="hdr-left">
-        <h1>Cal<span>Pro+</span> <span class="sync-dot s-idle" id="syncDot" title="" onclick="navTo('settings')" role="button" tabindex="0" aria-label="Sync status — tap for Cloud Sync settings"></span></h1>
+        <h1>Cal<span>Pro+</span> <span class="sync-dot s-idle" id="syncDot" title="" onclick="navTo('set-cloud')" role="button" tabindex="0" aria-label="Sync status — tap for Cloud Sync settings"></span></h1>
         <p id="hdrSub" data-i18n="welcome">ยินดีต้อนรับ</p>
       </div>
       <!-- iOS-only refresh button. Shown by JS init when UA is iOS and we're not inside Capacitor. -->
@@ -4195,7 +4195,7 @@ async function renderFriendsCard(){
   // count as "real" sign-in for the social features.
   const isRealUser=cloudUser&&!cloudUser.is_anonymous;
   if(!isRealUser){
-    body.innerHTML=`<div class="empty" style="padding:24px 12px;font-size:.82rem;line-height:1.6;text-align:center">${t('lb_signin_needed')}<br><button class="btn-sec" onclick="navTo('settings')" style="margin-top:12px;font-size:.78rem;padding:7px 14px">${t('lb_go_signin')}</button></div>`;
+    body.innerHTML=`<div class="empty" style="padding:24px 12px;font-size:.82rem;line-height:1.6;text-align:center">${t('lb_signin_needed')}<br><button class="btn-sec" onclick="navTo('set-cloud')" style="margin-top:12px;font-size:.78rem;padding:7px 14px">${t('lb_go_signin')}</button></div>`;
     return;
   }
   const _skelF=showSkeleton(body,4);
@@ -8307,7 +8307,7 @@ function openAiPhotoModal(){
   if(cfg.noKey){
     if(!isRegisteredUser()){
       showToast(isEn?'AI photo is for registered members · please sign up':'AI ถ่ายรูปสำหรับสมาชิกที่สมัครแล้ว · กรุณาสมัครสมาชิกก่อน',4000);
-      setTimeout(()=>navTo('settings'),900);
+      setTimeout(()=>navTo('set-cloud'),900);
       return;
     }
   }else{
@@ -8315,7 +8315,7 @@ function openAiPhotoModal(){
     const key=localStorage.getItem('cp_ai_key')||'';
     if(!key){
       showToast(isEn?'Set up your AI key in Settings first':'ตั้งค่า AI key ใน Settings ก่อน',3000);
-      setTimeout(()=>navTo('settings'),900);
+      setTimeout(()=>navTo('set-ai'),900);
       return;
     }
   }
