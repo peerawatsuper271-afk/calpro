@@ -3387,6 +3387,30 @@ function renderPresetsTab(w){
   });
 }
 function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// ── Security helpers ──────────────────────────────────────────────────
+// Profile fields (avatar / banner_image / banner_color) are PUBLIC and can be
+// written by any user straight to the REST API (RLS only checks ownership, not
+// content). Anything attacker-controlled that we inject into markup or CSS must
+// be validated, or a crafted value becomes stored XSS for everyone who views
+// the leaderboard / a profile. These return '' for anything that isn't a plain,
+// safe value — callers fall back to a non-injected default.
+function safeImageDataUrl(v){
+  // Only well-formed base64 raster data URLs. Excludes data:image/svg+xml
+  // (SVG can carry scripts) and anything with quotes that could break out of
+  // an HTML attribute or a CSS url().
+  return (typeof v==='string' && /^data:image\/(?:png|jpe?g|gif|webp|avif);base64,[A-Za-z0-9+/=\s]+$/.test(v)) ? v : '';
+}
+function safeCssColor(v){
+  // Hex (#rgb…#rrggbbaa) only — enough for the banner palette, and nothing
+  // that can smuggle extra CSS declarations or a url().
+  return (typeof v==='string' && /^#[0-9a-fA-F]{3,8}$/.test(v.trim())) ? v.trim() : '';
+}
+// Non-image (emoji) avatar → safe text, else the display-name initial.
+function avatarInitialHtml(av,name){
+  return (typeof av==='string' && av && !av.startsWith('data:'))
+    ? escapeHtml(av)
+    : escapeHtml(((name||'?')[0]||'?').toUpperCase());
+}
 function savePresetFromToday(){
   const isEn=settings.lang==='en';
   if(!dailyEntries.length){showToast(t('preset_empty_day'));return;}
@@ -4029,9 +4053,10 @@ async function renderAllUsersLeaderboard(){
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
       const isMe=cloudUser&&u.id===cloudUser.id;
       const safeName=escapeHtml(u.display_name||'Test User');
-      const av=u.avatar&&u.avatar.startsWith('data:')
-        ?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`
-        :`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
+      const avImg=safeImageDataUrl(u.avatar);
+      const av=avImg
+        ?`<img src="${avImg}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`
+        :`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${avatarInitialHtml(u.avatar,u.display_name)}</div>`;
       const meTag=isMe?(isEn?' (You)':' (คุณ)'):'';
       const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}" role="button" tabindex="0" aria-label="ดูโปรไฟล์ ${safeName}"`;
       // "+ Add" friend button — only when signed in real, not yourself,
@@ -4131,7 +4156,8 @@ async function renderFriendsCard(){
     scores.forEach((u,i)=>{
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
       const isMe=u.id===cloudUser.id;
-      const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
+      const avImg=safeImageDataUrl(u.avatar);
+      const av=avImg?`<img src="${avImg}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${avatarInitialHtml(u.avatar,u.display_name)}</div>`;
       const meTag=settings.lang==='en'?' (You)':' (คุณ)';
       const safeName=escapeHtml(u.display_name||'?');
       const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px"><span class="ic" data-ic="x"></span></button>`;
@@ -4195,20 +4221,24 @@ function renderFriendSearch(q){
   // Debounce 250ms — avoids spamming the DB while user types
   _frSearchTimer=setTimeout(async ()=>{
     try{
-      // Match either email exact or display_name ILIKE
-      const orExpr=`email.eq.${txt},display_name.ilike.%${txt.replace(/[%,]/g,'')}%`;
-      const {data,error}=await withTimeout(sb.from('profiles').select('id,display_name,email,avatar').or(orExpr).limit(20),8000,'user search');
+      // Search via the search_profiles() SECURITY DEFINER RPC: it matches on
+      // display_name (ILIKE) or email (EXACT) server-side but NEVER returns
+      // anyone's email. The profiles.email column is no longer readable through
+      // the REST API (v2.34 migration), so the public anon key can't be used to
+      // dump or enumerate the whole user list by email.
+      const {data,error}=await withTimeout(sb.rpc('search_profiles',{_q:txt}),8000,'user search');
       if(error)throw error;
       const list=(data||[]).slice(0,10);
       if(!list.length){w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('fr_no_results')}</div>`;return;}
       w.innerHTML=list.map(u=>{
         const isMe=u.id===cloudUser.id;
         const isAdded=_frCurrentIds.has(u.id);
-        const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--accent)">${u.avatar||(u.display_name||u.email||'?')[0].toUpperCase()}</div>`;
+        const avImg=safeImageDataUrl(u.avatar);
+        const av=avImg?`<img src="${avImg}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--accent)">${avatarInitialHtml(u.avatar,u.display_name||u.email)}</div>`;
         const status=isMe?`<span style="font-size:.7rem;color:var(--muted)">${t('fr_self')}</span>`
           :isAdded?`<span style="font-size:.7rem;color:var(--green)">✓ ${t('fr_already')}</span>`
           :`<button class="btn-sec" style="font-size:.74rem;padding:5px 10px" data-fid="${u.id}" data-fname="${escapeHtml(u.display_name||u.email||'?')}" data-action="add">+</button>`;
-        return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px">${av}<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(u.display_name||'—')}</div><div style="font-size:.66rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(u.email||'')}</div></div>${status}</div>`;
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px">${av}<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(u.display_name||'—')}</div></div>${status}</div>`;
       }).join('');
       w.querySelectorAll('button[data-action="add"]').forEach(b=>b.onclick=()=>doAddFriend(b.dataset.fid,b.dataset.fname));
     }catch(e){
@@ -4517,7 +4547,11 @@ async function syncFromCloud(){
   if(!cloudUser||!sb)return;
   const uid=cloudUser.id;
   await syncStep('pull:profile', async ()=>{
-    const {data:p,error}=await sb.from('profiles').select('*').eq('id',uid).maybeSingle();
+    // Explicit column list (NOT select('*')) because profiles.email is no
+    // longer SELECT-able via the REST API after the v2.34 lockdown — a bare *
+    // could trip a column-privilege error. We never need email here anyway
+    // (the app reads it from the auth session, cloudUser.email).
+    const {data:p,error}=await sb.from('profiles').select('id,display_name,avatar,gender,age,weight,height,goal_weight,activity,goal_type,goal_cal,bio,banner_color,level_title,banner_image,persisted_badges,updated_at,created_at').eq('id',uid).maybeSingle();
     if(error)throw error;
     // Only override local profile fields that exist in cloud (keep local for null cloud fields)
     if(p){
@@ -6085,8 +6119,9 @@ function renderProfileUI(){
   const isEn=settings.lang==='en';
   // ── Hero: avatar + banner color ──
   const av=document.getElementById('profileAvatar');
-  if(p.avatar&&p.avatar.startsWith('data:')){av.innerHTML='<img src="'+p.avatar+'" alt="avatar">';}
-  else if(p.avatar){av.textContent=p.avatar;}
+  const avImg=safeImageDataUrl(p.avatar);
+  if(avImg){av.innerHTML='<img src="'+avImg+'" alt="avatar">';}
+  else if(p.avatar&&!p.avatar.startsWith('data:')){av.textContent=p.avatar;}
   else{av.textContent=(n[0]||'?').toUpperCase();}
   const bannerColor=p.banner_color||'#ff6b6b';
   applyBannerVisual();   // sets --banner-color + applies banner_image if any
@@ -6203,11 +6238,12 @@ function applyBannerVisual(){
   const hero=document.getElementById('profileHero');
   if(!hero||!userProfile)return;
   const banner=hero.querySelector('.profile-hero-banner');
-  const color=userProfile.banner_color||'#ff6b6b';
+  const color=safeCssColor(userProfile.banner_color)||'#ff6b6b';
   hero.style.setProperty('--banner-color',color);
   if(banner){
-    if(userProfile.banner_image){
-      banner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${userProfile.banner_image}")`;
+    const bannerImg=safeImageDataUrl(userProfile.banner_image);
+    if(bannerImg){
+      banner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${bannerImg}")`;
       banner.style.backgroundSize='cover';
       banner.style.backgroundPosition='center';
       const rmBtn=document.getElementById('bannerRemoveBtn');if(rmBtn)rmBtn.style.display='inline-flex';
@@ -6488,20 +6524,23 @@ async function openFriendProfile(userId,displayName,avatar){
     const lvl=computeUserLevel(streak,days,onTrack);
     // Fill modal
     const av=document.getElementById('fpAvatar');
-    if(prof.avatar&&prof.avatar.startsWith('data:')){av.innerHTML='<img src="'+prof.avatar+'" alt="avatar">';}
-    else if(prof.avatar){av.textContent=prof.avatar;av.innerHTML=prof.avatar;}
+    const avImg=safeImageDataUrl(prof.avatar);
+    if(avImg){av.innerHTML='<img src="'+avImg+'" alt="avatar">';}
+    else if(prof.avatar&&!prof.avatar.startsWith('data:')){av.textContent=prof.avatar;}
     else{av.textContent=((prof.display_name||'?')[0]||'?').toUpperCase();}
     // Banner — uploaded image takes precedence over color (matches the
     // applyBannerVisual logic on the user's own profile).
     const fpBanner=document.getElementById('fpBanner');
-    if(prof.banner_image){
+    const fpBannerImg=safeImageDataUrl(prof.banner_image);
+    const fpBannerColor=safeCssColor(prof.banner_color)||'#ff6b6b';
+    if(fpBannerImg){
       fpBanner.style.background='';
-      fpBanner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${prof.banner_image}")`;
+      fpBanner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${fpBannerImg}")`;
       fpBanner.style.backgroundSize='cover';
       fpBanner.style.backgroundPosition='center';
     }else{
       fpBanner.style.backgroundImage='';
-      fpBanner.style.setProperty('background',`linear-gradient(135deg,${prof.banner_color||'#ff6b6b'},color-mix(in srgb,${prof.banner_color||'#ff6b6b'} 60%,#000))`);
+      fpBanner.style.setProperty('background',`linear-gradient(135deg,${fpBannerColor},color-mix(in srgb,${fpBannerColor} 60%,#000))`);
     }
     document.getElementById('fpName').textContent=prof.display_name||displayName||'—';
     document.getElementById('fpLevelBadge').textContent=`${lvl.icon} Lv ${lvl.lv}`;
@@ -6649,8 +6688,9 @@ function closeDrawer(){
 function renderDrawerHeader(){
   const av=document.getElementById('drawerAvatar');
   const p=userProfile;
-  if(p?.avatar&&p.avatar.startsWith('data:'))av.innerHTML='<img src="'+p.avatar+'" alt="avatar">';
-  else if(p?.avatar)av.textContent=p.avatar;
+  const drawerAvImg=safeImageDataUrl(p?.avatar);
+  if(drawerAvImg)av.innerHTML='<img src="'+drawerAvImg+'" alt="avatar">';
+  else if(p?.avatar&&!p.avatar.startsWith('data:'))av.textContent=p.avatar;
   else av.textContent=((p?.display_name||'?')[0]||'?').toUpperCase();
   document.getElementById('drawerName').textContent=p?.display_name||t('you');
   // Anonymous sessions have no email — show a device-only hint instead.

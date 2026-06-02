@@ -17,6 +17,9 @@
 
 ตรวจสอบ: ในหน้า Table Editor ควรเห็นตาราง `ai_usage` ใหม่
 
+จากนั้น run `calpro-database-v2.34-security-fixes.sql` ด้วย (ทำให้ `ai_usage`
+เขียนได้จาก server เท่านั้น + สร้าง RPC `increment_ai_usage` ที่ Edge Function ใช้)
+
 ## 3) Enable Anonymous Sign-ins (ครั้งเดียว)
 
 Supabase Dashboard → **Authentication** → **Providers** → **Anonymous** → toggle เป็น **ON** → Save
@@ -40,6 +43,13 @@ supabase link --project-ref pbtxshodaeztptegkguy
 ```
 supabase secrets set GEMINI_API_KEY=AIza...your-key-here
 ```
+
+ตั้ง service-role key เป็น secret ด้วย (ใช้เขียน counter `ai_usage` ฝั่ง server —
+หาได้จาก Dashboard → Settings → API → `service_role` secret):
+```
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY=eyJ...service-role-key
+```
+⚠️ อย่าเอา service-role key ไปใส่ในแอป/ฝั่ง client เด็ดขาด — ใช้ใน Edge Function เท่านั้น
 
 (ออปชั่นนัล) ปรับ daily limit หรือ model:
 ```
