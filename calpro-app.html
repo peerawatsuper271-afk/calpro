@@ -748,14 +748,19 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .set-version{text-align:center;font-size:.72rem;color:var(--muted);margin:20px 0 8px;line-height:1.6;opacity:.85;}
 .set-version b{color:var(--text);font-weight:600;}
 /* Compact iOS-style edit-profile modal — groups read clean on the glass modal */
-#profileEditModal .ios-group{background:var(--surface2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border-color:var(--border);margin-bottom:4px;}
-#profileEditModal .set-sec{margin:13px 2px 6px;}
+#profileEditModal .modal{padding:14px 13px 16px;}
+#profileEditModal .modal-hdr{margin-bottom:8px;}
+#profileEditModal .ios-group{background:var(--surface2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border-color:var(--border);margin-bottom:2px;}
+#profileEditModal .set-sec{margin:9px 2px 4px;}
 #profileEditModal .set-sec:first-of-type{margin-top:0;}
-#profileEditModal .pgrid{gap:8px;margin-bottom:6px;}
-#profileEditModal .fl label{font-size:.65rem;margin-bottom:2px;}
-#profileEditModal .fl input,#profileEditModal .fl select{padding:6px 9px;font-size:.82rem;border-radius:9px;}
-#profileEditModal .gchip{padding:6px 11px;}
-#profileEditModal .ios-pad{padding:11px 12px;}
+#profileEditModal .pgrid{gap:7px;margin-bottom:4px;}
+#profileEditModal .fl label{font-size:.64rem;margin-bottom:1px;}
+#profileEditModal .fl input,#profileEditModal .fl select{padding:5px 8px;font-size:.8rem;border-radius:8px;}
+#profileEditModal .gchip{padding:5px 10px;font-size:.72rem;}
+#profileEditModal .ios-pad{padding:9px 11px;}
+#profileEditModal .btn,#profileEditModal .btn-sec{padding:9px;font-size:.85rem;}
+#profileEditModal #resultCard .rbox{padding:8px 11px;margin-bottom:6px;}
+#profileEditModal #pBio{min-height:46px;}
 /* ── Collapsible card header (profile badges) ── */
 .card-collapse-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:8px;}
 .card-collapse-hd h3{margin:0;}
@@ -1504,7 +1509,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <div class="ios-group"><div class="ios-pad">
       <div class="bio-field" style="margin:0">
         <div class="bio-wrap">
-          <textarea id="pBio" maxlength="280" rows="3" placeholder="เล่าเรื่องเป้าหมายของคุณ..." oninput="updateBioCount(this)"></textarea>
+          <textarea id="pBio" maxlength="280" rows="2" placeholder="เล่าเรื่องเป้าหมายของคุณ..." data-i18n="bio_ph" oninput="updateBioCount(this)"></textarea>
           <div class="bio-meta">
             <div class="bio-progress"><div class="bio-progress-fill" id="pBioFill"></div></div>
             <div class="bio-count" id="pBioCountWrap"><span id="pBioCount">0</span> / 280</div>
@@ -1959,7 +1964,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.15';
+const APP_VERSION = '2.33.16';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2223,7 +2228,7 @@ const I18N = {
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
     streak_saver:'เตือนรักษา streak',streak_saver_sub:'push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)',
     edit_profile:'แก้ไขโปรไฟล์',edit_profile_long:'แก้ไขโปรไฟล์',
-    bio_label:'เกี่ยวกับฉัน',bio_empty_self:'ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม',bio_empty_friend:'(เพื่อนยังไม่ใส่คำอธิบาย)',
+    bio_label:'เกี่ยวกับฉัน',bio_ph:'เล่าเรื่องเป้าหมายของคุณ...',bio_empty_self:'ยังไม่ได้ใส่คำอธิบายตัวเอง · กดแก้ไขโปรไฟล์เพื่อเพิ่ม',bio_empty_friend:'(เพื่อนยังไม่ใส่คำอธิบาย)',
     banner_color:'สีแบนเนอร์',
     badges_showcase:'เหรียญตราที่ได้รับ',
     my_goal:'เป้าหมายของฉัน',goal_type_lbl:'ประเภท',goal_label2:'เป้า/วัน',weight_progress:'น้ำหนัก',
@@ -2325,7 +2330,7 @@ const I18N = {
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
     streak_saver:'Streak saver',streak_saver_sub:'21:30 push if not logged yet + streak ≥ 3 days (APK only)',
     edit_profile:'Edit profile',edit_profile_long:'Edit profile',
-    bio_label:'About me',bio_empty_self:'No bio yet · tap Edit profile to add one',bio_empty_friend:'(No bio yet)',
+    bio_label:'About me',bio_ph:'Tell us about your goals...',bio_empty_self:'No bio yet · tap Edit profile to add one',bio_empty_friend:'(No bio yet)',
     banner_color:'Banner color',
     badges_showcase:'Badges earned',
     my_goal:'My goal',goal_type_lbl:'Type',goal_label2:'Daily',weight_progress:'Weight',
@@ -2427,7 +2432,7 @@ const I18N = {
     reminders:'提醒',meal_reminders:'用餐提醒',meal_reminders_sub:'过了用餐时间还没记录时显示横幅',
     streak_saver:'连续打卡提醒',streak_saver_sub:'21:30 若还没记录且连续 ≥ 3 天推送（仅 APK）',
     edit_profile:'编辑资料',edit_profile_long:'编辑资料',
-    bio_label:'关于我',bio_empty_self:'还没有简介 · 点编辑资料添加',bio_empty_friend:'（还没有简介）',
+    bio_label:'关于我',bio_ph:'聊聊你的目标吧...',bio_empty_self:'还没有简介 · 点编辑资料添加',bio_empty_friend:'（还没有简介）',
     banner_color:'横幅颜色',
     badges_showcase:'已获得徽章',
     my_goal:'我的目标',goal_type_lbl:'类型',goal_label2:'每日',weight_progress:'体重',
@@ -2529,7 +2534,7 @@ const I18N = {
     reminders:'提醒',meal_reminders:'用餐提醒',meal_reminders_sub:'過了用餐時間還沒記錄時顯示橫幅',
     streak_saver:'連續打卡提醒',streak_saver_sub:'21:30 若還沒記錄且連續 ≥ 3 天推播（僅 APK）',
     edit_profile:'編輯資料',edit_profile_long:'編輯資料',
-    bio_label:'關於我',bio_empty_self:'還沒有簡介 · 點編輯資料新增',bio_empty_friend:'（還沒有簡介）',
+    bio_label:'關於我',bio_ph:'聊聊你的目標吧...',bio_empty_self:'還沒有簡介 · 點編輯資料新增',bio_empty_friend:'（還沒有簡介）',
     banner_color:'橫幅顏色',
     badges_showcase:'已獲得徽章',
     my_goal:'我的目標',goal_type_lbl:'類型',goal_label2:'每日',weight_progress:'體重',
@@ -2577,6 +2582,10 @@ const I18N = {
   }
 };
 function t(k){const L=I18N[settings.lang]||I18N.th;return (L&&L[k])||I18N.en[k]||I18N.th[k]||k;}
+// Inline 4-language picker for dynamic strings (toasts, computed text, etc.).
+// Chinese falls back to English when no zh variant is given, so a Chinese user
+// never sees Thai. Unset language defaults to Thai.
+function LL(th,en,hans,hant){const l=settings.lang||'th';if(l==='zh-Hans')return hans!=null?hans:en;if(l==='zh-Hant')return hant!=null?hant:(hans!=null?hans:en);if(l==='en')return en;return th;}
 
 // ═══ STORAGE LAYER ═══
 const LS_PROFILE = 'calpro_profile';
@@ -2632,7 +2641,7 @@ function lsSave(key, val){
   catch(e){
     if(e.name==='QuotaExceededError'||/quota/i.test(e.message||'')){
       console.warn('[storage] quota exceeded, attempting cleanup for',key);
-      try{showToast(settings.lang==='en'?'Storage full · consider clearing photos':'พื้นที่เต็ม · ลองลบรูปบางส่วน',4000);}catch{}
+      try{showToast((settings.lang||'th')!=='th'?'Storage full · consider clearing photos':'พื้นที่เต็ม · ลองลบรูปบางส่วน',4000);}catch{}
     }else{
       console.warn('[storage] save failed for',key,e.message);
     }
@@ -3039,7 +3048,7 @@ function todayKey(){return dateKey(new Date());}
 function fmtDate(k){
   const d=new Date(k+'T00:00:00'),tk=todayKey();
   const y=new Date();y.setDate(y.getDate()-1);
-  const loc=settings.lang==='en'?'en-GB':'th-TH';
+  const loc=(settings.lang||'th')!=='th'?'en-GB':'th-TH';
   if(k===tk)return t('today')+' · '+d.toLocaleDateString(loc,{day:'numeric',month:'short'});
   if(k===dateKey(y))return t('yesterday')+' · '+d.toLocaleDateString(loc,{day:'numeric',month:'short'});
   return d.toLocaleDateString(loc,{weekday:'short',day:'numeric',month:'short',year:'2-digit'});
@@ -3095,21 +3104,21 @@ function _showDlg({title,msg,buttons,input}){
   return new Promise(res=>{_dlgResolve=res;});
 }
 function appAlert(msg,opts={}){
-  const isEn=settings.lang==='en';
-  return _showDlg({title:opts.title,msg,buttons:[{label:opts.okText||(isEn?'OK':'ตกลง'),val:true,kind:'primary'}]});
+  const isEn=(settings.lang||'th')!=='th';
+  return _showDlg({title:opts.title,msg,buttons:[{label:opts.okText||(LL('ตกลง','OK','确定','確定')),val:true,kind:'primary'}]});
 }
 function appConfirm(msg,opts={}){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   return _showDlg({title:opts.title,msg,buttons:[
-    {label:opts.cancelText||(isEn?'Cancel':'ยกเลิก'),val:false,kind:'sec'},
-    {label:opts.okText||(isEn?'Confirm':'ยืนยัน'),val:true,kind:opts.danger?'danger':'primary'},
+    {label:opts.cancelText||(LL('ยกเลิก','Cancel','取消','取消')),val:false,kind:'sec'},
+    {label:opts.okText||LL('ยืนยัน','Confirm','确认','確認'),val:true,kind:opts.danger?'danger':'primary'},
   ]}).then(v=>v===true);
 }
 function appPrompt(msg,opts={}){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   return _showDlg({title:opts.title,msg,input:{placeholder:opts.placeholder,value:opts.value,password:opts.password},buttons:[
-    {label:isEn?'Cancel':'ยกเลิก',val:null,kind:'sec'},
-    {label:opts.okText||(isEn?'OK':'ตกลง'),returnInput:true,kind:'primary'},
+    {label:LL('ยกเลิก','Cancel','取消','取消'),val:null,kind:'sec'},
+    {label:opts.okText||(LL('ตกลง','OK','确定','確定')),returnInput:true,kind:'primary'},
   ]});
 }
 
@@ -3255,7 +3264,7 @@ function saveEntries_LS(){
 }
 // Clear meal photos older than 30 days — frees localStorage quota
 async function cleanOldPhotos(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
   const cutoffKey=dateKey(cutoff);
   let removed=0;
@@ -3282,7 +3291,7 @@ async function cleanOldPhotos(){
 }
 
 async function resetAllData(){
-  if(!await appConfirm(settings.lang==='en'?'Reset ALL data (profile + food + weight + water)? This cannot be undone.':'ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหาร + น้ำหนัก + น้ำดื่ม)? ไม่สามารถกู้คืนได้',{danger:true}))return;
+  if(!await appConfirm((settings.lang||'th')!=='th'?'Reset ALL data (profile + food + weight + water)? This cannot be undone.':'ล้างข้อมูลทั้งหมด (โปรไฟล์ + อาหาร + น้ำหนัก + น้ำดื่ม)? ไม่สามารถกู้คืนได้',{danger:true}))return;
   localStorage.removeItem(LS_PROFILE);
   localStorage.removeItem(LS_ENTRIES);
   localStorage.removeItem(LS_WEIGHTS);
@@ -3294,7 +3303,7 @@ async function resetAllData(){
   localStorage.removeItem(LS_MEASURES);
   localStorage.removeItem(LS_PRESETS);
   idbClear();   // wipe IDB-stored meal photos too
-  showToast(settings.lang==='en'?'Data cleared':'ล้างข้อมูลแล้ว');
+  showToast(LL('ล้างข้อมูลแล้ว','Data cleared','数据已清除','資料已清除'));
   setTimeout(()=>location.reload(), 800);
 }
 
@@ -3323,7 +3332,7 @@ function exportData(){
   a.download='calpro-backup-'+todayKey()+'.json';
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
-  showToast(settings.lang==='en'?'Export complete':'Export สำเร็จ');
+  showToast(LL('Export สำเร็จ','Export complete','导出完成','匯出完成'));
 }
 function importData(file){
   if(!file)return;
@@ -3331,12 +3340,12 @@ function importData(file){
   reader.onload=async (e)=>{
     try{
       const data=JSON.parse(e.target.result);
-      if(data.app!=='CalPro'&&data.app!=='CalPro+')throw new Error(settings.lang==='en'?'Not a CalPro+ file':'ไฟล์ไม่ใช่ของ CalPro+');
-      if(!data.profile||!data.entries)throw new Error(settings.lang==='en'?'Incomplete file':'ไฟล์ข้อมูลไม่ครบ');
-      const loc=settings.lang==='en'?'en-GB':'th-TH';
-      const exportDate=data.exported_at?new Date(data.exported_at).toLocaleDateString(loc):(settings.lang==='en'?'unknown':'ไม่ทราบ');
+      if(data.app!=='CalPro'&&data.app!=='CalPro+')throw new Error((settings.lang||'th')!=='th'?'Not a CalPro+ file':'ไฟล์ไม่ใช่ของ CalPro+');
+      if(!data.profile||!data.entries)throw new Error((settings.lang||'th')!=='th'?'Incomplete file':'ไฟล์ข้อมูลไม่ครบ');
+      const loc=(settings.lang||'th')!=='th'?'en-GB':'th-TH';
+      const exportDate=data.exported_at?new Date(data.exported_at).toLocaleDateString(loc):((settings.lang||'th')!=='th'?'unknown':'ไม่ทราบ');
       const numDays=Object.keys(data.entries).length;
-      const msg=settings.lang==='en'
+      const msg=(settings.lang||'th')!=='th'
         ?`Import from v${data.version||'?'} (${exportDate})\nThis will replace all current data (${numDays} days)\n\nContinue?`
         :`นำเข้าจากไฟล์ v${data.version||'?'} (${exportDate})\nจะแทนที่ข้อมูลปัจจุบันทั้งหมด (${numDays} วัน)\n\nต้องการดำเนินการต่อ?`;
       if(!await appConfirm(msg,{danger:true}))return;
@@ -3351,10 +3360,10 @@ function importData(file){
       if(data.measures)lsSave(LS_MEASURES,data.measures);
       if(data.presets)lsSave(LS_PRESETS,data.presets);
       if(data.settings)lsSave(LS_SETTINGS,data.settings);
-      showToast(settings.lang==='en'?'Import complete · loading...':'Import สำเร็จ · กำลังโหลด...');
+      showToast(LL('Import สำเร็จ · กำลังโหลด...','Import complete · loading...','导入完成 · 加载中...','匯入完成 · 載入中...'));
       setTimeout(()=>location.reload(),800);
     }catch(err){
-      showToast((settings.lang==='en'?'Import failed: ':'Import ล้มเหลว: ')+err.message);
+      showToast(((settings.lang||'th')!=='th'?'Import failed: ':'Import ล้มเหลว: ')+err.message);
     }
   };
   reader.readAsText(file);
@@ -3362,7 +3371,7 @@ function importData(file){
 }
 
 // ═══ SHOW APP ═══
-function dayUnitShort(){return settings.lang==='en'?'/day':'/วัน';}
+function dayUnitShort(){return (settings.lang||'th')!=='th'?'/day':'/วัน';}
 function showApp(){
   const name = userProfile?.display_name || t('you');
   document.getElementById('hdrSub').textContent = name + ' · ' + (userProfile?.goal_cal || 1800).toLocaleString() + ' kcal' + dayUnitShort();
@@ -3417,7 +3426,7 @@ function toggleNavTab(id){
   const tabs=new Set(settings.navTabs||['today','add','analysis','tdee']);
   if(tabs.has(id))tabs.delete(id);
   else if(tabs.size<5)tabs.add(id);
-  else{showToast(settings.lang==='en'?'Max 5 tabs':'สูงสุด 5 รายการ');renderNavTabsList();return;}
+  else{showToast((settings.lang||'th')!=='th'?'Max 5 tabs':'สูงสุด 5 รายการ');renderNavTabsList();return;}
   // Preserve order
   const order=['today','add','analysis','tdee','profile','settings','friends','about'];
   settings.navTabs=order.filter(t=>tabs.has(t));
@@ -3509,7 +3518,7 @@ function calPick(k){
 }
 function renderCalendar(){
   const {y,m}=_calView;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const loc=isEn?'en-GB':'th-TH';
   // Header — month + year (Buddhist year shown by th-TH locale automatically)
   document.getElementById('calTitle').textContent=new Date(y,m,1).toLocaleDateString(loc,{month:'long',year:'numeric'});
@@ -3563,7 +3572,7 @@ const CAT_GROUPS={
 function renderCatFilter(){
   const sel=document.getElementById('catFilter');
   if(!sel)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const lab=k=>(CAT_LABELS[k]&&CAT_LABELS[k][isEn?'en':'th'])||k;
   const opt=k=>`<option value="${k}"${k===activeCat?' selected':''}>${CATS[k]||''} ${escapeHtml(lab(k))}</option>`;
   sel.innerHTML=
@@ -3667,10 +3676,10 @@ function setQuickTab(tab){
   document.querySelectorAll('.qtab').forEach(b=>b.classList.toggle('active',b.dataset.qtab===tab));
   renderQuickList();
 }
-function foodDisplayName(f){return settings.lang==='en'&&f.e?f.e:f.n;}
+function foodDisplayName(f){return (settings.lang||'th')!=='th'&&f.e?f.e:f.n;}
 function foodSubLine(f){
   const macros=`${t('protein')} ${f.p}g · ${t('carbs')} ${f.cb}g · ${t('fat')} ${f.f}g`;
-  return settings.lang==='en'?(f.n?f.n+' · ':'')+macros:(f.e?f.e+' · ':'')+macros;
+  return (settings.lang||'th')!=='th'?(f.n?f.n+' · ':'')+macros:(f.e?f.e+' · ':'')+macros;
 }
 function renderQuickList(){
   const w=document.getElementById('quickList');
@@ -3679,7 +3688,7 @@ function renderQuickList(){
     ?favorites.map(n=>findFood(n)).filter(Boolean)
     :recentFoods.map(n=>findFood(n)).filter(Boolean);
   if(!list.length){
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     const isFavTab=activeQTab==='fav';
     w.innerHTML=`<div class="empty-state" style="padding:22px 16px">`+
       `<div class="es-ico">${isFavTab?icoSvg('star'):icoSvg('clock')}</div>`+
@@ -3699,7 +3708,7 @@ function renderQuickList(){
 }
 // ═══ MEAL PRESETS — 1-tap "save today as a set" + "apply set" ═══
 function renderPresetsTab(w){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   // Top: save-today button (only enabled when there's food on the current day)
   const todayCount=dailyEntries.length;
   const saveBtn=`<div style="display:flex;gap:6px;margin-bottom:10px"><input type="text" id="presetNameInput" placeholder="${t('preset_name_ph')}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;outline:none"><button class="btn-sec" onclick="savePresetFromToday()" style="white-space:nowrap;font-size:.78rem;padding:0 12px" ${todayCount?'':'disabled style="opacity:.5"'}>${t('preset_save_today')}</button></div>`;
@@ -3752,7 +3761,7 @@ function safeCssUrl(u){
   return '';
 }
 function savePresetFromToday(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(!dailyEntries.length){showToast(t('preset_empty_day'));return;}
   const nameEl=document.getElementById('presetNameInput');
   const name=(nameEl?.value||'').trim()||(isEn?`Set ${presets.length+1}`:`ชุดที่ ${presets.length+1}`);
@@ -3774,7 +3783,7 @@ function savePresetFromToday(){
 }
 async function deletePreset(id){
   const p=presets.find(x=>x.id===id);if(!p)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(!await appConfirm(isEn?`Delete set "${p.name}"?`:`ลบชุด "${p.name}"?`,{danger:true}))return;
   presets=presets.filter(x=>x.id!==id);
   lsSave(LS_PRESETS,presets);
@@ -3827,7 +3836,7 @@ function addFromSearch(f){
 }
 function openPortionModal(f){
   _portionFood=f;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   document.getElementById('portionName').textContent=foodDisplayName(f);
   const baseAmt=f.a?` · ${f.a}g`:'';
   const baseSub=`${f.c} kcal${baseAmt} · ${t('protein')} ${f.p} · ${t('carbs')} ${f.cb} · ${t('fat')} ${f.f}`;
@@ -3849,7 +3858,7 @@ function setPortion(q){
 }
 function recalcPortion(){
   if(!_portionFood)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const q=Math.max(0.1,Math.min(20,+document.getElementById('portionQty').value||1));
   const f=_portionFood;
   const cal=Math.round(f.c*q);
@@ -3884,7 +3893,7 @@ function confirmPortion(){
 function addManual(){
   const name=document.getElementById('fName').value.trim();
   const cal=+document.getElementById('fCal').value;
-  if(!name||!cal){showToast(settings.lang==='en'?'Enter name and calories':'กรอกชื่อและแคลอรี่');return;}
+  if(!name||!cal){showToast((settings.lang||'th')!=='th'?'Enter name and calories':'กรอกชื่อและแคลอรี่');return;}
   const meal=document.getElementById('mealSel').value;
   const p=+document.getElementById('fP').value||0;
   const c=+document.getElementById('fC').value||0;
@@ -3894,7 +3903,7 @@ function addManual(){
     if(!customFoods.find(x=>x.n===name)){
       customFoods.push({n:name,e:'',c:cal,p,cb:c,f:fat,a:null,cat:'custom'});
       lsSave(LS_CUSTOM,customFoods);
-      showToast(settings.lang==='en'?('Saved '+name+' to library ✓'):('บันทึก '+name+' ลงไลบรารี ✓'));
+      showToast((settings.lang||'th')!=='th'?('Saved '+name+' to library ✓'):('บันทึก '+name+' ลงไลบรารี ✓'));
     }
   }
   trackRecent(name);
@@ -3906,12 +3915,12 @@ function addManual(){
 let pendingPhoto=null;
 function loadPhotoForEntry(file){
   if(!file)return;
-  if(file.size>5*1024*1024){showToast(settings.lang==='en'?'Image too large (max 5MB)':'รูปใหญ่เกินไป (สูงสุด 5MB)');return;}
+  if(file.size>5*1024*1024){showToast((settings.lang||'th')!=='th'?'Image too large (max 5MB)':'รูปใหญ่เกินไป (สูงสุด 5MB)');return;}
   const reader=new FileReader();
-  reader.onerror=()=>showToast(settings.lang==='en'?'Read failed':'อ่านไฟล์ไม่สำเร็จ');
+  reader.onerror=()=>showToast((settings.lang||'th')!=='th'?'Read failed':'อ่านไฟล์ไม่สำเร็จ');
   reader.onload=(e)=>{
     const img=new Image();
-    img.onerror=()=>showToast(settings.lang==='en'?'Not a valid image':'ไฟล์ไม่ใช่รูปภาพ');
+    img.onerror=()=>showToast((settings.lang||'th')!=='th'?'Not a valid image':'ไฟล์ไม่ใช่รูปภาพ');
     img.onload=()=>{
       try{
         const SIZE=320;  // reduced from 512 to save localStorage quota
@@ -3922,7 +3931,7 @@ function loadPhotoForEntry(file){
         pendingPhoto=c.toDataURL('image/jpeg',0.72);
         const prev=document.getElementById('photoPreview');
         if(prev){prev.src=pendingPhoto;prev.style.display='block';}
-      }catch(err){showToast(settings.lang==='en'?'Photo error: ':'รูปผิดพลาด: '+err.message);}
+      }catch(err){showToast((settings.lang||'th')!=='th'?'Photo error: ':'รูปผิดพลาด: '+err.message);}
     };
     img.src=e.target.result;
   };
@@ -3952,7 +3961,7 @@ function insertEntry(data){
   saveEntries_LS();
   renderToday();
   showPage('today',document.querySelector('.bnt'));
-  showToast((settings.lang==='en'?'Added ':'เพิ่ม ')+data.food_name+(settings.lang==='en'?'':' แล้ว'));
+  showToast(LL('เพิ่ม ','Added ','已添加 ','已新增 ')+data.food_name+LL(' แล้ว','','',''));
   scheduleAutoSync('insertEntry');
 }
 function delFood(id){
@@ -3984,11 +3993,11 @@ function saveMeasurements(){
     chest:+document.getElementById('mChest').value||null,
     neck:+document.getElementById('mNeck').value||null,
   };
-  if(!m.waist&&!m.hip&&!m.chest&&!m.neck){showToast(settings.lang==='en'?'Enter at least one':'กรอกอย่างน้อย 1 ค่า');return;}
+  if(!m.waist&&!m.hip&&!m.chest&&!m.neck){showToast((settings.lang||'th')!=='th'?'Enter at least one':'กรอกอย่างน้อย 1 ค่า');return;}
   allMeasures[currentDate]=m;
   lsSave(LS_MEASURES,allMeasures);
   renderMeasurements();
-  showToast(settings.lang==='en'?'Saved ✓':'บันทึกแล้ว ✓');
+  showToast(LL('บันทึกแล้ว ✓','Saved ✓','已保存 ✓','已儲存 ✓'));
   scheduleAutoSync('measures');
 }
 function navyBF(){
@@ -4026,7 +4035,7 @@ function renderMeasurements(){
   // Recent history
   const keys=Object.keys(allMeasures).sort().slice(-5).reverse();
   if(keys.length>1){
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     const waistLbl=isEn?'waist':'เอว';
     const hipLbl=isEn?'hip':'สะโพก';
     const rows=keys.map(k=>{const x=allMeasures[k];return `${k.slice(5)}: ${waistLbl} ${x.waist||'-'} · ${hipLbl} ${x.hip||'-'}`;}).join('<br>');
@@ -4050,11 +4059,11 @@ function switchAuthMode(mode){
   document.getElementById('authTabLogin').classList.toggle('active',mode==='login');
   document.getElementById('authTabSignup').classList.toggle('active',mode==='signup');
   document.getElementById('signupNameWrap').style.display=mode==='signup'?'block':'none';
-  document.getElementById('authTitle').textContent=mode==='login'?(settings.lang==='en'?'Sign in':'เข้าสู่ระบบ'):(settings.lang==='en'?'Sign up':'สมัครสมาชิก');
-  document.getElementById('authSubmit').textContent=mode==='login'?(settings.lang==='en'?'Sign in':'เข้าสู่ระบบ'):(settings.lang==='en'?'Create account':'สร้างบัญชี');
+  document.getElementById('authTitle').textContent=mode==='login'?((settings.lang||'th')!=='th'?'Sign in':'เข้าสู่ระบบ'):((settings.lang||'th')!=='th'?'Sign up':'สมัครสมาชิก');
+  document.getElementById('authSubmit').textContent=mode==='login'?((settings.lang||'th')!=='th'?'Sign in':'เข้าสู่ระบบ'):((settings.lang||'th')!=='th'?'Create account':'สร้างบัญชี');
 }
 async function submitAuth(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(!sb){showToast(isEn?'Supabase not ready':'Supabase ไม่พร้อม');return;}
   const email=document.getElementById('authEmail').value.trim();
   const pass=document.getElementById('authPass').value;
@@ -4079,11 +4088,11 @@ async function submitAuth(){
   }
 }
 async function signOutCloud(){
-  if(!await appConfirm(settings.lang==='en'?'Sign out? Local data stays.':'ออกจากระบบ? ข้อมูลในเครื่องยังอยู่ครับ'))return;
+  if(!await appConfirm((settings.lang||'th')!=='th'?'Sign out? Local data stays.':'ออกจากระบบ? ข้อมูลในเครื่องยังอยู่ครับ'))return;
   await sb.auth.signOut();
 }
 async function deleteCloudAccount(){
-  if(!await appConfirm(settings.lang==='en'?'Delete cloud data ONLY (local data stays)?':'ลบเฉพาะข้อมูลใน cloud (ข้อมูลในเครื่องยังอยู่)?',{danger:true}))return;
+  if(!await appConfirm((settings.lang||'th')!=='th'?'Delete cloud data ONLY (local data stays)?':'ลบเฉพาะข้อมูลใน cloud (ข้อมูลในเครื่องยังอยู่)?',{danger:true}))return;
   try{
     const uid=cloudUser.id;
     await Promise.all([
@@ -4096,8 +4105,8 @@ async function deleteCloudAccount(){
       sb.from('custom_foods').delete().eq('user_id',uid),
       sb.from('friends').delete().eq('user_id',uid),
     ]);
-    showToast(settings.lang==='en'?'Cloud data deleted':'ลบข้อมูลใน cloud แล้ว');
-  }catch(e){showToast((settings.lang==='en'?'Delete failed: ':'ลบไม่สำเร็จ: ')+e.message);}
+    showToast((settings.lang||'th')!=='th'?'Cloud data deleted':'ลบข้อมูลใน cloud แล้ว');
+  }catch(e){showToast(((settings.lang||'th')!=='th'?'Delete failed: ':'ลบไม่สำเร็จ: ')+e.message);}
 }
 
 // Refresh whatever page the user is currently on (after sync, lang change, etc.)
@@ -4145,16 +4154,16 @@ ensureSupabase().then(async ()=>{
         // This preserves the anon-only data instead of letting a cloud-empty
         // pull mask it.
         if(isAnonUpgrade){
-          showToast(settings.lang==='en'?'Moving your data to your account...':'กำลังย้ายข้อมูลเข้าบัญชี...',8000);
+          showToast((settings.lang||'th')!=='th'?'Moving your data to your account...':'กำลังย้ายข้อมูลเข้าบัญชี...',8000);
           try{await syncToCloud();await syncFromCloud();setSyncStatus('synced');
-            showToast(settings.lang==='en'?'Data migrated ✓':'ย้ายข้อมูลแล้ว ✓');}
-          catch(e){setSyncStatus('error');showToast((settings.lang==='en'?'Sync error: ':'ซิงค์ผิดพลาด: ')+e.message,4000);}
+            showToast((settings.lang||'th')!=='th'?'Data migrated ✓':'ย้ายข้อมูลแล้ว ✓');}
+          catch(e){setSyncStatus('error');showToast(((settings.lang||'th')!=='th'?'Sync error: ':'ซิงค์ผิดพลาด: ')+e.message,4000);}
         }else if(isNowReal){
           // Plain sign-in on a fresh device: pull then push (merge)
-          showToast(settings.lang==='en'?'Loading your data...':'กำลังโหลดข้อมูล...',8000);
+          showToast((settings.lang||'th')!=='th'?'Loading your data...':'กำลังโหลดข้อมูล...',8000);
           try{await syncFromCloud();await syncToCloud();setSyncStatus('synced');
-            showToast(settings.lang==='en'?'Data loaded ✓':'โหลดข้อมูลแล้ว ✓');}
-          catch(e){setSyncStatus('error');showToast((settings.lang==='en'?'Sync error: ':'ซิงค์ผิดพลาด: ')+e.message,4000);}
+            showToast((settings.lang||'th')!=='th'?'Data loaded ✓':'โหลดข้อมูลแล้ว ✓');}
+          catch(e){setSyncStatus('error');showToast(((settings.lang||'th')!=='th'?'Sync error: ':'ซิงค์ผิดพลาด: ')+e.message,4000);}
         }else{
           // Fresh anonymous session — just push whatever LS has up to the cloud.
           try{await syncToCloud();setSyncStatus('synced');}
@@ -4190,7 +4199,7 @@ function setSyncStatus(s){
   const ind=document.getElementById('syncDot');
   if(!ind)return;
   ind.className='sync-dot s-'+s;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const titles=isEn
     ?{idle:'Not synced',syncing:'Syncing…',synced:'Synced ✓',error:'Sync error',offline:'Offline'}
     :{idle:'ยังไม่ซิงค์',syncing:'กำลังซิงค์...',synced:'ซิงค์แล้ว ✓',error:'ซิงค์ผิดพลาด',offline:'ออฟไลน์'};
@@ -4251,7 +4260,7 @@ window.addEventListener('beforeunload',()=>{
 function renderCloudStatus(){
   const wrap=document.getElementById('cloudStatus');if(!wrap)return;
   if(!sb){wrap.innerHTML='<div style="font-size:.78rem;color:var(--muted)">Supabase SDK โหลดไม่ได้</div>';return;}
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const isAnon=cloudUser&&(cloudUser.is_anonymous===true||cloudUser.aud==='anon');
   const isReal=cloudUser&&!isAnon;
   const lastSync=lsLoad('calpro_last_sync',null);
@@ -4388,7 +4397,7 @@ async function renderAllUsersLeaderboard(){
     // Find self's rank — only meaningful when signed in
     const meIdx=cloudUser?ranked.findIndex(u=>u.id===cloudUser.id):-1;
     let html='';
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     ranked.forEach((u,i)=>{
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
       const isMe=cloudUser&&u.id===cloudUser.id;
@@ -4450,7 +4459,7 @@ async function renderAllUsersLeaderboard(){
     });
   }catch(e){
     skeletonDone(_skel);
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     body.innerHTML=`<div class="empty-state" style="padding:24px 16px">`+
       `<div class="es-ico">${icoSvg('alert')}</div>`+
       `<div class="es-title">${isEn?'Couldn\'t load the leaderboard':'โหลดกระดานผู้นำไม่สำเร็จ'}</div>`+
@@ -4507,7 +4516,7 @@ async function renderFriendsCard(){
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
       const isMe=u.id===cloudUser.id;
       const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${escapeHtml(u.avatar)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${escapeHtml(u.avatar||(u.display_name||'?')[0].toUpperCase())}</div>`;
-      const meTag=settings.lang==='en'?' (You)':' (คุณ)';
+      const meTag=(settings.lang||'th')!=='th'?' (You)':' (คุณ)';
       const safeName=escapeHtml(u.display_name||'?');
       const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px"><span class="ic" data-ic="x"></span></button>`;
       const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}" role="button" tabindex="0" aria-label="ดูโปรไฟล์ ${safeName}"`;
@@ -4528,7 +4537,7 @@ async function renderFriendsCard(){
     });
   }catch(e){
     skeletonDone(_skelF);
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     body.innerHTML=`<div class="empty-state" style="padding:24px 16px">`+
       `<div class="es-ico">${icoSvg('alert')}</div>`+
       `<div class="es-title">${isEn?'Couldn\'t load friends':'โหลดเพื่อนไม่สำเร็จ'}</div>`+
@@ -4595,7 +4604,7 @@ function renderFriendSearch(q){
       }).join('');
       w.querySelectorAll('button[data-action="add"]').forEach(b=>b.onclick=()=>doAddFriend(b.dataset.fid,b.dataset.fname));
     }catch(e){
-      const msg=/timed out/i.test(e.message||'')?(settings.lang==='en'?'⏳ Slow network — type to retry':'⏳ เน็ตช้า · พิมพ์ใหม่เพื่อลองอีกครั้ง'):(e.message||e);
+      const msg=/timed out/i.test(e.message||'')?((settings.lang||'th')!=='th'?'⏳ Slow network — type to retry':'⏳ เน็ตช้า · พิมพ์ใหม่เพื่อลองอีกครั้ง'):(e.message||e);
       w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem;color:var(--accent)">${escapeHtml(String(msg))}</div>`;
     }
   },250);
@@ -4629,7 +4638,7 @@ async function removeFriend(friendId,friendName){
 async function manualSync(){
   if(!cloudUser)return;
   syncing=true;renderCloudStatus();
-  showToast(settings.lang==='en'?'Syncing...':'กำลังซิงค์...',60000);
+  showToast((settings.lang||'th')!=='th'?'Syncing...':'กำลังซิงค์...',60000);
   let toastErr=null;
   try{
     await syncFromCloud();
@@ -4637,15 +4646,15 @@ async function manualSync(){
   }catch(e){toastErr=e.message||'sync failed';}
   finally{
     syncing=false;renderCloudStatus();refreshActivePage();
-    if(toastErr){showToast((settings.lang==='en'?'Partial sync: ':'ซิงค์ไม่ครบ: ')+toastErr,4000);}
-    else{showToast(settings.lang==='en'?'Sync complete ✓':'ซิงค์เสร็จ ✓');}
+    if(toastErr){showToast(((settings.lang||'th')!=='th'?'Partial sync: ':'ซิงค์ไม่ครบ: ')+toastErr,4000);}
+    else{showToast((settings.lang||'th')!=='th'?'Sync complete ✓':'ซิงค์เสร็จ ✓');}
   }
 }
 
 // Connection diagnostic — reports each table count and whether migration is applied
 async function diagnoseSync(){
   if(!cloudUser||!sb){showToast(t('sign_in_first'));return;}
-  showToast(settings.lang==='en'?'Diagnosing...':'กำลังตรวจ...',3000);
+  showToast((settings.lang||'th')!=='th'?'Diagnosing...':'กำลังตรวจ...',3000);
   const uid=cloudUser.id;
   const tables=['profiles','food_entries','weights','water','workouts','body_measures','favorites','custom_foods'];
   const results=[];
@@ -4680,14 +4689,14 @@ async function diagnoseSync(){
     }
   }catch(e){results.push('upsert: ❌ '+e.message);}
   // Display
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   let prefix='';
   if(needMigration){
     prefix=(isEn
       ?`⚠️ Database needs migration (${migrationReason})\n\nFix:\n1. Open https://supabase.com/dashboard/project/pbtxshodaeztptegkguy/sql/new\n2. Paste contents of calpro-database-v2.7-migration.sql\n3. Run\n4. Come back and tap "Diagnose" again\n\n`
       :`⚠️ ต้อง run migration SQL (สาเหตุ: ${migrationReason})\n\nวิธีแก้:\n1. เปิด https://supabase.com/dashboard/project/pbtxshodaeztptegkguy/sql/new\n2. วาง calpro-database-v2.7-migration.sql (มีในโฟลเดอร์โปรเจกต์)\n3. กด Run\n4. กลับมากด "ตรวจสอบ" อีกครั้ง\n\n`);
   }
-  appAlert(prefix+results.join('\n'),{title:settings.lang==='en'?'Diagnose':'ตรวจสอบ'});
+  appAlert(prefix+results.join('\n'),{title:(settings.lang||'th')!=='th'?'Diagnose':'ตรวจสอบ'});
 }
 
 // Helper: wrap a Supabase promise with a timeout
@@ -5010,7 +5019,7 @@ async function syncFromCloud(){
 // ═══ WORKOUTS ═══
 function openWorkoutModal(){
   const sel=document.getElementById('wkType');sel.innerHTML='';
-  EXERCISES.forEach((ex,i)=>{const o=document.createElement('option');o.value=i;o.textContent=settings.lang==='en'?`${ex.e} · ${ex.n}`:`${ex.n} · ${ex.e}`;sel.appendChild(o);});
+  EXERCISES.forEach((ex,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(settings.lang||'th')!=='th'?`${ex.e} · ${ex.n}`:`${ex.n} · ${ex.e}`;sel.appendChild(o);});
   customizeSelect(sel);if(sel._csSync)sel._csSync();   // themed picker + refresh label
   document.getElementById('wkMin').value=30;
   recalcWorkoutKcal();
@@ -5033,13 +5042,13 @@ function saveWorkout(){
   const mins=+document.getElementById('wkMin').value;
   const kcal=+document.getElementById('wkKcal').value;
   const ex=EXERCISES[idx];
-  if(!ex||!mins||!kcal){showToast(settings.lang==='en'?'Fill in all fields':'กรอกข้อมูลให้ครบ');return;}
+  if(!ex||!mins||!kcal){showToast((settings.lang||'th')!=='th'?'Fill in all fields':'กรอกข้อมูลให้ครบ');return;}
   if(!allWorkouts[currentDate])allWorkouts[currentDate]=[];
   allWorkouts[currentDate].push({id:uid(),name:ex.n,name_en:ex.e,minutes:mins,kcal,met:ex.met});
   lsSave(LS_WORKOUTS,allWorkouts);
   closeWorkoutModal();renderToday();
-  const exName=settings.lang==='en'?(ex.e||ex.n):ex.n;
-  showToast((settings.lang==='en'?'Added ':'เพิ่ม ')+exName+' (-'+kcal+' kcal) ✓');
+  const exName=(settings.lang||'th')!=='th'?(ex.e||ex.n):ex.n;
+  showToast(LL('เพิ่ม ','Added ','已添加 ','已新增 ')+exName+' (-'+kcal+' kcal) ✓');
   scheduleAutoSync('workout');
 }
 function delWorkout(id){
@@ -5054,7 +5063,7 @@ function renderWorkoutsList(){
   if(!list.length){wrap.innerHTML=`<div class="empty" style="padding:10px 0;font-size:.78rem">${t('no_workouts')}</div>`;return;}
   wrap.innerHTML='';
   list.forEach(w=>{
-    const name=settings.lang==='en'&&w.name_en?w.name_en:w.name;
+    const name=(settings.lang||'th')!=='th'&&w.name_en?w.name_en:w.name;
     const div=document.createElement('div');div.className='fi';
     div.innerHTML=`<div class="fi-l"><div class="fi-n">${escapeHtml(name)}</div><div class="fi-m">${w.minutes} ${t('duration_min')}</div></div><div class="fi-r"><div><div class="fi-c" style="color:var(--green)">-${w.kcal}</div><div class="fi-u">kcal</div></div><button class="del" onclick="delWorkout('${w.id}')"><span class="ic" data-ic="x"></span></button></div>`;
     wrap.appendChild(div);
@@ -5065,7 +5074,7 @@ function renderWorkoutsList(){
 // Sev legend: 'bad' (red) · 'warn' (amber) · 'info' (blue) · 'ok' (green)
 function getHealthTips(){
   const tips=[];
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const E=dailyEntries||[];
   if(!E.length)return tips;
   const totCal=E.reduce((s,e)=>s+(+e.calories||0),0);
@@ -5320,7 +5329,7 @@ async function handleBarcode(code){
     const food=await lookupBarcodeOFF(code);
     if(!food){result.innerHTML=`<div style="text-align:center;padding:12px;color:var(--accent);font-size:.84rem">${t('barcode_notfound')}<br><span style="color:var(--muted);font-size:.7rem">${code}</span></div>`;return;}
     // Preview + Add button
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     result.innerHTML=
       `<div style="background:var(--surface2);border-radius:9px;padding:10px;margin-bottom:8px">`+
         `<div style="font-weight:600;margin-bottom:2px">${escapeHtml(food.n)}</div>`+
@@ -5417,7 +5426,7 @@ function renderRcpIngredients(){
   renderRcpTotals();
 }
 function renderRcpTotals(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const servings=Math.max(1,+document.getElementById('rcpServings').value||1);
   let totC=0,totP=0,totCb=0,totF=0;
   _recipeIngs.forEach(({f,qty})=>{
@@ -5430,7 +5439,7 @@ function renderRcpTotals(){
     `<div style="display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted)"><span>${t('protein')} ${perP}g · ${t('carbs')} ${perCb}g · ${t('fat')} ${perF}g</span><span>${servings} ${isEn?'serving(s)':'เสิร์ฟ'}</span></div>`;
 }
 function saveRecipe(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const name=document.getElementById('rcpName').value.trim();
   if(!name){showToast(t('recipe_need_name'));return;}
   if(!_recipeIngs.length){showToast(t('recipe_need_ing'));return;}
@@ -5497,7 +5506,7 @@ function obShowStep(n){
   if(n===4)renderObSummary();
 }
 function obNext(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(_obStep===2){
     const age=+document.getElementById('obAge').value;
     const weight=+document.getElementById('obWeight').value;
@@ -5520,7 +5529,7 @@ function pickObGoal(btn){
   if(prevEl){
     const {tdee,goalCal}=computeObTdee();
     if(tdee){
-      const isEn=settings.lang==='en';
+      const isEn=(settings.lang||'th')!=='th';
       prevEl.innerHTML=`TDEE: <b>${Math.round(tdee).toLocaleString()}</b> kcal · ${isEn?'goal':'เป้า'}: <b style="color:var(--accent)">${goalCal.toLocaleString()} kcal${dayUnitShort()}</b>`;
     }
   }
@@ -5554,7 +5563,7 @@ function saveObProfile(){
   saveProfile_LS();
 }
 function renderObSummary(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const {bmr,tdee,goalCal}=computeObTdee();
   const goalLbl=_obGoal==='lose'?(isEn?'Lose':'ลดน้ำหนัก'):_obGoal==='gain'?(isEn?'Gain':'เพิ่มกล้าม'):(isEn?'Maintain':'คงน้ำหนัก');
   document.getElementById('obSummary').innerHTML=
@@ -5601,7 +5610,7 @@ function openFeedback(){
 }
 function closeFeedback(){document.getElementById('feedbackModal').classList.add('hide');}
 function sendFeedback(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const subj=document.getElementById('fbSubject').value.trim();
   const body=document.getElementById('fbBody').value.trim();
   if(!body){showToast(isEn?'Please write a message':'กรุณาพิมพ์ข้อความ');return;}
@@ -5620,7 +5629,7 @@ function sendFeedback(){
 // ═══ HELP / HOW TO USE ═══
 function renderHelp(){
   const body=document.getElementById('helpBody');if(!body)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const sections=isEn?[
     {ico:'rocket',title:'Getting started',items:[
       'Open <b>Profile</b> first and enter your age, weight, height, gender, and activity level.',
@@ -5817,7 +5826,7 @@ function checkSmartGoal(){
   const cur=userProfile.goal_cal;
   let suggested=cur;
   let reason='';
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(goalDir==='lose'&&perWeek>-0.1){
     suggested=Math.max(1200,cur-150);
     reason=isEn
@@ -5839,11 +5848,11 @@ function checkSmartGoal(){
   document.getElementById('smartGoalBody').innerHTML=`${reason}<br><br>${lblCur}: <strong>${cur.toLocaleString()} kcal${dayUnitShort()}</strong><br>${lblRec}: <strong style="color:var(--accent)">${suggested.toLocaleString()} kcal${dayUnitShort()}</strong>`;
   document.getElementById('smartGoalApply').onclick=()=>{
     userProfile.goal_cal=suggested;saveProfile_LS();
-    document.getElementById('hdrSub').textContent=(userProfile.display_name||t('you'))+' · '+suggested.toLocaleString()+' kcal/'+(settings.lang==='en'?'day':'วัน');
+    document.getElementById('hdrSub').textContent=(userProfile.display_name||t('you'))+' · '+suggested.toLocaleString()+' kcal/'+((settings.lang||'th')!=='th'?'day':'วัน');
     renderToday();
     lsSave('calpro_smart_goal_check',now);
     closeSmartGoal();
-    showToast((settings.lang==='en'?'Goal adjusted to ':'ปรับเป้าเป็น ')+suggested.toLocaleString()+' kcal ✓');
+    showToast(((settings.lang||'th')!=='th'?'Goal adjusted to ':'ปรับเป้าเป็น ')+suggested.toLocaleString()+' kcal ✓');
   };
   lsSave('calpro_smart_goal_check',now);
   document.getElementById('smartGoalModal').classList.remove('hide');
@@ -5917,7 +5926,7 @@ function renderReminderBanner(){
   if(!missed)return;
   const mealKeys={'เช้า':'morning','กลางวัน':'lunch','เย็น':'dinner'};
   const mealName=t(mealKeys[missed.meal]||'')||missed.meal;
-  const msg=settings.lang==='en'
+  const msg=(settings.lang||'th')!=='th'
     ?`Past ${missed.hour}:00 · <strong>${mealName}</strong> not logged yet`
     :`เลย${missed.hour}:00 แล้ว · ยังไม่ได้บันทึก<strong>มื้อ${missed.meal}</strong>`;
   wrap.innerHTML=`<div class="banner"><div class="b-ico">${missed.emoji}</div><div class="b-txt">${msg}</div><button class="b-x" onclick="dismissReminder()"><span class="ic" data-ic="x"></span></button></div>`;
@@ -5976,7 +5985,7 @@ function saveEditedFood(){
   const i=dailyEntries.findIndex(x=>x.id===id);if(i<0)return;
   const name=document.getElementById('eName').value.trim();
   const cal=+document.getElementById('eCal').value;
-  if(!name||!cal){showToast(settings.lang==='en'?'Enter name and calories':'ใส่ชื่อและแคลอรี่');return;}
+  if(!name||!cal){showToast((settings.lang||'th')!=='th'?'Enter name and calories':'ใส่ชื่อและแคลอรี่');return;}
   dailyEntries[i]={...dailyEntries[i],
     food_name:name,calories:cal,
     protein:+document.getElementById('eP').value||0,
@@ -5984,7 +5993,7 @@ function saveEditedFood(){
     fat:+document.getElementById('eF').value||0,
     meal:document.getElementById('eMeal').value};
   saveEntries_LS();renderToday();closeEditModal();
-  showToast(settings.lang==='en'?'Edit saved ✓':'บันทึกแก้ไขแล้ว ✓');
+  showToast((settings.lang||'th')!=='th'?'Edit saved ✓':'บันทึกแก้ไขแล้ว ✓');
   scheduleAutoSync('editFood');
 }
 
@@ -6024,7 +6033,7 @@ function renderToday(){
   if(!E.length){
     // Rich empty state — guide the very first action instead of a blank list.
     const isToday=currentDate===todayKey();
-    const isEn2=settings.lang==='en';
+    const isEn2=(settings.lang||'th')!=='th';
     log.innerHTML=`<div class="empty-state">`+
       `<div class="es-ico">${icoSvg('utensils')}</div>`+
       `<div class="es-title">${isToday?t('no_entries'):(isEn2?'No entries on this day':'วันนี้ยังไม่มีรายการ')}</div>`+
@@ -6086,7 +6095,7 @@ function renderToday(){
 function renderProjectionChart(){
   const wrap=document.getElementById('projChart');
   const sum=document.getElementById('projSum');
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const p=userProfile||{};
   const startW=+p.weight||0;
   const goalW=+p.goal_weight||0;          // (old code read goal_weight_kg → always undefined)
@@ -6236,7 +6245,7 @@ function renderProjectionChart(){
   sum.innerHTML=out;
 }
 function renderWaterStats(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const PERIOD=+_waterPeriod;
   const isMonth=PERIOD===30;
   const titleEl=document.getElementById('waterChartTitle');
@@ -6290,7 +6299,7 @@ function renderWaterStats(){
 // Tap-a-bar scrubber for the iOS-style water chart (mirrors selectCalBar).
 let _waterDays=[];
 function selectWaterBar(idx){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const cols=document.querySelectorAll('#waterStats .iosc-col');
   const target=cols[idx]; if(!target)return;
   const ro=document.getElementById('waterReadout');
@@ -6320,7 +6329,7 @@ function setWaterPeriod(p){_waterPeriod=p;localStorage.setItem('cp_water_period'
 // readout line. Tapping the same bar again restores the default average readout.
 let _calDays=[];
 function selectCalBar(idx){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const cols=document.querySelectorAll('#wBars .iosc-col');
   const target=cols[idx]; if(!target)return;
   const ro=document.getElementById('calReadout');
@@ -6346,7 +6355,7 @@ function selectCalBar(idx){
 function renderAnalysis(){
   renderProjectionChart();renderWaterStats();
   renderAdSlot('analysis-1',document.querySelector('[data-ad-slot="analysis-1"]'));
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const PERIOD=+_calPeriod;
   const isMonth=PERIOD===30;
   // Sync the heading + tab active state on every render (covers lang change)
@@ -6434,7 +6443,7 @@ function updateBioCount(el){
   if(f){f.style.width=pct.toFixed(1)+'%';f.classList.toggle('warn',warn&&!full);f.classList.toggle('full',full);}
 }
 function bmiLabel(b){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(b<18.5)return isEn?'(underweight)':'(ผอมเกิน)';
   if(b<23)return isEn?'(normal)':'(ปกติ)';
   if(b<27.5)return isEn?'(overweight)':'(น้ำหนักเกิน)';
@@ -6453,7 +6462,7 @@ function saveProfile(){
   const goalType=(document.querySelector('.gchip[data-g].active')||{dataset:{g:'lose'}}).dataset.g;
   const bioRaw=document.getElementById('pBio')?.value||'';
   const bio=bioRaw.trim().slice(0,280);
-  if(!age||!weight||!height){showToast(settings.lang==='en'?'Fill in all fields':'กรอกข้อมูลให้ครบ');return;}
+  if(!age||!weight||!height){showToast((settings.lang||'th')!=='th'?'Fill in all fields':'กรอกข้อมูลให้ครบ');return;}
   const bmr=computeBMR(gender,weight,height,age);
   const tdee=bmr*act;
   const gc=goalCalsFromTDEE(tdee,goalType);
@@ -6468,8 +6477,8 @@ function saveProfile(){
   document.getElementById('rGoal').textContent=gc+' kcal';
   document.getElementById('rProt').textContent=Math.round(pt)+'g/วัน';
   document.getElementById('rBMI').textContent=bmi+' '+bmiLabel(+bmi);
-  const wkUnit2=settings.lang==='en'?'weeks':'สัปดาห์';
-  const isEn2=settings.lang==='en';
+  const wkUnit2=(settings.lang||'th')!=='th'?'weeks':'สัปดาห์';
+  const isEn2=(settings.lang||'th')!=='th';
   document.getElementById('rWeeks').textContent=goalType==='maintain'?'—':Math.ceil(diff/0.45)+' '+wkUnit2;
   document.getElementById('tipBox').innerHTML=goalType==='lose'
     ?(isEn2?`Lose <strong>${diff}kg</strong> in ~<strong>${Math.ceil(diff/0.45)} weeks</strong> · ${Math.round(pt)}g protein/day`:`ลด <strong>${diff}กก.</strong> ใช้เวลา ~<strong>${Math.ceil(diff/0.45)} สัปดาห์</strong> ทานโปรตีน <strong>${Math.round(pt)}g/วัน</strong>`)
@@ -6477,7 +6486,7 @@ function saveProfile(){
     ?(isEn2?`Gain <strong>${diff}kg</strong> · +300 kcal/day with resistance training`:`เพิ่ม <strong>${diff}กก.</strong> ทาน +300 kcal/วัน ควบคู่ออกกำลังกาย`)
     :(isEn2?`Maintain <strong>${weight}kg</strong> · eat near TDEE <strong>${Math.round(tdee)} kcal</strong>`:`คงน้ำหนัก <strong>${weight}กก.</strong> ทานใกล้เคียง TDEE <strong>${Math.round(tdee)} kcal</strong>`);
   document.getElementById('resultCard').style.display='block';
-  renderProfileUI();renderToday();showToast(settings.lang==='en'?'Profile saved ✓':'บันทึกโปรไฟล์แล้ว ✓');
+  renderProfileUI();renderToday();showToast(LL('บันทึกโปรไฟล์แล้ว ✓','Profile saved ✓','已保存资料 ✓','已儲存資料 ✓'));
   scheduleAutoSync('profile');
 }
 const CUTE_AVATARS=['🐱','🐶','🐻','🐼','🦊','🐰','🐯','🦁','🐨','🐭','🐹','🐮','🐷','🐸','🐵','🦄','🐧','🦉','🐺','🦝','🐢','🐬','🦋','🌸'];
@@ -6533,7 +6542,7 @@ function viewBanner(){
 function renderProfileUI(){
   const p=userProfile;if(!p)return;
   const n=p.display_name||(cloudUser?.email?cloudUser.email.split('@')[0]:'')||'';
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   // ── Hero: avatar + banner color ──
   const av=document.getElementById('profileAvatar');
   if(p.avatar&&p.avatar.startsWith('data:')){av.innerHTML='<img src="'+escapeHtml(p.avatar)+'" alt="avatar">';}
@@ -6558,7 +6567,7 @@ function renderProfileUI(){
   // moves to its own line below so it doesn't crowd the title.
   document.getElementById('profileLevelTitle').textContent=lvl.title;
   // FB-style inline stat line — quick summary combining CalPro metrics.
-  const isEn2=settings.lang==='en';
+  const isEn2=(settings.lang||'th')!=='th';
   const statLine=document.getElementById('profileStatLine');
   if(statLine){
     statLine.innerHTML=isEn2
@@ -6677,7 +6686,7 @@ function applyBannerVisual(){
 let _cropState=null;
 function uploadBannerImage(file){
   if(!file||!userProfile)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(file.size>8*1024*1024){showToast(isEn?'Image too large (max 8MB)':'รูปใหญ่เกินไป (สูงสุด 8MB)');return;}
   const reader=new FileReader();
   reader.onload=e=>{
@@ -6697,7 +6706,7 @@ function uploadBannerImage(file){
 // at object-fit:cover behavior (fill frame, no whitespace).
 function openBannerCropModal(img,mode){
   mode=(mode==='avatar')?'avatar':'banner';
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const modal=document.getElementById('bannerCropModal');
   const frame=document.getElementById('cropFrame');
   const slot=document.getElementById('cropImg');
@@ -6784,7 +6793,7 @@ function applyCrop(){
 // (stored square; the circular look is the CSS mask — same as the reference).
 function applyAvatarCrop(){
   if(!_cropState||!userProfile)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   try{
     const OUT=512;
     const s=_cropState.baseScale*_cropState.scale;
@@ -6810,7 +6819,7 @@ function applyAvatarCrop(){
 }
 function applyBannerCrop(){
   if(!_cropState||!userProfile)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   try{
     const OUT_W=1200,OUT_H=300;     // 4:1 banner
     const s=_cropState.baseScale*_cropState.scale;
@@ -6849,7 +6858,7 @@ function removeBannerImage(){
   saveProfile_LS();
   applyBannerVisual();
   scheduleAutoSync('profile');
-  showToast(settings.lang==='en'?'Banner image removed':'ลบรูป banner แล้ว');
+  showToast((settings.lang||'th')!=='th'?'Banner image removed':'ลบรูป banner แล้ว');
 }
 // Bind bio char-counter (called after first render)
 function bindBioCounter(){
@@ -6865,7 +6874,7 @@ setTimeout(bindBioCounter,500);
 async function openFriendProfile(userId,displayName,avatar){
   if(!userId||!sb)return;
   const modal=document.getElementById('friendProfileModal');
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   modal.classList.remove('hide');
   // Show loading placeholders
   document.getElementById('fpName').textContent=displayName||t('fp_loading');
@@ -7122,8 +7131,8 @@ function renderDrawerHeader(){
   const isAnonCU=cloudUser&&(cloudUser.is_anonymous===true||cloudUser.aud==='anon');
   const emailEl=document.getElementById('drawerEmail');
   if(cloudUser&&!isAnonCU)emailEl.textContent=cloudUser.email||'';
-  else if(isAnonCU)emailEl.textContent=settings.lang==='en'?'📱 Device-only sync':'📱 ซิงค์เฉพาะเครื่องนี้';
-  else emailEl.textContent=settings.lang==='en'?'Local only':'เครื่องนี้เท่านั้น';
+  else if(isAnonCU)emailEl.textContent=(settings.lang||'th')!=='th'?'📱 Device-only sync':'📱 ซิงค์เฉพาะเครื่องนี้';
+  else emailEl.textContent=(settings.lang||'th')!=='th'?'Local only':'เครื่องนี้เท่านั้น';
   // Always show the friends button — the leaderboard works for everyone
   // (anon + unsigned can browse "all users"; the Friends tab itself prompts
   // sign-in when needed).
@@ -7248,7 +7257,7 @@ async function sendNotification(title, body, onProgress){
 }
 async function testNotification(){
   const status=document.getElementById('notifStatus');
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const setStatus=s=>{status.textContent=s;};
   setStatus(isEn?'Starting...':'เริ่ม...');
   // Wrap the whole call so it can never "hang" forever — withTimeout each await inside
@@ -7273,7 +7282,7 @@ async function testNotification(){
 function renderSettings(){
   // Version footer on the main settings page
   const sv=document.getElementById('setVersion');
-  if(sv)sv.innerHTML=`<b>CalPro+</b> ${settings.lang==='en'?'version':'เวอร์ชั่น'} ${APP_VERSION} · BETA`;
+  if(sv)sv.innerHTML=`<b>CalPro+</b> ${(settings.lang||'th')!=='th'?'version':'เวอร์ชั่น'} ${APP_VERSION} · BETA`;
   // Themes
   const tg=document.getElementById('themeGrid');if(tg){tg.innerHTML='';
     Object.entries(THEMES).forEach(([k,v])=>{
@@ -7300,7 +7309,7 @@ function renderSettings(){
     Object.entries(FONT_OPTIONS).forEach(([k,opt])=>{
       const b=document.createElement('button');b.className='font-chip'+(cur===k?' active':'');
       b.dataset.font=k;
-      const lbl=k==='system'?t('font_system'):(settings.lang==='en'?opt.label_en:opt.label_th);
+      const lbl=k==='system'?t('font_system'):((settings.lang||'th')!=='th'?opt.label_en:opt.label_th);
       b.textContent=lbl;
       // Preview style — load + render label in target font
       if(opt.stack){
@@ -7362,8 +7371,7 @@ function applyLang(){
   // Static elements via data-i18n
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k=el.dataset.i18n;
-    if(el.tagName==='INPUT'&&el.type==='text'||el.tagName==='INPUT'&&el.type==='email'){el.placeholder=t(k);}
-    else if(el.tagName==='INPUT')el.placeholder=t(k);
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'){el.placeholder=t(k);}
     else el.textContent=t(k);
   });
   // Active lang button
@@ -7385,12 +7393,12 @@ function openAvatarModal(){
 function closeAvatarModal(){document.getElementById('avatarModal').classList.add('hide');}
 function chooseAvatar(emoji){
   userProfile.avatar=emoji;saveProfile_LS();renderProfileUI();closeAvatarModal();
-  showToast(settings.lang==='en'?'Avatar changed':'เปลี่ยนรูปแล้ว');
+  showToast((settings.lang||'th')!=='th'?'Avatar changed':'เปลี่ยนรูปแล้ว');
 }
 function uploadAvatar(file){
   if(!file)return;
   // Bumped 2 MB → 8 MB so phone-camera shots aren't rejected
-  if(file.size>8*1024*1024){showToast(settings.lang==='en'?'File too large (max 8MB)':'ไฟล์ใหญ่เกินไป (สูงสุด 8MB)');return;}
+  if(file.size>8*1024*1024){showToast((settings.lang||'th')!=='th'?'File too large (max 8MB)':'ไฟล์ใหญ่เกินไป (สูงสุด 8MB)');return;}
   const reader=new FileReader();
   reader.onload=(e)=>{
     const img=new Image();
@@ -7403,7 +7411,7 @@ function uploadAvatar(file){
 }
 function resetAvatar(){
   delete userProfile.avatar;saveProfile_LS();renderProfileUI();closeAvatarModal();
-  showToast(settings.lang==='en'?'Using initial letter':'ใช้ตัวอักษรแรก');
+  showToast((settings.lang||'th')!=='th'?'Using initial letter':'ใช้ตัวอักษรแรก');
 }
 
 // ═══ SHARE ═══
@@ -7433,11 +7441,11 @@ const INVITE_EN=[
   'Grab CalPro+ and let’s glow healthy together! 🍀',
 ];
 function pickInvite(){
-  const arr=settings.lang==='en'?INVITE_EN:INVITE_TH;
+  const arr=(settings.lang||'th')!=='th'?INVITE_EN:INVITE_TH;
   return arr[Math.floor(Math.random()*arr.length)];
 }
 async function shareText(text,title){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(navigator.share){
     try{await navigator.share({title,text,url:getReferralUrl()});showToast(isEn?'Shared ✓':'แชร์เรียบร้อย ✓');}
     catch(e){if(e.name!=='AbortError')showToast(isEn?'Share failed':'แชร์ไม่สำเร็จ');}
@@ -7511,7 +7519,7 @@ function buildShareCanvas(){
   const burned=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+w.kcal,0);
   const net=Math.max(0,totCal-burned);
   const dateStr=fmtDate(currentDate).replace(/^วันนี้ · |^เมื่อวาน · |^Today · |^Yesterday · /,'');
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const isLight=(THEMES[settings.theme]||THEMES.dark).mode==='light';
   const accent=settings.accent||'#ff6b6b';
   // Determine status (based on net consumption vs goal)
@@ -7648,7 +7656,7 @@ function wrapInviteText(ctx,text,maxW){
   return lines;
 }
 async function shareDaily(){
-  showToast(settings.lang==='en'?'Creating share image...':'กำลังสร้างรูป...',3000);
+  showToast((settings.lang||'th')!=='th'?'Creating share image...':'กำลังสร้างรูป...',3000);
   try{
     await ensureShareAssets();
     const {canvas,invite}=buildShareCanvas();
@@ -7660,7 +7668,7 @@ async function shareDaily(){
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       try{
         await navigator.share({files:[file],text:caption,title:'CalPro+'});
-        showToast(settings.lang==='en'?'Shared ✓':'แชร์เรียบร้อย ✓');
+        showToast(LL('แชร์เรียบร้อย ✓','Shared ✓','已分享 ✓','已分享 ✓'));
         return;
       }catch(e){if(e.name==='AbortError')return;/* fall through */}
     }
@@ -7671,7 +7679,7 @@ async function shareDaily(){
     document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),2000);
     if(navigator.clipboard){try{await navigator.clipboard.writeText(caption);}catch{}}
-    showToast(settings.lang==='en'?'Image downloaded + caption copied ✓':'ดาวน์โหลดรูป + คัดลอกข้อความแล้ว ✓',3500);
+    showToast((settings.lang||'th')!=='th'?'Image downloaded + caption copied ✓':'ดาวน์โหลดรูป + คัดลอกข้อความแล้ว ✓',3500);
   }catch(e){
     console.warn('[share] image failed, falling back to text:',e);
     // Last-resort fallback: text-only share
@@ -7687,7 +7695,7 @@ function buildAchievementCanvas(){
   const ontrack=daysOnTrack(ebd);
   const earned=syncEarnedBadges(ebd);  // persisted ledger — earned badges stick forever
   const totalDays=logDays(ebd);
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const isLight=(THEMES[settings.theme]||THEMES.dark).mode==='light';
   const accent=settings.accent||'#ff6b6b';
 
@@ -7777,7 +7785,7 @@ function buildAchievementCanvas(){
   return {canvas:cv,invite};
 }
 async function shareAchievements(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   showToast(isEn?'Creating share image...':'กำลังสร้างรูป...',3000);
   try{
     await ensureShareAssets();
@@ -7861,7 +7869,7 @@ function liveTDEE(){
   const bmr=computeBMR(gender,weight,height,age);
   const tdee=bmr*act;
   let note,protRatio,carbRatio,fatRatio;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(tdeeGoalType==='lose'){note=isEn?'-0.5 kg/wk':'ลด ~0.5 กก./สัปดาห์';protRatio=.35;carbRatio=.35;fatRatio=.30;}
   else if(tdeeGoalType==='gain'){note=isEn?'Build muscle':'เพิ่มกล้ามเนื้อ';protRatio=.30;carbRatio=.45;fatRatio=.25;}
   else{note=isEn?'Maintain':'คงน้ำหนัก';protRatio=.30;carbRatio=.40;fatRatio=.30;}
@@ -7906,7 +7914,7 @@ function applyTDEEtoProfile(){
   const weight=+document.getElementById('tWeight').value;
   const height=+document.getElementById('tHeight').value;
   const act=+document.getElementById('tAct').value;
-  if(!age||!weight||!height){showToast(settings.lang==='en'?'Fill in all fields first':'กรอกข้อมูลให้ครบก่อน');return;}
+  if(!age||!weight||!height){showToast((settings.lang||'th')!=='th'?'Fill in all fields first':'กรอกข้อมูลให้ครบก่อน');return;}
   const tdee=computeTDEE(gender,weight,height,age,act);
   const gc=goalCalsFromTDEE(tdee,tdeeGoalType);
   userProfile={...userProfile,gender,age,weight,height,activity:act,goal_type:tdeeGoalType,goal_cal:gc};
@@ -7914,7 +7922,7 @@ function applyTDEEtoProfile(){
   const name=userProfile.display_name||'คุณ';
   document.getElementById('hdrSub').textContent=name+' · '+gc.toLocaleString()+' kcal/วัน';
   renderProfileUI();renderToday();
-  showToast((settings.lang==='en'?'Goal set to ':'ตั้งเป้าหมาย ')+gc.toLocaleString()+' kcal'+dayUnitShort()+' ✓');
+  showToast(((settings.lang||'th')!=='th'?'Goal set to ':'ตั้งเป้าหมาย ')+gc.toLocaleString()+' kcal'+dayUnitShort()+' ✓');
 }
 
 // ═══ AFFILIATE / SPONSOR ADS — Phase 1 ═══
@@ -8007,7 +8015,7 @@ function parseReferralOnLoad(){
     if(stored)return;                         // already attributed — don't re-celebrate
     localStorage.setItem('calpro_referred_by',ref);
     localStorage.setItem('calpro_referred_at',new Date().toISOString());
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     setTimeout(()=>{
       showToast(isEn?'A friend invited you to CalPro+':'เพื่อนคุณเชิญคุณมา CalPro+',3500);
     },1500);
@@ -8022,7 +8030,7 @@ function dailyCheckInToast(){
     localStorage.setItem('calpro_last_visit',today);
     const streak=calcStreak(allEntries);
     if(streak<1)return;                       // no active streak — nothing to celebrate
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     const msg=isEn
       ?`🔥 ${streak}-day streak · keep going!`
       :`🔥 ${streak} วันติด · เก่งมาก!`;
@@ -8048,7 +8056,7 @@ function celebrateMilestoneIfNew(){
     if(celebrated.includes(ms))return;
     celebrated.push(ms);
     localStorage.setItem('calpro_milestones_shared',JSON.stringify(celebrated));
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     // Small intro toast then open share sheet
     showToast(isEn?`${ms}-day milestone — share it!`:`ครบ ${ms} วันติด — แชร์ความสำเร็จ!`,3000);
     setTimeout(()=>{try{shareAchievements();}catch(e){console.warn('[milestone] share failed:',e.message);}},1200);
@@ -8111,7 +8119,7 @@ async function scheduleMealReminders(){
     const perm=await LN.checkPermissions();
     if(perm.display!=='granted')return;
     const mt=settings.mealTimes||{morning:9,lunch:14,dinner:20};
-    const lang=settings.lang==='en'?'en':'th';
+    const lang=(settings.lang||'th')!=='th'?'en':'th';
     const meals=[
       {key:'morning',hour:mt.morning,id:MEAL_NOTIF_IDS.morning},
       {key:'lunch',hour:mt.lunch,id:MEAL_NOTIF_IDS.lunch},
@@ -8150,7 +8158,7 @@ async function fireMissedMealNotifsWeb(){
       {key:'lunch',hour:mt.lunch,mealName:'กลางวัน'},
       {key:'dinner',hour:mt.dinner,mealName:'เย็น'},
     ];
-    const lang=settings.lang==='en'?'en':'th';
+    const lang=(settings.lang||'th')!=='th'?'en':'th';
     let reg=null;
     try{reg=await navigator.serviceWorker?.getRegistration();}catch{}
     for(const m of meals){
@@ -8205,7 +8213,7 @@ async function scheduleStreakSaver(){
     if(target<=now)return;                      // 21:30 already passed today
     const perm=await LN.checkPermissions();
     if(perm.display!=='granted')return;         // don't auto-prompt; user must opt in via test button
-    const isEn=settings.lang==='en';
+    const isEn=(settings.lang||'th')!=='th';
     await LN.schedule({notifications:[{
       id:STREAK_SAVER_ID,
       title:'CalPro+',
@@ -8543,7 +8551,7 @@ function aiSaveKey(){
   const v=el.value.trim();
   if(v){localStorage.setItem('cp_ai_key',v);}
   else{localStorage.removeItem('cp_ai_key');}
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   showToast(v?(isEn?'Key saved ✓':'บันทึก key แล้ว ✓'):(isEn?'Key cleared':'ลบ key แล้ว'));
   renderAiSettingsBody();
 }
@@ -8561,7 +8569,7 @@ function aiSaveEndpoint(){
 }
 async function testAiConnection(){
   const status=document.getElementById('aiTestStatus');
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(!status)return;
   status.style.color='var(--muted)';
   status.textContent=isEn?'Testing...':'กำลังทดสอบ...';
@@ -8586,7 +8594,7 @@ function renderAiSettingsBody(){
   const keyMasked=key?'•'.repeat(Math.min(20,key.length)):'';
   const model=settings.aiModel||cfg.defaultModel||'';
   const endpoint=settings.aiEndpoint||cfg.defaultEndpoint||'';
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   // Read cached usage for the proxy provider
   let usageNote='';
   if(isProxy){
@@ -8647,7 +8655,7 @@ function renderAiSettingsBody(){
 function refreshAiQuotaInline(){
   const el=document.getElementById('aiQuotaInline');
   if(!el)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   // Only show for proxy provider — BYO-key users manage their own quota
   if((settings.aiProvider||'proxy')!=='proxy'){el.textContent='';return;}
   if(!isRegisteredUser()){
@@ -8702,7 +8710,7 @@ function isRegisteredUser(){
 function openAiPhotoModal(){
   const provider=settings.aiProvider||'proxy';
   const cfg=AI_PROVIDERS[provider]||{};
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   // For the free proxy provider — require a registered (non-anonymous) account.
   if(cfg.noKey){
     if(!isRegisteredUser()){
@@ -8749,7 +8757,7 @@ function _aiSpinner(){
 async function handleAiPhotoSelect(input){
   const file=input.files?.[0];
   if(!file)return;
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const status=document.getElementById('aiPhotoStatus');
   const preview=document.getElementById('aiPhotoPreview');
   const result=document.getElementById('aiPhotoResult');
@@ -8840,7 +8848,7 @@ function applyAiResult(parsed){
     const fn=document.getElementById('fName');
     if(fn){fn.scrollIntoView({behavior:'smooth',block:'center'});fn.focus();}
   },150);
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   showToast(isEn?'Filled in from AI · review + save':'กรอกข้อมูลจาก AI แล้ว · ตรวจสอบและบันทึก',2800);
 }
 
@@ -10027,7 +10035,7 @@ function dismissUpdate(){
   _pendingWorker=null;
 }
 async function checkForUpdates(){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   if(!('serviceWorker' in navigator)){
     showToast(isEn?'Not supported in this browser':'เบราว์เซอร์ไม่รองรับ');return;
   }
@@ -10064,7 +10072,7 @@ async function checkForUpdates(){
 
 // What's-new flow --------------------------------------------------
 function showWhatsNew(versions){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   const body=document.getElementById('whatsNewBody');
   // Special sentinel: '__current__' → show entries for current version (replay)
   let entries;
@@ -10134,7 +10142,7 @@ async function checkApkUpdate(){
   }catch(e){ /* offline / rate-limited — silent, retry next launch */ }
 }
 function showApkUpdate(version,url,notes){
-  const isEn=settings.lang==='en';
+  const isEn=(settings.lang||'th')!=='th';
   // If the app is in a store, deep-link there instead of sideloading the APK.
   const inStore=!!APK_UPDATE.storeUrl;
   const target=inStore?APK_UPDATE.storeUrl:url;
