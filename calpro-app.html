@@ -730,6 +730,30 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .ios-ico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;}
 .ios-lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ios-chev{color:var(--muted);font-size:1.15rem;opacity:.55;flex-shrink:0;}
+/* ── Settings sub-page sections (iOS grouped look) ── */
+.set-sec{font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.3px;text-transform:uppercase;margin:22px 8px 8px;}
+.set-sec:first-of-type{margin-top:6px;}
+.set-note{font-size:.74rem;color:var(--muted);line-height:1.5;margin:2px 8px 9px;}
+.ios-group>.setting-row{padding:13px 15px;}
+.ios-group>.ios-pad>.setting-row{padding:13px 0;}
+.ios-pad{padding:14px 15px;}
+.ios-pad>:last-child{margin-bottom:0;}
+.ios-group .theme-grid,.ios-group .accent-grid,.ios-group .font-grid,.ios-group .lang-row{margin-bottom:0;}
+.set-version{text-align:center;font-size:.72rem;color:var(--muted);margin:20px 0 8px;line-height:1.6;opacity:.85;}
+.set-version b{color:var(--text);font-weight:600;}
+/* ── Collapsible card header (profile badges) ── */
+.card-collapse-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:8px;}
+.card-collapse-hd h3{margin:0;}
+.card-collapse-chev{color:var(--muted);font-size:1.1rem;transition:transform .25s;flex-shrink:0;}
+.card.collapsed .card-collapse-chev{transform:rotate(-90deg);}
+.collapse-body{overflow:hidden;transition:max-height .3s ease,opacity .2s,margin .25s;max-height:1200px;opacity:1;margin-top:10px;}
+.card.collapsed .collapse-body{max-height:0;opacity:0;margin-top:0;}
+/* ── Image lightbox (tap avatar / banner to view) ── */
+.imgview{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:24px;}
+.imgview.show{opacity:1;pointer-events:auto;}
+.imgview img{max-width:100%;max-height:86vh;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);object-fit:contain;}
+.imgview .iv-emoji{font-size:38vw;line-height:1;filter:drop-shadow(0 10px 30px rgba(0,0,0,.4));}
+.imgview .iv-close{position:absolute;top:18px;right:18px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.16);border:none;color:#fff;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:99px;font-size:.82rem;opacity:0;transition:all .3s;pointer-events:none;z-index:300;white-space:nowrap;}
@@ -995,11 +1019,6 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="ad-slot" data-ad-slot="analysis-1"></div>
       <div class="card"><h3 data-i18n="summary">สรุป</h3><div id="wkSum"></div></div>
       <div class="card"><h3 data-i18n="advice">คำแนะนำ</h3><div id="insDiv"></div></div>
-      <div class="card">
-        <h3 data-i18n="badges">เหรียญตรา</h3>
-        <div class="bdg-g" id="bdgGrid"></div>
-        <button class="btn-sec" onclick="shareAchievements()" style="width:100%;margin-top:10px"><span class="ic" data-ic="trophy"></span> <span data-i18n="share_ach">แชร์ความสำเร็จ</span></button>
-      </div>
     </div>
 
     <!-- TDEE CALCULATOR -->
@@ -1080,12 +1099,12 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <!-- ─── Hero card (Steam-style) ─── -->
       <div class="profile-hero" id="profileHero">
-        <div class="profile-hero-banner" id="profileBanner">
-          <button class="profile-cam profile-cam-cover" onclick="document.getElementById('bannerImgUpload').click()" aria-label="แก้ไขพื้นหลัง" title="แก้ไขพื้นหลัง"><span class="ic" data-ic="camera"></span></button>
+        <div class="profile-hero-banner" id="profileBanner" onclick="viewBanner()" style="cursor:pointer">
+          <button class="profile-cam profile-cam-cover" onclick="event.stopPropagation();document.getElementById('bannerImgUpload').click()" aria-label="แก้ไขพื้นหลัง" title="แก้ไขพื้นหลัง"><span class="ic" data-ic="camera"></span></button>
         </div>
         <div class="profile-hero-body">
           <div class="profile-avatar-wrap">
-            <div class="profile-avatar-lg" id="profileAvatar" onclick="openAvatarModal()" data-tip="คลิกเพื่อเปลี่ยนรูปประจำตัว">?</div>
+            <div class="profile-avatar-lg" id="profileAvatar" onclick="viewAvatar()" data-tip="คลิกเพื่อดูรูป · กดกล้องเพื่อเปลี่ยน">?</div>
             <button class="profile-cam profile-cam-av" onclick="openAvatarModal()" aria-label="แก้ไขรูปโปรไฟล์" title="แก้ไขรูปโปรไฟล์"><span class="ic" data-ic="camera"></span></button>
           </div>
           <div class="profile-hero-info">
@@ -1111,10 +1130,15 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="target"></span></div><div class="pst-val" id="pstOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
         <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="trophy"></span></div><div class="pst-val" id="pstScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
       </div>
-      <!-- ─── Badges showcase ─── -->
-      <div class="card">
-        <h3><span data-i18n="badges_showcase">🏅 เหรียญตราที่ได้รับ</span> <span style="font-size:.7rem;color:var(--muted);font-weight:400" id="pstBadgeCount">(0)</span></h3>
-        <div class="profile-badges-grid" id="profileBadgesGrid"></div>
+      <!-- ─── Badges showcase (collapsible) ─── -->
+      <div class="card" id="badgesCard">
+        <div class="card-collapse-hd" onclick="toggleCard('badgesCard')">
+          <h3><span data-i18n="badges_showcase">🏅 เหรียญตราที่ได้รับ</span> <span style="font-size:.7rem;color:var(--muted);font-weight:400" id="pstBadgeCount">(0)</span></h3>
+          <span class="card-collapse-chev">▾</span>
+        </div>
+        <div class="collapse-body">
+          <div class="profile-badges-grid" id="profileBadgesGrid"></div>
+        </div>
       </div>
       <!-- ─── Goal showcase ─── -->
       <div class="card" id="profileGoalCard">
@@ -1128,6 +1152,12 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <!-- Edit profile + measurements now live in a popup modal further
            down. The hero's "✏️ Edit profile" button opens it. -->
+    </div>
+
+    <!-- Image lightbox — tap avatar / banner to view (change = camera buttons) -->
+    <div class="imgview" id="imgViewer" onclick="closeImgViewer()">
+      <button class="iv-close" aria-label="close">✕</button>
+      <div class="iv-content"></div>
     </div>
 
     <!-- SETTINGS (iOS-style grouped list → drill-in sub-pages) -->
@@ -1154,24 +1184,26 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="ios-group">
         <button class="ios-row" onclick="navTo('set-data')"><span class="ios-ico" data-ic="gear" style="background:#8e8e93"></span><span class="ios-lbl" data-i18n="manage_data">จัดการข้อมูล</span><span class="ios-chev">›</span></button>
       </div>
+      <div class="set-version" id="setVersion"></div>
     </div>
 
     <!-- SETTINGS · Cloud Sync -->
     <div class="screen" id="pg-set-cloud">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="cloud_sync">Cloud Sync</h2></div>
-      <div class="card"><div id="cloudStatus"></div></div>
+      <div class="ios-group"><div class="ios-pad"><div id="cloudStatus"></div></div></div>
     </div>
 
     <!-- SETTINGS · Appearance -->
     <div class="screen" id="pg-set-appearance">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="appearance">รูปลักษณ์</h2></div>
-      <div class="card">
-        <div class="sec-lbl" data-i18n="theme">ธีมสี</div>
-        <div class="theme-grid" id="themeGrid"></div>
-        <div class="sec-lbl" data-i18n="accent">สีหลัก</div>
-        <div class="accent-grid" id="accentGrid"></div>
-        <div class="sec-lbl" data-i18n="font_setting">ฟอนต์</div>
-        <div class="font-grid" id="fontGrid"></div>
+      <div class="set-sec" data-i18n="theme">ธีมสี</div>
+      <div class="ios-group"><div class="ios-pad"><div class="theme-grid" id="themeGrid"></div></div></div>
+      <div class="set-sec" data-i18n="accent">สีหลัก</div>
+      <div class="ios-group"><div class="ios-pad"><div class="accent-grid" id="accentGrid"></div></div></div>
+      <div class="set-sec" data-i18n="font_setting">ฟอนต์</div>
+      <div class="ios-group"><div class="ios-pad"><div class="font-grid" id="fontGrid"></div></div></div>
+      <div class="set-sec" data-i18n="display_sec">การแสดงผล</div>
+      <div class="ios-group">
         <div class="setting-row">
           <div class="sr-l">
             <div class="sr-name" data-i18n="simple_mode">โหมดใช้งานง่าย</div>
@@ -1192,18 +1224,18 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <!-- SETTINGS · Language -->
     <div class="screen" id="pg-set-lang">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="language">ภาษา</h2></div>
-      <div class="card">
+      <div class="ios-group"><div class="ios-pad">
         <div class="lang-row">
           <button class="lbtn" data-lang="th" onclick="setLang('th')">ไทย</button>
           <button class="lbtn" data-lang="en" onclick="setLang('en')">English</button>
         </div>
-      </div>
+      </div></div>
     </div>
 
     <!-- SETTINGS · Reminders -->
     <div class="screen" id="pg-set-reminders">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="reminders">การเตือน</h2></div>
-      <div class="card">
+      <div class="ios-group">
         <div class="setting-row">
           <div class="sr-l">
             <div class="sr-name" data-i18n="meal_reminders">เตือนมื้ออาหาร</div>
@@ -1211,7 +1243,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           </div>
           <label class="switch"><input type="checkbox" id="mealRemToggle" onchange="toggleReminder('meal')"><span class="slider"></span></label>
         </div>
-        <div id="mealTimesGrid" style="margin-top:8px"></div>
+        <div class="ios-pad" style="padding-top:2px"><div id="mealTimesGrid"></div></div>
         <div class="setting-row">
           <div class="sr-l">
             <div class="sr-name" data-i18n="streak_saver">เตือนรักษา streak</div>
@@ -1233,44 +1265,40 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           </div>
           <label class="switch"><input type="checkbox" id="recapToggle" onchange="toggleReminder('recap')"><span class="slider"></span></label>
         </div>
-        <button class="btn-sec" onclick="testNotification()" style="width:100%;margin-top:10px;font-size:.82rem"><span class="ic" data-ic="bell"></span> <span data-i18n="test_notif">ทดสอบส่งแจ้งเตือน</span></button>
-        <div id="notifStatus" style="font-size:.7rem;color:var(--muted);margin-top:6px;text-align:center"></div>
       </div>
+      <button class="btn-sec" onclick="testNotification()" style="width:100%;font-size:.82rem"><span class="ic" data-ic="bell"></span> <span data-i18n="test_notif">ทดสอบส่งแจ้งเตือน</span></button>
+      <div id="notifStatus" style="font-size:.7rem;color:var(--muted);margin-top:6px;text-align:center"></div>
     </div>
 
     <!-- SETTINGS · AI -->
     <div class="screen" id="pg-set-ai">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="ai_settings_title">AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)</h2></div>
-      <div class="card">
-        <div style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:10px" data-i18n="ai_settings_sub">ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)</div>
-        <div id="aiSettingsBody"></div>
-      </div>
+      <div class="set-note" data-i18n="ai_settings_sub">ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)</div>
+      <div class="ios-group"><div class="ios-pad"><div id="aiSettingsBody"></div></div></div>
     </div>
 
     <!-- SETTINGS · Customize nav -->
     <div class="screen" id="pg-set-nav">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="customize_nav">ปรับแต่งแถบล่าง</h2></div>
-      <div class="card">
-        <div style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:10px" data-i18n="customize_nav_sub">เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้</div>
-        <div id="navTabsList"></div>
-      </div>
+      <div class="set-note" data-i18n="customize_nav_sub">เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้</div>
+      <div class="ios-group" id="navTabsList"></div>
     </div>
 
     <!-- SETTINGS · Water goal -->
     <div class="screen" id="pg-set-water">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="water_goal_cfg">เป้าหมายน้ำดื่ม</h2></div>
-      <div class="card">
+      <div class="ios-group"><div class="ios-pad">
         <div style="display:flex;align-items:center;gap:10px">
           <input type="range" id="waterGoalRange" min="4" max="16" step="1" oninput="changeWaterGoal(this.value)" style="flex:1">
           <div style="font-size:1rem;font-weight:700;min-width:60px;text-align:right"><span id="waterGoalVal">8</span> <span data-i18n="cups_unit">แก้ว</span></div>
         </div>
-      </div>
+      </div></div>
     </div>
 
     <!-- SETTINGS · Manage data -->
     <div class="screen" id="pg-set-data">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="manage_data">จัดการข้อมูล</h2></div>
-      <div class="card">
+      <div class="ios-group"><div class="ios-pad">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
           <button class="btn-sec" onclick="exportData()"><span class="ic" data-ic="upload"></span> Export</button>
           <button class="btn-sec" onclick="document.getElementById('importFile').click()"><span class="ic" data-ic="download"></span> Import</button>
@@ -1278,7 +1306,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <input type="file" id="importFile" accept="application/json,.json" hidden onchange="importData(this.files[0])">
         <button class="btn-sec" onclick="cleanOldPhotos()" style="width:100%;margin-bottom:8px"><span class="ic" data-ic="trash"></span> <span data-i18n="clean_photos">ลบรูปอาหารเก่า (>30 วัน)</span></button>
         <button class="btn-danger" onclick="resetAllData()" data-i18n="reset_all">ล้างข้อมูลทั้งหมด</button>
-      </div>
+      </div></div>
     </div>
 
     <!-- FRIENDS -->
@@ -1909,7 +1937,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.13';
+const APP_VERSION = '2.33.14';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2144,7 +2172,7 @@ const I18N = {
     personal_info:'ข้อมูลส่วนตัว',name:'ชื่อ',goal_weight_kg:'เป้าหมาย (กก.)',
     save_calc:'บันทึกและคำนวณ',calc_result:'ผลการคำนวณ',
     manage_data:'จัดการข้อมูล',export:'📤 Export',import:'📥 Import',reset_all:'ล้างข้อมูลทั้งหมด',
-    settings:'ตั้งค่า',theme:'ธีมสี',accent:'สีหลัก',done:'เสร็จสิ้น',language:'ภาษา',
+    settings:'ตั้งค่า',theme:'ธีมสี',display_sec:'การแสดงผล',accent:'สีหลัก',done:'เสร็จสิ้น',language:'ภาษา',
     water:'น้ำดื่ม',weight:'น้ำหนัก',cups:'แก้ว',cups_unit:'แก้ว',kg_unit:'กก.',save:'บันทึก',cancel:'ยกเลิก',
     enter_ph:'กรอก...',weight_trend_hint:'บันทึกอย่างน้อย 2 วันเพื่อดูแนวโน้ม',
     no_workouts:'ยังไม่มีการออกกำลังกาย',
@@ -2246,7 +2274,7 @@ const I18N = {
     personal_info:'Personal info',name:'Name',goal_weight_kg:'Goal (kg)',
     save_calc:'Save & calculate',calc_result:'Results',
     manage_data:'Manage data',export:'📤 Export',import:'📥 Import',reset_all:'Reset all data',
-    settings:'Settings',theme:'Theme',accent:'Accent',done:'Done',language:'Language',
+    settings:'Settings',theme:'Theme',display_sec:'Display',accent:'Accent',done:'Done',language:'Language',
     water:'Water',weight:'Weight',cups:'cups',cups_unit:'cups',kg_unit:'kg',save:'Save',cancel:'Cancel',
     enter_ph:'Enter...',weight_trend_hint:'Log at least 2 days to see trend',
     no_workouts:'No workouts logged yet',
@@ -5999,36 +6027,61 @@ function renderWaterStats(){
   const goal=getWaterGoal();
   const hit=daysArr.filter(d=>d.c>=goal).length;
   const avg=daysArr.reduce((s,d)=>s+d.c,0)/PERIOD;
-  // Auto-resize: if there's a giant drink day way above goal, the column needs
-  // more vertical headroom. Cap at 90px so it doesn't dominate the card.
-  const maxC=Math.max(...daysArr.map(d=>d.c),goal);
-  const baseColH=isMonth?68:54;
-  const overGoal=maxC/goal;
-  const colH=overGoal>1.6?Math.min(90,baseColH+18):baseColH;
-  const gap=isMonth?'2px':'5px';
-  // 7-day: fixed 14px column width (chunky visual).
-  // 30-day: fill the flex:1 column (was 'auto' which collapses to 0 because the
-  // inner fill is position:absolute — outer div had nothing to size against).
-  const colW=isMonth?'100%':'14px';
-  const wrap=document.getElementById('waterStats');
-  const bars=daysArr.map(d=>{
-    const pct=Math.min(d.c/maxC,1);
-    const hue=d.c>=goal?'var(--blue)':d.c>0?'var(--blue)':'var(--surface2)';
-    const op=d.c>=goal?'1':d.c>0?'.78':'1';
-    const valueLbl=isMonth?'':(d.c||'');
-    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0">`+
-      `<div style="width:${colW};height:${colH}px;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden">`+
-        `<div style="position:absolute;bottom:0;left:0;right:0;height:${(pct*100).toFixed(1)}%;background:${hue};opacity:${op};transition:height .3s"></div>`+
-      `</div>`+
-      `<div style="font-size:.58rem;color:var(--muted);white-space:nowrap">${d.label}</div>`+
-      `<div style="font-size:.55rem;color:var(--muted)">${valueLbl}</div>`+
-    `</div>`;
+  // iOS Battery-style bar plot (matches the calorie chart): bars are % of a
+  // rounded max with headroom, the goal shows as a dashed reference line, faint
+  // gridlines + a solid baseline behind, and tapping a bar reveals that day.
+  const peak=Math.max(...daysArr.map(d=>d.c),goal,1);
+  const scale=Math.max(Math.ceil(peak*1.12),goal+1);
+  const plotH=isMonth?140:120;
+  const goalPct=Math.min(goal/scale*100,92);
+  const grid=[75,50,25].map(p=>`<i style="top:${p}%"></i>`).join('');
+  const barsHtml=daysArr.map((d,idx)=>{
+    const p=Math.min(d.c/scale,1);
+    const col=d.c>0?'var(--blue)':'var(--surface2)';
+    const op=d.c>=goal?'1':d.c>0?'.62':'1';
+    return `<div class="iosc-col" data-idx="${idx}" onclick="selectWaterBar(${idx})"><div class="iosc-bar" style="height:${Math.max(p*100,1.5).toFixed(1)}%;background:${col};opacity:${op}"></div></div>`;
   }).join('');
-  const goalLbl=isEn?`Hit ${goal} cups`:`บรรลุเป้า ${goal} แก้ว`;
-  const periodLbl=isMonth?`${hit}/${PERIOD} ${t('days')}`:`${hit}/7 ${t('days')}`;
-  wrap.innerHTML=`<div style="display:flex;gap:${gap};justify-content:space-between;margin-bottom:8px;align-items:flex-end">${bars}</div>`+
-    `<div class="rrow"><span class="rl">${goalLbl}</span><span class="rv" style="color:var(--blue)">${periodLbl}</span></div>`+
+  const xHtml=daysArr.map(d=>`<span>${d.label}</span>`).join('');
+  _waterDays=daysArr;
+  const wrap=document.getElementById('waterStats');
+  wrap.innerHTML=
+    `<div class="iosc">`+
+      `<div class="iosc-plot" style="--ch:${plotH}px">`+
+        `<div class="iosc-grid">${grid}<div class="iosc-base"></div>`+
+          `<div class="iosc-goal" style="bottom:${goalPct.toFixed(1)}%;border-top-color:color-mix(in srgb,var(--blue) 62%,transparent)"><b style="color:var(--blue)">${isEn?'goal':'เป้า'} ${goal}</b></div>`+
+          `<span class="iosc-ymax">${scale}</span>`+
+        `</div>`+
+        `<div class="iosc-bars${isMonth?' is-month':''}">${barsHtml}</div>`+
+      `</div>`+
+      `<div class="iosc-x${isMonth?' is-month':''}">${xHtml}</div>`+
+      `<div class="iosc-readout" id="waterReadout"></div>`+
+    `</div>`+
+    `<div class="rrow" style="margin-top:6px"><span class="rl">${isEn?`Hit ${goal} cups`:`บรรลุเป้า ${goal} แก้ว`}</span><span class="rv" style="color:var(--blue)">${hit}/${PERIOD} ${t('days')}</span></div>`+
     `<div class="rrow"><span class="rl">${t('avg_per_day')}</span><span class="rv">${avg.toFixed(1)} ${t('cups_unit')}</span></div>`;
+  const ro=document.getElementById('waterReadout');
+  if(ro)ro.innerHTML=avg>0?`${t('avg_per_day')} <b>${avg.toFixed(1)} ${t('cups_unit')}</b> · ${isEn?'tap a bar for details':'แตะแท่งดูรายวัน'}`:(isEn?'No water logged yet':'ยังไม่มีการบันทึกน้ำ');
+}
+// Tap-a-bar scrubber for the iOS-style water chart (mirrors selectCalBar).
+let _waterDays=[];
+function selectWaterBar(idx){
+  const isEn=settings.lang==='en';
+  const cols=document.querySelectorAll('#waterStats .iosc-col');
+  const target=cols[idx]; if(!target)return;
+  const ro=document.getElementById('waterReadout');
+  const wasSel=target.classList.contains('sel');
+  cols.forEach(c=>{c.classList.remove('sel');c.classList.remove('dim');});
+  if(wasSel){
+    const avg=_waterDays.reduce((s,x)=>s+x.c,0)/(_waterDays.length||1);
+    if(ro)ro.innerHTML=avg>0?`${t('avg_per_day')} <b>${avg.toFixed(1)} ${t('cups_unit')}</b> · ${isEn?'tap a bar for details':'แตะแท่งดูรายวัน'}`:(isEn?'No water logged yet':'ยังไม่มีการบันทึกน้ำ');
+    return;
+  }
+  cols.forEach(c=>{if(c!==target)c.classList.add('dim');});
+  target.classList.add('sel');
+  const d=_waterDays[idx];
+  if(ro&&d){
+    const dl=d.d.toLocaleDateString(isEn?'en-GB':'th-TH',{weekday:'short',day:'numeric',month:'short'});
+    ro.innerHTML=`<b>${dl}</b> · ${d.c} ${t('cups_unit')}`;
+  }
 }
 // Cal/Water chart period state — '7' or '30'. Persisted across nav so users
 // don't have to re-toggle every time they hit Analysis.
@@ -6138,17 +6191,6 @@ function renderAnalysis(){
     d.innerHTML=`<div class="ins-i">${item.i}</div><div class="ins-t">${item.t}</div>`;
     ins.appendChild(d);
   });
-  // Badges — use persisted-badge ledger so earned badges stay forever
-  const bg=document.getElementById('bdgGrid');bg.innerHTML='';
-  const earned=syncEarnedBadges(allEntries);
-  BADGES.forEach(b=>{
-    const yes=earned.includes(b.id);
-    const d=document.createElement('div');
-    d.className='bdg-item'+(yes?' earned':' locked');
-    const bname=settings.lang==='en'&&b.name_en?b.name_en:b.name;
-    d.innerHTML=`<div class="bdg-ico">${b.ico}</div><div class="bdg-name">${bname}</div>`;
-    bg.appendChild(d);
-  });
 }
 
 // ═══ PROFILE ═══
@@ -6239,6 +6281,25 @@ function computeUserLevel(streak,days,onTrack){
   return {lv:cur.lv,title:t(cur.key),icon:cur.icon,score,nextAt:next?next.min:null};
 }
 // Render the new Steam-style profile page (own profile)
+// Collapsible card toggle (profile badges card, etc.)
+function toggleCard(id){const c=document.getElementById(id);if(c)c.classList.toggle('collapsed');}
+// Image lightbox — view avatar / banner full-size. Changing the picture is done
+// through the small camera buttons; tapping the image itself just views it.
+function showImgViewer(html){const v=document.getElementById('imgViewer');if(!v)return;v.querySelector('.iv-content').innerHTML=html;v.classList.add('show');}
+function closeImgViewer(){const v=document.getElementById('imgViewer');if(v)v.classList.remove('show');}
+function viewAvatar(){
+  const p=userProfile||{};const av=p.avatar||'';
+  const fallback=(((p.display_name||(cloudUser&&cloudUser.email)||'')[0])||'?').toString().toUpperCase();
+  const inner=(av&&av.startsWith('data:'))?`<img src="${escapeHtml(av)}" alt="avatar">`:`<div class="iv-emoji">${escapeHtml(av||fallback)}</div>`;
+  showImgViewer(inner);
+}
+function viewBanner(){
+  const p=userProfile||{};const bi=p.banner_image||'';
+  let inner;
+  if(bi&&bi.startsWith('data:')){inner=`<img src="${escapeHtml(bi)}" alt="banner">`;}
+  else{const c=safeCssColor(p.banner_color,'#ff6b6b');inner=`<div style="width:84vw;max-width:560px;aspect-ratio:3/1;border-radius:18px;background:linear-gradient(135deg,${c},color-mix(in srgb,${c} 55%,#000))"></div>`;}
+  showImgViewer(inner);
+}
 function renderProfileUI(){
   const p=userProfile;if(!p)return;
   const n=p.display_name||(cloudUser?.email?cloudUser.email.split('@')[0]:'')||'';
@@ -6980,6 +7041,9 @@ async function testNotification(){
   }
 }
 function renderSettings(){
+  // Version footer on the main settings page
+  const sv=document.getElementById('setVersion');
+  if(sv)sv.innerHTML=`<b>CalPro+</b> ${settings.lang==='en'?'version':'เวอร์ชั่น'} ${APP_VERSION} · BETA`;
   // Themes
   const tg=document.getElementById('themeGrid');if(tg){tg.innerHTML='';
     Object.entries(THEMES).forEach(([k,v])=>{
