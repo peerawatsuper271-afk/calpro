@@ -1831,7 +1831,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.7';
+const APP_VERSION = '2.33.8';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4140,11 +4140,22 @@ async function renderFriendsCard(){
     const friendsList=(fr||[]).map(x=>x.profiles).filter(Boolean);
     // Build leaderboard: self + friends
     const allUsers=[{id:cloudUser.id,display_name:userProfile?.display_name||t('you'),avatar:userProfile?.avatar,goal_cal:userProfile?.goal_cal||1800},...friendsList];
+    // SECURITY: score friends from aggregate daily totals (no raw food names /
+    // photos) via the security-definer RPC, so we never need raw cross-user
+    // food_entries (the entries_friends_select RLS policy is being removed).
+    let totalsByUser={};
+    try{
+      const tot=await withTimeout(sb.rpc('get_public_daily_totals',{_days:60}),10000,'friend totals');
+      (tot.data||[]).forEach(r=>{(totalsByUser[r.user_id]||(totalsByUser[r.user_id]={}))[r.entry_date]=[{calories:r.total_kcal}];});
+    }catch(e){}
     const scores=[];
     for(const u of allUsers){
-      const {data}=await withTimeout(sb.from('food_entries').select('entry_date,calories').eq('user_id',u.id),10000,'friend entries');
-      const ebd={};(data||[]).forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);});
-      // Per-user goal — keeps "days on track" consistent across viewers
+      let ebd=totalsByUser[u.id];
+      if(!ebd){
+        // Fallback (RPC missing / pre-migration): direct read — own row always
+        // allowed by RLS; friends' rows only if the legacy policy still exists.
+        try{ const {data}=await withTimeout(sb.from('food_entries').select('entry_date,calories').eq('user_id',u.id),10000,'friend entries'); ebd={};(data||[]).forEach(e=>{if(!ebd[e.entry_date])ebd[e.entry_date]=[];ebd[e.entry_date].push(e);}); }catch(e){ ebd={}; }
+      }
       const opts={goal:u.goal_cal};
       const onTrack=daysOnTrack(ebd,opts);
       const streak=calcStreak(ebd);

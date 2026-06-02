@@ -19,6 +19,9 @@ const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
 const DAILY_LIMIT = parseInt(Deno.env.get("AI_DAILY_LIMIT") || "20", 10);
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
+// Service-role key (server-only) for the rate-limit table, so the quota can't be
+// reset from the client. Set: supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 // CORS — accept any origin (the app is a PWA + APK; origins vary).
 // If you want to lock this down, swap "*" for your Pages URL.
@@ -52,9 +55,16 @@ Deno.serve(async (req) => {
   if (userErr || !userRes?.user) return json({ error: "invalid_jwt", detail: userErr?.message }, 401);
   const userId = userRes.user.id;
 
+  // Rate-limit table is read/written with the SERVICE-ROLE key (bypasses RLS) so
+  // a user can't reset their own quota by writing ai_usage directly. Falls back
+  // to the user client if the secret isn't configured yet (keeps working).
+  const admin = SUPABASE_SERVICE_ROLE_KEY
+    ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    : sb;
+
   // 2) Rate limit — UPSERT today's count, reject if over.
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-  const { data: usageRows, error: usageErr } = await sb
+  const { data: usageRows, error: usageErr } = await admin
     .from("ai_usage")
     .select("count")
     .eq("user_id", userId)
@@ -97,7 +107,7 @@ Deno.serve(async (req) => {
   const text = result?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
   // 5) Increment usage AFTER successful upstream (don't charge users for failures).
-  await sb.from("ai_usage").upsert(
+  await admin.from("ai_usage").upsert(
     { user_id: userId, day: today, count: usedSoFar + 1, updated_at: new Date().toISOString() },
     { onConflict: "user_id,day" },
   );

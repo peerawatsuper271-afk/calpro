@@ -59,6 +59,31 @@ language sql stable security definer set search_path = public as $$
 $$;
 grant execute on function public.search_profiles(text) to anon, authenticated;
 
+-- ── 4. Stop raw cross-user food_entries access (food names + meal PHOTOS) ──
+--   Vulnerability: `entries_friends_select` let you read a user's ENTIRE
+--   food_entries row (food_name + base64 photo) for anyone you'd added as a
+--   friend — and friending is one-way (no accept), so any authenticated user
+--   could `insert (me, victim_id)` then read the victim's full food diary +
+--   meal photos. The friends leaderboard + friend-profile only need aggregate
+--   daily kcal (already exposed safely via get_public_daily_totals), so we drop
+--   this policy entirely → food_entries becomes strictly owner-only.
+--   (The app v2.34+ scores friends from get_public_daily_totals instead.)
+drop policy if exists "entries_friends_select" on public.food_entries;
+
+-- ── 5. AI quota can no longer be reset from the client ────────────────────
+--   Vulnerability: ai_usage had FOR INSERT/UPDATE policies for the owner, and
+--   the Edge Function wrote it with the USER's JWT — so a user could call
+--   ai_usage.update({count:0}) directly and reset their daily AI limit
+--   (unlimited free calls on the shared Gemini key = cost abuse).
+--   Fix: only the server (service-role) may write ai_usage; users keep SELECT
+--   (to see "X left"). The Edge Function v2.34+ uses the service-role key.
+--   ⚠ DEPLOY ORDER: deploy the updated ai-vision function (with the
+--   SUPABASE_SERVICE_ROLE_KEY secret set) BEFORE running this, otherwise the
+--   server upsert would be blocked and the quota would stop incrementing.
+drop policy if exists "ai_usage_self_upsert" on public.ai_usage;
+drop policy if exists "ai_usage_self_update" on public.ai_usage;
+-- (ai_usage_self_select stays so the app can still show remaining count.)
+
 notify pgrst, 'reload schema';
 
 -- ✅ After running: email / age / height / goal_weight / activity are no longer
