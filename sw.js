@@ -1,5 +1,5 @@
 // CalPro Service Worker — offline cache
-const VERSION = '2.33.11';
+const VERSION = '2.33.12';
 const CACHE = 'calpro-v' + VERSION;
 const ASSETS = [
   './',
@@ -7,7 +7,8 @@ const ASSETS = [
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './qr-app.png'
 ];
 
 self.addEventListener('install', (e) => {

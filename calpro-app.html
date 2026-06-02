@@ -1909,7 +1909,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.11';
+const APP_VERSION = '2.33.12';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -7141,6 +7141,60 @@ async function shareText(text,title){
   }else{showToast(isEn?'Browser does not support sharing':'เบราว์เซอร์ไม่รองรับการแชร์');}
 }
 // Build daily-summary share card as canvas (1080×1350 — Instagram 4:5)
+// ── Share-card QR + app icon ───────────────────────────────────────────────
+// Every share card carries a QR of the app URL (SHARE_URL) with the app icon
+// in the centre. Both images are same-origin (a local PNG asset + icon-192.png)
+// so drawing them never taints the canvas — toBlob()/Web Share still works.
+// The QR is generated at ECC level H, which tolerates the centre-icon occlusion.
+const QR_ASSET='./qr-app.png';
+let _appIconImg=null,_qrImg=null,_shareAssetsP=null;
+function ensureShareAssets(){
+  if(_shareAssetsP)return _shareAssetsP;
+  const load=src=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src;});
+  _shareAssetsP=Promise.all([load('./icon-192.png'),load(QR_ASSET)]).then(([a,q])=>{_appIconImg=a;_qrImg=q;});
+  return _shareAssetsP;
+}
+try{ensureShareAssets();}catch{}   // warm early so the first share is instant
+// Manual rounded-rect path (older Android WebViews lack ctx.roundRect).
+function _rrect(ctx,x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+// White rounded panel + QR modules + app icon centred (with its own white pad).
+function drawAppQR(ctx,x,y,size){
+  const pad=Math.round(size*0.1);              // quiet zone
+  _rrect(ctx,x-pad,y-pad,size+pad*2,size+pad*2,16);
+  ctx.fillStyle='#ffffff';ctx.fill();
+  if(_qrImg&&_qrImg.complete&&_qrImg.naturalWidth)ctx.drawImage(_qrImg,x,y,size,size);
+  const ic=Math.round(size*0.27),icx=x+(size-ic)/2,icy=y+(size-ic)/2,ip=Math.round(ic*0.16);
+  _rrect(ctx,icx-ip,icy-ip,ic+ip*2,ic+ip*2,12);
+  ctx.fillStyle='#ffffff';ctx.fill();
+  if(_appIconImg&&_appIconImg.complete&&_appIconImg.naturalWidth){
+    ctx.save();_rrect(ctx,icx,icy,ic,ic,9);ctx.clip();
+    ctx.drawImage(_appIconImg,icx,icy,ic,ic);
+    ctx.restore();
+  }
+}
+// Shared bottom footer for both share cards: app-link QR (left) + invite (right).
+function drawShareFooter(ctx,W,H,isLight,txt,muted,fontTH,invite){
+  const bandTop=1150;
+  ctx.strokeStyle=isLight?'rgba(0,0,0,0.08)':'rgba(255,255,255,0.09)';
+  ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(80,bandTop);ctx.lineTo(W-80,bandTop);ctx.stroke();
+  const qr=146,qx=80,qy=bandTop+24;
+  drawAppQR(ctx,qx,qy,qr);
+  ctx.fillStyle=txt;ctx.font=`600 33px ${fontTH}`;ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  const tx=qx+qr+38,maxW=W-80-tx,lh=44;
+  const lines=wrapInviteText(ctx,invite,maxW);
+  let ty=qy+qr/2-((lines.length-1)*lh)/2+11;
+  lines.forEach((ln,i)=>ctx.fillText(ln,tx,ty+i*lh));
+  ctx.textAlign='left';ctx.textBaseline='top';
+}
 function buildShareCanvas(){
   const E=dailyEntries;
   const totCal=E.reduce((s,e)=>s+e.calories,0);
@@ -7244,9 +7298,7 @@ function buildShareCanvas(){
   ctx.font=`600 34px ${fontTH}`;        // was 42 — safer for iOS Thai metrics
   ctx.textAlign='center';                // re-affirm in case earlier draws changed it
   const invite=pickInvite();
-  const lines=wrapInviteText(ctx,invite,W-200);   // was W-160 — extra side padding
-  const startY=H-150-(lines.length-1)*46;
-  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,startY+i*46));
+  drawShareFooter(ctx,W,H,isLight,txt,muted,fontTH,invite);
 
   ctx.textAlign='left';ctx.textBaseline='top';
   return {canvas:cv,invite};
@@ -7282,6 +7334,7 @@ function wrapInviteText(ctx,text,maxW){
 async function shareDaily(){
   showToast(settings.lang==='en'?'Creating share image...':'กำลังสร้างรูป...',3000);
   try{
+    await ensureShareAssets();
     const {canvas,invite}=buildShareCanvas();
     const blob=await new Promise(r=>canvas.toBlob(r,'image/png',0.95));
     if(!blob)throw new Error('canvas to blob failed');
@@ -7421,9 +7474,7 @@ function buildAchievementCanvas(){
   ctx.font=`600 34px ${fontTH}`;        // match shareDaily — safer for iOS
   ctx.textAlign='center';
   const invite=pickInvite();
-  const lines=wrapInviteText(ctx,invite,W-200);
-  const startY=H-150-(lines.length-1)*46;
-  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,startY+i*46));
+  drawShareFooter(ctx,W,H,isLight,txt,muted,fontTH,invite);
 
   ctx.textAlign='left';ctx.textBaseline='top';
   return {canvas:cv,invite};
@@ -7432,6 +7483,7 @@ async function shareAchievements(){
   const isEn=settings.lang==='en';
   showToast(isEn?'Creating share image...':'กำลังสร้างรูป...',3000);
   try{
+    await ensureShareAssets();
     const {canvas,invite}=buildAchievementCanvas();
     const blob=await new Promise(r=>canvas.toBlob(r,'image/png',0.95));
     if(!blob)throw new Error('canvas to blob failed');
