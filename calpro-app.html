@@ -3350,7 +3350,7 @@ function renderQuickList(){
   }
   w.innerHTML='';list.slice(0,8).forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
@@ -3471,7 +3471,7 @@ function renderResults(list){
   if(!list.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   list.forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
@@ -5028,7 +5028,7 @@ function renderRcpSearch(q){
   const matches=allFoods().filter(f=>f.n.includes(txt)||(f.e||'').toLowerCase().includes(txt)).slice(0,6);
   if(!matches.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   w.innerHTML=matches.map(f=>{
-    return `<div class="sri" data-fn="${escapeHtml(f.n)}" style="cursor:pointer;padding:6px 8px"><div style="flex:1"><div class="sri-n" style="font-size:.84rem">${foodDisplayName(f)}</div><div class="sri-m" style="font-size:.66rem">${f.c} kcal</div></div><div style="color:var(--accent);font-weight:600">+</div></div>`;
+    return `<div class="sri" data-fn="${escapeHtml(f.n)}" style="cursor:pointer;padding:6px 8px"><div style="flex:1"><div class="sri-n" style="font-size:.84rem">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m" style="font-size:.66rem">${f.c} kcal</div></div><div style="color:var(--accent);font-weight:600">+</div></div>`;
   }).join('');
   w.querySelectorAll('.sri').forEach(el=>{
     el.onclick=()=>{
@@ -5050,7 +5050,7 @@ function renderRcpIngredients(){
   w.innerHTML=_recipeIngs.map((ing,i)=>{
     const cal=Math.round(ing.f.c*ing.qty);
     return `<div class="sri" style="padding:6px 8px;gap:6px">`+
-      `<div style="flex:1;min-width:0"><div class="sri-n" style="font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${foodDisplayName(ing.f)}</div><div class="sri-m" style="font-size:.66rem">${cal} kcal</div></div>`+
+      `<div style="flex:1;min-width:0"><div class="sri-n" style="font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(foodDisplayName(ing.f))}</div><div class="sri-m" style="font-size:.66rem">${cal} kcal</div></div>`+
       `<input type="number" min="0.1" max="20" step="0.1" value="${ing.qty}" data-idx="${i}" class="rcp-qty" style="width:55px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px;font-family:inherit;font-size:.78rem;text-align:center">`+
       `<button class="del" data-rem="${i}" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:4px 6px"><span class="ic" data-ic="x"></span></button>`+
     `</div>`;
@@ -5699,9 +5699,12 @@ function renderToday(){
       if(item.carbs)meta.push(t('carbs')+' '+item.carbs+'g');
       // For IDB-backed photos, omit src up-front and fill async (no broken image flash)
       const isIdbPhoto=item.photo&&item.photo.startsWith('idb:');
-      const inlineSrc=item.photo&&!isIdbPhoto?` src="${item.photo}"`:'';
+      // Validate the inline photo data URL (and escape the food name) so a
+      // crafted entry can't break out of the attribute / inject markup.
+      const safePhoto=(!isIdbPhoto)?safeImageDataUrl(item.photo):'';
+      const inlineSrc=safePhoto?` src="${safePhoto}"`:'';
       const photoHtml=item.photo?`<img${inlineSrc} class="fi-photo" data-id="${item.id}" alt="">`:'';
-      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="${t('edit')}">${icoSvg('edit')}</button><button class="del" onclick="delFood('${item.id}')" title="${t('del')}"><span class="ic" data-ic="x"></span></button></div>`;
+      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${escapeHtml(item.food_name)}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="${t('edit')}">${icoSvg('edit')}</button><button class="del" onclick="delFood('${item.id}')" title="${t('del')}"><span class="ic" data-ic="x"></span></button></div>`;
       if(item.photo){
         const imgEl=div.querySelector('.fi-photo');
         imgEl.onclick=()=>openPhotoViewer(item.photo);

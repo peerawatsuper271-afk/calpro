@@ -58,8 +58,11 @@ as $$
   limit 20
 $$;
 
-revoke all on function public.search_profiles(text) from public;
-grant execute on function public.search_profiles(text) to anon, authenticated;
+-- authenticated only (NOT anon): friend-search lives behind a real-user gate
+-- in the app, and exact-email matching shouldn't be an open, anonymous
+-- "is this address registered?" oracle.
+revoke all on function public.search_profiles(text) from public, anon;
+grant execute on function public.search_profiles(text) to authenticated;
 
 
 -- ════════════════════════════════════════════════════════════
