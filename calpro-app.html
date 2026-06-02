@@ -242,8 +242,8 @@ html[data-hc="1"] .fab{background:var(--accent)!important;-webkit-backdrop-filte
 .water-stepper button:active{transform:scale(.9);}
 .water-stepper .wwval{min-width:70px;text-align:center;}
 .water-dots{display:flex;gap:3px;margin-top:10px;flex-wrap:wrap;}
-.wd{width:13px;height:17px;border-radius:3px 3px 6px 6px;background:var(--surface2);border:1px solid var(--border);transition:background .15s;cursor:pointer;}
-.wd.full{background:var(--blue);border-color:var(--blue);}
+.wd{width:13px;height:17px;border-radius:3px 3px 6px 6px;background:var(--glass2);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--glass-bd);transition:background .15s;cursor:pointer;}
+.wd.full{background:linear-gradient(180deg,color-mix(in srgb,var(--blue) 68%,#fff),var(--blue));border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 4px color-mix(in srgb,var(--blue) 40%,transparent);}
 .weight-input{display:flex;gap:5px;align-items:center;margin-top:4px;}
 .weight-input input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px 8px;font-size:.85rem;outline:none;font-family:inherit;}
 .weight-input input:focus{border-color:var(--accent);}
@@ -505,7 +505,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .wbars{display:flex;align-items:flex-end;gap:5px;height:var(--chart-h,100px);margin-top:6px;margin-bottom:5px;transition:height .25s;overflow:hidden;}
 .wbars.is-month{gap:2px;height:var(--chart-h,140px);}
 .wbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
-.wb{width:100%;border-radius:3px 3px 0 0;transition:height .5s,background .3s;min-height:2px;}
+.wb{width:100%;border-radius:6px 6px 3px 3px;transition:height .5s,background .3s;min-height:3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -10px 14px rgba(0,0,0,.05);}
 .wb-l{font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;}
 .wb-c{font-size:.58rem;color:var(--muted);white-space:nowrap;overflow:hidden;}
 /* Collapse empty label/value cells so the column doesn't reserve ghost
@@ -662,17 +662,18 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .back-btn:active{transform:translateY(-50%) scale(.9);}
 
 /* ── SETTINGS ── */
-.setting-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);}
+.setting-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--glass-bd);}
 .setting-row:first-of-type{border-top:none;}
 .sr-l{flex:1;min-width:0;}
 .sr-name{font-size:.86rem;font-weight:500;}
 .sr-sub{font-size:.7rem;color:var(--muted);margin-top:2px;line-height:1.4;}
 .switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;}
 .switch input{opacity:0;width:0;height:0;}
-.switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--surface2);border:1px solid var(--border);transition:.2s;border-radius:34px;}
-.switch .slider:before{position:absolute;content:'';height:18px;width:18px;left:2px;top:1px;background:var(--text);transition:.2s;border-radius:50%;opacity:.5;}
-.switch input:checked + .slider{background:var(--accent);border-color:var(--accent);}
-.switch input:checked + .slider:before{transform:translateX(20px);background:#fff;opacity:1;}
+/* iOS-style toggle: borderless track, neutral-gray off / iOS-green on, white knob with lift shadow */
+.switch .slider{position:absolute;cursor:pointer;inset:0;background:color-mix(in srgb,var(--text) 22%,transparent);border:none;transition:background .25s;border-radius:34px;}
+.switch .slider:before{position:absolute;content:'';height:20px;width:20px;left:2px;top:2px;background:#fff;transition:transform .25s cubic-bezier(.3,1.3,.5,1);border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.35),0 0 1px rgba(0,0,0,.2);}
+.switch input:checked + .slider{background:#34c759;}
+.switch input:checked + .slider:before{transform:translateX(20px);}
 .meal-time-row{display:grid;grid-template-columns:1fr 80px;gap:10px;align-items:center;padding:6px 0;}
 .meal-time-row label{font-size:.82rem;}
 .meal-time-row .mtr-input{display:flex;align-items:center;gap:4px;}
@@ -1831,7 +1832,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.8';
+const APP_VERSION = '2.33.9';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -5859,7 +5860,7 @@ function renderProjectionChart(){
   ).join('');
   wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="overflow:visible;width:100%">
     <defs><linearGradient id="lcAreaGrad" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0%" stop-color="${trend}" stop-opacity=".2"/><stop offset="100%" stop-color="${trend}" stop-opacity="0"/>
+      <stop offset="0%" stop-color="${trend}" stop-opacity=".32"/><stop offset="55%" stop-color="${trend}" stop-opacity=".12"/><stop offset="100%" stop-color="${trend}" stop-opacity="0"/>
     </linearGradient></defs>
     ${grid}${todayMark}${goalLine}
     <path d="${areaPath}" fill="url(#lcAreaGrad)" stroke="none"/>
