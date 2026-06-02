@@ -1235,8 +1235,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <div class="card">
         <h3 data-i18n="about_links">ลิงก์</h3>
-        <a href="https://github.com/peerawatsuper271-afk/calpro" target="_blank" class="drawer-item" style="border-radius:9px"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></span><span>GitHub Repository</span><span class="di-arrow">↗</span></a>
-        <a href="https://peerawatsuper271-afk.github.io/calpro/" target="_blank" class="drawer-item" style="border-radius:9px"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span>Live URL</span><span class="di-arrow">↗</span></a>
+        <a href="https://github.com/peerawatsuper271-afk/calpro" target="_blank" rel="noopener noreferrer" class="drawer-item" style="border-radius:9px"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></span><span>GitHub Repository</span><span class="di-arrow">↗</span></a>
+        <a href="https://peerawatsuper271-afk.github.io/calpro/" target="_blank" rel="noopener noreferrer" class="drawer-item" style="border-radius:9px"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span>Live URL</span><span class="di-arrow">↗</span></a>
       </div>
       <div class="card">
         <h3 data-i18n="about_credits">เครดิต</h3>
@@ -1831,7 +1831,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.5';
+const APP_VERSION = '2.33.6';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3387,6 +3387,30 @@ function renderPresetsTab(w){
   });
 }
 function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// ── XSS-safe renderers for user / cross-user data (avatars, banners) ──
+// An avatar becomes an <img> ONLY for a genuine image data-URI; any other value
+// is rendered as escaped plain text (emoji/initial) — never raw HTML. This
+// blocks stored XSS from a malicious profile.avatar synced via the backend.
+function avatarHTML(av, fallbackTxt){
+  if(typeof av==='string' && /^data:image\/[a-z0-9.+-]+[;,]/i.test(av)) return '<img src="'+escapeHtml(av)+'" alt="">';
+  const txt=(typeof av==='string' && av.trim())?av:(fallbackTxt||'?');
+  return escapeHtml(txt);
+}
+// CSS color guard — only hex / rgb()/hsl() / simple named colours, else fallback.
+function safeCssColor(c, fallback){
+  fallback=fallback||'#ff6b6b';
+  if(typeof c!=='string') return fallback;
+  c=c.trim();
+  return (/^#[0-9a-f]{3,8}$/i.test(c) || /^(rgb|hsl)a?\([0-9.,%\s/]+\)$/i.test(c) || /^[a-z]{3,20}$/i.test(c)) ? c : fallback;
+}
+// CSS background-image URL guard — data:image (base64) or https, with no chars
+// that could break out of url("…") and inject extra CSS. Else returns ''.
+function safeCssUrl(u){
+  if(typeof u!=='string') return '';
+  if(/^data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/i.test(u)) return u.replace(/\s+/g,'');
+  if(/^https:\/\/[^\s"'()\\<>]+$/i.test(u)) return u;
+  return '';
+}
 function savePresetFromToday(){
   const isEn=settings.lang==='en';
   if(!dailyEntries.length){showToast(t('preset_empty_day'));return;}
@@ -3895,7 +3919,7 @@ function renderCloudStatus(){
   const lastTxt=lastSync?new Date(lastSync).toLocaleString(loc,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
   if(isReal){
     wrap.innerHTML=
-      `<div style="font-size:.82rem;margin-bottom:4px">✓ <strong>${cloudUser.email}</strong></div>`+
+      `<div style="font-size:.82rem;margin-bottom:4px">✓ <strong>${escapeHtml(cloudUser.email)}</strong></div>`+
       `<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">${t('last_sync')}: ${lastTxt}</div>`+
       `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">`+
         `<button class="btn-sec" onclick="manualSync()" ${syncing?'disabled':''}>${syncing?'⏳ ...':icoSvg('sync')+' '+t('sync_now')}</button>`+
@@ -4030,8 +4054,8 @@ async function renderAllUsersLeaderboard(){
       const isMe=cloudUser&&u.id===cloudUser.id;
       const safeName=escapeHtml(u.display_name||'Test User');
       const av=u.avatar&&u.avatar.startsWith('data:')
-        ?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`
-        :`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
+        ?`<img src="${escapeHtml(u.avatar)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`
+        :`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${escapeHtml(u.avatar||(u.display_name||'?')[0].toUpperCase())}</div>`;
       const meTag=isMe?(isEn?' (You)':' (คุณ)'):'';
       const clickAttr=isMe?'':` data-openfid="${u.id}" data-openfname="${safeName}" role="button" tabindex="0" aria-label="ดูโปรไฟล์ ${safeName}"`;
       // "+ Add" friend button — only when signed in real, not yourself,
@@ -4131,7 +4155,7 @@ async function renderFriendsCard(){
     scores.forEach((u,i)=>{
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
       const isMe=u.id===cloudUser.id;
-      const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${u.avatar||(u.display_name||'?')[0].toUpperCase()}</div>`;
+      const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${escapeHtml(u.avatar)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${escapeHtml(u.avatar||(u.display_name||'?')[0].toUpperCase())}</div>`;
       const meTag=settings.lang==='en'?' (You)':' (คุณ)';
       const safeName=escapeHtml(u.display_name||'?');
       const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px"><span class="ic" data-ic="x"></span></button>`;
@@ -4195,16 +4219,24 @@ function renderFriendSearch(q){
   // Debounce 250ms — avoids spamming the DB while user types
   _frSearchTimer=setTimeout(async ()=>{
     try{
-      // Match either email exact or display_name ILIKE
-      const orExpr=`email.eq.${txt},display_name.ilike.%${txt.replace(/[%,]/g,'')}%`;
-      const {data,error}=await withTimeout(sb.from('profiles').select('id,display_name,email,avatar').or(orExpr).limit(20),8000,'user search');
+      // SECURITY: parameterized RPC — blocks PostgREST .or() filter injection and
+      // never returns email/PII. Falls back to a (sanitized) direct query on
+      // pre-v2.34 DBs that lack the RPC.
+      let data, error;
+      const rpc=await withTimeout(sb.rpc('search_profiles',{_q:txt}),8000,'user search rpc');
+      if(rpc.error){
+        const safe=txt.replace(/[,()]/g,'');   // strip PostgREST filter delimiters
+        const orExpr=`email.eq.${safe},display_name.ilike.%${safe.replace(/%/g,'')}%`;
+        const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar').or(orExpr).limit(20),8000,'user search fb');
+        data=r.data; error=r.error;
+      }else{ data=rpc.data; error=null; }
       if(error)throw error;
       const list=(data||[]).slice(0,10);
       if(!list.length){w.innerHTML=`<div class="empty" style="padding:14px 0;font-size:.78rem">${t('fr_no_results')}</div>`;return;}
       w.innerHTML=list.map(u=>{
         const isMe=u.id===cloudUser.id;
         const isAdded=_frCurrentIds.has(u.id);
-        const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${u.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--accent)">${u.avatar||(u.display_name||u.email||'?')[0].toUpperCase()}</div>`;
+        const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${escapeHtml(u.avatar)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--accent)">${escapeHtml(u.avatar||(u.display_name||u.email||'?')[0].toUpperCase())}</div>`;
         const status=isMe?`<span style="font-size:.7rem;color:var(--muted)">${t('fr_self')}</span>`
           :isAdded?`<span style="font-size:.7rem;color:var(--green)">✓ ${t('fr_already')}</span>`
           :`<button class="btn-sec" style="font-size:.74rem;padding:5px 10px" data-fid="${u.id}" data-fname="${escapeHtml(u.display_name||u.email||'?')}" data-action="add">+</button>`;
@@ -5665,9 +5697,9 @@ function renderToday(){
       if(item.carbs)meta.push(t('carbs')+' '+item.carbs+'g');
       // For IDB-backed photos, omit src up-front and fill async (no broken image flash)
       const isIdbPhoto=item.photo&&item.photo.startsWith('idb:');
-      const inlineSrc=item.photo&&!isIdbPhoto?` src="${item.photo}"`:'';
+      const inlineSrc=item.photo&&!isIdbPhoto?` src="${escapeHtml(item.photo)}"`:'';
       const photoHtml=item.photo?`<img${inlineSrc} class="fi-photo" data-id="${item.id}" alt="">`:'';
-      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${item.food_name}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="${t('edit')}">${icoSvg('edit')}</button><button class="del" onclick="delFood('${item.id}')" title="${t('del')}"><span class="ic" data-ic="x"></span></button></div>`;
+      div.innerHTML=`${photoHtml}<div class="fi-l"><div class="fi-n">${escapeHtml(item.food_name)}</div>${meta.length?`<div class="fi-m">${meta.join(' · ')}</div>`:''}</div><div class="fi-r"><div><div class="fi-c">${item.calories}</div><div class="fi-u">kcal</div></div><button class="del" onclick="editFood('${item.id}')" title="${t('edit')}">${icoSvg('edit')}</button><button class="del" onclick="delFood('${item.id}')" title="${t('del')}"><span class="ic" data-ic="x"></span></button></div>`;
       if(item.photo){
         const imgEl=div.querySelector('.fi-photo');
         imgEl.onclick=()=>openPhotoViewer(item.photo);
@@ -6085,7 +6117,7 @@ function renderProfileUI(){
   const isEn=settings.lang==='en';
   // ── Hero: avatar + banner color ──
   const av=document.getElementById('profileAvatar');
-  if(p.avatar&&p.avatar.startsWith('data:')){av.innerHTML='<img src="'+p.avatar+'" alt="avatar">';}
+  if(p.avatar&&p.avatar.startsWith('data:')){av.innerHTML='<img src="'+escapeHtml(p.avatar)+'" alt="avatar">';}
   else if(p.avatar){av.textContent=p.avatar;}
   else{av.textContent=(n[0]||'?').toUpperCase();}
   const bannerColor=p.banner_color||'#ff6b6b';
@@ -6203,11 +6235,12 @@ function applyBannerVisual(){
   const hero=document.getElementById('profileHero');
   if(!hero||!userProfile)return;
   const banner=hero.querySelector('.profile-hero-banner');
-  const color=userProfile.banner_color||'#ff6b6b';
+  const color=safeCssColor(userProfile.banner_color,'#ff6b6b');
   hero.style.setProperty('--banner-color',color);
   if(banner){
-    if(userProfile.banner_image){
-      banner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${userProfile.banner_image}")`;
+    const _bi=safeCssUrl(userProfile.banner_image);   // SECURITY: CSS-injection guard
+    if(_bi){
+      banner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${_bi}")`;
       banner.style.backgroundSize='cover';
       banner.style.backgroundPosition='center';
       const rmBtn=document.getElementById('bannerRemoveBtn');if(rmBtn)rmBtn.style.display='inline-flex';
@@ -6434,19 +6467,29 @@ async function openFriendProfile(userId,displayName,avatar){
     // shows an error) instead of leaving the modal stuck on the "loading…"
     // placeholders forever. A *timeout* skips the schema fallbacks (they'd only
     // stall too); a genuine column error still falls through to the older sets.
+    // SECURITY: prefer the safe security-definer RPC (returns only shareable
+    // columns — never email/age/height). Falls back to a direct select on older
+    // DBs that don't yet have the RPC (pre-v2.34 migration).
     try{
-      const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,weight,bio,banner_color,banner_image,persisted_badges').eq('id',userId).maybeSingle(),8000,'friend profile');
+      const r=await withTimeout(sb.rpc('get_public_profile',{_id:userId}),8000,'friend profile rpc');
       if(r.error)throw r.error;
-      prof=r.data;
-    }catch(e1){
-      if(/timed out/i.test(e1.message||''))throw e1;
+      prof=Array.isArray(r.data)?r.data[0]:r.data;
+    }catch(eRpc){
+      if(/timed out/i.test(eRpc.message||''))throw eRpc;
       try{
-        const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,bio,banner_color').eq('id',userId).maybeSingle(),8000,'friend profile');
+        const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,weight,bio,banner_color,banner_image,persisted_badges').eq('id',userId).maybeSingle(),8000,'friend profile');
+        if(r.error)throw r.error;
         prof=r.data;
-      }catch(e2){
-        if(/timed out/i.test(e2.message||''))throw e2;
-        const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type').eq('id',userId).maybeSingle(),8000,'friend profile');
-        prof=r.data;
+      }catch(e1){
+        if(/timed out/i.test(e1.message||''))throw e1;
+        try{
+          const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type,bio,banner_color').eq('id',userId).maybeSingle(),8000,'friend profile');
+          prof=r.data;
+        }catch(e2){
+          if(/timed out/i.test(e2.message||''))throw e2;
+          const r=await withTimeout(sb.from('profiles').select('id,display_name,avatar,goal_cal,goal_type').eq('id',userId).maybeSingle(),8000,'friend profile');
+          prof=r.data;
+        }
       }
     }
     if(!prof){throw new Error(t('fp_err'));}
@@ -6488,20 +6531,22 @@ async function openFriendProfile(userId,displayName,avatar){
     const lvl=computeUserLevel(streak,days,onTrack);
     // Fill modal
     const av=document.getElementById('fpAvatar');
-    if(prof.avatar&&prof.avatar.startsWith('data:')){av.innerHTML='<img src="'+prof.avatar+'" alt="avatar">';}
-    else if(prof.avatar){av.textContent=prof.avatar;av.innerHTML=prof.avatar;}
-    else{av.textContent=((prof.display_name||'?')[0]||'?').toUpperCase();}
+    // SECURITY: render avatar safely — <img> only for real image data-URIs;
+    // any other value (incl. attacker-controlled) becomes escaped text, never raw HTML.
+    av.innerHTML=avatarHTML(prof.avatar, ((prof.display_name||'?')[0]||'?').toUpperCase());
     // Banner — uploaded image takes precedence over color (matches the
     // applyBannerVisual logic on the user's own profile).
     const fpBanner=document.getElementById('fpBanner');
-    if(prof.banner_image){
+    const fpBi=safeCssUrl(prof.banner_image);   // SECURITY: guard against CSS injection
+    if(fpBi){
       fpBanner.style.background='';
-      fpBanner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${prof.banner_image}")`;
+      fpBanner.style.backgroundImage=`linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.35)),url("${fpBi}")`;
       fpBanner.style.backgroundSize='cover';
       fpBanner.style.backgroundPosition='center';
     }else{
+      const fpBc=safeCssColor(prof.banner_color,'#ff6b6b');
       fpBanner.style.backgroundImage='';
-      fpBanner.style.setProperty('background',`linear-gradient(135deg,${prof.banner_color||'#ff6b6b'},color-mix(in srgb,${prof.banner_color||'#ff6b6b'} 60%,#000))`);
+      fpBanner.style.setProperty('background',`linear-gradient(135deg,${fpBc},color-mix(in srgb,${fpBc} 60%,#000))`);
     }
     document.getElementById('fpName').textContent=prof.display_name||displayName||'—';
     document.getElementById('fpLevelBadge').textContent=`${lvl.icon} Lv ${lvl.lv}`;

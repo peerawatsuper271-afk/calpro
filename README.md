@@ -75,6 +75,7 @@ calpro-database-v2.7-migration.sql    ← Adds client_id / photo / name_en / met
 
 ## เวอร์ชั่น
 
+- **v2.33.6** *(เว็บ · BETA · silent · 🔒 security)* — อุดช่องโหว่จาก security audit: escape ข้อมูลผู้ใช้/เพื่อนทุกจุดที่ render (กัน **stored XSS** จากชื่อ/รูปโปรไฟล์เพื่อน + ชื่ออาหารจากบาร์โค้ด/AI) · กัน **CSS injection** จากสี/รูป banner · กัน **PostgREST filter injection** ในค้นหาเพื่อน + ปิด **PII ของ profiles** (email/อายุ/ส่วนสูง) ผ่าน RPC ปลอดภัย + RLS own-only *(ต้องรัน `calpro-database-v2.34-profile-privacy.sql` ใน Supabase)* · `rel=noopener` กัน tabnabbing · อัปเดตเงียบ (เว็บ · APK พักไว้)
 - **v2.33.5** *(เว็บ · BETA · silent)* — 🩹 เอาเส้นขอบขาวบนการ์ดโปรไฟล์ (cover) ออก — เดิม border `glass-bd` + specular highlight สีขาวพาดบนแบนเนอร์มืด เหลือแค่เงา drop · อัปเดตเงียบ
 - **v2.33.4** *(เว็บ · BETA · silent)* — 🔝 แถบหัวเต็มขอบ (full-bleed) + blur ย้ายไป `::before` พร้อม mask ไล่จางลงล่าง → เลื่อนแล้วเนื้อหาเบลอจางหายไม่มีเส้นขอบ (iOS scroll-edge) · อัปเดตเงียบ
 - **v2.33.3** *(เว็บ · BETA · silent)* — 🧹 เก็บกวาดอีโมจิตกค้าง/ซ้ำในทุกหน้า+ป๊อปอัป: ลบอีโมจิที่ซ้ำกับไอคอน SVG (recap/ส่งกำลังใจ/โปรไฟล์เพื่อน/AI/บันทึกสูตร) · statline ใช้ award icon · empty-state เป็น SVG · เอา 🎁🔒🎉 ออกจาก toast/แจ้งเตือน/empty-state (อัปเดตเงียบ ไม่เด้ง changelog)

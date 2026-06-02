@@ -1,0 +1,66 @@
+-- ╔══════════════════════════════════════════════════════════╗
+-- ║  CalPro+ v2.34 — Profiles privacy hardening (SECURITY)     ║
+-- ║  Run once in Supabase → SQL Editor.                        ║
+-- ╚══════════════════════════════════════════════════════════╝
+--
+-- THE VULNERABILITY (found in a security audit):
+--   The `profiles` SELECT policy was `using (true)` — i.e. world-readable.
+--   Because the anon API key is shipped in the client (by design), ANYONE
+--   could query the table directly, e.g.:
+--       supabase.from('profiles').select('email,weight,height,age')
+--   and bulk-harvest every user's e-mail + body stats (PII leak). The in-app
+--   friend search also concatenated the query into a PostgREST `.or()` filter,
+--   allowing filter injection (e.g. `,id.neq.0`) to dump all rows.
+--
+-- THE FIX:
+--   1. Lock `profiles` SELECT to the OWNER only.
+--   2. Expose only SAFE, shareable columns to others through SECURITY DEFINER
+--      RPCs (no email / age / height / goal_weight / activity ever leave the DB):
+--        • get_public_profiles()        — the leaderboard (already added v2.24.2)
+--        • get_public_profile(_id)       — single friend-profile view (NEW)
+--        • search_profiles(_q)           — add-friend search, parameterized (NEW)
+--   The client (v2.34+) calls these RPCs first and only falls back to a direct
+--   select on older databases, so running this migration is safe + non-breaking.
+
+-- ── 1. profiles SELECT → owner only ───────────────────────────────────────
+drop policy if exists "profiles_select" on public.profiles;
+create policy "profiles_select" on public.profiles
+  for select using (auth.uid() = id);
+-- (insert/update policies from the base schema already restrict to auth.uid()=id)
+
+-- ── 2. Single public profile (friend-profile modal) — safe columns only ───
+create or replace function public.get_public_profile(_id uuid)
+returns table(
+  id uuid, display_name text, avatar text, goal_cal int, goal_type text,
+  weight numeric, bio text, banner_color text, banner_image text, persisted_badges jsonb
+)
+language sql stable security definer set search_path = public as $$
+  select p.id, p.display_name, p.avatar, p.goal_cal, p.goal_type,
+         p.weight, p.bio, p.banner_color, p.banner_image, p.persisted_badges
+  from public.profiles p
+  where p.id = _id
+$$;
+grant execute on function public.get_public_profile(uuid) to anon, authenticated;
+
+-- ── 3. Friend search — server-side match, returns NO email / PII ──────────
+create or replace function public.search_profiles(_q text)
+returns table(id uuid, display_name text, avatar text)
+language sql stable security definer set search_path = public as $$
+  select p.id, p.display_name, p.avatar
+  from public.profiles p
+  join auth.users u on u.id = p.id
+  where coalesce(u.is_anonymous, false) = false
+    and coalesce(btrim(p.display_name), '') <> ''
+    and (
+      lower(p.email) = lower(btrim(_q))                                  -- exact e-mail
+      or p.display_name ilike '%' || replace(replace(_q, '%', ''), ',', '') || '%'  -- name contains
+    )
+  limit 20
+$$;
+grant execute on function public.search_profiles(text) to anon, authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ✅ After running: email / age / height / goal_weight / activity are no longer
+--    readable by anyone but the owner. Leaderboard, friend search and the
+--    friend-profile view keep working via the safe RPCs above.
