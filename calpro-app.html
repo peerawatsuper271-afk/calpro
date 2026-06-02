@@ -1831,7 +1831,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.6';
+const APP_VERSION = '2.33.7';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3350,7 +3350,7 @@ function renderQuickList(){
   }
   w.innerHTML='';list.slice(0,8).forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
@@ -3471,7 +3471,7 @@ function renderResults(list){
   if(!list.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   list.forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${foodDisplayName(f)}</div><div class="sri-m">${foodSubLine(f)}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
@@ -4705,7 +4705,7 @@ function renderWorkoutsList(){
   list.forEach(w=>{
     const name=settings.lang==='en'&&w.name_en?w.name_en:w.name;
     const div=document.createElement('div');div.className='fi';
-    div.innerHTML=`<div class="fi-l"><div class="fi-n">${name}</div><div class="fi-m">${w.minutes} ${t('duration_min')}</div></div><div class="fi-r"><div><div class="fi-c" style="color:var(--green)">-${w.kcal}</div><div class="fi-u">kcal</div></div><button class="del" onclick="delWorkout('${w.id}')"><span class="ic" data-ic="x"></span></button></div>`;
+    div.innerHTML=`<div class="fi-l"><div class="fi-n">${escapeHtml(name)}</div><div class="fi-m">${w.minutes} ${t('duration_min')}</div></div><div class="fi-r"><div><div class="fi-c" style="color:var(--green)">-${w.kcal}</div><div class="fi-u">kcal</div></div><button class="del" onclick="delWorkout('${w.id}')"><span class="ic" data-ic="x"></span></button></div>`;
     wrap.appendChild(div);
   });
 }
@@ -5026,7 +5026,7 @@ function renderRcpSearch(q){
   const matches=allFoods().filter(f=>f.n.includes(txt)||(f.e||'').toLowerCase().includes(txt)).slice(0,6);
   if(!matches.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   w.innerHTML=matches.map(f=>{
-    return `<div class="sri" data-fn="${escapeHtml(f.n)}" style="cursor:pointer;padding:6px 8px"><div style="flex:1"><div class="sri-n" style="font-size:.84rem">${foodDisplayName(f)}</div><div class="sri-m" style="font-size:.66rem">${f.c} kcal</div></div><div style="color:var(--accent);font-weight:600">+</div></div>`;
+    return `<div class="sri" data-fn="${escapeHtml(f.n)}" style="cursor:pointer;padding:6px 8px"><div style="flex:1"><div class="sri-n" style="font-size:.84rem">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m" style="font-size:.66rem">${f.c} kcal</div></div><div style="color:var(--accent);font-weight:600">+</div></div>`;
   }).join('');
   w.querySelectorAll('.sri').forEach(el=>{
     el.onclick=()=>{
@@ -5048,7 +5048,7 @@ function renderRcpIngredients(){
   w.innerHTML=_recipeIngs.map((ing,i)=>{
     const cal=Math.round(ing.f.c*ing.qty);
     return `<div class="sri" style="padding:6px 8px;gap:6px">`+
-      `<div style="flex:1;min-width:0"><div class="sri-n" style="font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${foodDisplayName(ing.f)}</div><div class="sri-m" style="font-size:.66rem">${cal} kcal</div></div>`+
+      `<div style="flex:1;min-width:0"><div class="sri-n" style="font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(foodDisplayName(ing.f))}</div><div class="sri-m" style="font-size:.66rem">${cal} kcal</div></div>`+
       `<input type="number" min="0.1" max="20" step="0.1" value="${ing.qty}" data-idx="${i}" class="rcp-qty" style="width:55px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px;font-family:inherit;font-size:.78rem;text-align:center">`+
       `<button class="del" data-rem="${i}" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:4px 6px"><span class="ic" data-ic="x"></span></button>`+
     `</div>`;
@@ -8331,10 +8331,10 @@ async function handleAiPhotoSelect(input){
       `<div style="font-size:1rem;font-weight:700;margin-bottom:4px">${escapeHtml(parsed.name||'?')}</div>`+
       `<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">${escapeHtml(parsed.portion_estimate||'')}</div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;font-size:.78rem;margin-bottom:10px">`+
-        `<div><div style="font-weight:700">${parsed.kcal||0}</div><div style="font-size:.6rem;color:var(--muted)">kcal</div></div>`+
-        `<div><div style="font-weight:700">${parsed.protein_g||0}g</div><div style="font-size:.6rem;color:var(--muted)">P</div></div>`+
-        `<div><div style="font-weight:700">${parsed.carbs_g||0}g</div><div style="font-size:.6rem;color:var(--muted)">C</div></div>`+
-        `<div><div style="font-weight:700">${parsed.fat_g||0}g</div><div style="font-size:.6rem;color:var(--muted)">F</div></div>`+
+        `<div><div style="font-weight:700">${Number(parsed.kcal)||0}</div><div style="font-size:.6rem;color:var(--muted)">kcal</div></div>`+
+        `<div><div style="font-weight:700">${Number(parsed.protein_g)||0}g</div><div style="font-size:.6rem;color:var(--muted)">P</div></div>`+
+        `<div><div style="font-weight:700">${Number(parsed.carbs_g)||0}g</div><div style="font-size:.6rem;color:var(--muted)">C</div></div>`+
+        `<div><div style="font-weight:700">${Number(parsed.fat_g)||0}g</div><div style="font-size:.6rem;color:var(--muted)">F</div></div>`+
       `</div>`+
       `<button class="btn" onclick='applyAiResult(${JSON.stringify(parsed).replace(/'/g,"&apos;")})' style="width:100%">${isEn?'✓ Use these values':'✓ ใช้ค่านี้'}</button>`+
       `<div style="font-size:.66rem;color:var(--muted);margin-top:6px;text-align:center">${isEn?'You can edit before saving':'แก้ไขก่อนบันทึกได้'}</div>`;
