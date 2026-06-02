@@ -314,9 +314,16 @@ html[data-hc="1"] .fab{background:var(--accent)!important;-webkit-backdrop-filte
 /* ── QUICK ADD TABS ── */
 .qtab{flex:1;padding:7px;text-align:center;font-size:.78rem;border-radius:7px;cursor:pointer;color:var(--muted);border:none;background:none;font-family:inherit;transition:all .2s;}
 .qtab.active{background:var(--surface);color:var(--text);font-weight:600;}
-.sri .star{cursor:pointer;font-size:.95rem;padding:2px 4px;opacity:.4;transition:opacity .15s,transform .15s;}
-.sri .star:hover{transform:scale(1.2);}
-.sri .star.on{opacity:1;}
+.sri .star{cursor:pointer;padding:2px 4px;opacity:.5;transition:opacity .15s,transform .15s;color:var(--muted);display:inline-flex;align-items:center;}
+.sri .star .ic{display:inline-flex;}
+.sri .star .ic svg{width:18px;height:18px;}
+.sri .star:hover{transform:scale(1.18);}
+.sri .star.on{opacity:1;color:var(--amber);}
+.sri .star.on .ic svg{fill:var(--amber);}
+/* step-number badges (Add Food flow) */
+.step-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.step-row label{margin-bottom:0!important;}
+.step-no{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:.66rem;font-weight:800;flex-shrink:0;}
 
 /* ── SEARCH ── */
 .sbox{position:relative;margin-bottom:9px;}
@@ -325,7 +332,8 @@ html[data-hc="1"] .fab{background:var(--accent)!important;-webkit-backdrop-filte
 .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none;}
 .cats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
 /* (food-category chips removed in v2.29.3 — replaced by the #catFilter dropdown) */
-.sres{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.sres{max-height:46vh;overflow-y:auto;resize:vertical;display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.sres:empty{display:none;}
 .sri{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .15s;}
 .sri:hover{border-color:var(--accent);}
 .sri-n{font-size:.83rem;font-weight:500;}.sri-m{font-size:.68rem;color:var(--muted);margin-top:1px;}
@@ -761,6 +769,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 #profileEditModal .btn,#profileEditModal .btn-sec{padding:9px;font-size:.85rem;}
 #profileEditModal #resultCard .rbox{padding:8px 11px;margin-bottom:6px;}
 #profileEditModal #pBio{min-height:46px;}
+#profileEditModal .modal-hdr{justify-content:center;position:relative;padding:0 38px;}
+#profileEditModal .modal-hdr h3{text-align:center;}
+#profileEditModal .modal-hdr .mc-close{position:absolute;right:0;top:50%;transform:translateY(-50%);}
 /* ── Collapsible card header (profile badges) ── */
 .card-collapse-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:8px;}
 .card-collapse-hd h3{margin:0;}
@@ -967,14 +978,15 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem"><span class="ic" data-ic="ai"></span> <span data-i18n="ai_photo_btn">ถ่ายรูป AI</span></button>
         </div>
         <div id="aiQuotaInline" style="font-size:.66rem;color:var(--muted);text-align:right;margin-bottom:8px;padding-right:4px;min-height:14px"></div>
+        <div class="fl">
+          <div class="step-row"><span class="step-no">1</span><label data-i18n="meal">มื้ออาหาร</label></div>
+          <select id="mealSel"><option value="เช้า" data-i18n="morning_opt">🌅 เช้า</option><option value="กลางวัน" selected data-i18n="lunch_opt">☀️ กลางวัน</option><option value="เย็น" data-i18n="dinner_opt">🌙 เย็น</option><option value="ของว่าง" data-i18n="snack_opt">🍎 ของว่าง</option></select>
+        </div>
         <div class="fl" id="catFilterWrap" style="margin-bottom:9px">
-          <label id="catFilterLabel">ประเภทอาหาร</label>
+          <div class="step-row"><span class="step-no">2</span><label id="catFilterLabel">ประเภทอาหาร</label></div>
           <select id="catFilter" onchange="onCatFilterChange(this.value)"></select>
         </div>
         <div class="sres" id="sRes"></div>
-        <div class="fl"><label data-i18n="meal">มื้ออาหาร</label>
-          <select id="mealSel"><option value="เช้า" data-i18n="morning_opt">🌅 เช้า</option><option value="กลางวัน" selected data-i18n="lunch_opt">☀️ กลางวัน</option><option value="เย็น" data-i18n="dinner_opt">🌙 เย็น</option><option value="ของว่าง" data-i18n="snack_opt">🍎 ของว่าง</option></select>
-        </div>
       </div>
       <div class="card">
         <h3 data-i18n="manual">กรอกเอง</h3>
@@ -1964,7 +1976,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.16';
+const APP_VERSION = '2.33.17';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3699,7 +3711,7 @@ function renderQuickList(){
   }
   w.innerHTML='';list.slice(0,8).forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
@@ -3820,7 +3832,7 @@ function renderResults(list){
   if(!list.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   list.forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">★</span></div>`;
+    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
@@ -7932,21 +7944,21 @@ window._adsDismissed=window._adsDismissed||new Set();
 window._adsCurrent=window._adsCurrent||{};
 // Replace .url with real Lazada/Shopee affiliate links once you've signed up.
 const ADS=[
-  {id:'whey-1',icon:'💪',title:'เวย์โปรตีน Isolate',sub:'QiuMi · BCAA · รสวานิลลา 2LB',cta:'ดูร้านค้า',color:'#74c0fc',
+  {id:'whey-1',icon:'💪',title:'เวย์โปรตีน Isolate',sub:'QiuMi · BCAA · รสวานิลลา 2LB',cta:'ดูร้านค้า',title_en:'Whey Protein Isolate',sub_en:'QiuMi · BCAA · Vanilla 2LB',cta_en:'View store',color:'#74c0fc',
    url:'https://s.lazada.co.th/s.Z6yNlp?c=b&t=p-i5qwta7-sOsjkD6'},
-  {id:'jumprope-weight-1',icon:'🥊',title:'เชือกกระโดดถ่วงน้ำหนัก',sub:'ลูกปืนเหล็ก · ฝึกชกมวย/คาร์ดิโอ',cta:'ดูสินค้า',color:'#ff8a3d',
+  {id:'jumprope-weight-1',icon:'🥊',title:'เชือกกระโดดถ่วงน้ำหนัก',sub:'ลูกปืนเหล็ก · ฝึกชกมวย/คาร์ดิโอ',cta:'ดูสินค้า',title_en:'Weighted Jump Rope',sub_en:'Steel bearings · boxing / cardio',cta_en:'View product',color:'#ff8a3d',
    url:'https://s.lazada.co.th/s.Z6yNsW?c=a&t=p-i5d82OL-sNnnsUk'},
-  {id:'mealrep-1',icon:'🥤',title:'BAT™ ทดแทนมื้ออาหาร',sub:'1 กล่อง · 14 ซอง · คุมน้ำหนัก ลดหิว',cta:'ดูสินค้า',color:'#b197fc',
+  {id:'mealrep-1',icon:'🥤',title:'BAT™ ทดแทนมื้ออาหาร',sub:'1 กล่อง · 14 ซอง · คุมน้ำหนัก ลดหิว',cta:'ดูสินค้า',title_en:'BAT™ Meal Replacement',sub_en:'1 box · 14 sachets · weight control, curbs hunger',cta_en:'View product',color:'#b197fc',
    url:'https://s.shopee.co.th/809pvvowGR'},
-  {id:'cleanmeal-1',icon:'🥗',title:'อาหารคลีน Pack 3 วัน 9 มื้อ',sub:'อกไก่นุ่ม · เพื่อการลดน้ำหนัก',cta:'ดูแพ็คเกจ',color:'#63e6be',
+  {id:'cleanmeal-1',icon:'🥗',title:'อาหารคลีน Pack 3 วัน 9 มื้อ',sub:'อกไก่นุ่ม · เพื่อการลดน้ำหนัก',cta:'ดูแพ็คเกจ',title_en:'Clean Meal Pack · 3 days, 9 meals',sub_en:'Tender chicken breast · for weight loss',cta_en:'View package',color:'#63e6be',
    url:'https://s.shopee.co.th/1Lcvzh4ls0'},
-  {id:'proteincereal-1',icon:'🥣',title:'Proove Protein Crunch',sub:'รสออริจินอล/ดาร์กช็อก · โปรตีนซีเรียล 210g',cta:'ดูสินค้า',color:'#f783ac',
+  {id:'proteincereal-1',icon:'🥣',title:'Proove Protein Crunch',sub:'รสออริจินอล/ดาร์กช็อก · โปรตีนซีเรียล 210g',cta:'ดูสินค้า',title_en:'Proove Protein Crunch',sub_en:'Original / dark choc · protein cereal 210g',cta_en:'View product',color:'#f783ac',
    url:'https://s.shopee.co.th/3VhQZjhQug'},
-  {id:'kale-1',icon:'🥬',title:'ผักเคลอบกรอบ ออร์แกนิก',sub:'ไม่ทอด · ไขมันต่ำ · กรอบ กินเพลิน',cta:'ดูสินค้า',color:'#51cf66',
+  {id:'kale-1',icon:'🥬',title:'ผักเคลอบกรอบ ออร์แกนิก',sub:'ไม่ทอด · ไขมันต่ำ · กรอบ กินเพลิน',cta:'ดูสินค้า',title_en:'Organic Crispy Kale',sub_en:'Not fried · low fat · crunchy snack',cta_en:'View product',color:'#51cf66',
    url:'https://s.shopee.co.th/8fPWjIazt4'},
-  {id:'grains-1',icon:'🌾',title:'ธัญพืชรวม 9 เซียน 500g',sub:'คีโต · ไม่มีน้ำตาล · ไม่มีเนย · อบสด',cta:'ดูสินค้า',color:'#ffd43b',
+  {id:'grains-1',icon:'🌾',title:'ธัญพืชรวม 9 เซียน 500g',sub:'คีโต · ไม่มีน้ำตาล · ไม่มีเนย · อบสด',cta:'ดูสินค้า',title_en:'9-Grain Mix 500g',sub_en:'Keto · no sugar · no butter · fresh-baked',cta_en:'View product',color:'#ffd43b',
    url:'https://s.lazada.co.th/s.Z6ynop?c=a&t=p-i5Jxpzu-sMJtxZp'},
-  {id:'chicken-1',icon:'🍗',title:'CP อกไก่เนื้อนุ่ม 1kg',sub:'พร้อมทาน · ไมโครเวฟ 3 นาที',cta:'ดูสินค้า',color:'#ff6b6b',
+  {id:'chicken-1',icon:'🍗',title:'CP อกไก่เนื้อนุ่ม 1kg',sub:'พร้อมทาน · ไมโครเวฟ 3 นาที',cta:'ดูสินค้า',title_en:'CP Tender Chicken Breast 1kg',sub_en:'Ready to eat · microwave 3 min',cta_en:'View product',color:'#ff6b6b',
    url:'https://s.lazada.co.th/s.Z6ynIy?c=a&t=p-i5ehypP-sO0P0Og'},
 ];
 function renderAdSlot(slotId,container){
@@ -7959,14 +7971,20 @@ function renderAdSlot(slotId,container){
   // Stable choice per slot per session — re-render same ad on every render call
   let ad=window._adsCurrent[slotId];
   if(!ad){ad=ADS[Math.floor(Math.random()*ADS.length)];window._adsCurrent[slotId]=ad;}
+  // Localized ad copy — Thai uses the original text; other languages use the
+  // English fields (Chinese falls back to English, consistent with the app).
+  const _adTh=(settings.lang||'th')==='th';
+  const _adTitle=_adTh?ad.title:(ad.title_en||ad.title);
+  const _adSub=_adTh?ad.sub:(ad.sub_en||ad.sub);
+  const _adCta=_adTh?ad.cta:(ad.cta_en||ad.cta);
   container.innerHTML=
     `<a class="ad-card" href="${ad.url}" target="_blank" rel="noopener nofollow sponsored" style="--ad-tint:${ad.color}">`+
       `<div class="ad-icon">${ad.icon}</div>`+
       `<div class="ad-body">`+
-        `<div class="ad-title">${escapeHtml(ad.title)}</div>`+
-        `<div class="ad-sub">${escapeHtml(ad.sub)}</div>`+
+        `<div class="ad-title">${escapeHtml(_adTitle)}</div>`+
+        `<div class="ad-sub">${escapeHtml(_adSub)}</div>`+
       `</div>`+
-      `<div class="ad-cta">${escapeHtml(ad.cta)} →</div>`+
+      `<div class="ad-cta">${escapeHtml(_adCta)} →</div>`+
       `<button class="ad-dismiss" data-dismiss-slot="${slotId}" aria-label="${t('ad_dismiss_aria')}">×</button>`+
       `<div class="ad-label">${t('ad_label')}</div>`+
     `</a>`;
