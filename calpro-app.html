@@ -756,8 +756,15 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .set-version{text-align:center;font-size:.72rem;color:var(--muted);margin:20px 0 8px;line-height:1.6;opacity:.85;}
 .set-version b{color:var(--text);font-weight:600;}
 /* Compact iOS-style edit-profile modal — groups read clean on the glass modal */
-#profileEditModal .modal{padding:14px 13px 16px;}
-#profileEditModal .modal-hdr{margin-bottom:8px;}
+/* Edit-profile modal: fixed header + scrollable body + fixed save footer, so
+   the close (×) and save button are always reachable no matter the height. */
+#profileEditModal .modal{display:flex;flex-direction:column;padding:0;max-height:calc(100vh - 24px);overflow:hidden;}
+#profileEditModal .modal-hdr{flex:none;margin:0;padding:13px 44px;position:relative;justify-content:center;border-bottom:1px solid var(--glass-bd);}
+#profileEditModal .modal-hdr h3{text-align:center;}
+#profileEditModal .modal-hdr .mc-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);}
+#profileEditModal .pem-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:8px 14px 12px;}
+#profileEditModal .pem-foot{flex:none;padding:10px 14px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--glass-bd);background:var(--glass-solid);}
+#profileEditModal .pem-foot .btn{width:100%;margin:0;padding:11px;font-size:.9rem;}
 #profileEditModal .ios-group{background:var(--surface2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border-color:var(--border);margin-bottom:2px;}
 #profileEditModal .set-sec{margin:9px 2px 4px;}
 #profileEditModal .set-sec:first-of-type{margin-top:0;}
@@ -766,12 +773,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 #profileEditModal .fl input,#profileEditModal .fl select{padding:5px 8px;font-size:.8rem;border-radius:8px;}
 #profileEditModal .gchip{padding:5px 10px;font-size:.72rem;}
 #profileEditModal .ios-pad{padding:9px 11px;}
-#profileEditModal .btn,#profileEditModal .btn-sec{padding:9px;font-size:.85rem;}
 #profileEditModal #resultCard .rbox{padding:8px 11px;margin-bottom:6px;}
 #profileEditModal #pBio{min-height:46px;}
-#profileEditModal .modal-hdr{justify-content:center;position:relative;padding:0 38px;}
-#profileEditModal .modal-hdr h3{text-align:center;}
-#profileEditModal .modal-hdr .mc-close{position:absolute;right:0;top:50%;transform:translateY(-50%);}
 /* ── Collapsible card header (profile badges) ── */
 .card-collapse-hd{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:8px;}
 .card-collapse-hd h3{margin:0;}
@@ -1503,9 +1506,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 
 <!-- EDIT PROFILE MODAL — combined profile + measurements edit (lifted out
      of pg-profile to avoid the confusing inline expand/collapse pattern) -->
-<div class="modal-bg hide" id="profileEditModal">
+<div class="modal-bg hide" id="profileEditModal" onclick="if(event.target===this)closeProfileEdit()">
   <div class="modal" style="max-width:480px">
     <div class="modal-hdr"><h3><span class="ic" data-ic="edit"></span> <span data-i18n="edit_profile_long">แก้ไขโปรไฟล์</span></h3><button class="mc-close" onclick="closeProfileEdit()" aria-label="Close"><span class="ic" data-ic="x"></span></button></div>
+    <div class="pem-body">
     <!-- Banner -->
     <div class="set-sec" data-i18n="banner_color">สีแบนเนอร์</div>
     <div class="ios-group"><div class="ios-pad">
@@ -1559,7 +1563,6 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <button class="gchip" data-g="gain" onclick="pickGoal(this)"><span class="ic" data-ic="dumbbell"></span> <span data-i18n="goal_gain">เพิ่มกล้ามเนื้อ</span></button>
       </div>
     </div></div>
-    <button class="btn" onclick="saveProfile()" style="width:100%" data-i18n="save_calc">บันทึกและคำนวณ</button>
     <!-- Calc result lives inside the modal — shown after save, hidden again next open -->
     <div id="resultCard" style="display:none;margin-top:14px">
       <h3 data-i18n="calc_result" style="margin-bottom:8px">ผลการคำนวณ</h3>
@@ -1586,10 +1589,11 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <div class="fl"><label data-i18n="chest">รอบอก (ซม.)</label><input type="number" id="mChest" step="0.1" placeholder="95"></div>
         <div class="fl"><label data-i18n="neck">รอบคอ (ซม.)</label><input type="number" id="mNeck" step="0.1" placeholder="38"></div>
       </div>
-      <button class="btn-sec" onclick="saveMeasurements()" style="width:100%" data-i18n="save">บันทึก</button>
       <div id="bfResult" style="margin-top:10px;font-size:.78rem"></div>
       <div id="measureHistory" style="margin-top:10px;font-size:.74rem;color:var(--muted)"></div>
     </div></div>
+    </div>
+    <div class="pem-foot"><button class="btn" onclick="saveProfileAll()" data-i18n="save">บันทึก</button></div>
   </div>
 </div>
 
@@ -1976,7 +1980,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.17';
+const APP_VERSION = '2.33.18';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -6460,6 +6464,16 @@ function bmiLabel(b){
   if(b<23)return isEn?'(normal)':'(ปกติ)';
   if(b<27.5)return isEn?'(overweight)':'(น้ำหนักเกิน)';
   return isEn?'(obese)':'(อ้วน)';
+}
+// Single combined save (one footer button) — saves the profile, and also the
+// body measurements if any of those fields were filled in. Skips measurements
+// when the core profile is incomplete so the user only sees the one error.
+function saveProfileAll(){
+  saveProfile();
+  const a=+document.getElementById('pAge').value,w=+document.getElementById('pWeight').value,h=+document.getElementById('pHeight').value;
+  if(!a||!w||!h)return;
+  const anyM=['mWaist','mHip','mChest','mNeck'].some(id=>{const el=document.getElementById(id);return el&&el.value.trim();});
+  if(anyM)saveMeasurements();
 }
 function saveProfile(){
   const name=document.getElementById('pName').value||userProfile?.display_name||'คุณ';
