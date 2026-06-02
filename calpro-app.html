@@ -1909,7 +1909,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.12';
+const APP_VERSION = '2.33.13';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -7115,16 +7115,28 @@ function resetAvatar(){
 // ═══ SHARE ═══
 const SHARE_URL='https://peerawatsuper271-afk.github.io/calpro/';
 const INVITE_TH=[
-  'ลองมาดูแลสุขภาพไปด้วยกันใน CalPro+ นะ 🌿',
-  'นับแคล นับชัยชนะของวันนี้ ด้วย CalPro+ 💚',
-  'เริ่มต้นใส่ใจตัวเองง่ายๆ กับ CalPro+ ✨',
-  'มาบันทึกอาหารและดูแลตัวเองด้วยกันที่ CalPro+ นะ 🌸',
+  'มาเป็นเพื่อนสุขภาพดีด้วยกันที่ CalPro+ นะ 🥰',
+  'วันนี้ดูแลตัวเองหรือยังเอ่ย~ มาเริ่มกับ CalPro+ 🌷',
+  'นับแคลสนุกๆ ไปด้วยกันนะ กับ CalPro+ 💕',
+  'กินดี อยู่ดี มีความสุขทุกวัน กับ CalPro+ ☀️',
+  'มาสร้างนิสัยน่ารักๆ รักสุขภาพกับ CalPro+ 🌸',
+  'เริ่มวันใหม่สดใส ไปกับ CalPro+ กันเถอะ 🌈',
+  'ตัวเล็กๆ ก็เฮลตี้ได้ มาลอง CalPro+ ด้วยกันนะ 🐣',
+  'ฟิตไปด้วยกัน ปังไปด้วยกัน กับ CalPro+ ✨',
+  'รักตัวเองวันละนิด กับ CalPro+ นะ 💖',
+  'มาโหลด CalPro+ แล้วเฮลตี้ไปพร้อมกันเลย! 🍀',
 ];
 const INVITE_EN=[
-  'Track your day with us on CalPro+ 🌿',
-  'Eat well, live well — join CalPro+ 💚',
-  'Self-care, simplified · CalPro+ ✨',
-  'Log meals + see your progress on CalPro+ 🌸',
+  'Be healthy buddies with us on CalPro+ 🥰',
+  'Treat yourself today~ start on CalPro+ 🌷',
+  'Counting calories, but make it fun · CalPro+ 💕',
+  'Eat happy, live happy, every day · CalPro+ ☀️',
+  'Build cute lil’ healthy habits on CalPro+ 🌸',
+  'Brighten up your day with CalPro+ 🌈',
+  'Small steps, big glow-up · CalPro+ 🐣',
+  'Let’s get fit and shine together · CalPro+ ✨',
+  'A little self-love daily, with CalPro+ 💖',
+  'Grab CalPro+ and let’s glow healthy together! 🍀',
 ];
 function pickInvite(){
   const arr=settings.lang==='en'?INVITE_EN:INVITE_TH;
@@ -7241,8 +7253,8 @@ function buildShareCanvas(){
   ctx.fillStyle=accent;
   ctx.fillText('Pro+',80+calW,80);
 
-  // Big calorie ring (center upper portion)
-  const ringCX=W/2,ringCY=520,ringR=210;
+  // Big calorie ring (centred upper area)
+  const ringCX=W/2,ringCY=478,ringR=205;
   // Background ring
   ctx.beginPath();
   ctx.arc(ringCX,ringCY,ringR,-Math.PI/2,Math.PI*1.5);
@@ -7261,35 +7273,45 @@ function buildShareCanvas(){
     ctx.strokeStyle=statusColor;
     ctx.stroke();
   }
-  // Calorie number center
-  ctx.fillStyle=txt;ctx.textAlign='center';
+  // Number + "kcal" unit, vertically centred inside the ring
+  ctx.fillStyle=txt;ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.font=`800 150px ${fontTH}`;
-  ctx.fillText(net.toLocaleString(),ringCX,ringCY-70);
-  ctx.font=`500 38px ${fontTH}`;
-  ctx.fillStyle=muted;
-  const goalLabel=isEn?`of ${goal.toLocaleString()} kcal`+(burned?` · −${burned}`:''):`จาก ${goal.toLocaleString()} kcal`+(burned?` · −${burned}`:'');
-  ctx.fillText(goalLabel,ringCX,ringCY+90);
+  ctx.fillText(net.toLocaleString(),ringCX,ringCY-16);
+  ctx.fillStyle=muted;ctx.font=`600 46px ${fontTH}`;
+  ctx.fillText('kcal',ringCX,ringCY+94);
+  ctx.textBaseline='top';
 
-  // Macros (3 columns)
-  const macroY=900;
-  ctx.textAlign='center';
+  // Macros — three colour rings (arc fill = that macro's share of total kcal)
+  const macroCY=905,mR=80,mLW=16;
+  const mk=[totP*4,totC*4,totF*9];
+  const totMK=(mk[0]+mk[1]+mk[2])||1;
   const macros=[
-    {l:isEn?'Protein':'โปรตีน',v:totP,color:'#74c0fc'},
-    {l:isEn?'Carbs':'คาร์บ',v:totC,color:'#ffa94d'},
-    {l:isEn?'Fat':'ไขมัน',v:totF,color:'#b197fc'},
+    {l:isEn?'Protein':'โปรตีน',v:totP,color:'#74c0fc',frac:mk[0]/totMK},
+    {l:isEn?'Carbs':'คาร์บ',v:totC,color:'#ffa94d',frac:mk[1]/totMK},
+    {l:isEn?'Fat':'ไขมัน',v:totF,color:'#b197fc',frac:mk[2]/totMK},
   ];
   macros.forEach((m,i)=>{
-    const x=180+i*360;
+    const cx=200+i*340;
+    ctx.beginPath();ctx.arc(cx,macroCY,mR,0,Math.PI*2);
+    ctx.lineWidth=mLW;ctx.lineCap='round';
+    ctx.strokeStyle=isLight?'#e8e8ee':'#22222e';ctx.stroke();
+    if(m.frac>0){
+      ctx.beginPath();
+      ctx.arc(cx,macroCY,mR,-Math.PI/2,-Math.PI/2+Math.max(m.frac,0.02)*Math.PI*2);
+      ctx.lineWidth=mLW;ctx.lineCap='round';ctx.strokeStyle=m.color;ctx.stroke();
+    }
+    ctx.fillStyle=txt;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=`700 50px ${fontTH}`;
+    ctx.fillText(m.v+'g',cx,macroCY);
+    ctx.textBaseline='top';
     ctx.fillStyle=muted;ctx.font=`500 30px ${fontTH}`;
-    ctx.fillText(m.l,x,macroY);
-    ctx.fillStyle=m.color;ctx.font=`700 64px ${fontTH}`;
-    ctx.fillText(m.v+'g',x,macroY+44);
+    ctx.fillText(m.l,cx,macroCY+mR+22);
   });
 
   // Entry count line
   ctx.fillStyle=muted;ctx.font=`500 30px ${fontTH}`;
   const entriesLbl=isEn?`${E.length} food items logged`:`${E.length} รายการอาหารที่บันทึก`;
-  ctx.fillText(entriesLbl,W/2,1060);
+  ctx.fillText(entriesLbl,W/2,1078);
 
   // Invite message (no URL on the image — URL goes to caption text)
   // iOS Safari renders Thai + emoji wider than measureText reports; smaller
@@ -7402,26 +7424,22 @@ function buildAchievementCanvas(){
   ctx.fillText('Pro+',80+calW,80);
 
   // Subheader — achievement label
-  ctx.fillStyle=muted;ctx.font=`500 32px ${fontTH}`;
-  ctx.fillText(isEn?'My Achievements':'ความสำเร็จของฉัน',80,170);
+  ctx.fillStyle=muted;ctx.font=`500 34px ${fontTH}`;ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText(isEn?'My Achievements':'ความสำเร็จของฉัน',80,158);
 
-  // Big STREAK display centered
-  const streakCY=420;
-  ctx.textAlign='center';
-  ctx.fillStyle=accent;
-  ctx.font=`700 100px ${fontTH}`;
-  ctx.fillText('🔥',W/2,streakCY-130);
-  ctx.fillStyle=txt;
-  ctx.font=`800 200px ${fontTH}`;
-  ctx.fillText(streak.toString(),W/2,streakCY-20);
-  ctx.fillStyle=muted;
-  ctx.font=`500 40px ${fontTH}`;
-  const streakLbl=isEn?(streak===1?'day streak':'day streak'):'วันติดต่อกัน';
-  ctx.fillText(streakLbl,W/2,streakCY+200);
+  // Big streak — vertically centred block
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle=accent;ctx.font=`700 96px ${fontTH}`;
+  ctx.fillText('🔥',W/2,302);
+  ctx.fillStyle=txt;ctx.font=`800 200px ${fontTH}`;
+  ctx.fillText(streak.toString(),W/2,462);
+  ctx.fillStyle=muted;ctx.font=`600 42px ${fontTH}`;
+  ctx.fillText(isEn?'day streak':'วันติดต่อกัน',W/2,602);
+  ctx.textBaseline='top';
 
   // 3 stat boxes
-  const statsY=820;
-  const boxW=280,boxH=180,gap=30;
+  const statsY=712;
+  const boxW=280,boxH=176,gap=30;
   const totalW=boxW*3+gap*2;
   const startX=(W-totalW)/2;
   const stats=[
@@ -7431,36 +7449,21 @@ function buildAchievementCanvas(){
   ];
   stats.forEach((s,i)=>{
     const bx=startX+i*(boxW+gap);
-    // Box background
-    ctx.fillStyle=isLight?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.04)';
-    const r=20;
-    ctx.beginPath();
-    ctx.moveTo(bx+r,statsY);
-    ctx.lineTo(bx+boxW-r,statsY);
-    ctx.quadraticCurveTo(bx+boxW,statsY,bx+boxW,statsY+r);
-    ctx.lineTo(bx+boxW,statsY+boxH-r);
-    ctx.quadraticCurveTo(bx+boxW,statsY+boxH,bx+boxW-r,statsY+boxH);
-    ctx.lineTo(bx+r,statsY+boxH);
-    ctx.quadraticCurveTo(bx,statsY+boxH,bx,statsY+boxH-r);
-    ctx.lineTo(bx,statsY+r);
-    ctx.quadraticCurveTo(bx,statsY,bx+r,statsY);
-    ctx.closePath();
-    ctx.fill();
-    // Label
-    ctx.fillStyle=muted;ctx.font=`500 28px ${fontTH}`;ctx.textAlign='center';
-    ctx.fillText(s.label,bx+boxW/2,statsY+30);
-    // Value
-    ctx.fillStyle=s.color;ctx.font=`700 78px ${fontTH}`;
-    ctx.fillText(s.value+'',bx+boxW/2,statsY+72);
-    // Unit
+    _rrect(ctx,bx,statsY,boxW,boxH,20);
+    ctx.fillStyle=isLight?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.04)';ctx.fill();
+    ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillStyle=muted;ctx.font=`500 28px ${fontTH}`;
+    ctx.fillText(s.label,bx+boxW/2,statsY+28);
+    ctx.fillStyle=s.color;ctx.font=`700 76px ${fontTH}`;
+    ctx.fillText(s.value+'',bx+boxW/2,statsY+64);
     ctx.fillStyle=muted;ctx.font=`500 26px ${fontTH}`;
-    ctx.fillText(s.unit,bx+boxW/2,statsY+155);
+    ctx.fillText(s.unit,bx+boxW/2,statsY+146);
   });
 
   // Earned badge icons row
   if(earned.length){
     const earnedList=BADGES.filter(b=>earned.includes(b.id));
-    const bdgY=1080;
+    const bdgY=966;
     ctx.fillStyle=muted;ctx.font=`500 28px ${fontTH}`;ctx.textAlign='center';
     ctx.fillText(isEn?'🏆 Earned':'🏆 ได้รับแล้ว',W/2,bdgY-44);
     ctx.font=`500 56px ${fontTH}`;
