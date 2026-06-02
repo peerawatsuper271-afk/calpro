@@ -700,6 +700,15 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .modal-hdr h3{font-size:.95rem;font-weight:600;}
 .mc-close{background:var(--surface2);border:none;color:var(--muted);width:27px;height:27px;border-radius:50%;cursor:pointer;font-size:.85rem;}
 .sec-lbl{font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+/* ── iOS-style grouped settings list (drill-in sub-pages) ── */
+.ios-group{background:var(--glass);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.5);backdrop-filter:blur(var(--glass-blur)) saturate(1.5);border:1px solid var(--glass-bd);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:var(--glass-sh);}
+.ios-row{display:flex;align-items:center;gap:12px;padding:11px 13px;cursor:pointer;color:var(--text);background:none;border:none;width:100%;font-family:inherit;font-size:.92rem;text-align:left;transition:background .12s;}
+.ios-row+.ios-row{border-top:1px solid var(--glass-bd);}
+.ios-row:active{background:color-mix(in srgb,var(--text) 9%,transparent);}
+.ios-ico{width:29px;height:29px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ios-ico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;}
+.ios-lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ios-chev{color:var(--muted);font-size:1.15rem;opacity:.55;flex-shrink:0;}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:99px;font-size:.82rem;opacity:0;transition:all .3s;pointer-events:none;z-index:300;white-space:nowrap;}
@@ -1101,18 +1110,42 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
            down. The hero's "✏️ Edit profile" button opens it. -->
     </div>
 
-    <!-- SETTINGS (full page) -->
+    <!-- SETTINGS (iOS-style grouped list → drill-in sub-pages) -->
     <div class="screen" id="pg-settings">
       <div class="page-hd">
         <button class="back-btn" onclick="navTo('today')">‹</button>
         <h2 data-i18n="settings">ตั้งค่า</h2>
       </div>
-      <div class="card">
-        <h3 data-i18n="cloud_sync">Cloud Sync</h3>
-        <div id="cloudStatus"></div>
+      <div class="ios-group">
+        <button class="ios-row" onclick="navTo('set-cloud')"><span class="ios-ico" data-ic="cloud" style="background:#0a84ff"></span><span class="ios-lbl" data-i18n="cloud_sync">Cloud Sync</span><span class="ios-chev">›</span></button>
       </div>
+      <div class="ios-group">
+        <button class="ios-row" onclick="navTo('set-appearance')"><span class="ios-ico" data-ic="sparkle" style="background:#af52de"></span><span class="ios-lbl" data-i18n="appearance">รูปลักษณ์</span><span class="ios-chev">›</span></button>
+        <button class="ios-row" onclick="navTo('set-lang')"><span class="ios-ico" data-ic="globe" style="background:#5856d6"></span><span class="ios-lbl" data-i18n="language">ภาษา</span><span class="ios-chev">›</span></button>
+      </div>
+      <div class="ios-group">
+        <button class="ios-row" onclick="navTo('set-reminders')"><span class="ios-ico" data-ic="bell" style="background:#ff3b30"></span><span class="ios-lbl" data-i18n="reminders">การเตือน</span><span class="ios-chev">›</span></button>
+        <button class="ios-row" onclick="navTo('set-ai')"><span class="ios-ico" data-ic="ai" style="background:#30b0c7"></span><span class="ios-lbl">AI</span><span class="ios-chev">›</span></button>
+      </div>
+      <div class="ios-group">
+        <button class="ios-row" onclick="navTo('set-nav')"><span class="ios-ico" data-ic="home" style="background:#ff9500"></span><span class="ios-lbl" data-i18n="customize_nav">ปรับแต่งแถบล่าง</span><span class="ios-chev">›</span></button>
+        <button class="ios-row" onclick="navTo('set-water')"><span class="ios-ico" data-ic="droplet" style="background:#32ade6"></span><span class="ios-lbl" data-i18n="water_goal_cfg">เป้าหมายน้ำดื่ม</span><span class="ios-chev">›</span></button>
+      </div>
+      <div class="ios-group">
+        <button class="ios-row" onclick="navTo('set-data')"><span class="ios-ico" data-ic="gear" style="background:#8e8e93"></span><span class="ios-lbl" data-i18n="manage_data">จัดการข้อมูล</span><span class="ios-chev">›</span></button>
+      </div>
+    </div>
+
+    <!-- SETTINGS · Cloud Sync -->
+    <div class="screen" id="pg-set-cloud">
+      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="cloud_sync">Cloud Sync</h2></div>
+      <div class="card"><div id="cloudStatus"></div></div>
+    </div>
+
+    <!-- SETTINGS · Appearance -->
+    <div class="screen" id="pg-set-appearance">
+      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="appearance">รูปลักษณ์</h2></div>
       <div class="card">
-        <h3 data-i18n="appearance">รูปลักษณ์</h3>
         <div class="sec-lbl" data-i18n="theme">ธีมสี</div>
         <div class="theme-grid" id="themeGrid"></div>
         <div class="sec-lbl" data-i18n="accent">สีหลัก</div>
@@ -1134,15 +1167,23 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           <label class="switch"><input type="checkbox" id="compactToggle" onchange="toggleCompact()"><span class="slider"></span></label>
         </div>
       </div>
+    </div>
+
+    <!-- SETTINGS · Language -->
+    <div class="screen" id="pg-set-lang">
+      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="language">ภาษา</h2></div>
       <div class="card">
-        <h3 data-i18n="language">ภาษา</h3>
         <div class="lang-row">
           <button class="lbtn" data-lang="th" onclick="setLang('th')">ไทย</button>
           <button class="lbtn" data-lang="en" onclick="setLang('en')">English</button>
         </div>
       </div>
+    </div>
+
+    <!-- SETTINGS · Reminders -->
+    <div class="screen" id="pg-set-reminders">
+      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="reminders">การเตือน</h2></div>
       <div class="card">
-        <h3 data-i18n="reminders">การเตือน</h3>
         <div class="setting-row">
           <div class="sr-l">
             <div class="sr-name" data-i18n="meal_reminders">เตือนมื้ออาหาร</div>
@@ -1175,25 +1216,41 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <button class="btn-sec" onclick="testNotification()" style="width:100%;margin-top:10px;font-size:.82rem"><span class="ic" data-ic="bell"></span> <span data-i18n="test_notif">ทดสอบส่งแจ้งเตือน</span></button>
         <div id="notifStatus" style="font-size:.7rem;color:var(--muted);margin-top:6px;text-align:center"></div>
       </div>
+    </div>
+
+    <!-- SETTINGS · AI -->
+    <div class="screen" id="pg-set-ai">
+      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="ai_settings_title">AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)</h2></div>
       <div class="card">
-        <h3><span class="ic" data-ic="ai"></span> <span data-i18n="ai_settings_title">AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)</span></h3>
         <div style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:10px" data-i18n="ai_settings_sub">ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)</div>
         <div id="aiSettingsBody"></div>
       </div>
+    </div>
+
+    <!-- SETTINGS · Customize nav -->
+    <div class="screen" id="pg-set-nav">
+      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="customize_nav">ปรับแต่งแถบล่าง</h2></div>
       <div class="card">
-        <h3 data-i18n="customize_nav">ปรับแต่งแถบล่าง</h3>
         <div style="font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:10px" data-i18n="customize_nav_sub">เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้</div>
         <div id="navTabsList"></div>
       </div>
+    </div>
+
+    <!-- SETTINGS · Water goal -->
+    <div class="screen" id="pg-set-water">
+      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="water_goal_cfg">เป้าหมายน้ำดื่ม</h2></div>
       <div class="card">
-        <h3 data-i18n="water_goal_cfg">เป้าหมายน้ำดื่ม</h3>
         <div style="display:flex;align-items:center;gap:10px">
           <input type="range" id="waterGoalRange" min="4" max="16" step="1" oninput="changeWaterGoal(this.value)" style="flex:1">
           <div style="font-size:1rem;font-weight:700;min-width:60px;text-align:right"><span id="waterGoalVal">8</span> <span data-i18n="cups_unit">แก้ว</span></div>
         </div>
       </div>
+    </div>
+
+    <!-- SETTINGS · Manage data -->
+    <div class="screen" id="pg-set-data">
+      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="manage_data">จัดการข้อมูล</h2></div>
       <div class="card">
-        <h3 data-i18n="manage_data">จัดการข้อมูล</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
           <button class="btn-sec" onclick="exportData()"><span class="ic" data-ic="upload"></span> Export</button>
           <button class="btn-sec" onclick="document.getElementById('importFile').click()"><span class="ic" data-ic="download"></span> Import</button>
@@ -1832,7 +1889,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.9';
+const APP_VERSION = '2.33.10';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3113,6 +3170,14 @@ function showPage(id,btn){
     tdee:syncTDEEFromProfile,
     add:()=>{renderCatFilter();renderQuickList();refreshAiQuotaInline();applyDefaultMeal();},
     settings:renderSettings,
+    'set-cloud':renderCloudStatus,
+    'set-appearance':renderSettings,
+    'set-lang':renderSettings,
+    'set-reminders':renderSettings,
+    'set-ai':()=>{ if(typeof renderAiSettingsBody==='function') renderAiSettingsBody(); },
+    'set-nav':renderNavTabsList,
+    'set-water':renderSettings,
+    'set-data':()=>{},
     help:renderHelp,
     dev:renderDev,
     friends:renderLeaderboard,
