@@ -955,6 +955,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="ring-wrap">
         <div class="ring-cont">
           <svg width="144" height="144" viewBox="0 0 144 144">
+            <defs><linearGradient id="ringGrad" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset="0.38" stop-color="#22c55e"/><stop offset="0.7" stop-color="#f59e0b"/><stop offset="1" stop-color="#ef4444"/></linearGradient></defs>
             <circle class="ring-track" cx="72" cy="72" r="60"/>
             <circle class="ring-fill" id="ringFill" cx="72" cy="72" r="60" stroke-dasharray="376.99" stroke-dashoffset="376.99"/>
           </svg>
@@ -2033,7 +2034,6 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
   <div class="drawer-hd" onclick="navTo('profile')">
     <div class="dh-av-wrap" onclick="event.stopPropagation();closeDrawer();openAvatarModal()" role="button" tabindex="0" aria-label="แก้ไขรูปโปรไฟล์" title="แก้ไขรูปโปรไฟล์">
       <div class="user-avatar" id="drawerAvatar">?</div>
-      <span class="dh-av-cam" aria-hidden="true"><span class="ic" data-ic="camera"></span></span>
     </div>
     <div class="dh-info">
       <div class="drawer-name" id="drawerName">—</div>
@@ -2079,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.1';
+const APP_VERSION = '2.36.2';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -6826,11 +6826,9 @@ function renderToday(){
   const net=Math.max(0,totCal-burned);            // net kcal "absorbed" — food in minus workout out
   const pct=Math.min(net/goal,1);
   const over=net>goal;
-  // Cool→warm status colour by how close to the goal: cyan (low) → green →
-  // amber → orange (at goal) → red (over) so the ring warns as you near/exceed.
-  const _rr=goal>0?net/goal:0;
-  const _hue=_rr<=1 ? (195-177*_rr) : Math.max(0,18-(_rr-1)*60);   // 195°cyan→18°orange, then →0°red
-  const clr=`hsl(${_hue.toFixed(0)} 72% 52%)`;
+  // Cool→warm gradient ring (cyan→green→amber→red) so it visibly warms as it
+  // fills; turns solid red once over the goal as a clear warning.
+  const clr=over?'#ef4444':'url(#ringGrad)';
   document.getElementById('dateLabelText').textContent=fmtDate(currentDate);
   // Disable the forward arrow on today (can't log the future)
   const nextBtn=document.getElementById('dnavNext');
