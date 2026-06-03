@@ -2079,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.4';
+const APP_VERSION = '2.36.5';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4347,6 +4347,16 @@ function renderPresetsTab(w){
   });
 }
 function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// Single source of truth for a user avatar chip: a stored photo (data: URL) →
+// <img>, otherwise a coloured circle with the emoji/initial. Both branches stay
+// XSS-safe via escapeHtml. (Replaces the inline img/initial ternary that was
+// duplicated across the friends leaderboard + friend-search rows.)
+function avatarHtml(avatar, fallbackChar, size, bg, font){
+  size=size||34; bg=bg||'var(--surface2)'; font=font||'1rem';
+  if(avatar && avatar.startsWith('data:'))
+    return `<img src="${escapeHtml(avatar)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover">`;
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${font};color:var(--accent)">${escapeHtml(avatar||fallbackChar)}</div>`;
+}
 // ── XSS-safe renderers for user / cross-user data (avatars, banners) ──
 // An avatar becomes an <img> ONLY for a genuine image data-URI; any other value
 // is rendered as escaped plain text (emoji/initial) — never raw HTML. This
@@ -5188,7 +5198,7 @@ async function renderFriendsCard(){
     scores.forEach((u,i)=>{
       const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
       const isMe=u.id===cloudUser.id;
-      const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${escapeHtml(u.avatar)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)">${escapeHtml(u.avatar||(u.display_name||'?')[0].toUpperCase())}</div>`;
+      const av=avatarHtml(u.avatar,(u.display_name||'?')[0].toUpperCase(),34,'rgba(255,107,107,.15)','1.1rem');
       const meTag=(settings.lang||'th')!=='th'?' (You)':' (คุณ)';
       const safeName=escapeHtml(u.display_name||'?');
       const removeBtn=isMe?'':`<button class="del" data-frid="${u.id}" data-frname="${safeName}" title="Remove" aria-label="Remove friend" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 6px;margin-left:4px"><span class="ic" data-ic="x"></span></button>`;
@@ -5269,7 +5279,7 @@ function renderFriendSearch(q){
       w.innerHTML=list.map(u=>{
         const isMe=u.id===cloudUser.id;
         const isAdded=_frCurrentIds.has(u.id);
-        const av=u.avatar&&u.avatar.startsWith('data:')?`<img src="${escapeHtml(u.avatar)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`:`<div style="width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--accent)">${escapeHtml(u.avatar||(u.display_name||u.email||'?')[0].toUpperCase())}</div>`;
+        const av=avatarHtml(u.avatar,(u.display_name||u.email||'?')[0].toUpperCase(),34,'var(--surface2)','1rem');
         const status=isMe?`<span style="font-size:.7rem;color:var(--muted)">${t('fr_self')}</span>`
           :isAdded?`<span style="font-size:.7rem;color:var(--green)">✓ ${t('fr_already')}</span>`
           :`<button class="btn-sec" style="font-size:.74rem;padding:5px 10px" data-fid="${u.id}" data-fname="${escapeHtml(u.display_name||u.email||'?')}" data-action="add">+</button>`;
