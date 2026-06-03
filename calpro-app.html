@@ -138,7 +138,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-hd{display:flex;align-items:center;gap:12px;text-align:left;margin:10px 10px 6px;padding:12px;border-radius:15px;background:var(--surface2);cursor:pointer;transition:opacity .15s;}
 .drawer-hd:active{opacity:.85;}
 .drawer-hd .user-avatar{width:52px;height:52px;font-size:1.5rem;margin:0;flex-shrink:0;}
-.drawer-hd .user-avatar::after{width:18px;height:18px;font-size:.58rem;}
+.drawer-hd .user-avatar::after{display:none;}/* use the explicit .dh-av-cam badge instead — avoids a double icon */
 .dh-av-wrap{position:relative;flex-shrink:0;cursor:pointer;line-height:0;}
 .dh-av-cam{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;background:var(--accent);border:2px solid var(--surface2);color:#fff;display:flex;align-items:center;justify-content:center;}
 .dh-av-cam .ic svg{width:11px;height:11px;}
@@ -955,7 +955,6 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="ring-wrap">
         <div class="ring-cont">
           <svg width="144" height="144" viewBox="0 0 144 144">
-            <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="0.5" stop-color="#22c55e"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs>
             <circle class="ring-track" cx="72" cy="72" r="60"/>
             <circle class="ring-fill" id="ringFill" cx="72" cy="72" r="60" stroke-dasharray="376.99" stroke-dashoffset="376.99"/>
           </svg>
@@ -966,7 +965,6 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         </div>
         <div class="ring-sub" id="ringGoal"></div>
       </div>
-      <div class="prog"><div class="prog-f" id="progFill" style="width:0%"></div></div>
       <div class="macros">
         <div class="mc"><div class="mc-l" data-i18n="protein">โปรตีน</div><div class="mc-v" id="mP" style="color:var(--blue)">0g</div><div class="mc-b"><div class="mc-bf" id="mPB" style="width:0%;background:var(--blue)"></div></div></div>
         <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--amber)">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--amber)"></div></div></div>
@@ -2081,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.0';
+const APP_VERSION = '2.36.1';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -6828,8 +6826,11 @@ function renderToday(){
   const net=Math.max(0,totCal-burned);            // net kcal "absorbed" — food in minus workout out
   const pct=Math.min(net/goal,1);
   const over=net>goal;
-  // On-track → spectrum gradient (blue→green→amber) · near goal → amber · over → red
-  const clr=over?'#ef4444':pct>0.85?'#f59e0b':'url(#ringGrad)';
+  // Cool→warm status colour by how close to the goal: cyan (low) → green →
+  // amber → orange (at goal) → red (over) so the ring warns as you near/exceed.
+  const _rr=goal>0?net/goal:0;
+  const _hue=_rr<=1 ? (195-177*_rr) : Math.max(0,18-(_rr-1)*60);   // 195°cyan→18°orange, then →0°red
+  const clr=`hsl(${_hue.toFixed(0)} 72% 52%)`;
   document.getElementById('dateLabelText').textContent=fmtDate(currentDate);
   // Disable the forward arrow on today (can't log the future)
   const nextBtn=document.getElementById('dnavNext');
@@ -6839,7 +6840,6 @@ function renderToday(){
   document.getElementById('ringFill').style.stroke=clr;
   document.getElementById('ringCal').textContent=net.toLocaleString();
   document.getElementById('ringGoal').textContent=t('goal')+' '+goal.toLocaleString()+' kcal'+(burned?' · −'+burned+' 🏋️':'');
-  const pf=document.getElementById('progFill');pf.style.width=(pct*100).toFixed(1)+'%';pf.style.background=clr;
   const pg=(userProfile?.weight||60)*1.6;
   document.getElementById('mP').textContent=totP+'g';document.getElementById('mC').textContent=totC+'g';document.getElementById('mF').textContent=totF+'g';
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
