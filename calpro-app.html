@@ -6134,6 +6134,9 @@ function finishOnboard(skipped){
 // to auto-pop again for everyone.
 const TUTORIAL_VERSION = 1;
 let _tutStep = 0;
+// Holds changelog entries deferred by checkWhatsNew so they can pop right after
+// the guided tour closes (set at launch, consumed in closeTutorial).
+let _pendingWhatsNew = null;
 function shouldShowTutorial(){
   return lsLoad('cp_tutorial_seen_v',0) < TUTORIAL_VERSION;
 }
@@ -6278,6 +6281,13 @@ function tutPrev(){ if(_tutStep>0){_tutStep--;tutRender();} }
 function closeTutorial(skipped){
   lsSave('cp_tutorial_seen_v',TUTORIAL_VERSION);
   document.getElementById('tutorialModal').classList.add('hide');
+  // If a "what's new" changelog was deferred so it wouldn't stack on the tour,
+  // show it now — right after the tour closes (per design: tour first, then news).
+  if(_pendingWhatsNew&&_pendingWhatsNew.length){
+    const list=_pendingWhatsNew; _pendingWhatsNew=null;
+    lsSave('calpro_last_seen_version',APP_VERSION);
+    setTimeout(()=>{ if(typeof showWhatsNew==='function') showWhatsNew(list); },380);
+  }
 }
 
 // ═══ FEEDBACK (opens a mailto draft to the developer) ═══
@@ -10029,6 +10039,32 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.35.0':{
+    th:[
+      '🎓 **ทัวร์แนะนำการใช้งานทีละขั้น** — เปิดอัตโนมัติครั้งแรก + กดดูซ้ำได้จากเมนู',
+      '🍜 **ฐานข้อมูลอาหาร 540+ เมนู** — เน้นอาหารไทย + เครื่องดื่ม/ฟาสต์ฟู้ด/ของหวาน/ผลไม้/ทะเล',
+      '⚡ **เพิ่มอาหารใช้ง่ายขึ้น** — กรอกเองเป็นป๊อปอัพ · เลือก①มื้อ ②ประเภท · ลากขยายกล่องผลค้นหา · ดาวของโปรดแบบใหม่',
+      '✏️ **หน้าแก้ไขโปรไฟล์ใหม่** — กระชับ ไม่เกิน 2/3 จอ · ปุ่มบันทึกเดียว · ปิดได้เสมอ',
+      '🌏 **เพิ่มภาษาจีน (简体 + 繁體)** — รวมเป็น 4 ภาษา (จีน/อังกฤษไม่มีไทยโผล่แล้ว)',
+      '⚙️ **หน้าตั้งค่าสไตล์ iOS** — แยกเป็นหน้าย่อย + โชว์เลขเวอร์ชั่น',
+      '📊 **กราฟวิเคราะห์สไตล์ iOS** — แตะดูค่ารายวันได้ · กราฟน้ำดื่มเป็นแท่ง',
+      '🖼️ **แตะดูรูปโปรไฟล์/แบนเนอร์เต็มจอ** + บีบนิ้วซูมได้',
+      '🎨 **การ์ดแชร์ใหม่** — วงแหวนมาโคร + QR โหลดแอป + คำเชิญน่ารัก 10 แบบ',
+      '🏅 **ย้ายเหรียญตราไปหน้าโปรไฟล์** (พับ/ขยายได้) · 🧊 ดีไซน์กระจกใสทั้งแอป · 🔒 อุดช่องโหว่ความปลอดภัยหลายจุด',
+    ],
+    en:[
+      '🎓 **Step-by-step guided tour** — auto-shows on first open + re-openable from the menu',
+      '🍜 **540+ food database** — Thai-first, plus drinks/fast food/desserts/fruit/seafood',
+      '⚡ **Easier food logging** — manual entry as a popup · pick ① meal ② category · resizable results box · new favorite-star',
+      '✏️ **Rebuilt Edit Profile sheet** — compact, capped at 2/3 screen · one Save button · always closable',
+      '🌏 **Added Chinese (简体 + 繁體)** — now 4 languages (no more Thai leaking into EN/ZH)',
+      '⚙️ **iOS-style Settings** — split into sub-pages + shows the version number',
+      '📊 **iOS-style analysis charts** — tap a bar for that day · water as bars',
+      '🖼️ **Tap avatar/banner for full-screen** + pinch-to-zoom',
+      '🎨 **Redesigned share cards** — macro rings + app QR code + 10 cute invites',
+      '🏅 **Badges moved to Profile** (collapsible) · 🧊 liquid-glass design throughout · 🔒 several security hardening fixes',
+    ],
+  },
   '2.33.2':{
     th:[
       '✨ **ยกระดับเป็นกระจกใสสไตล์ iOS ทั้งแอป** — เบลอหนักขึ้น · โปร่งขึ้น · มีขอบเรืองแสง (specular) ทุกพื้นผิว · ให้ความรู้สึก liquid glass',
@@ -10842,14 +10878,14 @@ function checkWhatsNew(){
     .sort((a,b)=>verCmp(b,a));   // newest first
   if(toShow.length){
     // Don't stack on top of the guided tour. If the tour is about to auto-show
-    // (new TUTORIAL_VERSION) or is already open, let it be the "what's new"
-    // moment for this launch and skip the changelog popup.
+    // (new TUTORIAL_VERSION) or is already open, DEFER the changelog so it pops
+    // right after the tour closes (handled in closeTutorial). Don't advance
+    // last-seen yet, so it isn't lost if the user closes the app mid-tour.
     const tutPending=(typeof shouldShowTutorial==='function'&&shouldShowTutorial())
       ||!document.getElementById('tutorialModal').classList.contains('hide');
-    if(!tutPending){
-      // Slight delay so it lands after initial render
-      setTimeout(()=>showWhatsNew(toShow),900);
-    }
+    if(tutPending){ _pendingWhatsNew=toShow; return; }
+    // Slight delay so it lands after initial render
+    setTimeout(()=>showWhatsNew(toShow),900);
   }
   lsSave('calpro_last_seen_version',APP_VERSION);
 }
