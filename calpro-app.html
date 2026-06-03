@@ -2047,7 +2047,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.35.1';
+const APP_VERSION = '2.35.2';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3675,7 +3675,12 @@ function accToggle(hd){
 }
 function calcStreak(entries_by_day){
   let s=0;
-  for(let i=0;i<90;i++){const d=new Date();d.setDate(d.getDate()-i);const k=dateKey(d);if((entries_by_day[k]||[]).length)s++;else break;}
+  // Today-grace: if today hasn't been logged YET, don't reset the streak to 0 —
+  // the run is still alive until the day actually ends. Start counting from
+  // yesterday in that case so a restored/continuing streak shows correctly.
+  const todayLogged=((entries_by_day[dateKey(new Date())]||[]).length)>0;
+  const start=todayLogged?0:1;
+  for(let i=start;i<90+start;i++){const d=new Date();d.setDate(d.getDate()-i);const k=dateKey(d);if((entries_by_day[k]||[]).length)s++;else break;}
   return s;
 }
 // Target-aware: passing {goal} computes against THAT user's calorie target.
@@ -10104,6 +10109,14 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.35.2':{
+    th:[
+      '🔥 **แก้สตรีคขึ้นถูกต้อง** — ถ้ายังไม่ได้บันทึกอาหารของ "วันนี้" สตรีคจะไม่รีเซ็ตเป็น 0 อีกต่อไป · จะนับวันที่ต่อเนื่องถึงเมื่อวานให้ (สตรีคยังอยู่จนกว่าจะหมดวันจริงๆ)',
+    ],
+    en:[
+      '🔥 **Streak now counts correctly** — if today isn\'t logged yet, the streak no longer drops to 0; it shows the unbroken run through yesterday (the streak stays alive until the day actually ends)',
+    ],
+  },
   '2.35.1':{
     th:[
       '🛟 **กันข้อมูลหาย** — เพิ่มการสำรองข้อมูลอัตโนมัติในเครื่อง และกู้คืนให้เองทันทีถ้าข้อมูลหลักหาย',
