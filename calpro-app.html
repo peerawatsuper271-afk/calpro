@@ -2047,7 +2047,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.35.0';
+const APP_VERSION = '2.35.1';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2189,6 +2189,12 @@ let syncStatus = 'idle';  // idle · syncing · synced · error · offline
 let syncTimer = null;     // for debounced auto-sync
 let periodicTimer = null; // for interval-based sync
 let noUpsertSupport = false; // set true when 42P10 detected — switches to fallback diff strategy
+// DATA-LOSS GUARD: cloud "delete rows missing from local" is only safe AFTER a
+// successful pull this session — at which point local is a superset of cloud, so
+// a push only removes what the user genuinely deleted. Until then (e.g. local was
+// just cleared/corrupted and never restored), an empty/partial local must NEVER
+// delete cloud rows. Set true once any food_entries pull succeeds; never reset.
+let _cloudPullOk = false;
 
 // ═══ ANONYMOUS SESSION (device-only sync) ═══
 // Non-logged-in users still get cloud backup of their data — under an anonymous
@@ -3728,6 +3734,14 @@ function loadUserData(){
   allMeasures = lsLoad(LS_MEASURES, {});
   presets = lsLoad(LS_PRESETS, []);
   loadEntries();
+  // ── Local safety net ── if the precious keys came back empty but an on-device
+  // backup exists, restore from it. Guards against the main keys being cleared
+  // or corrupted (NOT a full "clear site data" — that wipes the backup too;
+  // Cloud Sync + file export cover that). Runs BEFORE any cloud sync, so a
+  // restored-from-backup local won't be seen as "empty" by the push guard.
+  const _restored = maybeRestoreFromBackup();
+  backupLocalData(true);   // refresh the backup from the current good state
+  if(_restored){ setTimeout(()=>{ try{ showToast(LL('กู้ข้อมูลจากสำรองในเครื่องแล้ว ✓','Restored your data from on-device backup ✓','已从本机备份恢复数据 ✓','已從本機備份還原資料 ✓')); }catch(e){} }, 1500); }
   const ls = lsLoad(LS_SETTINGS, null);
   if (ls) settings = ls;
   applyTheme();
@@ -3735,12 +3749,50 @@ function loadUserData(){
 function loadEntries(){
   dailyEntries = (allEntries[currentDate] || []).slice();
 }
+// ═══ ON-DEVICE SAFETY BACKUP ═══
+const LS_BACKUP = 'calpro_backup';
+let _lastBackup = 0;
+function backupLocalData(force){
+  try{
+    if(!force && Date.now()-_lastBackup < 5000) return;   // light throttle
+    // Never overwrite a good backup with a blank state.
+    if(Object.keys(allEntries||{}).length===0) return;
+    const snap={ts:Date.now(), v:APP_VERSION,
+      entries:allEntries, weights:allWeights, water:allWater,
+      workouts:allWorkouts, measures:allMeasures};
+    localStorage.setItem(LS_BACKUP, JSON.stringify(snap));
+    _lastBackup=Date.now();
+  }catch(e){ /* quota / serialization — backup is best-effort */ }
+}
+function maybeRestoreFromBackup(){
+  try{
+    if(Object.keys(allEntries||{}).length>0) return false;   // main data present
+    const raw=localStorage.getItem(LS_BACKUP);
+    if(!raw) return false;
+    const snap=JSON.parse(raw);
+    if(!snap||!snap.entries||Object.keys(snap.entries).length===0) return false;
+    allEntries=snap.entries||{};
+    if(snap.weights) allWeights=snap.weights;
+    if(snap.water) allWater=snap.water;
+    if(snap.workouts) allWorkouts=snap.workouts;
+    if(snap.measures) allMeasures=snap.measures;
+    lsSave(LS_ENTRIES,allEntries);
+    if(snap.weights) lsSave(LS_WEIGHTS,allWeights);
+    if(snap.water) lsSave(LS_WATER,allWater);
+    if(snap.workouts) lsSave(LS_WORKOUTS,allWorkouts);
+    if(snap.measures) lsSave(LS_MEASURES,allMeasures);
+    loadEntries();
+    console.warn('[backup] restored '+Object.keys(allEntries).length+' day(s) from on-device backup');
+    return true;
+  }catch(e){ return false; }
+}
 function saveProfile_LS(){
   lsSave(LS_PROFILE, userProfile);
 }
 function saveEntries_LS(){
   allEntries[currentDate] = dailyEntries;
   lsSave(LS_ENTRIES, allEntries);
+  backupLocalData();   // keep the on-device safety backup fresh (throttled)
   // Growth hook — auto-celebrate streak milestones (7/14/30/60/100) at most once each.
   // Wrapped in try because celebrateMilestoneIfNew is defined later in the file.
   try{ if(typeof celebrateMilestoneIfNew==='function') celebrateMilestoneIfNew(); }catch{}
@@ -5344,12 +5396,16 @@ async function syncToCloud(){
       if(entries.length){
         await safeUpsertById('food_entries',entries,'user_id,client_id');
       }
-      // Delete cloud rows not in local (safe: we know local state)
+      // Delete cloud rows not in local — ONLY after a confirmed pull this session
+      // AND when local is non-empty. This prevents a wiped/partial local (e.g.
+      // cleared storage) from deleting the cloud backup. See _cloudPullOk.
       const localIds=new Set(entries.map(e=>e.client_id));
-      const {data:cloudRows,error:e1}=await sb.from('food_entries').select('client_id').eq('user_id',uid);
-      if(e1)throw e1;
-      const toDelete=(cloudRows||[]).map(r=>r.client_id).filter(cid=>cid&&!localIds.has(cid));
-      if(toDelete.length){const {error:e2}=await sb.from('food_entries').delete().eq('user_id',uid).in('client_id',toDelete);if(e2)throw e2;}
+      if(_cloudPullOk && localIds.size>0){
+        const {data:cloudRows,error:e1}=await sb.from('food_entries').select('client_id').eq('user_id',uid);
+        if(e1)throw e1;
+        const toDelete=(cloudRows||[]).map(r=>r.client_id).filter(cid=>cid&&!localIds.has(cid));
+        if(toDelete.length){const {error:e2}=await sb.from('food_entries').delete().eq('user_id',uid).in('client_id',toDelete);if(e2)throw e2;}
+      }
     });
     ok?okCount++:failCount++;
   }
@@ -5380,10 +5436,12 @@ async function syncToCloud(){
         await safeUpsertById('workouts',workouts,'user_id,client_id');
       }
       const localIds=new Set(workouts.map(w=>w.client_id));
-      const {data:cloudRows,error:e1}=await sb.from('workouts').select('client_id').eq('user_id',uid);
-      if(e1)throw e1;
-      const toDelete=(cloudRows||[]).map(r=>r.client_id).filter(cid=>cid&&!localIds.has(cid));
-      if(toDelete.length){const {error:e2}=await sb.from('workouts').delete().eq('user_id',uid).in('client_id',toDelete);if(e2)throw e2;}
+      if(_cloudPullOk && localIds.size>0){
+        const {data:cloudRows,error:e1}=await sb.from('workouts').select('client_id').eq('user_id',uid);
+        if(e1)throw e1;
+        const toDelete=(cloudRows||[]).map(r=>r.client_id).filter(cid=>cid&&!localIds.has(cid));
+        if(toDelete.length){const {error:e2}=await sb.from('workouts').delete().eq('user_id',uid).in('client_id',toDelete);if(e2)throw e2;}
+      }
     });
     ok?okCount++:failCount++;
   }
@@ -5405,7 +5463,8 @@ async function syncToCloud(){
       const toAdd=favorites.filter(n=>!cloudSet.has(n));
       const toRemove=[...cloudSet].filter(n=>!localSet.has(n));
       if(toAdd.length){const {error:e2}=await sb.from('favorites').insert(toAdd.map(n=>({user_id:uid,food_name:n})));if(e2)throw e2;}
-      if(toRemove.length){const {error:e3}=await sb.from('favorites').delete().eq('user_id',uid).in('food_name',toRemove);if(e3)throw e3;}
+      // Guard removals behind a confirmed pull + non-empty local (anti data-loss)
+      if(_cloudPullOk && localSet.size>0 && toRemove.length){const {error:e3}=await sb.from('favorites').delete().eq('user_id',uid).in('food_name',toRemove);if(e3)throw e3;}
     });
     ok?okCount++:failCount++;
   }
@@ -5420,7 +5479,8 @@ async function syncToCloud(){
       const {data:cloudRows,error:e1}=await sb.from('custom_foods').select('name').eq('user_id',uid);
       if(e1)throw e1;
       const toDelete=(cloudRows||[]).map(r=>r.name).filter(n=>!localNames.has(n));
-      if(toDelete.length){const {error:e2}=await sb.from('custom_foods').delete().eq('user_id',uid).in('name',toDelete);if(e2)throw e2;}
+      // Guard removals behind a confirmed pull + non-empty local (anti data-loss)
+      if(_cloudPullOk && localNames.size>0 && toDelete.length){const {error:e2}=await sb.from('custom_foods').delete().eq('user_id',uid).in('name',toDelete);if(e2)throw e2;}
     });
     ok?okCount++:failCount++;
   }
@@ -5456,7 +5516,7 @@ async function syncFromCloud(){
       saveProfile_LS();
     }
   });
-  await syncStep('pull:food_entries', async ()=>{
+  const _feOk = await syncStep('pull:food_entries', async ()=>{
     const {data:fe,error}=await sb.from('food_entries').select('*').eq('user_id',uid);
     if(error)throw error;
     if(!fe||fe.length===0)return;  // keep local if cloud empty
@@ -5480,6 +5540,11 @@ async function syncFromCloud(){
     });
     allEntries=merged;lsSave(LS_ENTRIES,allEntries);loadEntries();
   });
+  // A successful food pull means local now contains everything the cloud had
+  // (merge only adds), so local ⊇ cloud → it's now safe for a later push to
+  // delete cloud rows the user genuinely removed. Until this happens, deletes
+  // are blocked so a wiped/partial local can't destroy the cloud copy.
+  if(_feOk) _cloudPullOk = true;
   await syncStep('pull:weights', async ()=>{
     const {data:wts,error}=await sb.from('weights').select('*').eq('user_id',uid);
     if(error)throw error;
@@ -10039,6 +10104,16 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.35.1':{
+    th:[
+      '🛟 **กันข้อมูลหาย** — เพิ่มการสำรองข้อมูลอัตโนมัติในเครื่อง และกู้คืนให้เองทันทีถ้าข้อมูลหลักหาย',
+      '🔒 **แก้บั๊กซิงค์ที่อาจลบข้อมูลบนคลาวด์** — ตอนนี้จะไม่ลบข้อมูลบนคลาวด์จนกว่าจะดึงข้อมูลมาครบก่อน (กันเครื่องที่ข้อมูลว่างไปลบทับของบนคลาวด์)',
+    ],
+    en:[
+      '🛟 **Data-loss protection** — automatic on-device backup + instant auto-restore if the main data ever goes missing',
+      '🔒 **Fixed a sync bug that could delete cloud data** — cloud rows are no longer removed until a successful pull confirms local state (stops an empty device from wiping the cloud copy)',
+    ],
+  },
   '2.35.0':{
     th:[
       '🎓 **ทัวร์แนะนำการใช้งานทีละขั้น** — เปิดอัตโนมัติครั้งแรก + กดดูซ้ำได้จากเมนู',
