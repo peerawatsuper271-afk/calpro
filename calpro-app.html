@@ -2079,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.3';
+const APP_VERSION = '2.36.4';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2762,14 +2762,34 @@ async function resolvePhotoSrc(p){
 
 function lsLoad(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
 function lsSave(key, val){
-  try{ localStorage.setItem(key, JSON.stringify(val)); }
+  // Serialize once (also lets us isolate a serialize failure from a write failure).
+  let str;
+  try{ str=JSON.stringify(val); }
+  catch(e){ console.warn('[storage] serialize failed for',key,e&&e.message); return false; }
+  try{ localStorage.setItem(key, str); return true; }
   catch(e){
-    if(e.name==='QuotaExceededError'||/quota/i.test(e.message||'')){
-      console.warn('[storage] quota exceeded, attempting cleanup for',key);
-      try{showToast((settings.lang||'th')!=='th'?'Storage full · consider clearing photos':'พื้นที่เต็ม · ลองลบรูปบางส่วน',4000);}catch{}
-    }else{
-      console.warn('[storage] save failed for',key,e.message);
+    // Cross-browser quota detection (name, Chrome/FF code 22, old FF 1014, message).
+    const quota = !!e && (e.name==='QuotaExceededError' || e.code===22 || e.code===1014 || /quota|exceeded/i.test(e.message||''));
+    if(quota && key!=='calpro_backup'){
+      // A real log must NEVER be lost to a full quota. The on-device backup is a
+      // redundant copy of this same data, so sacrifice it to make room and retry
+      // the PRIMARY write once. (Cloud Sync + the freshly-saved primary remain.)
+      try{
+        localStorage.removeItem('calpro_backup');
+        localStorage.setItem(key, str);
+        console.warn('[storage] quota hit — dropped on-device backup to save',key);
+        return true;
+      }catch(_){ /* still over quota even without the backup */ }
     }
+    if(quota){
+      console.warn('[storage] quota exceeded saving',key);
+      try{ showToast((settings.lang||'th')!=='th'
+        ? 'Storage full — export your data, then clear old photos'
+        : 'พื้นที่เต็ม · แนะนำ Export ข้อมูลแล้วลบรูปเก่า',5000); }catch(_){}
+    }else{
+      console.warn('[storage] save failed for',key,e&&e.message);
+    }
+    return false;
   }
 }
 function uid(){ return 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,8); }
