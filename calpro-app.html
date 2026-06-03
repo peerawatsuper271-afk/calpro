@@ -139,6 +139,9 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .drawer-hd:active{opacity:.85;}
 .drawer-hd .user-avatar{width:52px;height:52px;font-size:1.5rem;margin:0;flex-shrink:0;}
 .drawer-hd .user-avatar::after{width:18px;height:18px;font-size:.58rem;}
+.dh-av-wrap{position:relative;flex-shrink:0;cursor:pointer;line-height:0;}
+.dh-av-cam{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;background:var(--accent);border:2px solid var(--surface2);color:#fff;display:flex;align-items:center;justify-content:center;}
+.dh-av-cam .ic svg{width:11px;height:11px;}
 .drawer-hd .dh-info{flex:1;min-width:0;}
 .drawer-name{font-size:1rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .drawer-email{font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1855,6 +1858,34 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
   </div>
 </div>
 
+<!-- FIRST-RUN LANGUAGE PICKER — shown once before onboarding -->
+<div class="modal-bg hide" id="langPickerModal">
+  <div class="modal" style="max-width:360px">
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:2.3rem;line-height:1;margin-bottom:6px">🌐</div>
+      <h3 style="margin:0 0 3px">เลือกภาษา · Language</h3>
+      <div style="font-size:.76rem;color:var(--muted)">选择语言 · 選擇語言</div>
+    </div>
+    <div class="ios-group" style="margin:0">
+      <button class="lang-opt" onclick="chooseStartLang('th')"><span>🇹🇭 ภาษาไทย</span><span class="lang-check">✓</span></button>
+      <button class="lang-opt" onclick="chooseStartLang('en')"><span>🇬🇧 English</span><span class="lang-check">✓</span></button>
+      <button class="lang-opt" onclick="chooseStartLang('zh-Hans')"><span>🇨🇳 简体中文</span><span class="lang-check">✓</span></button>
+      <button class="lang-opt" onclick="chooseStartLang('zh-Hant')"><span>🇹🇼 繁體中文</span><span class="lang-check">✓</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- PWA INSTALL PROMPT — Android (beforeinstallprompt) + iOS (Add to Home Screen) -->
+<div class="modal-bg hide" id="installModal" onclick="if(event.target===this)dismissInstall()">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <img src="icon-192.png" alt="CalPro+" style="width:72px;height:72px;border-radius:18px;margin:2px auto 10px;box-shadow:0 6px 18px rgba(0,0,0,.28)">
+    <h3 style="margin:0 0 6px" id="installTitle">ติดตั้ง CalPro+</h3>
+    <div id="installBody" style="font-size:.84rem;color:var(--muted);line-height:1.6;margin-bottom:14px;text-align:left"></div>
+    <div id="installActions"></div>
+    <button class="btn-sec" onclick="dismissInstall()" style="width:100%;margin-top:8px;font-size:.76rem;padding:7px" id="installLater">ไว้ก่อน</button>
+  </div>
+</div>
+
 <!-- UPDATE AVAILABLE MODAL — shown when SW detects a new version -->
 <div class="modal-bg hide" id="updateModal">
   <div class="modal" style="text-align:center">
@@ -2002,7 +2033,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-hd" onclick="navTo('profile')">
-    <div class="user-avatar" id="drawerAvatar">?</div>
+    <div class="dh-av-wrap" onclick="event.stopPropagation();closeDrawer();openAvatarModal()" role="button" tabindex="0" aria-label="แก้ไขรูปโปรไฟล์" title="แก้ไขรูปโปรไฟล์">
+      <div class="user-avatar" id="drawerAvatar">?</div>
+      <span class="dh-av-cam" aria-hidden="true"><span class="ic" data-ic="camera"></span></span>
+    </div>
     <div class="dh-info">
       <div class="drawer-name" id="drawerName">—</div>
       <div class="drawer-email" id="drawerEmail">—</div>
@@ -2047,7 +2081,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.35.2';
+const APP_VERSION = '2.36.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4816,8 +4850,15 @@ function renderCloudStatus(){
     const loc=isEn?'en-GB':'th-TH';
     const lastTxt=lastSync?new Date(lastSync).toLocaleString(loc,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
     if(isReal){
+      // Signed in → show the user's avatar in place of the cloud icon.
+      const _av=userProfile&&userProfile.avatar;
+      const _badge=(_av&&_av.startsWith('data:'))
+        ? `<div class="cloud-badge cloud-badge-on" style="padding:0;overflow:hidden"><img src="${escapeHtml(_av)}" alt="" style="width:100%;height:100%;object-fit:cover"></div>`
+        : _av
+          ? `<div class="cloud-badge cloud-badge-on" style="font-size:1.7rem">${escapeHtml(_av)}</div>`
+          : `<div class="cloud-badge cloud-badge-on">${icoSvg('cloud')}</div>`;
       wrap.innerHTML=
-        `<div class="cloud-hero"><div class="cloud-badge cloud-badge-on">${icoSvg('cloud')}</div>`+
+        `<div class="cloud-hero">${_badge}`+
           `<div class="cloud-acct"><div class="cloud-email">${escapeHtml(cloudUser.email)}</div>`+
           `<div class="cloud-sub">${t('last_sync')}: ${lastTxt}</div></div></div>`+
         `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">`+
@@ -5065,10 +5106,26 @@ async function renderFriendsCard(){
   }
   const _skelF=showSkeleton(body,4);
   try{
-    // Load friends list (timeout so the skeleton never hangs forever)
-    const {data:fr}=await withTimeout(sb.from('friends').select('friend_id, profiles!friends_friend_id_fkey(id,display_name,avatar,goal_cal)').eq('user_id',cloudUser.id),10000,'friends list');
+    // Load friend IDs (own rows — always allowed by RLS).
+    const {data:fr}=await withTimeout(sb.from('friends').select('friend_id').eq('user_id',cloudUser.id),10000,'friends list');
+    const friendIds=(fr||[]).map(x=>x.friend_id).filter(Boolean);
+    // Resolve friend profiles via the security-definer RPC. A direct
+    // profiles join is blocked by the own-only RLS (v2.34 privacy migration),
+    // which silently dropped EVERY friend → "added friend never shows". The
+    // RPC returns public fields (display_name/avatar/goal_cal) for any user.
+    let friendsList=[];
+    if(friendIds.length){
+      try{
+        const pp=await withTimeout(sb.rpc('get_public_profiles'),10000,'friend profiles');
+        const byId=new Map((pp.data||[]).map(p=>[p.id,p]));
+        friendsList=friendIds.map(id=>byId.get(id)).filter(Boolean);
+        // Any friend not surfaced by the bulk RPC → resolve individually.
+        for(const id of friendIds.filter(id=>!byId.has(id))){
+          try{ const r=await withTimeout(sb.rpc('get_public_profile',{_id:id}),8000,'friend profile'); const d=Array.isArray(r.data)?r.data[0]:r.data; if(d)friendsList.push(d); }catch(e){}
+        }
+      }catch(e){ console.warn('[friends] profile resolve failed',e?.message||e); }
+    }
     skeletonDone(_skelF);
-    const friendsList=(fr||[]).map(x=>x.profiles).filter(Boolean);
     // Build leaderboard: self + friends
     const allUsers=[{id:cloudUser.id,display_name:userProfile?.display_name||t('you'),avatar:userProfile?.avatar,goal_cal:userProfile?.goal_cal||1800},...friendsList];
     // SECURITY: score friends from aggregate daily totals (no raw food names /
@@ -10066,9 +10123,111 @@ customizeAllSelects();
 // inside finishOnboard). Existing users skip the wizard but still get the tour
 // once — auto-shown here when the tour hasn't been seen for this TUTORIAL_VERSION.
 setTimeout(()=>{
+  // Brand-new users pick a language FIRST; chooseStartLang() then chains into
+  // the onboarding wizard + tour.
+  if(shouldShowLangPicker()){ openLangPicker(); return; }
   if(shouldShowOnboarding()){openOnboard();}
   else if(shouldShowTutorial()){openTutorial();}
 },700);
+// PWA install nudge — only for the uninstalled web app (not native/standalone).
+// Delayed so it never collides with the first-run language/onboarding/tour flow.
+setTimeout(maybeShowInstallPrompt,5200);
+
+// ═══ FIRST-RUN LANGUAGE PICKER ═══
+function shouldShowLangPicker(){
+  // Only brand-new users (those who'd also see onboarding) and only once.
+  return !lsLoad('cp_lang_chosen',false) && (typeof shouldShowOnboarding==='function') && shouldShowOnboarding();
+}
+function openLangPicker(){
+  // Pre-highlight the device language as a hint.
+  const nav=(navigator.language||'').toLowerCase();
+  const guess=nav.startsWith('th')?'th':nav.startsWith('zh')?(/(hant|tw|hk|mo)/.test(nav)?'zh-Hant':'zh-Hans'):nav?'en':'th';
+  document.querySelectorAll('#langPickerModal .lang-opt').forEach(b=>{
+    b.classList.toggle('active', (b.getAttribute('onclick')||'').includes("'"+guess+"'"));
+  });
+  document.getElementById('langPickerModal').classList.remove('hide');
+}
+function chooseStartLang(lang){
+  setLang(lang);
+  lsSave('cp_lang_chosen',true);
+  document.getElementById('langPickerModal').classList.add('hide');
+  // Continue the first-run flow in the chosen language.
+  setTimeout(()=>{
+    if(typeof shouldShowOnboarding==='function'&&shouldShowOnboarding())openOnboard();
+    else if(typeof shouldShowTutorial==='function'&&shouldShowTutorial())openTutorial();
+  },260);
+}
+
+// ═══ PWA INSTALL PROMPT (Android beforeinstallprompt · iOS Add-to-Home-Screen) ═══
+let _deferredInstallPrompt=null;
+function isStandalonePWA(){
+  return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone===true;   // iOS Safari
+}
+function isIOSDevice(){
+  const ua=navigator.userAgent||'';
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+}
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();          // stop Chrome's mini-infobar; we show our own UI
+  _deferredInstallPrompt=e;
+  maybeShowInstallPrompt();
+});
+window.addEventListener('appinstalled',()=>{
+  _deferredInstallPrompt=null;
+  lsSave('cp_install_dismissed',Date.now());
+  const m=document.getElementById('installModal'); if(m)m.classList.add('hide');
+});
+function maybeShowInstallPrompt(){
+  try{
+    if(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())return; // native APK
+    if(isStandalonePWA())return;                       // already installed
+    const last=lsLoad('cp_install_dismissed',0);
+    if(last && Date.now()-last < 7*864e5)return;        // snooze 7 days after dismiss
+    // Never stack on the first-run flow or any open modal.
+    if((typeof shouldShowLangPicker==='function'&&shouldShowLangPicker())||
+       (typeof shouldShowOnboarding==='function'&&shouldShowOnboarding())||
+       (typeof shouldShowTutorial==='function'&&shouldShowTutorial()))return;
+    if(document.querySelector('.modal-bg:not(.hide)'))return;
+    const ios=isIOSDevice();
+    if(!_deferredInstallPrompt && !ios)return;          // can't install here
+    showInstallModal(ios);
+  }catch(e){}
+}
+function showInstallModal(ios){
+  const en=(settings.lang||'th')!=='th';
+  document.getElementById('installTitle').textContent=LL('ติดตั้ง CalPro+ ลงเครื่อง','Install CalPro+','安装 CalPro+','安裝 CalPro+');
+  const body=document.getElementById('installBody');
+  const acts=document.getElementById('installActions');
+  if(ios){
+    // iOS Safari can't trigger install programmatically → show A2HS steps.
+    body.innerHTML=
+      `<div style="margin-bottom:8px">${LL('เพิ่ม CalPro+ ไปที่หน้าจอโฮม เปิดเร็วขึ้น เต็มจอ ใช้ออฟไลน์ได้','Add CalPro+ to your Home Screen for faster, full-screen, offline access','把 CalPro+ 添加到主屏幕，更快、全屏、可离线使用','把 CalPro+ 加到主畫面，更快、全螢幕、可離線使用')}</div>`+
+      `<ol style="margin:0;padding-left:20px;line-height:1.9">`+
+        `<li>${LL('แตะปุ่ม <b>แชร์</b> ⬆️ ด้านล่างของ Safari','Tap the <b>Share</b> ⬆️ button in Safari','点按 Safari 底部的<b>分享</b> ⬆️ 按钮','點按 Safari 底部的<b>分享</b> ⬆️ 按鈕')}</li>`+
+        `<li>${LL('เลือก <b>เพิ่มไปยังหน้าจอโฮม</b>','Choose <b>Add to Home Screen</b>','选择<b>添加到主屏幕</b>','選擇<b>加入主畫面</b>')}</li>`+
+        `<li>${LL('กด <b>เพิ่ม</b> มุมขวาบน','Tap <b>Add</b> (top-right)','点按右上角<b>添加</b>','點按右上角<b>加入</b>')}</li>`+
+      `</ol>`;
+    acts.innerHTML=`<button class="btn" style="width:100%" onclick="dismissInstall()">${LL('เข้าใจแล้ว','Got it','明白了','明白了')}</button>`;
+    document.getElementById('installLater').style.display='none';
+  }else{
+    body.innerHTML=`<div style="text-align:center">${LL('ติดตั้งเพื่อเปิดเร็วขึ้น เต็มจอ และใช้งานออฟไลน์ได้','Install for faster launch, full-screen, and offline use','安装后启动更快、全屏、可离线使用','安裝後啟動更快、全螢幕、可離線使用')}</div>`;
+    acts.innerHTML=`<button class="btn" style="width:100%" onclick="triggerInstall()">${LL('ติดตั้ง','Install','安装','安裝')}</button>`;
+    document.getElementById('installLater').style.display='';
+  }
+  document.getElementById('installModal').classList.remove('hide');
+}
+async function triggerInstall(){
+  if(!_deferredInstallPrompt){dismissInstall();return;}
+  document.getElementById('installModal').classList.add('hide');
+  try{ _deferredInstallPrompt.prompt(); await _deferredInstallPrompt.userChoice; }catch(e){}
+  _deferredInstallPrompt=null;
+  lsSave('cp_install_dismissed',Date.now());
+}
+function dismissInstall(){
+  document.getElementById('installModal').classList.add('hide');
+  lsSave('cp_install_dismissed',Date.now());
+}
 
 // ═══ Esc-to-close + Tab-trap for open modals ═══
 function _topmostModal(){
