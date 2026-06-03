@@ -129,7 +129,7 @@ select,textarea{font-size:max(16px,1rem)!important;}
 /* ── DRAWER ── */
 .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;backdrop-filter:blur(2px);}
 .drawer-overlay.open{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 62%,transparent);-webkit-backdrop-filter:blur(34px) saturate(1.8);backdrop-filter:blur(34px) saturate(1.8);border-right:1px solid var(--glass-bd);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(34px) saturate(1.8);backdrop-filter:blur(34px) saturate(1.8);border-right:1px solid var(--glass-bd);border-radius:0 24px 24px 0;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.6,.2,1);z-index:101;overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
 /* Shadow ONLY while open — a closed drawer sits at translateX(-100%) with its
    right edge exactly at x=0, so a permanent box-shadow bled a faint dark band
    onto the left screen edge. Toggling it with .open kills that artifact. */
@@ -324,6 +324,21 @@ html[data-hc="1"] .fab{background:var(--accent)!important;-webkit-backdrop-filte
 .step-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
 .step-row label{margin-bottom:0!important;}
 .step-no{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:.66rem;font-weight:800;flex-shrink:0;}
+/* Today share button — accent-tinted so it stands out a touch (not a loud solid) */
+.share-today{background:color-mix(in srgb,var(--accent) 13%,var(--surface2));border-color:color-mix(in srgb,var(--accent) 42%,transparent);color:var(--accent);font-weight:600;box-shadow:0 2px 10px color-mix(in srgb,var(--accent) 18%,transparent);}
+.share-today:hover{background:color-mix(in srgb,var(--accent) 20%,var(--surface2));}
+.share-today .ic svg{stroke:var(--accent);}
+/* Cloud Sync panel (settings) */
+.cloud-hero{display:flex;align-items:center;gap:13px;}
+.cloud-hero-col{flex-direction:column;text-align:center;gap:9px;padding:6px 0 2px;}
+.cloud-badge{width:56px;height:56px;border-radius:50%;background:color-mix(in srgb,var(--blue) 16%,var(--surface2));color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cloud-badge .ic{display:inline-flex;}
+.cloud-badge .ic svg{width:28px;height:28px;}
+.cloud-badge-on{background:color-mix(in srgb,var(--green) 18%,var(--surface2));color:var(--green);}
+.cloud-acct{min-width:0;}
+.cloud-email{font-size:.9rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cloud-title{font-size:1.02rem;font-weight:700;}
+.cloud-sub{font-size:.72rem;color:var(--muted);line-height:1.5;margin-top:2px;}
 
 /* ── SEARCH ── */
 .sbox{position:relative;margin-bottom:9px;}
@@ -964,7 +979,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         </h3>
         <div id="workoutsList"></div>
       </div>
-      <button class="btn-sec" onclick="shareDaily()" style="width:100%;margin-top:8px"><span class="ic" data-ic="share"></span> <span data-i18n="share_today">แชร์สรุปวันนี้</span></button>
+      <button class="btn-sec share-today" onclick="shareDaily()" style="width:100%;margin-top:8px"><span class="ic" data-ic="share"></span> <span data-i18n="share_today">แชร์สรุปวันนี้</span></button>
       <!-- Floating Add-Food button — visible only on Today (parent .screen toggles display) -->
       <button class="fab" id="addFoodFab" onclick="goToAddFood()" aria-label="Add food" title="เพิ่มอาหาร">
         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
@@ -993,24 +1008,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <div class="card">
         <h3 data-i18n="manual">กรอกเอง</h3>
-        <div class="fgrid g2">
-          <div class="fl"><label data-i18n="food_name">ชื่ออาหาร</label><input type="text" id="fName" placeholder="ชื่อ..." data-i18n="name_ph"></div>
-          <div class="fl"><label data-i18n="cal">แคลอรี่</label><input type="number" id="fCal" min="0" placeholder="kcal" data-i18n="cal_ph"></div>
-        </div>
-        <div class="fgrid g3" style="margin-bottom:10px">
-          <div class="fl"><label data-i18n="protein_g">โปรตีน (g)</label><input type="number" id="fP" min="0" placeholder="0"></div>
-          <div class="fl"><label data-i18n="carbs_g">คาร์บ (g)</label><input type="number" id="fC" min="0" placeholder="0"></div>
-          <div class="fl"><label data-i18n="fat_g">ไขมัน (g)</label><input type="number" id="fF" min="0" placeholder="0"></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);cursor:pointer;user-select:none">
-            <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> <span class="ic" data-ic="save"></span> <span data-i18n="save_lib">บันทึกลงไลบรารี</span>
-          </label>
-          <button type="button" class="photo-btn" onclick="document.getElementById('photoUpload').click()"><span class="ic" data-ic="image"></span> <span data-i18n="attach_photo">แนบรูป</span></button>
-          <input type="file" id="photoUpload" accept="image/*" hidden onchange="loadPhotoForEntry(this.files[0])">
-          <img id="photoPreview" class="photo-preview" alt="">
-        </div>
-        <button class="btn" onclick="addManual()" data-i18n="btn_add">+ เพิ่มอาหาร</button>
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;line-height:1.5" data-i18n="manual_sub">เพิ่มอาหารที่ไม่มีในระบบ · ใส่แคล/มาโครเอง</div>
+        <button class="btn-sec" onclick="openManualModal()" style="width:100%" data-i18n="manual_open">+ กรอกอาหารเอง</button>
       </div>
       <div class="card">
         <h3><span class="ic" data-ic="utensils"></span> <span data-i18n="recipe_title">สร้างสูตรอาหาร</span></h3>
@@ -1699,6 +1698,31 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 </div>
 
 <!-- RECIPE BUILDER MODAL — composite custom food from multiple ingredients -->
+<!-- MANUAL ENTRY MODAL — opened from the "กรอกเอง" card (popup like recipe) -->
+<div class="modal-bg hide" id="manualModal" onclick="if(event.target===this)closeManualModal()">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-hdr"><h3><span class="ic" data-ic="edit"></span> <span data-i18n="manual">กรอกเอง</span></h3><button class="mc-close" onclick="closeManualModal()" aria-label="Close"><span class="ic" data-ic="x"></span></button></div>
+    <div class="fgrid g2">
+      <div class="fl"><label data-i18n="food_name">ชื่ออาหาร</label><input type="text" id="fName" placeholder="ชื่อ..." data-i18n="name_ph"></div>
+      <div class="fl"><label data-i18n="cal">แคลอรี่</label><input type="number" id="fCal" min="0" placeholder="kcal" data-i18n="cal_ph"></div>
+    </div>
+    <div class="fgrid g3" style="margin-bottom:10px">
+      <div class="fl"><label data-i18n="protein_g">โปรตีน (g)</label><input type="number" id="fP" min="0" placeholder="0"></div>
+      <div class="fl"><label data-i18n="carbs_g">คาร์บ (g)</label><input type="number" id="fC" min="0" placeholder="0"></div>
+      <div class="fl"><label data-i18n="fat_g">ไขมัน (g)</label><input type="number" id="fF" min="0" placeholder="0"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);cursor:pointer;user-select:none">
+        <input type="checkbox" id="saveLib" style="width:16px;height:16px;accent-color:var(--accent)"> <span class="ic" data-ic="save"></span> <span data-i18n="save_lib">บันทึกลงไลบรารี</span>
+      </label>
+      <button type="button" class="photo-btn" onclick="document.getElementById('photoUpload').click()"><span class="ic" data-ic="image"></span> <span data-i18n="attach_photo">แนบรูป</span></button>
+      <input type="file" id="photoUpload" accept="image/*" hidden onchange="loadPhotoForEntry(this.files[0])">
+      <img id="photoPreview" class="photo-preview" alt="">
+    </div>
+    <button class="btn" onclick="addManual()" style="width:100%" data-i18n="btn_add">+ เพิ่มอาหาร</button>
+  </div>
+</div>
+
 <div class="modal-bg hide" id="recipeModal">
   <div class="modal" style="max-width:420px">
     <div class="modal-hdr">
@@ -1980,7 +2004,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.33.19';
+const APP_VERSION = '2.33.20';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2200,7 +2224,7 @@ const I18N = {
     search_food:'ค้นหาอาหาร',search_ph:'พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)...',
     no_food:'ไม่พบอาหาร',no_fav:'ยังไม่มีของโปรด · กด ⭐ ในผลค้นหา',no_recent:'ยังไม่มีรายการล่าสุด · เพิ่มอาหารดูสิ',
     meal:'มื้ออาหาร',
-    manual:'กรอกเอง',food_name:'ชื่ออาหาร',name_ph:'ชื่อ...',cal:'แคลอรี่',cal_ph:'kcal',
+    manual:'กรอกเอง',manual_sub:'เพิ่มอาหารที่ไม่มีในระบบ · ใส่แคล/มาโครเอง',manual_open:'+ กรอกอาหารเอง',food_name:'ชื่ออาหาร',name_ph:'ชื่อ...',cal:'แคลอรี่',cal_ph:'kcal',
     protein_g:'โปรตีน (g)',carbs_g:'คาร์บ (g)',fat_g:'ไขมัน (g)',
     save_lib:'บันทึกลงไลบรารี',attach_photo:'แนบรูป',btn_add:'+ เพิ่มอาหาร',
     cal_7d:'แคลอรี่ 7 วัน',weight_30d:'น้ำหนัก 30 วัน',water_7d:'น้ำดื่ม 7 วัน',projection_title:'แนวโน้มน้ำหนัก 30 วัน + พยากรณ์',
@@ -2302,7 +2326,7 @@ const I18N = {
     search_food:'Search Food',search_ph:'Type food name (TH/EN)...',
     no_food:'No food found',no_fav:'No favorites yet · tap ⭐ on a result',no_recent:'No recent items · log something to populate this',
     meal:'Meal',
-    manual:'Manual Entry',food_name:'Food name',name_ph:'Name...',cal:'Calories',cal_ph:'kcal',
+    manual:'Manual Entry',manual_sub:'Add a food that isn’t listed · enter kcal/macros yourself',manual_open:'+ Manual entry',food_name:'Food name',name_ph:'Name...',cal:'Calories',cal_ph:'kcal',
     protein_g:'Protein (g)',carbs_g:'Carbs (g)',fat_g:'Fat (g)',
     save_lib:'Save to my library',attach_photo:'Attach photo',btn_add:'+ Add food',
     cal_7d:'7-day Calories',weight_30d:'30-day Weight',water_7d:'7-day Water',projection_title:'30-day weight trend + forecast',
@@ -2404,7 +2428,7 @@ const I18N = {
     search_food:'搜索食物',search_ph:'输入食物名称（中/英）...',
     no_food:'未找到食物',no_fav:'还没有收藏 · 在结果上点 ⭐',no_recent:'还没有最近记录 · 记录一些来填充',
     meal:'餐次',
-    manual:'手动输入',food_name:'食物名称',name_ph:'名称...',cal:'热量',cal_ph:'千卡',
+    manual:'手动输入',manual_sub:'添加系统里没有的食物 · 自己填热量/营养素',manual_open:'+ 手动输入',food_name:'食物名称',name_ph:'名称...',cal:'热量',cal_ph:'千卡',
     protein_g:'蛋白质 (克)',carbs_g:'碳水 (克)',fat_g:'脂肪 (克)',
     save_lib:'保存到我的食物库',attach_photo:'附加照片',btn_add:'+ 添加食物',
     cal_7d:'7天热量',weight_30d:'30天体重',water_7d:'7天饮水',projection_title:'30天体重趋势 + 预测',
@@ -2506,7 +2530,7 @@ const I18N = {
     search_food:'搜尋食物',search_ph:'輸入食物名稱（中/英）...',
     no_food:'找不到食物',no_fav:'還沒有收藏 · 在結果上點 ⭐',no_recent:'還沒有最近記錄 · 記錄一些來填充',
     meal:'餐別',
-    manual:'手動輸入',food_name:'食物名稱',name_ph:'名稱...',cal:'熱量',cal_ph:'大卡',
+    manual:'手動輸入',manual_sub:'新增系統裡沒有的食物 · 自己填熱量/營養素',manual_open:'+ 手動輸入',food_name:'食物名稱',name_ph:'名稱...',cal:'熱量',cal_ph:'大卡',
     protein_g:'蛋白質 (克)',carbs_g:'碳水 (克)',fat_g:'脂肪 (克)',
     save_lib:'儲存到我的食物庫',attach_photo:'附加照片',btn_add:'+ 新增食物',
     cal_7d:'7天熱量',weight_30d:'30天體重',water_7d:'7天飲水',projection_title:'30天體重趨勢 + 預測',
@@ -3926,8 +3950,12 @@ function addManual(){
   insertEntry({food_name:name,calories:cal,protein:p,carbs:c,fat,amount_g:null,meal});
   ['fName','fCal','fP','fC','fF'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('saveLib').checked=false;
-  if(document.getElementById('saveLib')?.checked||customFoods.find(x=>x.n===name))scheduleAutoSync('custom_food');
+  if(customFoods.find(x=>x.n===name))scheduleAutoSync('custom_food');
+  const _pp=document.getElementById('photoPreview');if(_pp){_pp.removeAttribute('src');_pp.style.display='none';}pendingPhoto=null;
+  closeManualModal();
 }
+function openManualModal(){const m=document.getElementById('manualModal');if(m)m.classList.remove('hide');}
+function closeManualModal(){const m=document.getElementById('manualModal');if(m)m.classList.add('hide');}
 let pendingPhoto=null;
 function loadPhotoForEntry(file){
   if(!file)return;
@@ -4275,6 +4303,41 @@ window.addEventListener('beforeunload',()=>{
 
 function renderCloudStatus(){
   const wrap=document.getElementById('cloudStatus');if(!wrap)return;
+  // iOS-style cloud panel: a tinted cloud badge + centred status + clear actions.
+  {
+    const isEn=(settings.lang||'th')!=='th';
+    if(!sb){wrap.innerHTML=`<div style="font-size:.76rem;color:var(--muted);text-align:center;padding:8px">${LL('โหลด Supabase ไม่ได้','Could not load Supabase','无法加载 Supabase','無法載入 Supabase')}</div>`;return;}
+    const isAnon=cloudUser&&(cloudUser.is_anonymous===true||cloudUser.aud==='anon');
+    const isReal=cloudUser&&!isAnon;
+    const lastSync=lsLoad('calpro_last_sync',null);
+    const loc=isEn?'en-GB':'th-TH';
+    const lastTxt=lastSync?new Date(lastSync).toLocaleString(loc,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    if(isReal){
+      wrap.innerHTML=
+        `<div class="cloud-hero"><div class="cloud-badge cloud-badge-on">${icoSvg('cloud')}</div>`+
+          `<div class="cloud-acct"><div class="cloud-email">${escapeHtml(cloudUser.email)}</div>`+
+          `<div class="cloud-sub">${t('last_sync')}: ${lastTxt}</div></div></div>`+
+        `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">`+
+          `<button class="btn-sec" onclick="manualSync()" ${syncing?'disabled':''}>${syncing?'…':icoSvg('sync')+' '+t('sync_now')}</button>`+
+          `<button class="btn-sec" onclick="signOutCloud()">${t('sign_out')}</button>`+
+        `</div>`+
+        `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">`+
+          `<button class="btn-sec" onclick="diagnoseSync()" style="font-size:.74rem;padding:7px">${icoSvg('search')} ${LL('ตรวจสอบ','Diagnose','诊断','診斷')}</button>`+
+          `<button class="btn-danger" onclick="deleteCloudAccount()" style="font-size:.74rem;padding:7px">${t('delete_cloud')}</button>`+
+        `</div>`;
+    }else{
+      const sub=isAnon
+        ?LL('ข้อมูลถูกสำรองไว้แต่ผูกกับเครื่องนี้ · เข้าสู่ระบบเพื่อซิงค์ข้ามอุปกรณ์','Your data is backed up but tied to this device. Sign in to sync across devices.','你的数据已备份但仅限本设备 · 登录后可跨设备同步','你的資料已備份但僅限本裝置 · 登入後可跨裝置同步')
+        :t('cloud_help');
+      wrap.innerHTML=
+        `<div class="cloud-hero cloud-hero-col"><div class="cloud-badge">${icoSvg('cloud')}</div>`+
+          `<div class="cloud-title">${LL('ยังไม่ได้เข้าสู่ระบบ','Not signed in','尚未登录','尚未登入')}</div>`+
+          `<div class="cloud-sub" style="text-align:center;max-width:270px">${escapeHtml(sub)}</div></div>`+
+        `<button class="btn" style="width:100%;margin-top:14px" onclick="openAuthModal('signup')">${t('signup')}</button>`+
+        `<button class="btn-sec" style="width:100%;margin-top:8px" onclick="openAuthModal('login')">${t('login')}</button>`;
+    }
+    return;
+  }
   if(!sb){wrap.innerHTML='<div style="font-size:.78rem;color:var(--muted)">Supabase SDK โหลดไม่ได้</div>';return;}
   const isEn=(settings.lang||'th')!=='th';
   const isAnon=cloudUser&&(cloudUser.is_anonymous===true||cloudUser.aud==='anon');
@@ -6546,7 +6609,29 @@ function computeUserLevel(streak,days,onTrack){
 function toggleCard(id){const c=document.getElementById(id);if(c)c.classList.toggle('collapsed');}
 // Image lightbox — view avatar / banner full-size. Changing the picture is done
 // through the small camera buttons; tapping the image itself just views it.
-function showImgViewer(html){const v=document.getElementById('imgViewer');if(!v)return;v.querySelector('.iv-content').innerHTML=html;v.classList.add('show');}
+function showImgViewer(html){const v=document.getElementById('imgViewer');if(!v)return;v.querySelector('.iv-content').innerHTML=html;v.classList.add('show');_initImgZoom();}
+// Pinch-to-zoom / pan / double-tap-zoom for the lightbox image, so zooming the
+// photo no longer zooms the whole page. Handles its own gestures (touch-action:
+// none) and preventDefault to stop the browser's page zoom.
+function _initImgZoom(){
+  const v=document.getElementById('imgViewer');if(!v)return;
+  const el=v.querySelector('.iv-content img')||v.querySelector('.iv-content .iv-emoji');
+  if(!el)return;
+  let scale=1,tx=0,ty=0,startD=0,startScale=1,panning=false,sx=0,sy=0,lastTap=0;
+  el.style.touchAction='none';el.style.willChange='transform';el.style.transition='transform .15s';
+  const apply=()=>{el.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;};
+  const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+  el.addEventListener('touchstart',e=>{
+    if(e.touches.length===2){startD=dist(e.touches)||1;startScale=scale;el.style.transition='none';}
+    else if(e.touches.length===1&&scale>1){panning=true;sx=e.touches[0].clientX-tx;sy=e.touches[0].clientY-ty;el.style.transition='none';}
+  },{passive:false});
+  el.addEventListener('touchmove',e=>{
+    if(e.touches.length===2){e.preventDefault();scale=Math.min(5,Math.max(1,startScale*dist(e.touches)/startD));apply();}
+    else if(panning&&e.touches.length===1){e.preventDefault();tx=e.touches[0].clientX-sx;ty=e.touches[0].clientY-sy;apply();}
+  },{passive:false});
+  el.addEventListener('touchend',()=>{panning=false;el.style.transition='transform .15s';if(scale<=1.02){scale=1;tx=0;ty=0;apply();}});
+  el.addEventListener('click',e=>{e.stopPropagation();const now=Date.now();if(now-lastTap<300){if(scale>1){scale=1;tx=0;ty=0;}else{scale=2.4;}apply();}lastTap=now;});
+}
 function closeImgViewer(){const v=document.getElementById('imgViewer');if(v)v.classList.remove('show');}
 function viewAvatar(){
   const p=userProfile||{};const av=p.avatar||'';
