@@ -625,6 +625,28 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .ob-dot{width:8px;height:8px;border-radius:50%;background:var(--surface2);transition:all .2s;}
 .ob-dot.active{background:var(--accent);width:24px;border-radius:4px;}
 .ob-goal-chip{text-align:left;padding:14px;font-size:.9rem;}
+/* ── Guided tour / tutorial ── */
+.tut-modal{max-width:420px;max-height:92vh;display:flex;flex-direction:column;padding:0;overflow:hidden;}
+.tut-illus{position:relative;background:linear-gradient(165deg,color-mix(in srgb,var(--accent) 18%,var(--surface2)),var(--surface2));padding:16px 16px 8px;flex:none;}
+.tut-illus svg{width:100%;height:auto;display:block;border-radius:12px;}
+.tut-skip{position:absolute;top:10px;right:11px;z-index:3;background:color-mix(in srgb,var(--bg) 50%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--glass-bd);color:var(--text);font-size:.72rem;padding:5px 13px;border-radius:20px;cursor:pointer;font-family:inherit;}
+.tut-body{padding:15px 18px 6px;overflow-y:auto;flex:1;animation:obIn .25s ease-out;}
+.tut-step-badge{display:inline-block;font-size:.66rem;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);padding:3px 11px;border-radius:20px;margin-bottom:9px;letter-spacing:.3px;}
+.tut-title{margin:0 0 9px;font-size:1.12rem;line-height:1.3;}
+.tut-desc{font-size:.85rem;line-height:1.6;color:var(--text);}
+.tut-desc ol{margin:0;padding-left:0;list-style:none;counter-reset:tut;}
+.tut-desc ol li{position:relative;padding-left:30px;margin-bottom:9px;counter-increment:tut;}
+.tut-desc ol li::before{content:counter(tut);position:absolute;left:0;top:-1px;width:21px;height:21px;border-radius:50%;background:var(--accent);color:#fff;font-size:.74rem;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.tut-desc p{margin:0;color:var(--muted);}
+.tut-foot{padding:8px 18px 16px;flex:none;}
+.tut-dots{display:flex;justify-content:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.tut-dot{width:7px;height:7px;border-radius:50%;background:var(--surface2);transition:all .2s;cursor:pointer;}
+.tut-dot.active{background:var(--accent);width:22px;border-radius:4px;}
+.tut-nav{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;}
+.tut-nav .btn,.tut-nav .btn-sec{padding:11px;font-size:.86rem;}
+.tut-hl{animation:tutPulse 1.5s ease-in-out infinite;}
+@keyframes tutPulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+@media (prefers-reduced-motion: reduce){.tut-hl{animation:none!important;opacity:.85;}.tut-body{animation:none!important;}}
 /* Focus visible — keyboard-only outline */
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
 .bnt:focus-visible,.icon-btn:focus-visible{outline-offset:-2px;}
@@ -1813,6 +1835,26 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
   </div>
 </div>
 
+<!-- GUIDED TOUR / TUTORIAL — auto-shows once per device; re-openable from drawer -->
+<div class="modal-bg hide" id="tutorialModal" onclick="if(event.target===this)closeTutorial(true)">
+  <div class="modal tut-modal" role="dialog" aria-modal="true" aria-labelledby="tutTitle">
+    <button class="tut-skip" id="tutSkipBtn" onclick="closeTutorial(true)" data-i18n="tour_skip">ข้าม</button>
+    <div class="tut-illus" id="tutIllus"></div>
+    <div class="tut-body">
+      <div class="tut-step-badge" id="tutStepBadge"></div>
+      <h3 class="tut-title" id="tutTitle"></h3>
+      <div class="tut-desc" id="tutDesc"></div>
+    </div>
+    <div class="tut-foot">
+      <div class="tut-dots" id="tutDots"></div>
+      <div class="tut-nav">
+        <button class="btn-sec" id="tutBackBtn" onclick="tutPrev()" data-i18n="ob_back">ย้อนกลับ</button>
+        <button class="btn" id="tutNextBtn" onclick="tutNext()" data-i18n="ob_next">ถัดไป</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- UPDATE AVAILABLE MODAL — shown when SW detects a new version -->
 <div class="modal-bg hide" id="updateModal">
   <div class="modal" style="text-align:center">
@@ -1981,6 +2023,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <button class="drawer-item" onclick="navTo('settings')"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span data-i18n="settings">ตั้งค่า</span><span class="di-arrow">›</span></button>
 
     <div class="drawer-sect" data-i18n="other_section">อื่น ๆ</div>
+    <button class="drawer-item" onclick="closeDrawer();openTutorial()"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></span><span data-i18n="tour_title">ทัวร์แนะนำการใช้งาน</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="navTo('help')"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span data-i18n="help_title">วิธีใช้งาน</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="openFeedback()"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span data-i18n="feedback">ส่งคำแนะนำ</span><span class="di-arrow">›</span></button>
     <button class="drawer-item" onclick="enterDevMode()"><span class="di-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span><span>Developer</span><span class="di-arrow">›</span></button>
@@ -2004,7 +2047,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.34.0';
+const APP_VERSION = '2.35.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2297,6 +2340,7 @@ const I18N = {
     about_links:'ลิงก์',about_credits:'เครดิต',
     theme_dark:'มืด',theme_night:'ดึก',theme_rose:'กุหลาบ',theme_sky:'ฟ้า',theme_violet:'ม่วง',theme_light:'สว่าง',theme_cream:'ครีม',theme_mint:'มินต์',theme_contrast:'คมชัด',
     help_title:'วิธีใช้งาน',health_tips:'คำแนะนำสุขภาพวันนี้',
+    tour_title:'ทัวร์แนะนำการใช้งาน',tour_sub:'ดูวิธีใช้แบบเร็วๆ ทีละขั้น',tour_skip:'ข้าม',
     portion_label:'จำนวน (เท่า)',portion_amount:'ปริมาณ',font_setting:'ฟอนต์',font_system:'ค่าเริ่มต้น',
     ad_label:'โฆษณา',ad_dismiss_aria:'ปิดโฆษณา',
     feedback:'ส่งคำแนะนำ',feedback_sub:'แชร์ความคิดเห็น/บั๊กถึงผู้พัฒนา',feedback_subject:'หัวเรื่อง',feedback_body:'ข้อความ',feedback_send:'ส่งทางอีเมล',feedback_subj_ph:'เช่น “อยากให้เพิ่มเมนูใหม่...”',feedback_body_ph:'พิมพ์ข้อความที่นี่...',
@@ -2399,6 +2443,7 @@ const I18N = {
     about_links:'Links',about_credits:'Credits',
     theme_dark:'Dark',theme_night:'Night',theme_rose:'Rose',theme_sky:'Sky',theme_violet:'Violet',theme_light:'Light',theme_cream:'Cream',theme_mint:'Mint',theme_contrast:'Contrast',
     help_title:'How to use',health_tips:'Health insights today',
+    tour_title:'Quick tour',tour_sub:'A fast, step-by-step walkthrough',tour_skip:'Skip',
     portion_label:'Quantity (×)',portion_amount:'Amount',font_setting:'Font',font_system:'System default',
     ad_label:'Ad',ad_dismiss_aria:'Dismiss ad',
     feedback:'Send feedback',feedback_sub:'Share suggestions/bugs with the developer',feedback_subject:'Subject',feedback_body:'Message',feedback_send:'Send via email',feedback_subj_ph:'e.g. "Please add more foods..."',feedback_body_ph:'Type your message here...',
@@ -2501,6 +2546,7 @@ const I18N = {
     about_links:'链接',about_credits:'鸣谢',
     theme_dark:'深色',theme_night:'夜间',theme_rose:'玫瑰',theme_sky:'天空',theme_violet:'紫罗兰',theme_light:'浅色',theme_cream:'奶油',theme_mint:'薄荷',theme_contrast:'高对比',
     help_title:'使用方法',health_tips:'今日健康提示',
+    tour_title:'快速导览',tour_sub:'快速逐步了解用法',tour_skip:'跳过',
     portion_label:'数量 (×)',portion_amount:'分量',font_setting:'字体',font_system:'系统默认',
     ad_label:'广告',ad_dismiss_aria:'关闭广告',
     feedback:'发送反馈',feedback_sub:'向开发者分享建议/问题',feedback_subject:'主题',feedback_body:'内容',feedback_send:'通过邮件发送',feedback_subj_ph:'例如 “请增加更多食物...”',feedback_body_ph:'在此输入你的内容...',
@@ -2603,6 +2649,7 @@ const I18N = {
     about_links:'連結',about_credits:'鳴謝',
     theme_dark:'深色',theme_night:'夜間',theme_rose:'玫瑰',theme_sky:'天空',theme_violet:'紫羅蘭',theme_light:'淺色',theme_cream:'奶油',theme_mint:'薄荷',theme_contrast:'高對比',
     help_title:'使用方法',health_tips:'今日健康提示',
+    tour_title:'快速導覽',tour_sub:'快速逐步了解用法',tour_skip:'跳過',
     portion_label:'數量 (×)',portion_amount:'分量',font_setting:'字型',font_system:'系統預設',
     ad_label:'廣告',ad_dismiss_aria:'關閉廣告',
     feedback:'傳送意見',feedback_sub:'向開發者分享建議/問題',feedback_subject:'主旨',feedback_body:'內容',feedback_send:'透過電郵傳送',feedback_subj_ph:'例如「請增加更多食物...」',feedback_body_ph:'在此輸入你的內容...',
@@ -6069,13 +6116,168 @@ function finishOnboard(skipped){
     const hdr=document.getElementById('hdrSub');
     if(hdr&&userProfile?.goal_cal)hdr.textContent=(userProfile.display_name||t('you'))+' · '+userProfile.goal_cal.toLocaleString()+' kcal'+dayUnitShort();
   }
-  // First-run nudge: land on Today + pulse the + button so the new user
-  // knows exactly where to make their first log.
+  // First-run nudge: land on Today, then either run the guided tour (brand-new
+  // users) or pulse the + button so they know where to make their first log.
   setTimeout(()=>{
     showPage('today',document.querySelector('.bnt'));
+    if(shouldShowTutorial()){ openTutorial(); return; }
     const fab=document.getElementById('addFoodFab');
     if(fab){fab.classList.add('pulse-hint');setTimeout(()=>fab.classList.remove('pulse-hint'),4600);}
   },300);
+}
+
+// ═══ GUIDED TOUR / TUTORIAL ═══
+// A simple, swipe-through walkthrough that auto-shows ONCE per device (for new
+// AND existing users from this version on) and is re-openable from the drawer.
+// Each slide pairs a stylised SVG mock-up of a screen with numbered tap-steps.
+// Bump TUTORIAL_VERSION when you add slides for a new feature and want the tour
+// to auto-pop again for everyone.
+const TUTORIAL_VERSION = 1;
+let _tutStep = 0;
+function shouldShowTutorial(){
+  return lsLoad('cp_tutorial_seen_v',0) < TUTORIAL_VERSION;
+}
+// ── SVG mock-up illustrations (one per screen) ──
+// Helper: pulsing accent highlight ring + a numbered badge at its top-left.
+function _tutHL(x,y,w,h,n){
+  return `<rect class="tut-hl" x="${x}" y="${y}" width="${w}" height="${h}" rx="9" fill="none" stroke="var(--accent)" stroke-width="2.5"/>`+
+    `<circle cx="${x}" cy="${y}" r="10" fill="var(--accent)"/>`+
+    `<text x="${x}" y="${y+4}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="system-ui,sans-serif">${n}</text>`;
+}
+// progress-ring (faux calorie ring)
+function _tutRing(cx,cy,r,pct){
+  const c=2*Math.PI*r, on=c*pct;
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="9"/>`+
+    `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${on.toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+}
+function _tutIllus(key){
+  const S=(inner)=>`<svg viewBox="0 0 300 178" role="img" aria-hidden="true"><rect x="1.5" y="1.5" width="297" height="175" rx="18" fill="var(--surface)" stroke="var(--glass-bd)"/>${inner}</svg>`;
+  const bar=(x,y,w,h,fill)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${(h/2).toFixed(1)}" fill="${fill||'var(--surface2)'}"/>`;
+  switch(key){
+    case 'welcome':
+      return S(
+        _tutRing(150,78,42,.72)+
+        `<text x="150" y="74" text-anchor="middle" font-size="20" font-weight="800" fill="var(--text)" font-family="system-ui,sans-serif">1,547</text>`+
+        `<text x="150" y="92" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="system-ui,sans-serif">kcal</text>`+
+        `<text x="208" y="40" font-size="15" fill="var(--accent)">✦</text><text x="78" y="44" font-size="11" fill="var(--accent)">✦</text><text x="222" y="120" font-size="11" fill="var(--accent)">✦</text>`+
+        `<text x="150" y="150" text-anchor="middle" font-size="17" font-weight="800" fill="var(--text)" font-family="system-ui,sans-serif">Cal<tspan fill="var(--accent)">Pro+</tspan></text>`
+      );
+    case 'today':
+      return S(
+        bar(16,16,90,9)+`<circle cx="282" cy="20" r="7" fill="var(--surface2)"/>`+
+        _tutRing(58,86,32,.66)+
+        `<text x="58" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)" font-family="system-ui,sans-serif">1.5k</text>`+
+        `<text x="58" y="97" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="system-ui,sans-serif">kcal</text>`+
+        bar(110,58,150,8,'var(--accent)')+bar(110,76,120,8)+bar(110,94,90,8)+
+        `<rect x="110" y="120" width="174" height="34" rx="9" fill="var(--surface2)"/>`+
+        `<circle cx="124" cy="137" r="6" fill="var(--accent)"/><circle cx="142" cy="137" r="6" fill="var(--accent)"/><circle cx="160" cy="137" r="6" fill="var(--accent)"/><circle cx="178" cy="137" r="6" fill="var(--surface)" stroke="var(--accent)"/><circle cx="196" cy="137" r="6" fill="var(--surface)" stroke="var(--border)"/>`+
+        `<rect x="248" y="128" width="26" height="18" rx="9" fill="var(--accent)"/><text x="261" y="141" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="system-ui,sans-serif">+</text>`+
+        _tutHL(26,54,64,64,1)+_tutHL(110,118,174,38,2)
+      );
+    case 'addfood':
+      return S(
+        `<rect x="16" y="14" width="230" height="22" rx="11" fill="var(--surface2)"/><circle cx="32" cy="25" r="6" fill="none" stroke="var(--muted)" stroke-width="2"/><line x1="36" y1="29" x2="41" y2="34" stroke="var(--muted)" stroke-width="2"/>`+
+        `<text x="58" y="29" font-size="9" fill="var(--muted)" font-family="system-ui,sans-serif">ส้มตำ...</text>`+
+        bar(16,48,54,15,'var(--accent)')+bar(78,48,54,15)+bar(140,48,54,15)+bar(202,48,54,15)+
+        bar(16,72,40,13)+bar(64,72,40,13)+bar(112,72,40,13)+bar(160,72,40,13)+
+        `<rect x="16" y="96" width="268" height="22" rx="7" fill="var(--surface2)"/><path d="M271 100 l1.4 3 3.3 .3 -2.5 2.2 .8 3.2 -3-1.7 -3 1.7 .8 -3.2 -2.5 -2.2 3.3 -.3z" fill="var(--amber)"/>`+
+        `<rect x="16" y="122" width="268" height="22" rx="7" fill="var(--surface2)"/><path d="M271 126 l1.4 3 3.3 .3 -2.5 2.2 .8 3.2 -3-1.7 -3 1.7 .8 -3.2 -2.5 -2.2 3.3 -.3z" fill="none" stroke="var(--muted)" stroke-width="1"/>`+
+        _tutHL(16,14,230,22,1)+_tutHL(16,46,240,19,2)+_tutHL(262,96,22,22,3)
+      );
+    case 'ai':
+      return S(
+        bar(16,16,120,9)+
+        `<rect x="40" y="36" width="220" height="86" rx="12" fill="var(--surface2)"/>`+
+        `<circle cx="150" cy="73" r="20" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="150" cy="73" r="6" fill="var(--muted)"/><rect x="140" y="50" width="20" height="8" rx="3" fill="var(--muted)"/>`+
+        `<rect x="92" y="134" width="116" height="26" rx="13" fill="var(--accent)"/><text x="150" y="151" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="system-ui,sans-serif">✦ AI</text>`+
+        _tutHL(92,132,116,28,1)+_tutHL(40,36,220,86,2)
+      );
+    case 'analysis':
+      return S(
+        bar(16,16,110,9)+
+        `<g>`+[40,70,55,85,60,95,75].map((h,i)=>`<rect x="${20+i*22}" y="${120-h}" width="14" height="${h}" rx="4" fill="${i===3?'var(--accent)':'var(--surface2)'}"/>`).join('')+`</g>`+
+        `<line x1="20" y1="120" x2="184" y2="120" stroke="var(--border)" stroke-width="1"/>`+
+        `<polyline points="200,150 222,140 244,128 266,108" fill="none" stroke="var(--green)" stroke-width="2.5"/><polyline points="266,108 284,98" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-dasharray="3 3"/>`+
+        `<text x="210" y="60" font-size="8" fill="var(--muted)" font-family="system-ui,sans-serif">น้ำหนัก</text>`+
+        _tutHL(16,30,172,94,1)+_tutHL(196,92,96,66,2)
+      );
+    case 'profile':
+      return S(
+        `<rect x="1.5" y="1.5" width="297" height="56" rx="18" fill="var(--surface2)"/><rect x="1.5" y="40" width="297" height="17" fill="var(--surface)"/>`+
+        `<circle cx="48" cy="56" r="22" fill="var(--surface)" stroke="var(--accent)" stroke-width="3"/><circle cx="48" cy="56" r="14" fill="var(--surface2)"/>`+
+        `<rect x="80" y="46" width="70" height="11" rx="5" fill="var(--text)" opacity=".75"/>`+
+        `<rect x="158" y="44" width="46" height="16" rx="8" fill="var(--amber)"/><text x="181" y="56" text-anchor="middle" font-size="9" font-weight="800" fill="#3a2a00" font-family="system-ui,sans-serif">Lv 7</text>`+
+        `<rect x="16" y="92" width="80" height="34" rx="9" fill="var(--surface2)"/><rect x="110" y="92" width="80" height="34" rx="9" fill="var(--surface2)"/><rect x="204" y="92" width="80" height="34" rx="9" fill="var(--surface2)"/>`+
+        `<text x="56" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="var(--accent)" font-family="system-ui,sans-serif">12</text><text x="56" y="120" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="system-ui,sans-serif">streak</text>`+
+        `<rect x="16" y="140" width="268" height="24" rx="9" fill="none" stroke="var(--accent)" stroke-width="1.5"/><text x="150" y="156" text-anchor="middle" font-size="10" font-weight="700" fill="var(--accent)" font-family="system-ui,sans-serif">✎ แก้ไขโปรไฟล์</text>`+
+        _tutHL(16,90,268,38,1)+_tutHL(16,138,268,28,2)
+      );
+    case 'menu':
+      return S(
+        `<line x1="18" y1="20" x2="34" y2="20" stroke="var(--text)" stroke-width="2.5"/><line x1="18" y1="26" x2="34" y2="26" stroke="var(--text)" stroke-width="2.5"/><line x1="18" y1="32" x2="34" y2="32" stroke="var(--text)" stroke-width="2.5"/>`+
+        `<rect x="1.5" y="40" width="150" height="136" rx="0" fill="var(--surface2)"/>`+
+        `<circle cx="28" cy="62" r="11" fill="var(--surface)"/><rect x="46" y="57" width="70" height="10" rx="5" fill="var(--text)" opacity=".6"/>`+
+        bar(20,88,110,9)+bar(20,106,110,9)+bar(20,124,110,9)+
+        `<rect x="14" y="140" width="124" height="20" rx="7" fill="none" stroke="var(--accent)" stroke-width="1.5"/><polygon points="24,146 30,150 24,154" fill="var(--accent)"/><text x="46" y="153" font-size="8" fill="var(--accent)" font-family="system-ui,sans-serif">ทัวร์แนะนำ</text>`+
+        _tutHL(12,12,30,28,1)+_tutHL(14,138,124,24,2)
+      );
+  }
+  return S('');
+}
+// ── Slide content (TH + EN; non-Thai langs fall back to EN, matching Help) ──
+function _tutSlides(){
+  const en=(settings.lang||'th')!=='th';
+  return en?[
+    {illus:'welcome',title:'Welcome to CalPro+ 👋',body:`<p>A quick tour of the essentials. Tap <b>Next</b> to go through each step — it only takes a moment.</p>`},
+    {illus:'today',title:'Today — your daily ring',body:`<ol><li>The big ring shows your <b>net calories</b> (food eaten − exercise burned).</li><li>Tap <b>+ / −</b> on the water card after every glass. Scroll down for daily health tips.</li></ol>`},
+    {illus:'addfood',title:'Add food in 3 taps',body:`<ol><li><b>Search</b> from 540+ foods (Thai + English names).</li><li>Pick the <b>meal</b> and a <b>category</b> to browse faster.</li><li>Tap the <b>⭐ star</b> to save favorites for one-tap logging.</li></ol>`},
+    {illus:'ai',title:'Snap a photo — AI does the rest',body:`<ol><li>On Add Food, tap <b>✦ AI photo</b>.</li><li>Take or pick a meal photo — AI estimates the calories + macros for you to confirm.</li></ol>`},
+    {illus:'analysis',title:'See your progress',body:`<ol><li><b>7-day calories</b> vs your goal, at a glance.</li><li>The <b>weight trend</b> forecasts where you're heading — no daily weigh-in needed.</li></ol>`},
+    {illus:'profile',title:'Level up your profile',body:`<ol><li>Earn a <b>level</b>, build a <b>streak</b>, and unlock badges as you log.</li><li>Tap <b>Edit profile</b> to set your photo, banner and bio — then add friends to compare.</li></ol>`},
+    {illus:'menu',title:'Everything else lives in the menu',body:`<ol><li>Tap the <b>☰ menu</b> (top-left) for Settings, themes, language and sharing.</li><li>You can <b>re-open this tour</b> any time from the menu. That's it — enjoy! 🎉</li></ol>`},
+  ]:[
+    {illus:'welcome',title:'ยินดีต้อนรับสู่ CalPro+ 👋',body:`<p>มาดูวิธีใช้แบบเร็วๆ กันก่อน · กด <b>ถัดไป</b> เพื่อดูทีละขั้น ใช้เวลาแป๊บเดียว</p>`},
+    {illus:'today',title:'หน้าวันนี้ — วงแหวนประจำวัน',body:`<ol><li>วงแหวนใหญ่กลางจอบอก <b>แคลอรี่สุทธิ</b> (อาหารที่กิน − ที่เผาจากออกกำลังกาย)</li><li>กด <b>+ / −</b> ที่การ์ดน้ำดื่มทุกครั้งที่ดื่ม · เลื่อนลงดูคำแนะนำสุขภาพประจำวัน</li></ol>`},
+    {illus:'addfood',title:'เพิ่มอาหารใน 3 ขั้นตอน',body:`<ol><li><b>ค้นหา</b> จากเมนูกว่า 540 รายการ (ชื่อไทย + อังกฤษ)</li><li>เลือก <b>มื้อ</b> แล้วเลือก <b>ประเภทอาหาร</b> เพื่อหาง่ายขึ้น</li><li>แตะ <b>⭐ ดาว</b> เก็บเป็นของโปรด ไว้กดบันทึกซ้ำในแตะเดียว</li></ol>`},
+    {illus:'ai',title:'ถ่ายรูป — ให้ AI จัดการต่อ',body:`<ol><li>ในหน้าเพิ่มอาหาร กดปุ่ม <b>✦ ถ่ายรูป AI</b></li><li>ถ่ายหรือเลือกรูปอาหาร · AI จะประเมินแคลอรี่ + มาโครให้ตรวจสอบก่อนบันทึก</li></ol>`},
+    {illus:'analysis',title:'ดูความคืบหน้าของคุณ',body:`<ol><li><b>แคลอรี่ 7 วัน</b> เทียบกับเป้าหมาย เห็นภาพรวมในพริบตา</li><li><b>แนวโน้มน้ำหนัก</b> พยากรณ์ทิศทางให้ล่วงหน้า · ไม่ต้องชั่งทุกวัน</li></ol>`},
+    {illus:'profile',title:'อัปเลเวลโปรไฟล์',body:`<ol><li>สะสม <b>เลเวล</b> · ต่อ <b>สตรีค</b> · ปลดล็อกเหรียญตราเมื่อบันทึกต่อเนื่อง</li><li>กด <b>แก้ไขโปรไฟล์</b> ตั้งรูป แบนเนอร์ และไบโอ · เพิ่มเพื่อนเพื่อแข่งกันได้</li></ol>`},
+    {illus:'menu',title:'ที่เหลือทั้งหมดอยู่ในเมนู',body:`<ol><li>กดไอคอน <b>☰ เมนู</b> (มุมซ้ายบน) เพื่อเข้าตั้งค่า · ธีม · ภาษา · การแชร์</li><li><b>เปิดทัวร์นี้ซ้ำ</b> ได้ทุกเมื่อจากเมนู · เท่านี้แหละ ขอให้สนุก! 🎉</li></ol>`},
+  ];
+}
+function openTutorial(){
+  _tutStep=0;
+  tutRender();
+  document.getElementById('tutorialModal').classList.remove('hide');
+}
+function tutRender(){
+  const slides=_tutSlides();
+  const total=slides.length;
+  if(_tutStep<0)_tutStep=0; if(_tutStep>total-1)_tutStep=total-1;
+  const s=slides[_tutStep], en=(settings.lang||'th')!=='th';
+  document.getElementById('tutIllus').innerHTML=_tutIllus(s.illus);
+  document.getElementById('tutStepBadge').textContent=(en?'Step ':'ขั้นที่ ')+(_tutStep+1)+'/'+total;
+  document.getElementById('tutTitle').innerHTML=s.title;
+  document.getElementById('tutDesc').innerHTML=s.body;
+  // dots
+  document.getElementById('tutDots').innerHTML=slides.map((_,i)=>`<div class="tut-dot${i===_tutStep?' active':''}" onclick="_tutStep=${i};tutRender()"></div>`).join('');
+  // nav
+  const back=document.getElementById('tutBackBtn'), next=document.getElementById('tutNextBtn');
+  back.style.visibility=_tutStep===0?'hidden':'visible';
+  next.textContent=_tutStep===total-1?t('ob_start'):t('ob_next');
+  // re-trigger the slide-in animation on the body
+  const bodyEl=document.querySelector('#tutorialModal .tut-body');
+  if(bodyEl){bodyEl.style.animation='none';void bodyEl.offsetWidth;bodyEl.style.animation='';}
+}
+function tutNext(){
+  const total=_tutSlides().length;
+  if(_tutStep>=total-1){closeTutorial(false);return;}
+  _tutStep++;tutRender();
+}
+function tutPrev(){ if(_tutStep>0){_tutStep--;tutRender();} }
+function closeTutorial(skipped){
+  lsSave('cp_tutorial_seen_v',TUTORIAL_VERSION);
+  document.getElementById('tutorialModal').classList.add('hide');
 }
 
 // ═══ FEEDBACK (opens a mailto draft to the developer) ═══
@@ -6110,6 +6312,7 @@ function renderHelp(){
   const isEn=(settings.lang||'th')!=='th';
   const sections=isEn?[
     {ico:'rocket',title:'Getting started',items:[
+      'New here? Tap <b>Quick tour</b> in the menu (☰) any time — a 7-step visual walkthrough of the whole app.',
       'Open <b>Profile</b> first and enter your age, weight, height, gender, and activity level.',
       'Pick a <b>goal</b>: lose, maintain, or gain. Your daily calorie target is calculated automatically.',
       'All data lives in this browser — no login required. Optional Cloud Sync syncs across devices.',
@@ -6121,7 +6324,7 @@ function renderHelp(){
       '<b>💡 Health tips</b> below the water card update with your day — protein, water, meal balance, etc.',
     ]},
     {ico:'plus',title:'Logging food',items:[
-      'Search the built-in database (<b>250 foods</b>, TH + EN names).',
+      'Search the built-in database (<b>540+ foods</b>, TH + EN names).',
       '<b>⭐ Star</b> any result to add it to your Favorites for one-tap re-logging.',
       'Use <b>Manual entry</b> for foods not in the database; check <b>"Save to library"</b> to keep them.',
       'Pick the meal slot (Breakfast/Lunch/Dinner/Snack) — defaults to current time-of-day.',
@@ -6182,6 +6385,7 @@ function renderHelp(){
     ]},
   ]:[
     {ico:'rocket',title:'เริ่มต้นใช้งาน',items:[
+      'เพิ่งเริ่มใช้? กด <b>ทัวร์แนะนำการใช้งาน</b> ในเมนู (☰) ได้ทุกเมื่อ — สอนใช้แบบเห็นภาพครบ 7 ขั้น',
       'เปิดหน้า <b>โปรไฟล์</b> กรอกเพศ อายุ น้ำหนัก ส่วนสูง และระดับกิจกรรม',
       'เลือก <b>เป้าหมาย</b>: ลดน้ำหนัก / คงน้ำหนัก / เพิ่มกล้าม · ระบบจะคำนวณแคลอรี่/วันให้อัตโนมัติ',
       'ข้อมูลทั้งหมดเก็บในเครื่อง ไม่ต้องล็อกอิน · ถ้าอยากซิงค์ข้ามเครื่องเปิด Cloud Sync เพิ่มได้',
@@ -6193,7 +6397,7 @@ function renderHelp(){
       '<b>💡 คำแนะนำสุขภาพ</b> ใต้แถบน้ำ จะปรับตามข้อมูลแต่ละวัน — โปรตีน, มื้อ, น้ำ ฯลฯ',
     ]},
     {ico:'plus',title:'การบันทึกอาหาร',items:[
-      'ค้นหาจากฐานข้อมูล <b>250 รายการ</b> (ชื่อไทย/อังกฤษ)',
+      'ค้นหาจากฐานข้อมูล <b>540+ รายการ</b> (ชื่อไทย/อังกฤษ)',
       'กด <b>⭐</b> เพิ่มของโปรดเพื่อกดบันทึกซ้ำได้ในแตะเดียว',
       'ใช้ <b>กรอกเอง</b> สำหรับอาหารที่ไม่มีในฐาน — ติ๊ก <b>"บันทึกลงไลบรารี"</b> เพื่อเก็บไว้ใช้ครั้งหน้า',
       'เลือกมื้อ (เช้า/กลางวัน/เย็น/ของว่าง) — ระบบเดาให้ตามเวลาปัจจุบัน',
@@ -9777,8 +9981,14 @@ setTimeout(checkWhatsNew,1200);
 setTimeout(checkApkUpdate,3000);
 // Upgrade every native <select> to the themed bottom-sheet picker (no OS popup).
 customizeAllSelects();
-// First-launch onboarding (only if profile is empty + flag not set)
-setTimeout(()=>{if(shouldShowOnboarding())openOnboard();},700);
+// First-launch onboarding (only if profile is empty + flag not set).
+// New users go through the profile wizard first, then the guided tour (chained
+// inside finishOnboard). Existing users skip the wizard but still get the tour
+// once — auto-shown here when the tour hasn't been seen for this TUTORIAL_VERSION.
+setTimeout(()=>{
+  if(shouldShowOnboarding()){openOnboard();}
+  else if(shouldShowTutorial()){openTutorial();}
+},700);
 
 // ═══ Esc-to-close + Tab-trap for open modals ═══
 function _topmostModal(){
@@ -10631,8 +10841,15 @@ function checkWhatsNew(){
     .filter(v=>verCmp(v,last)>0&&verCmp(v,APP_VERSION)<=0)
     .sort((a,b)=>verCmp(b,a));   // newest first
   if(toShow.length){
-    // Slight delay so it lands after initial render
-    setTimeout(()=>showWhatsNew(toShow),900);
+    // Don't stack on top of the guided tour. If the tour is about to auto-show
+    // (new TUTORIAL_VERSION) or is already open, let it be the "what's new"
+    // moment for this launch and skip the changelog popup.
+    const tutPending=(typeof shouldShowTutorial==='function'&&shouldShowTutorial())
+      ||!document.getElementById('tutorialModal').classList.contains('hide');
+    if(!tutPending){
+      // Slight delay so it lands after initial render
+      setTimeout(()=>showWhatsNew(toShow),900);
+    }
   }
   lsSave('calpro_last_seen_version',APP_VERSION);
 }
