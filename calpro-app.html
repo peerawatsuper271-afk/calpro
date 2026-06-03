@@ -2079,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.2';
+const APP_VERSION = '2.36.3';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3788,19 +3788,35 @@ function loadEntries(){
 }
 // ═══ ON-DEVICE SAFETY BACKUP ═══
 const LS_BACKUP = 'calpro_backup';
-let _lastBackup = 0;
+let _lastBackup = 0, _backupQueued = false;
+// Mirror the precious data to a second on-device key — but OFF the critical path.
+// A full stringify+write of a long history is ~30ms+ on desktop (×3-5 on phones),
+// so we never run it inside the food-add interaction. Writes are coalesced and
+// deferred to idle time (throttled), then force-flushed on page hide/close so a
+// queued backup is never lost.
 function backupLocalData(force){
+  if(_backupQueued) return;                               // a write is already queued
+  if(!force && Date.now()-_lastBackup < 20000) return;    // throttle: at most every 20s
+  _backupQueued=true;
+  const run=()=>{ if(!_backupQueued) return; _backupQueued=false; _writeBackup(); };
+  if(window.requestIdleCallback) requestIdleCallback(run,{timeout:4000});
+  else setTimeout(run,500);
+}
+function _writeBackup(){
   try{
-    if(!force && Date.now()-_lastBackup < 5000) return;   // light throttle
-    // Never overwrite a good backup with a blank state.
-    if(Object.keys(allEntries||{}).length===0) return;
-    const snap={ts:Date.now(), v:APP_VERSION,
+    if(Object.keys(allEntries||{}).length===0) return;    // never overwrite with a blank state
+    const snap=JSON.stringify({ts:Date.now(), v:APP_VERSION,
       entries:allEntries, weights:allWeights, water:allWater,
-      workouts:allWorkouts, measures:allMeasures};
-    localStorage.setItem(LS_BACKUP, JSON.stringify(snap));
+      workouts:allWorkouts, measures:allMeasures});
+    if(snap.length>4500000) return;                        // ~4.5MB — skip rather than thrash the LS quota
+    localStorage.setItem(LS_BACKUP, snap);
     _lastBackup=Date.now();
   }catch(e){ /* quota / serialization — backup is best-effort */ }
 }
+// Flush a queued backup before the page is hidden/closed so it's never lost.
+function _flushBackup(){ if(_backupQueued){ _backupQueued=false; _writeBackup(); } }
+window.addEventListener('pagehide',_flushBackup);
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) _flushBackup(); });
 function maybeRestoreFromBackup(){
   try{
     if(Object.keys(allEntries||{}).length>0) return false;   // main data present
