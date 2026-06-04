@@ -2079,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.6';
+const APP_VERSION = '2.36.7';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3802,9 +3802,8 @@ function loadUserData(){
   // or corrupted (NOT a full "clear site data" — that wipes the backup too;
   // Cloud Sync + file export cover that). Runs BEFORE any cloud sync, so a
   // restored-from-backup local won't be seen as "empty" by the push guard.
-  const _restored = maybeRestoreFromBackup();
-  backupLocalData(true);   // refresh the backup from the current good state
-  if(_restored){ setTimeout(()=>{ try{ showToast(LL('กู้ข้อมูลจากสำรองในเครื่องแล้ว ✓','Restored your data from on-device backup ✓','已从本机备份恢复数据 ✓','已從本機備份還原資料 ✓')); }catch(e){} }, 1500); }
+  backupLocalData(true);              // schedule an IDB backup of the current good state
+  maybeRestoreFromBackupAsync();      // async safety net — restores + re-renders + toasts if entries are empty
   const ls = lsLoad(LS_SETTINGS, null);
   if (ls) settings = ls;
   applyTheme();
@@ -3812,8 +3811,9 @@ function loadUserData(){
 function loadEntries(){
   dailyEntries = (allEntries[currentDate] || []).slice();
 }
-// ═══ ON-DEVICE SAFETY BACKUP ═══
-const LS_BACKUP = 'calpro_backup';
+// ═══ ON-DEVICE SAFETY BACKUP (IndexedDB-backed) ═══
+const LS_BACKUP = 'calpro_backup';   // legacy localStorage key (read for transition, then removed)
+const IDB_BACKUP = 'cp_backup';      // new home: IndexedDB (large quota, no LS competition)
 let _lastBackup = 0, _backupQueued = false;
 // Mirror the precious data to a second on-device key — but OFF the critical path.
 // A full stringify+write of a long history is ~30ms+ on desktop (×3-5 on phones),
@@ -3831,25 +3831,35 @@ function backupLocalData(force){
 function _writeBackup(){
   try{
     if(Object.keys(allEntries||{}).length===0) return;    // never overwrite with a blank state
+    _lastBackup=Date.now();                                // optimistic — throttle while the async put is in flight
     const snap=JSON.stringify({ts:Date.now(), v:APP_VERSION,
       entries:allEntries, weights:allWeights, water:allWater,
       workouts:allWorkouts, measures:allMeasures});
-    if(snap.length>4500000) return;                        // ~4.5MB — skip rather than thrash the LS quota
-    localStorage.setItem(LS_BACKUP, snap);
-    _lastBackup=Date.now();
-  }catch(e){ /* quota / serialization — backup is best-effort */ }
+    // Store in IndexedDB (async, large quota) — the backup no longer competes
+    // with primary data for the ~5MB localStorage budget. Once IDB holds the
+    // copy, drop the legacy localStorage backup to reclaim that space.
+    idbPut(IDB_BACKUP, snap)
+      .then(()=>{ try{ localStorage.removeItem(LS_BACKUP); }catch(e){} })
+      .catch(()=>{});
+  }catch(e){ /* serialization — backup is best-effort */ }
 }
 // Flush a queued backup before the page is hidden/closed so it's never lost.
 function _flushBackup(){ if(_backupQueued){ _backupQueued=false; _writeBackup(); } }
 window.addEventListener('pagehide',_flushBackup);
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) _flushBackup(); });
-function maybeRestoreFromBackup(){
+// Async safety-net restore: only acts when the precious keys came back empty.
+// Prefers the IDB backup, falls back to a legacy localStorage backup (pre-IDB),
+// then re-renders + toasts. Not awaited in loadUserData so boot is never blocked.
+async function maybeRestoreFromBackupAsync(){
   try{
-    if(Object.keys(allEntries||{}).length>0) return false;   // main data present
-    const raw=localStorage.getItem(LS_BACKUP);
+    if(Object.keys(allEntries||{}).length>0) return false;   // main data present — nothing to do
+    let raw=null;
+    try{ raw=await idbGet(IDB_BACKUP); }catch(e){}
+    if(!raw){ try{ raw=localStorage.getItem(LS_BACKUP); }catch(e){} }   // legacy LS fallback
     if(!raw) return false;
-    const snap=JSON.parse(raw);
+    const snap=(typeof raw==='string')?JSON.parse(raw):raw;
     if(!snap||!snap.entries||Object.keys(snap.entries).length===0) return false;
+    if(Object.keys(allEntries||{}).length>0) return false;   // re-check: a cloud pull may have filled it
     allEntries=snap.entries||{};
     if(snap.weights) allWeights=snap.weights;
     if(snap.water) allWater=snap.water;
@@ -3861,7 +3871,10 @@ function maybeRestoreFromBackup(){
     if(snap.workouts) lsSave(LS_WORKOUTS,allWorkouts);
     if(snap.measures) lsSave(LS_MEASURES,allMeasures);
     loadEntries();
-    console.warn('[backup] restored '+Object.keys(allEntries).length+' day(s) from on-device backup');
+    if(typeof refreshActivePage==='function') refreshActivePage();
+    else if(typeof renderToday==='function') renderToday();
+    try{ showToast(LL('กู้ข้อมูลจากสำรองในเครื่องแล้ว ✓','Restored your data from on-device backup ✓','已从本机备份恢复数据 ✓','已從本機備份還原資料 ✓')); }catch(e){}
+    console.warn('[backup] restored '+Object.keys(allEntries).length+' day(s) from on-device backup (IDB)');
     return true;
   }catch(e){ return false; }
 }
@@ -9949,7 +9962,7 @@ async function renderDev(){
   // ── Storage ──
   let lsSize=0;
   try{for(const key in localStorage){if(key.startsWith('calpro')||key.startsWith('CalPro')){lsSize+=(localStorage.getItem(key)||'').length;}}}catch{}
-  let idbCount=0,idbSize=0;
+  let idbCount=0,idbSize=0,idbBakSize=0;
   try{
     const db=await idbOpen();
     const keys=await new Promise(r=>{
@@ -9958,8 +9971,11 @@ async function renderDev(){
       req.onsuccess=()=>r(req.result||[]);
       req.onerror=()=>r([]);
     });
-    idbCount=keys.length;
-    for(const k of keys){const v=await idbGet(k);idbSize+=(v||'').length;}
+    // The on-device backup shares this store but isn't a photo — count it separately.
+    const photoKeys=keys.filter(k=>k!==IDB_BACKUP);
+    idbCount=photoKeys.length;
+    for(const k of photoKeys){const v=await idbGet(k);idbSize+=((typeof v==='string'?v:JSON.stringify(v||''))||'').length;}
+    try{ const b=await idbGet(IDB_BACKUP); if(b)idbBakSize=(typeof b==='string'?b:JSON.stringify(b)).length; }catch(e){}
   }catch{}
   // ── Local counts ──
   const totalEntries=Object.values(allEntries).reduce((s,arr)=>s+(arr?.length||0),0);
@@ -10008,6 +10024,7 @@ async function renderDev(){
       row('Workouts',totalWorkouts)+
       row('localStorage usage',`${(lsSize/1024).toFixed(1)} KB`)+
       row('IDB meal photos',`${idbCount} files · ${(idbSize/1024).toFixed(1)} KB`)+
+      row('IDB backup',idbBakSize?`${(idbBakSize/1024).toFixed(1)} KB`:'(none yet)')+
     `</div>`+
     `<div class="card"><h3>🧪 Self-tests</h3>`+
       `<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px">Assertions on the pure helpers (isolated — no effect on your data).</div>`+
