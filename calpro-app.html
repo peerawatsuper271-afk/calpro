@@ -838,10 +838,15 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .supp-grid{display:flex;flex-wrap:wrap;gap:7px;}
 .supp-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 13px;font-size:.8rem;cursor:pointer;color:var(--text);font-family:inherit;transition:all .15s;}
 .supp-chip.on{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--surface2));color:var(--green);}
-.steps-row{display:flex;align-items:center;gap:9px;}
-.steps-input{max-width:130px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:8px 12px;font-family:inherit;font-size:1rem;font-weight:700;outline:none;}
-.steps-input:focus{border-color:var(--accent);}
+.steps-row{display:flex;align-items:baseline;gap:7px;}
+.steps-big{font-size:1.7rem;font-weight:800;color:var(--text);line-height:1;font-variant-numeric:tabular-nums;}
 .steps-unit{font-size:.8rem;color:var(--muted);}
+.steps-live{align-self:center;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 70%,transparent);animation:stepsPulse 1.8s ease-out infinite;margin-left:2px;}
+@keyframes stepsPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 60%,transparent);}70%{box-shadow:0 0 0 7px transparent;}100%{box-shadow:0 0 0 0 transparent;}}
+.steps-auto-note{font-size:.72rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px;}
+.steps-enable{margin-top:7px;display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:8px 13px;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;}
+.steps-enable:hover{border-color:var(--accent);}
+.steps-enable .ic{width:16px;height:16px;}
 /* ── Image lightbox (tap avatar / banner to view) ── */
 .imgview{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:24px;}
 .imgview.show{opacity:1;pointer-events:auto;}
@@ -2103,7 +2108,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.38.0';
+const APP_VERSION = '2.39.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2141,6 +2146,8 @@ const ICONS = {
   target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   droplet:'<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>',
   activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  footprints:'<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
+  pill:'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
   ruler:'<path d="M21.3 8.7l-5.6-5.6a1 1 0 0 0-1.4 0L2.7 14.3a1 1 0 0 0 0 1.4l5.6 5.6a1 1 0 0 0 1.4 0L21.3 10.1a1 1 0 0 0 0-1.4z"/><path d="M7.5 10.5l2 2M10.5 7.5l2 2M13.5 4.5l2 2M4.5 13.5l2 2"/>',
   user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
   users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -6098,8 +6105,96 @@ function toggleSupp(id){
 function setSteps(v){
   const h=getHabit(currentDate);
   allHabits[currentDate]={...h, steps:_clampSteps(v)};
-  saveHabits_LS(); renderHabits();   // onchange (fires on blur) → safe to re-render
+  saveHabits_LS(); renderHabits();   // kept for back-compat / programmatic set
 }
+
+// ═══ AUTOMATIC STEP TRACKING (hybrid) ═══
+// Counts today's steps with zero manual entry. Two auto-selected sources:
+//   • NATIVE (Android APK): the OS all-day step counter via @capgo/capacitor-pedometer
+//     (cumulative hardware sensor; the plugin emits deltas) → counts even in the
+//     background. The plugin auto-adds ACTIVITY_RECOGNITION at build time.
+//   • WEB / PWA (and the APK WebView as a fallback): the device motion sensor
+//     (DeviceMotion) with peak-detection → counts while the app is foreground.
+// Steps always accrue to LOCAL "today" (todayKey()), never a past day being viewed.
+const StepTracker = {
+  mode:null, running:false, _peaked:false, _avg:9.8, _lastStepAt:0, _saveTimer:null, _lastSave:0, _nativeSub:null, _boundMotion:null,
+  webSupported(){ return typeof window!=='undefined' && typeof window.DeviceMotionEvent!=='undefined'; },
+  iosNeedsPerm(){ return typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'; },
+  nativePlugin(){ try{ const c=window.Capacitor; return (c&&c.isNativePlatform&&c.isNativePlatform()&&c.Plugins&&c.Plugins.Pedometer)||null; }catch(_){ return null; } },
+  // UI state for renderHabits: 'running' | 'needperm' | 'unsupported' | 'idle'
+  state(){
+    if(this.running) return 'running';
+    if(this.nativePlugin()) return 'idle';                                   // native: about to auto-start
+    if(!this.webSupported()) return 'unsupported';
+    if(this.iosNeedsPerm() && !settings.stepPermGranted) return 'needperm';  // iOS: wait for the gesture
+    return 'idle';
+  },
+  ensureStarted(){
+    if(this.running) return;
+    const np=this.nativePlugin();
+    if(np){ this._startNative(np); return; }
+    if(!this.webSupported()) return;
+    if(this.iosNeedsPerm() && !settings.stepPermGranted) return;             // need the permission button first
+    this._startWeb();
+  },
+  async requestAndStart(){                                                   // iOS permission button (user gesture)
+    if(this.iosNeedsPerm()){
+      try{
+        const res=await DeviceMotionEvent.requestPermission();
+        if(res!=='granted'){ showToast(LL('ไม่ได้รับอนุญาตให้ใช้เซนเซอร์การเคลื่อนไหว','Motion sensor permission denied','运动传感器权限被拒绝','運動感測器權限被拒絕')); return; }
+        settings.stepPermGranted=true; lsSave(LS_SETTINGS,settings);
+      }catch(_){ return; }
+    }
+    this._startWeb(); if(typeof renderHabits==='function') renderHabits();
+  },
+  _startWeb(){
+    if(this.running) return;
+    if(!this._boundMotion) this._boundMotion=(e)=>this._onMotion(e);
+    this.mode='web'; this.running=true; this._avg=9.8; this._peaked=false;
+    window.addEventListener('devicemotion', this._boundMotion, {passive:true});
+  },
+  async _startNative(P){
+    if(this.running) return;
+    this.running=true; this.mode='native';                                  // optimistic; reverts on failure
+    try{
+      try{ const pc=await P.checkPermissions(); if(pc && pc.activity && pc.activity!=='granted') await P.requestPermissions(); }catch(_){}
+      this._nativeSub=await P.addListener('measurement',(d)=>{ const n=Math.round(+(d&&d.numberOfSteps)||0); if(n>0 && n<60000) this._addSteps(n); });
+      await P.startMeasurementUpdates();
+    }catch(e){
+      console.warn('[steps] native pedometer unavailable → web fallback', e&&e.message);
+      this.running=false; this.mode=null; this._startWeb();
+    }
+  },
+  stop(){
+    if(this.mode==='web'){ try{ window.removeEventListener('devicemotion', this._boundMotion); }catch(_){} }
+    if(this.mode==='native'){ try{ const P=this.nativePlugin(); if(P&&P.stopMeasurementUpdates) P.stopMeasurementUpdates(); if(this._nativeSub&&this._nativeSub.remove) this._nativeSub.remove(); }catch(_){} this._nativeSub=null; }
+    this.running=false; this.mode=null; this._flush();
+  },
+  _onMotion(e){
+    const a=e.accelerationIncludingGravity||e.acceleration; if(!a) return;
+    const mag=Math.sqrt((a.x||0)*(a.x||0)+(a.y||0)*(a.y||0)+(a.z||0)*(a.z||0));
+    this._avg=this._avg*0.9 + mag*0.1;                                       // low-pass baseline (gravity-ish)
+    const dyn=mag-this._avg, now=Date.now();
+    if(dyn>1.2 && !this._peaked && (now-this._lastStepAt)>300){ this._peaked=true; this._lastStepAt=now; this._addSteps(1); }
+    else if(dyn<0.4){ this._peaked=false; }
+  },
+  _addSteps(n){
+    const d=todayKey(), h=allHabits[d]||{};
+    allHabits[d]={...h, steps:_clampSteps((h.steps||0)+n)};
+    if(currentDate===d){ const el=document.getElementById('stepsCount'); if(el) el.textContent=allHabits[d].steps.toLocaleString(); }
+    const now=Date.now(); if(!this._lastSave) this._lastSave=now;
+    if(now-this._lastSave>15000){ this._flush(); }                          // hard-save during sustained walking
+    else { clearTimeout(this._saveTimer); this._saveTimer=setTimeout(()=>this._flush(), 4000); }  // trailing debounce
+  },
+  _flush(){ clearTimeout(this._saveTimer); this._saveTimer=null; this._lastSave=Date.now(); try{ if(typeof saveHabits_LS==='function') saveHabits_LS(); }catch(_){} },
+};
+// Foreground lifecycle: web counting is foreground-only (pause+save when hidden);
+// native keeps counting in the background, so just flush its tally.
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ if(StepTracker.mode==='web') StepTracker.stop(); else StepTracker._flush(); }
+  else { StepTracker.ensureStarted(); }
+});
+window.addEventListener('pagehide',()=>{ StepTracker._flush(); });
 function renderHabits(){
   const body=document.getElementById('habitsBody'); if(!body)return;
   const card=document.getElementById('habitsCard');
@@ -6108,17 +6203,28 @@ function renderHabits(){
   const h=getHabit(currentDate);
   const sleep=h.sleep||0, sleepQ=h.sleepQ||'', taken=new Set(h.supps||[]), steps=h.steps||0;
   const sleepTxt = sleep ? sleep+' '+LL('ชม.','h','小时','小時') : '—';
+  // Steps — fully automatic (device motion / native pedometer); no manual entry.
+  StepTracker.ensureStarted();
+  const stState=StepTracker.state();
+  const stepsBig=`<div class="steps-row"><span class="steps-big" id="stepsCount">${(steps||0).toLocaleString()}</span><span class="steps-unit">${LL('ก้าว','steps','步','步')}</span>`;
+  let stepsInner;
+  if(stState==='needperm'){
+    stepsInner = stepsBig+`</div><button class="steps-enable" onclick="StepTracker.requestAndStart()">${icoSvg('footprints')} ${LL('เริ่มนับก้าวอัตโนมัติ','Start auto step count','开始自动计步','開始自動計步')}</button>`;
+  }else if(stState==='unsupported'){
+    stepsInner = stepsBig+`</div><div class="steps-auto-note">${LL('อุปกรณ์นี้ไม่รองรับการนับก้าวอัตโนมัติ','Auto step counting isn’t available on this device','此设备不支持自动计步','此裝置不支援自動計步')}</div>`;
+  }else{
+    stepsInner = stepsBig+`<span class="steps-live" title="${LL('นับอัตโนมัติ','Auto-counting','自动计步','自動計步')}"></span></div>`+
+      `<div class="steps-auto-note">${LL('นับอัตโนมัติจากการเคลื่อนไหว · วันนี้','Counted automatically from movement · today','根据运动自动计步 · 今天','根據運動自動計步 · 今天')}</div>`;
+  }
   let html=`<div class="habit-blk">`+
-    `<div class="habit-lbl">😴 ${LL('การนอน','Sleep','睡眠','睡眠')}</div>`+
+    `<div class="habit-lbl">${icoSvg('moon')} ${LL('การนอน','Sleep','睡眠','睡眠')}</div>`+
     `<div class="sleep-row"><button onclick="setSleep(-0.5)" aria-label="less">−</button>`+
       `<span class="sleep-val">${sleepTxt}</span>`+
       `<button onclick="setSleep(0.5)" aria-label="more">+</button></div>`+
     `<div class="sleepq">`+SLEEP_Q.map(q=>`<button class="${sleepQ===q?'on':''}" onclick="setSleepQ('${q}')" aria-label="quality">${q}</button>`).join('')+`</div>`+
   `</div>`+
-  `<div class="habit-blk"><div class="habit-lbl">👣 ${LL('ก้าวเดิน','Steps','步数','步數')}</div>`+
-    `<div class="steps-row"><input type="number" inputmode="numeric" class="steps-input" value="${steps||''}" placeholder="0" min="0" max="100000" onchange="setSteps(this.value)" onkeydown="if(event.key==='Enter')this.blur()"> <span class="steps-unit">${LL('ก้าว/วันนี้','steps today','步/今天','步/今天')}</span></div>`+
-  `</div>`+
-  `<div class="habit-blk"><div class="habit-lbl">💊 ${LL('อาหารเสริม','Supplements','补充剂','補充劑')}</div>`+
+  `<div class="habit-blk"><div class="habit-lbl">${icoSvg('footprints')} ${LL('ก้าวเดิน','Steps','步数','步數')}</div>`+stepsInner+`</div>`+
+  `<div class="habit-blk"><div class="habit-lbl">${icoSvg('pill')} ${LL('อาหารเสริม','Supplements','补充剂','補充劑')}</div>`+
     `<div class="supp-grid">`+SUPPLEMENTS.map(s=>{
       const on=taken.has(s.id), name=LL(s.th,s.en,s.hans,s.hant);
       return `<button class="supp-chip${on?' on':''}" onclick="toggleSupp('${s.id}')">${s.emoji} ${escapeHtml(name)}${on?' ✓':''}</button>`;
@@ -10614,6 +10720,16 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.39.0':{
+    th:[
+      '👣 **ก้าวเดินอัตโนมัติ** — ไม่ต้องพิมพ์เองอีกต่อไป! แอปนับก้าวให้อัตโนมัติจากเซนเซอร์การเคลื่อนไหวของเครื่อง · ในแอป Android (APK) จะอ่านตัวนับก้าว "ทั้งวัน" ของระบบ · บนเว็บ/PWA จะนับขณะเปิดแอป (iOS แตะอนุญาตใช้เซนเซอร์ครั้งแรก)',
+      '🎨 **ไอคอนการ์ดนิสัยเป็นเส้น SVG** — เปลี่ยนอีโมจิหัวข้อ (นอน/ก้าวเดิน/อาหารเสริม) เป็นไอคอนเส้นให้เข้ากับทั้งแอป',
+    ],
+    en:[
+      '👣 **Automatic step counting** — no more typing! Steps are counted automatically from the device’s motion sensor · the Android app (APK) reads the OS all-day step counter · on web/PWA it counts while the app is open (iOS taps to allow the sensor once)',
+      '🎨 **SVG line icons on the habit card** — the section emojis (sleep / steps / supplements) are now line icons that match the rest of the app',
+    ],
+  },
   '2.38.0':{
     th:[
       '🌙 **ตัวติดตามนิสัยประจำวัน (ใหม่!)** — การ์ดในหน้าแรก บันทึก **การนอน** (ชั่วโมง + คุณภาพ 😩😐😊😴), **ก้าวเดิน** และ **อาหารเสริม** (วิตามินรวม/โอเมก้า 3/โปรไบโอติก/สังกะสี) · แตะพับเก็บได้',
