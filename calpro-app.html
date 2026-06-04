@@ -2105,7 +2105,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.40.0';
+const APP_VERSION = '2.40.1';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -6195,8 +6195,12 @@ function renderSteps(){
   }else if(stState==='unsupported'){
     inner = big+`</div><div class="steps-auto-note">${LL('อุปกรณ์นี้ไม่รองรับการนับก้าวอัตโนมัติ','Auto step counting isn’t available on this device','此设备不支持自动计步','此裝置不支援自動計步')}</div>`;
   }else{
+    // Honest note per platform: native pedometer counts all day; web sensor only while the app is open.
+    const note = StepTracker.nativePlugin()
+      ? LL('นับอัตโนมัติทั้งวัน · วันนี้','Counted automatically all day · today','全天自动计步 · 今天','全天自動計步 · 今天')
+      : LL('นับอัตโนมัติขณะเปิดแอป · วันนี้','Counted automatically while the app is open · today','打开应用时自动计步 · 今天','開啟應用時自動計步 · 今天');
     inner = big+`<span class="steps-live" title="${LL('นับอัตโนมัติ','Auto-counting','自动计步','自動計步')}"></span></div>`+
-      `<div class="steps-auto-note">${LL('นับอัตโนมัติจากการเคลื่อนไหว · วันนี้','Counted automatically from movement · today','根据运动自动计步 · 今天','根據運動自動計步 · 今天')}</div>`;
+      `<div class="steps-auto-note">${note}</div>`;
   }
   body.innerHTML=`<div class="habit-blk"><div class="habit-lbl">${icoSvg('footprints')} ${LL('ก้าวเดิน','Steps','步数','步數')}</div>${inner}</div>`;
 }
@@ -10705,786 +10709,80 @@ document.addEventListener('keydown',(e)=>{
 
 const CHANGELOG={
   '2.40.0':{
-    th:[
-      '🧹 **จัดหน้าแรกให้โล่งขึ้น** — หน้าแรกเหลือ **ก้าวเดิน** (อยู่เหนือออกกำลังกาย) · ย้าย **การนอน** ไปไว้ที่หน้า **วิเคราะห์** · เอา **อาหารเสริม** ออก',
-      '😴 **หน้าคุณภาพการนอนเป็นไอคอน SVG** — เปลี่ยนจากอีโมจิเป็นไอคอนเส้นให้เข้ากับทั้งแอป',
-      '🔧 **แก้บั๊กซิงค์คุณภาพการนอน** — เดิมค่าคุณภาพการนอนอาจซิงค์ขึ้นคลาวด์ไม่สำเร็จ ตอนนี้เก็บเป็นตัวเลขและซิงค์ได้ครบถูกต้อง',
-    ],
-    en:[
-      '🧹 **Leaner home screen** — Today now shows just **Steps** (above Workouts) · **Sleep** moved to the **Analysis** page · **Supplements** removed',
-      '😴 **SVG sleep-quality faces** — line icons instead of emoji, matching the rest of the app',
-      '🔧 **Fixed sleep-quality cloud sync** — the quality rating could previously fail to sync; it’s now stored as a number and syncs correctly',
-    ],
+    th:['🧹 จัดหน้านิสัยประจำวันใหม่ (ก้าวเดินคู่กับออกกำลังกาย · ย้ายการนอนไปหน้าวิเคราะห์)','🔧 แก้ไขบั๊ก'],
+    en:['🧹 Reorganized the habit tracker (steps with workouts · sleep moved to Analysis)','🔧 Bug fixes'],
   },
   '2.39.0':{
-    th:[
-      '👣 **ก้าวเดินอัตโนมัติ** — ไม่ต้องพิมพ์เองอีกต่อไป! แอปนับก้าวให้อัตโนมัติจากเซนเซอร์การเคลื่อนไหวของเครื่อง · ในแอป Android (APK) จะอ่านตัวนับก้าว "ทั้งวัน" ของระบบ · บนเว็บ/PWA จะนับขณะเปิดแอป (iOS แตะอนุญาตใช้เซนเซอร์ครั้งแรก)',
-      '🎨 **ไอคอนการ์ดนิสัยเป็นเส้น SVG** — เปลี่ยนอีโมจิหัวข้อ (นอน/ก้าวเดิน/อาหารเสริม) เป็นไอคอนเส้นให้เข้ากับทั้งแอป',
-    ],
-    en:[
-      '👣 **Automatic step counting** — no more typing! Steps are counted automatically from the device’s motion sensor · the Android app (APK) reads the OS all-day step counter · on web/PWA it counts while the app is open (iOS taps to allow the sensor once)',
-      '🎨 **SVG line icons on the habit card** — the section emojis (sleep / steps / supplements) are now line icons that match the rest of the app',
-    ],
+    th:['👣 ก้าวเดินอัตโนมัติ'],
+    en:['👣 Automatic step counting'],
   },
   '2.38.0':{
-    th:[
-      '🌙 **ตัวติดตามนิสัยประจำวัน (ใหม่!)** — การ์ดในหน้าแรก บันทึก **การนอน** (ชั่วโมง + คุณภาพ 😩😐😊😴), **ก้าวเดิน** และ **อาหารเสริม** (วิตามินรวม/โอเมก้า 3/โปรไบโอติก/สังกะสี) · แตะพับเก็บได้',
-      '🎤 **สั่งงานด้วยเสียง** — แตะไมค์ในช่องค้นหาอาหารแล้วพูดชื่อเมนูได้เลย (ไทย/อังกฤษ/จีน)',
-      '☁️ **ซิงค์นิสัยขึ้นคลาวด์** — ข้อมูลนิสัยตามไปทุกอุปกรณ์เมื่อล็อกอิน',
-      '🛟 **เสริมความปลอดภัยข้อมูล** — ระบบสำรอง + กู้คืนอัตโนมัติแข็งแรงขึ้น กันข้อมูลหายแม้พื้นที่เครื่องเต็ม',
-    ],
-    en:[
-      '🌙 **Daily Habit Tracker (new!)** — a Today-page card to log **sleep** (hours + quality 😩😐😊😴), **steps**, and **supplements** (multivitamin / omega-3 / probiotic / zinc) · collapsible',
-      '🎤 **Voice food logging** — tap the mic in the food search and just say the dish name (Thai/English/Chinese)',
-      '☁️ **Habits sync to the cloud** — your habit data follows you across devices when signed in',
-      '🛟 **Stronger data-safety** — hardened auto-backup + auto-restore so your log survives even if storage fills up',
-    ],
-  },
-  '2.35.2':{
-    th:[
-      '🔥 **แก้สตรีคขึ้นถูกต้อง** — ถ้ายังไม่ได้บันทึกอาหารของ "วันนี้" สตรีคจะไม่รีเซ็ตเป็น 0 อีกต่อไป · จะนับวันที่ต่อเนื่องถึงเมื่อวานให้ (สตรีคยังอยู่จนกว่าจะหมดวันจริงๆ)',
-    ],
-    en:[
-      '🔥 **Streak now counts correctly** — if today isn\'t logged yet, the streak no longer drops to 0; it shows the unbroken run through yesterday (the streak stays alive until the day actually ends)',
-    ],
-  },
-  '2.35.1':{
-    th:[
-      '🛟 **กันข้อมูลหาย** — เพิ่มการสำรองข้อมูลอัตโนมัติในเครื่อง และกู้คืนให้เองทันทีถ้าข้อมูลหลักหาย',
-      '🔒 **แก้บั๊กซิงค์ที่อาจลบข้อมูลบนคลาวด์** — ตอนนี้จะไม่ลบข้อมูลบนคลาวด์จนกว่าจะดึงข้อมูลมาครบก่อน (กันเครื่องที่ข้อมูลว่างไปลบทับของบนคลาวด์)',
-    ],
-    en:[
-      '🛟 **Data-loss protection** — automatic on-device backup + instant auto-restore if the main data ever goes missing',
-      '🔒 **Fixed a sync bug that could delete cloud data** — cloud rows are no longer removed until a successful pull confirms local state (stops an empty device from wiping the cloud copy)',
-    ],
+    th:['🌙 ตัวติดตามนิสัยประจำวัน','🎤 สั่งงานด้วยเสียง','☁️ ซิงค์นิสัยขึ้นคลาวด์'],
+    en:['🌙 Daily Habit Tracker','🎤 Voice food logging','☁️ Habits cloud sync'],
   },
   '2.35.0':{
-    th:[
-      '🎓 **ทัวร์แนะนำการใช้งานทีละขั้น** — เปิดอัตโนมัติครั้งแรก + กดดูซ้ำได้จากเมนู',
-      '🍜 **ฐานข้อมูลอาหาร 540+ เมนู** — เน้นอาหารไทย + เครื่องดื่ม/ฟาสต์ฟู้ด/ของหวาน/ผลไม้/ทะเล',
-      '⚡ **เพิ่มอาหารใช้ง่ายขึ้น** — กรอกเองเป็นป๊อปอัพ · เลือก①มื้อ ②ประเภท · ลากขยายกล่องผลค้นหา · ดาวของโปรดแบบใหม่',
-      '✏️ **หน้าแก้ไขโปรไฟล์ใหม่** — กระชับ ไม่เกิน 2/3 จอ · ปุ่มบันทึกเดียว · ปิดได้เสมอ',
-      '🌏 **เพิ่มภาษาจีน (简体 + 繁體)** — รวมเป็น 4 ภาษา (จีน/อังกฤษไม่มีไทยโผล่แล้ว)',
-      '⚙️ **หน้าตั้งค่าสไตล์ iOS** — แยกเป็นหน้าย่อย + โชว์เลขเวอร์ชั่น',
-      '📊 **กราฟวิเคราะห์สไตล์ iOS** — แตะดูค่ารายวันได้ · กราฟน้ำดื่มเป็นแท่ง',
-      '🖼️ **แตะดูรูปโปรไฟล์/แบนเนอร์เต็มจอ** + บีบนิ้วซูมได้',
-      '🎨 **การ์ดแชร์ใหม่** — วงแหวนมาโคร + QR โหลดแอป + คำเชิญน่ารัก 10 แบบ',
-      '🏅 **ย้ายเหรียญตราไปหน้าโปรไฟล์** (พับ/ขยายได้) · 🧊 ดีไซน์กระจกใสทั้งแอป · 🔒 อุดช่องโหว่ความปลอดภัยหลายจุด',
-    ],
-    en:[
-      '🎓 **Step-by-step guided tour** — auto-shows on first open + re-openable from the menu',
-      '🍜 **540+ food database** — Thai-first, plus drinks/fast food/desserts/fruit/seafood',
-      '⚡ **Easier food logging** — manual entry as a popup · pick ① meal ② category · resizable results box · new favorite-star',
-      '✏️ **Rebuilt Edit Profile sheet** — compact, capped at 2/3 screen · one Save button · always closable',
-      '🌏 **Added Chinese (简体 + 繁體)** — now 4 languages (no more Thai leaking into EN/ZH)',
-      '⚙️ **iOS-style Settings** — split into sub-pages + shows the version number',
-      '📊 **iOS-style analysis charts** — tap a bar for that day · water as bars',
-      '🖼️ **Tap avatar/banner for full-screen** + pinch-to-zoom',
-      '🎨 **Redesigned share cards** — macro rings + app QR code + 10 cute invites',
-      '🏅 **Badges moved to Profile** (collapsible) · 🧊 liquid-glass design throughout · 🔒 several security hardening fixes',
-    ],
-  },
-  '2.33.2':{
-    th:[
-      '✨ **ยกระดับเป็นกระจกใสสไตล์ iOS ทั้งแอป** — เบลอหนักขึ้น · โปร่งขึ้น · มีขอบเรืองแสง (specular) ทุกพื้นผิว · ให้ความรู้สึก liquid glass',
-      '🔝 **แถบหัวเอากรอบ/พื้นหลังออก** — โปร่งใสลอยเหนือเนื้อหาแบบ iOS (ไม่มีแผงทึบ/เส้นกรอบแล้ว)',
-      '➕ **ปุ่มลอย (FAB) สีเข้มสดขึ้น** — ไม่จางอีกต่อไป + เพิ่มประกายแสงแบบกระจก',
-      '🧊 **แถบล่าง + เมนูข้างเป็น liquid glass** · ปุ่มรองเป็นกระจกโปร่งให้เข้าชุดกัน',
-    ],
-    en:[
-      '✨ **Leveled-up to iOS-style liquid glass across the app** — heavier blur · clearer surfaces · specular edge highlights everywhere',
-      '🔝 **Header dropped its frame/background** — fully transparent, floating over content (iOS-style frameless)',
-      '➕ **Floating button (FAB) is bolder** — no longer washed out + a glass sheen',
-      '🧊 **Bottom bar + side drawer are now liquid glass** · secondary buttons turned translucent to match',
-    ],
-  },
-  '2.33.1':{
-    th:[
-      '🪟 **แถบหัว (header) เป็นกระจกฝ้าแล้ว** — โปร่งเบลอ เปลี่ยนสีตามธีม + มีเส้นคั่นบางๆ (เดิมเป็นแถบทึบไม่เข้ากับกระจก)',
-      '➕ **ปุ่มเพิ่มอาหารแบบลอย (FAB) เป็นกระจกใส** — โทน accent โปร่งเบลอ มีขอบ + แสงสะท้อนแบบกระจก',
-      '🎨 ขอบแถบล่าง/เมนูข้างปรับให้เห็นชัดทั้งธีมสว่างและมืด (เดิมเป็นสีขาว hardcode มองไม่เห็นในธีมสว่าง)',
-    ],
-    en:[
-      '🪟 **Header is now frosted glass** — translucent + blurred, adapts to the theme, with a hairline divider (was an opaque bar that broke the glass look)',
-      '➕ **Floating add button (FAB) is now clear glass** — translucent accent tint, blur, glass edge + sheen',
-      '🎨 Bottom-bar / drawer borders now adapt to light & dark (were a hardcoded white that vanished on light themes)',
-    ],
+    th:['🎓 ทัวร์แนะนำการใช้งาน','🍜 ฐานข้อมูลอาหาร 540+ เมนู','🌏 เพิ่มภาษาจีน (简体 + 繁體)','🛟 สำรอง+กู้คืนข้อมูลอัตโนมัติ','🔧 แก้ไขบั๊ก'],
+    en:['🎓 Step-by-step guided tour','🍜 540+ food database','🌏 Added Chinese (简体 + 繁體)','🛟 Auto backup + restore','🔧 Bug fixes'],
   },
   '2.33.0':{
-    th:[
-      '🪟 **ดีไซน์ใหม่สไตล์กระจกฝ้า (glassmorphism) ทั้งแอป** — การ์ด · เมนู · โมดัล · แถบล่าง เป็นพื้นผิวกึ่งโปร่งเบลอ ลอยเหนือพื้นหลังไล่สีพาสเทลนุ่มๆ ดูทันสมัยขึ้นทุกหน้า',
-      '🎨 **ปรับชุดธีมใหม่ให้เข้ากับกระจก** — โทนอ่อนละมุน (เลิกใช้ดำสนิท) ทั้งธีมมืดและสว่าง · สลับธีม/โหมด + เลือกสี accent ได้เหมือนเดิม',
-      '♿ ธีม "คมชัด" ยังคงพื้นทึบคอนทราสต์สูงเพื่อการเข้าถึง (ไม่ใช้กระจก)',
-    ],
-    en:[
-      '🪟 **App-wide frosted-glass (glassmorphism) redesign** — cards · menus · modals · the bottom bar are now translucent blurred surfaces floating over a soft pastel gradient',
-      '🎨 **Reworked theme palettes to suit the glass** — gentle soft tones (no more pure black) across dark & light · theme/mode switching + accent picker still work',
-      '♿ The "High-contrast" theme keeps solid opaque surfaces for accessibility (no glass)',
-    ],
-  },
-  '2.32.2':{
-    th:[
-      '🎨 **เปลี่ยนอีโมจิทั่วทั้งแอปเป็นไอคอนเส้น (SVG)** — ปุ่ม · หัวข้อ · เมนู · แท็บ · หน้าวิธีใช้ · โมดัล ฯลฯ ใช้ไอคอนเส้นสไตล์เดียวกับแถบล่าง ดูสะอาด/ทันสมัย/คมทุกความละเอียด',
-      '🏅 **คงอีโมจิเดิมไว้เฉพาะส่วนที่เป็นเอกลักษณ์**: เหรียญรางวัล · ระดับ · ไอคอนมื้ออาหาร/ประเภทมื้อ · คำแนะนำสุขภาพ · อวาตาร์ · โฆษณา',
-      '🚩 ตัดธงภาษา 🇹🇭🇬🇧 ออก (เหลือชื่อ "ไทย / English") เพราะไม่มีไอคอนเส้นแทนได้สื่อความหมาย',
-    ],
-    en:[
-      '🎨 **App-wide UI emojis swapped for line icons (SVG)** — buttons · headers · menus · tabs · the Help page · modals now use the same line-icon style as the bottom nav · crisp at any resolution',
-      '🏅 **Kept as emoji on purpose**: achievement badges · levels · meal & meal-type icons · health tips · avatars · ads',
-      '🚩 Dropped the 🇹🇭🇬🇧 language flags (kept the "ไทย / English" labels) — no meaningful line-icon equivalent',
-    ],
-  },
-  '2.32.1':{
-    th:[
-      '✂️ **ปรับรูปโปรไฟล์/พื้นหลังแบบลากซูมเอง** — เปิดหน้าครอปสไตล์โซเชียล (ลากเลื่อน + แถบซูม) · รูปโปรไฟล์ครอปเป็นวงกลม · รูปพื้นหลังครอป 4:1 ก่อนบันทึก (เลิกครอปกึ่งกลางอัตโนมัติ)',
-      '🎨 **ไอคอนเมนูด้านข้างเป็นเส้นโมเดิร์น** — เปลี่ยนจากอีโมจิเป็นไอคอนเส้นเรียบทันสมัยทั้งหมด',
-      '🩹 **เก็บกวาดขอบจอซ้าย** — เอาเงาดำจางๆ ที่ขอบซ้าย (โผล่ตอนเมนูปิดอยู่) ออก',
-    ],
-    en:[
-      '✂️ **Drag-to-zoom photo cropping** — profile & cover photos now open a social-style cropper (drag + zoom slider) · avatar crops to a circle, cover to 4:1, before saving (no more blind center-crop)',
-      '🎨 **Modern line icons in the side menu** — every emoji swapped for clean modern line icons',
-      '🩹 **Left-edge cleanup** — removed a faint dark band hugging the left edge (it showed while the menu was closed)',
-    ],
+    th:['🪟 ดีไซน์ใหม่สไตล์กระจกฝ้า (glassmorphism) ทั้งแอป'],
+    en:['🪟 App-wide frosted-glass (glassmorphism) redesign'],
   },
   '2.32.0':{
-    th:[
-      '👤 **หน้าโปรไฟล์โฉมใหม่สไตล์โซเชียล** — รูปปก + รูปโปรไฟล์ซ้อนมุมซ้าย (มีปุ่มกล้องแก้รูป/พื้นหลัง) · แถวสถิติย่อ · ปุ่ม แชร์ + แก้ไขโปรไฟล์',
-      '📂 **เมนูด้านข้างใหม่** — การ์ดผู้ใช้ด้านบน (แตะไปโปรไฟล์) + รายการมีไอคอนวงกลมประจำเมนู',
-    ],
-    en:[
-      '👤 **Refreshed social-style profile** — cover photo + overlapping avatar (with camera buttons to edit picture/cover) · quick stat line · Share + Edit profile buttons',
-      '📂 **New side menu** — a tappable user card on top + circular icon tiles for each item',
-    ],
+    th:['👤 โปรไฟล์โฉมใหม่สไตล์โซเชียล','✂️ ครอปรูปโปรไฟล์/พื้นหลังเอง','🎨 ไอคอน UI เป็นเส้น SVG ทั้งแอป'],
+    en:['👤 Refreshed social-style profile','✂️ Drag-to-zoom photo cropping','🎨 App-wide SVG line icons'],
   },
   '2.31.0':{
-    th:[
-      '🌈 **วงแหวนแคลอรี่ไล่สีสเปกตรัม** (ฟ้า→เขียว→เหลือง) เมื่อยังอยู่ในเป้า · ใกล้เป้าเป็นเหลือง · เกินเป็นแดง',
-      '⬅️ **หน้าย่อยใช้ปุ่มย้อนกลับวงกลม + หัวข้อกึ่งกลาง** ดูเป็นระเบียบขึ้น',
-      '🍱 **รายการอาหารมีไอคอนสีประจำมื้อ** (เช้า/กลางวัน/เย็น/ของว่าง) + ยอดแคลชิดขวา',
-      '🟢 **ป้ายระดับเป็นชิปเขียว** (สไตล์ Beginner)',
-      '🎨 **เมนูซ้ายเข้าธีมกระจกเข้ม** เข้าชุดกับแถบแคปซูลล่าง · 🔽 dropdown เด้งกลางจอ · ✂️ ตัดอีโมจิหัวข้อออกกำลังกายออก',
-    ],
-    en:[
-      '🌈 **Spectrum calorie ring** (blue→green→amber) while on-track · amber near goal · red when over',
-      '⬅️ **Sub-pages now use a circular back button + centered title**',
-      '🍱 **Food log gets per-meal colored icon tiles** + calories aligned right',
-      '🟢 **Level tag is now a green pill** (Beginner-style)',
-      '🎨 **Left menu themed as dark glass** to match the bottom capsule · 🔽 dropdowns open centered · ✂️ removed the workout-header emoji',
-    ],
-  },
-  '2.30.1':{
-    th:[
-      '🎛️ **เมนูเลือก (dropdown) เป็นของแอปเอง** — เลิกใช้ตัวเลือกของระบบที่ตัวใหญ่/สีไม่เข้าธีม · เปลี่ยนเป็น sheet เด้งขึ้นมาธีมเดียวกับแอป ตัวอักษรเล็กลง อ่านสบาย (มื้ออาหาร · ประเภทอาหาร · เพศ · กิจกรรม ฯลฯ)',
-    ],
-    en:[
-      '🎛️ **In-app dropdowns** — replaced the OS-native picker (oversized, off-theme) with a themed bottom-sheet that matches the app, with smaller, cleaner text (meal · food category · gender · activity, etc.)',
-    ],
+    th:['🌈 วงแหวนแคลอรี่ไล่สีสเปกตรัม','🎨 ปรับปรุง UI'],
+    en:['🌈 Spectrum calorie ring','🎨 UI polish'],
   },
   '2.30.0':{
-    th:[
-      '🎨 **โฉมใหม่ทั้งแอป** — โทน**ดำสนิท** การ์ดขอบมนใหญ่ ตัวหนังสือขาวคม เทรนด์มินิมอล',
-      '🛟 **แถบเมนูล่างลอยเป็นแคปซูลกระจก** ไอคอนล้วน · ปุ่มที่เลือกอยู่ไฮไลต์เป็นแคปซูลเทานุ่ม',
-      '🟢 ปรับชุดสีให้สดสะอาดขึ้น (เขียว/ฟ้า/เหลือง) บนพื้นดำ',
-    ],
-    en:[
-      '🎨 **Full visual refresh** — true-black theme, big rounded cards, crisp white type, a cleaner minimal look',
-      '🛟 **Floating glass capsule bottom bar** — icon-only, with the active tab in a soft grey pill',
-      '🟢 Refreshed, more vivid accent palette (green/blue/amber) on pure black',
-    ],
-  },
-  '2.29.3':{
-    th:[
-      '🧹 **หน้าค้นหาอาหารโล่งขึ้น** — รวมปุ่มหมวดทั้งแถว (16 ปุ่ม) เป็น **ตัวกรองแบบ dropdown อันเดียว** · จัดกลุ่ม "อาหารนานาชาติ" (ไทย/ญี่ปุ่น/เกาหลี/จีน/อิตาเลียน/อินเดีย) และ "ตามประเภท" ไว้ด้วยกัน เลือกง่าย ไม่รก',
-    ],
-    en:[
-      '🧹 **Tidier food search** — the whole row of 16 category chips is now a single **dropdown filter**, with "By cuisine" (Thai/Japanese/Korean/…) and "By type" grouped together — cleaner and easier to scan',
-    ],
-  },
-  '2.29.2':{
-    th:[
-      '🍽️ **เพิ่มหมวด "ทั้งหมด"** ในหน้าค้นหาอาหาร — รวมอาหารทุกหมวด + อาหารที่เพิ่มเอง ไว้ที่ตัวกรองแรก และเลือกให้อัตโนมัติเมื่อเปิดหน้า',
-    ],
-    en:[
-      '🍽️ **New "All" filter** on the food-search page — combines every category plus your custom foods; shown first and selected by default',
-    ],
-  },
-  '2.29.1':{
-    th:[
-      '🔖 **ตัวกรองหมวดอาหารใหม่** — หน้าค้นหาเปลี่ยนจากปุ่มธงประเทศ (🇹🇭🇯🇵) มาเป็นชิปตัวกรองมีชื่อกำกับ (เช่น "ไทย", "ญี่ปุ่น") อ่านง่ายขึ้น แสดงผลตรงกันทุกเครื่อง',
-    ],
-    en:[
-      '🔖 **New food-category filters** — the search page now uses labeled filter chips ("Thai", "Japanese", …) instead of country-flag emoji, which are clearer and render consistently across devices',
-    ],
+    th:['🎨 โฉมใหม่ธีมเข้ม · แถบล่างแคปซูลกระจก','🎛️ เมนูเลือกในแอป'],
+    en:['🎨 New dark look · glass capsule bottom bar','🎛️ In-app dropdowns'],
   },
   '2.29.0':{
-    th:[
-      '📲 **แอป Android อัปเดตเองได้แล้ว** — เมื่อมีเวอร์ชั่นใหม่ แอปจะเด้งให้ดาวน์โหลด & ติดตั้งทันที ไม่ต้องไปหาโหลดเอง (เว็บอัปเดตอัตโนมัติอยู่แล้ว)',
-      '🖥️ **โหมดเต็มจอ (ขอบจรดขอบ)** — เนื้อหายืดเต็มจอจรดขอบบน-ล่าง ดูทันสมัยขึ้น ยังเห็นนาฬิกา/แบตตามปกติ',
-    ],
-    en:[
-      '📲 **The Android app can update itself now** — when a new version is out it pops up to download & install right away, no hunting for the file (the web already auto-updates)',
-      '🖥️ **Edge-to-edge fullscreen** — content now stretches to the top/bottom edges for a more modern look, with the clock/battery still visible',
-    ],
-  },
-  '2.28.5':{
-    th:[
-      '⚡ **อัปเดตอัตโนมัติทันที** — แอปจะอัปเดตเป็นเวอร์ชั่นล่าสุดให้เองเมื่อเปิด ไม่ต้องกดยืนยันอีก แล้วโชว์หน้านี้ "มีอะไรใหม่" ให้ดูแทน',
-      '🔄 **ดึงเวอร์ชั่นใหม่ตอนกลับเข้าแอป** — ใครยังค้างเวอร์ชั่นเก่าจะถูกพาขึ้นล่าสุดอัตโนมัติ ไม่ตกค้างอีก',
-    ],
-    en:[
-      '⚡ **Instant auto-update** — the app now upgrades itself to the latest version on open (no "update now?" prompt) and shows you this "What\'s new" instead',
-      '🔄 **Re-checks on return** — anyone still on an old build gets pulled forward to the latest automatically',
-    ],
-  },
-  '2.28.4':{
-    th:[
-      '🔌 **ขยายการกันค้างไปทุกหน้าที่ดึงเน็ต** — ตรวจทุกหน้า: หน้าหลัก/วิเคราะห์/โปรไฟล์/ตั้งค่า/TDEE/เพิ่มอาหาร อ่านจากเครื่องล้วน เปิดทันทีอยู่แล้ว · กระดานผู้นำมี skeleton+timeout อยู่แล้ว',
-      '👤 **โปรไฟล์เพื่อน + ค้นหาเพื่อน ไม่ค้างอีก** — ใส่ timeout 8 วิทุกการดึงข้อมูล ถ้าเน็ตช้าโชว์ "⏳ เน็ตช้า · แตะลองใหม่" แทนการค้างที่ "loading…" ตลอด',
-      '➕ **ปุ่มเพิ่มเพื่อนเปิดทันที** — เดิมต้องรอโหลดรายชื่อเพื่อนก่อนหน้าต่างถึงเปิด (เน็ตค้าง = กดแล้วเงียบ) ตอนนี้เปิดก่อน โหลดทีหลัง',
-    ],
-    en:[
-      '🔌 **Extended the no-hang pattern to every networked view** — audited all pages: Today/Analysis/Profile/Settings/TDEE/Add read purely from device and already open instantly; the leaderboard already had skeleton + timeouts',
-      '👤 **Friend profile + friend search no longer hang** — 8s timeout on every fetch; a slow network shows "⏳ slow · tap to retry" instead of sticking on "loading…" forever',
-      '➕ **Add-friend button opens instantly** — it used to wait for the friend-list query before the sheet appeared (a stalled network meant nothing happened on tap); now it opens first and loads after',
-    ],
-  },
-  '2.28.3':{
-    th:[
-      '⚡ **หน้า Developer โหลดทันที** — ย้ายการนับข้อมูลคลาวด์ (profiles/food_entries) ออกไปทำหลังหน้าขึ้นแล้ว หน้าจึงไม่รอเน็ตเลย (เดิมถ้าเน็ตช้าจะค้าง)',
-      '🟡 **เน็ตช้าโชว์ "⏳ เน็ตช้า" แทน Error แดง** — การนับเป็นข้อมูลเสริม ถ้าช้า/หมดเวลาแสดงนุ่มๆ ไม่ทำให้ดูเหมือนแอปพัง (พบว่า count แบบ exact ของ Supabase ช้าเมื่อเน็ตไม่ดี)',
-    ],
-    en:[
-      '⚡ **Developer page renders instantly** — the cloud counts (profiles/food_entries) now run AFTER the page is on screen and fill in their rows, so a slow network never delays the page',
-      '🟡 **Slow network shows a calm "⏳ slow" instead of a red Error** — the counts are an optional extra; if Supabase\'s exact-count HEAD request is slow it degrades gracefully instead of looking like a crash',
-    ],
-  },
-  '2.28.2':{
-    th:[
-      '🔧 **แก้หน้า Developer ค้างโหลด** — เดิมถ้า Supabase ตอบช้า หน้านี้จะค้าง "Collecting diagnostics…" ไม่จบ ต้องรีเฟรช ตอนนี้ใส่ตัวจับเวลา (สูงสุด ~5 วิ) แล้วแสดงผลได้เสมอ',
-      '🛡️ **กันหน้าแบบ async ค้าง** — หน้าที่โหลดข้อมูลเบื้องหลัง (Developer / กระดานผู้นำ) ถ้าโหลดพลาดจะ log ไว้แทนที่จะค้างเงียบๆ',
-      '✅ ตรวจครบทุกหน้า (รวมหน้า Developer) — ไม่มี error ค้างหน้าใดเลย',
-    ],
-    en:[
-      '🔧 **Fixed Developer page hanging** — if Supabase was slow it used to stick on "Collecting diagnostics…" forever; every cloud probe is now time-boxed (≈5s max) so the page always renders',
-      '🛡️ **Async renders can\'t hang silently** — pages that load data in the background (Developer / Leaderboard) now log failures instead of freezing on a loader',
-      '✅ Swept every page (Developer included) — zero stuck/error states',
-    ],
-  },
-  '2.28.1':{
-    th:[
-      '🔧 **แก้สลับหน้าแล้วข้อมูลไม่โหลด** — แต่ละหน้ากันพังแยกกัน · หน้าหนึ่งเด้ง error ไม่ทำให้ทั้งแอปค้างต้องรีเฟรชอีก',
-      '🔄 **อัปเดตข้อมูลเองหลังซิงค์** — ดึงข้อมูลใหม่จากคลาวด์ (สลับแอป/ทุก 5 นาที) แล้วรีเฟรชหน้าที่เปิดอยู่ให้อัตโนมัติ',
-      '📡 **กระดานผู้นำไม่ค้างโหลด** — ถ้าเน็ตช้าเกิน 10 วิ มีปุ่ม "ลองใหม่" ให้กด ไม่ต้องรีเฟรชทั้งแอป',
-    ],
-    en:[
-      '🔧 **Fixed "switch page → data won\'t load"** — each page render is isolated, so one failing screen can no longer freeze the app into needing a reload',
-      '🔄 **Auto-refresh after sync** — pulling fresh cloud data (on app focus / every 5 min) now re-renders the open page automatically',
-      '📡 **Leaderboard never hangs** — if the network stalls past 10s you get a "Retry" button instead of an endless skeleton',
-    ],
+    th:['📲 แอป Android อัปเดตเอง','🖥️ โหมดเต็มจอ (ขอบจรดขอบ)','🔖 ตัวกรองหมวดอาหาร'],
+    en:['📲 Android app self-updates','🖥️ Edge-to-edge fullscreen','🔖 Food-category filters'],
   },
   '2.28.0':{
-    th:[
-      '⚡ **เพิ่มด่วน 1 แตะ** — แถวอาหารล่าสุด/โปรด บนหน้าแรก · แตะครั้งเดียวบันทึกเลย (เลือกมื้อตามเวลาให้) · วงแหวนอัปเดตทันที',
-      '🍽️ **หน้าว่างมีปุ่มชวนลงมือ** — ทั้งหน้าแรก + ของโปรด/ล่าสุด · ไม่เจอหน้าจอว่างเปล่าอีก',
-      '👋 **มือใหม่หาปุ่มเจอง่าย** — หลังตั้งค่าครั้งแรก ปุ่ม + กระพริบบอกตำแหน่ง',
-    ],
-    en:[
-      '⚡ **One-tap quick add** — a row of your recent/favorite foods on Today · tap once to log (meal auto-picked by time) · ring updates instantly',
-      '🍽️ **Actionable empty states** — Today + favorites/recent now guide you instead of showing a blank screen',
-      '👋 **Easier first log** — after first-run setup the + button pulses to show where to start',
-    ],
-  },
-  '2.27.1':{
-    th:[
-      '⏱️ **เลือกมื้ออัตโนมัติตามเวลา** — เปิดหน้าเพิ่มอาหารตอนเช้า/เที่ยง/เย็น จะเลือกมื้อให้เลย · ตัด 1 แตะทุกครั้งที่บันทึก',
-      '🍽️ **หน้าว่างชวนลงมือ** — วันที่ยังไม่บันทึก มีปุ่ม "บันทึกอาหาร" ให้กดเริ่มได้ทันที',
-    ],
-    en:[
-      '⏱️ **Auto-pick meal by time** — opening Add Food in the morning/noon/evening preselects the right meal · saves a tap on every log',
-      '🍽️ **Actionable empty state** — days with no entries show a "Log food" button to start right away',
-    ],
+    th:['⚡ เพิ่มด่วน 1 แตะ','🔧 แก้ไขบั๊ก · ปรับปรุงประสิทธิภาพ'],
+    en:['⚡ One-tap quick add','🔧 Bug fixes · performance'],
   },
   '2.27.0':{
-    th:[
-      '💀 **Skeleton loading + shimmer** — เปลี่ยนหน้าที่ต้องโหลด (กระดานผู้นำ) โชว์โครงร่างทันที · ถ้านานเกินมี shimmer วิ่ง',
-      '📐 **Accordion** — หน้าวิธีใช้งานยุบ/ขยายได้ ไม่รกตา',
-      '💬 **กล่อง popup เองทั้งหมด** — เลิกใช้ alert/confirm/prompt ของระบบ · สวย เข้ากับธีม',
-      '💡 **Tooltip ใหม่** — แตะ/ชี้ไอคอนเพื่อดูคำอธิบาย (เลิกใช้ title ของเบราว์เซอร์)',
-    ],
-    en:[
-      '💀 **Skeleton loading + shimmer** — data pages (leaderboard) show placeholders instantly · shimmer kicks in if it drags',
-      '📐 **Accordion** — the Help page now collapses/expands cleanly',
-      '💬 **Fully custom dialogs** — replaced native alert/confirm/prompt · themed + polished',
-      '💡 **New tooltips** — tap/hover icons for hints (replaces browser title=)',
-    ],
+    th:['⏱️ เลือกมื้ออัตโนมัติตามเวลา','💀 Skeleton loading','💬 ป๊อปอัปในแอป'],
+    en:['⏱️ Auto-pick meal by time','💀 Skeleton loading','💬 In-app dialogs'],
   },
   '2.26.0':{
-    th:[
-      '⚖️ **แนวโน้มน้ำหนักใหม่ทั้งหมด** — คำนวณจากสมดุลพลังงานจริง (กิน − TDEE − ออกกำลังกาย) · ยึดกับน้ำหนักที่ชั่งจริง · มีพยากรณ์ 7 วันข้างหน้า (เส้นปะ)',
-      '🎯 **แก้คำนวณให้แม่นขึ้น** — เดิมใช้ "เป้าหมาย" เป็นฐานคำนวณ ทำให้คนที่ทำตามเป้ากลับเห็นว่าน้ำหนักไม่ลด · ตอนนี้ใช้ TDEE (ค่าจริง)',
-      '🧮 **รวมสูตรคำนวณเป็นจุดเดียว** — BMR/TDEE/เป้าหมาย ทุกหน้าใช้สูตรเดียวกัน · ตรวจสอบ BMI · body fat · มาโคร ถูกต้องทั้งหมด',
-      '🐞 แก้เส้นเป้าหมาย + ETA ในกราฟที่ไม่เคยขึ้น (อ้างชื่อฟิลด์ผิด)',
-    ],
-    en:[
-      '⚖️ **Weight trend rebuilt** — true energy-balance model (intake − TDEE − exercise) · anchored to real weigh-ins · 7-day dashed forecast',
-      '🎯 **More accurate math** — old code used your *goal* as the baseline, so hitting your deficit showed ~no loss · now uses TDEE (maintenance)',
-      '🧮 **Formulas centralized** — BMR/TDEE/goal share one source · BMI, body-fat, macros all verified correct',
-      '🐞 Fixed the goal line + ETA never appearing on the trend (wrong field name)',
-    ],
+    th:['⚖️ แนวโน้มน้ำหนักใหม่ (พยากรณ์)','🔧 แก้ไขบั๊ก'],
+    en:['⚖️ Rebuilt weight trend (forecast)','🔧 Bug fixes'],
   },
   '2.25.0':{
-    th:[
-      '📅 **ปฏิทินใหม่** — เลือกวันที่ผ่านปฏิทินในแอป (ไม่ใช้ของระบบ) · มินิมอล · มีจุดบอกวันที่บันทึกอาหารไว้',
-      '🎨 **หน้าแรกโล่งขึ้น** — แถบวันที่เป็นปุ่มมน เว้นระยะจากหัวไม่ชนกัน',
-      '💧 **การ์ดน้ำดื่มกระชับ** — ปุ่ม −/+ เล็กลง อยู่บรรทัดเดียวกับจำนวน',
-    ],
-    en:[
-      '📅 **New in-app calendar** — pick dates with a custom minimal calendar (not the system one) · dots mark days you logged food',
-      '🎨 **Cleaner home** — date bar is now a rounded pill with breathing room from the header',
-      '💧 **Compact water card** — smaller −/+ buttons inline with the count',
-    ],
-  },
-  '2.24.3':{
-    th:[
-      '🐞 **แก้โปรไฟล์เพื่อนโชว์ Lv 1 / streak 0 ผิด** — คนที่ไม่ใช่เพื่อนกันจะเห็นสถิติเป็น 0 ทั้งที่ติดอันดับต้นๆ · ตอนนี้ตรงกับกระดานผู้นำแล้ว',
-      '🩹 **แก้ซิงค์ของบัญชีไม่ล็อกอินพัง** — กันข้อมูลหายเพราะ foreign key (จากบั๊กที่เผลอใส่ใน 2.24.2)',
-    ],
-    en:[
-      '🐞 **Fixed friend profile showing Lv 1 / streak 0** — non-friends saw all-zero stats even for top-ranked users · now matches the leaderboard',
-      '🩹 **Fixed broken sync for anonymous accounts** — prevented data loss from a foreign-key issue (regression from 2.24.2)',
-    ],
-  },
-  '2.24.2':{
-    th:[
-      '🧹 **กันบัญชีไม่ล็อกอินขึ้นกระดานผู้นำ** — เดิม anonymous account โผล่เป็น "Test User" เต็มไปหมด (เจอจากการตรวจระบบ: 14 จาก 18 โปรไฟล์เป็น anonymous)',
-      '🏅 leaderboard แสดงเฉพาะสมาชิกที่ตั้งชื่อแล้วเท่านั้น',
-    ],
-    en:[
-      '🧹 **Keep anonymous accounts off the leaderboard** — they were flooding it as nameless "Test User" rows (audit found 14 of 18 profiles were anonymous)',
-      '🏅 Leaderboard now shows only named, signed-up members',
-    ],
-  },
-  '2.24.1':{
-    th:[
-      '🖼️ **banner รูปแสดงข้ามเครื่อง + ในโปรไฟล์เพื่อน** (เคย local-only)',
-      '🏅 **เหรียญตราซิงค์ขึ้นคลาวด์** · เพื่อน + เครื่องใหม่เห็นเหรียญที่เคยได้',
-      '📊 **คะแนน leaderboard ตรงกันทุกเครื่อง** · ใช้เป้าหมายของเจ้าของ ไม่ใช่ผู้ดู',
-    ],
-    en:[
-      '🖼️ **Banner image now syncs cross-device + on friends profile** (was local-only)',
-      '🏅 **Badges sync to cloud** · friends + new devices see your earned badges',
-      '📊 **Leaderboard scores consistent across viewers** · uses each user\'s own goal, not the viewer\'s',
-    ],
+    th:['📅 ปฏิทินเลือกวันที่ในแอป'],
+    en:['📅 In-app calendar date picker'],
   },
   '2.24.0':{
-    th:[
-      '☁️ **ซิงค์ข้อมูลแม้ไม่ได้ล็อคอิน** — สำรองอัตโนมัติบนคลาวด์ · ข้อมูลผูกกับเครื่องนี้จนกว่าจะล็อคอิน',
-      '🔄 **ย้ายข้อมูลอัตโนมัติเมื่อล็อคอิน** — สมัคร/ล็อคอินแล้วข้อมูลย้ายเข้าบัญชีจริงไม่หาย',
-      '🏆 แก้คะแนนคนที่ไม่ใช่เพื่อนขึ้น 0 · ใช้ RPC รวมยอดต่อวัน (ไม่ leak ชื่ออาหาร)',
-      '🔁 เปลี่ยน tab → หน้าแรกรีโหลดข้อมูลใหม่อัตโนมัติ ไม่ต้องรีเฟรชแล้ว',
-      '🧹 ลบหัวข้อ "เหลือ" และ "จำนวนรายการ" ออกจากหน้าแรก',
-      '✏️ test user → Test User (ตัวพิมพ์ใหญ่)',
-    ],
-    en:[
-      '☁️ **Sync even without sign-in** — auto cloud backup · data is tied to this device until you sign in',
-      '🔄 **Data migrates on sign-in** — sign up / log in and your local data moves into the real account',
-      '🏆 Fixed 0-score for non-friends on leaderboard · uses per-day RPC aggregation (no food name leak)',
-      '🔁 Switching tabs back to Today auto-reloads · no more manual refresh needed',
-      '🧹 Removed "remaining" + entries-count headers from Today page',
-      '✏️ test user → Test User (titlecase)',
-    ],
+    th:['☁️ ซิงค์แม้ไม่ล็อกอิน + ย้ายข้อมูลเมื่อล็อกอิน','🔧 แก้ไขบั๊ก'],
+    en:['☁️ Sync without sign-in + migrate on login','🔧 Bug fixes'],
   },
   '2.23.0':{
-    th:[
-      '🌍 **Leaderboard ทั่วโลก ดูได้แม้ไม่ล็อกอิน** · Tab "เพื่อน" ต้องล็อกอินก่อน',
-      '📊 **แคล/น้ำ 7 วัน / 1 เดือน** สลับได้ · กรอบขยายเองถ้ากราฟสูง',
-      '🎮 **โปรไฟล์ Steam style** · Level 1-10 · banner สีหรืออัปโหลดรูป (ลาก + ซูม crop)',
-      '✏️ แก้ไขโปรไฟล์ + สัดส่วน ซ่อนเป็นค่าเริ่มต้น · เปิดเมื่อกด "แก้ไข"',
-      '📌 Header ตรึงบน · เลื่อนหน้าไม่หาย',
-      '🤳 iOS คีย์บอร์ดไม่ซูมจอแล้ว',
-      '✕ ปุ่มปิดโปรไฟล์เพื่อนอยู่บนหัว + footer · กดง่ายขึ้น',
-    ],
-    en:[
-      '🌍 **Global leaderboard works without sign-in** · Friends tab still requires login',
-      '📊 **Calorie/water 7d ↔ 30d toggle** · chart frame auto-expands for tall bars',
-      '🎮 **Steam-style profile** · Level 1-10 · banner color or upload image (drag + zoom crop)',
-      '✏️ Edit profile + measurements hidden by default · opens via Edit button',
-      '📌 Sticky top header · stays in place when scrolling',
-      '🤳 iOS keyboard no longer zooms the page',
-      '✕ Friend profile close button in header + footer · easier to tap',
-    ],
+    th:['🌍 กระดานผู้นำระดับโลก','🎮 โปรไฟล์ Steam-style · Level 1–10'],
+    en:['🌍 Global leaderboard','🎮 Steam-style profile · Level 1–10'],
   },
   '2.22.0':{
-    th:[
-      '✨ **เพื่อน + leaderboard ออกจาก BETA** · กลายเป็น GA เต็มตัว',
-      '⚡ **เปิดแอปไวขึ้น** — Service Worker ใช้ stale-while-revalidate · โหลด cache ก่อน · อัปเดต background',
-      '🌐 **บายพาส API ใน SW** — Supabase / Gemini / OpenAI / Claude ไม่ถูก cache · เร็วและถูกต้องกว่าเดิม',
-      '♿ เพิ่ม ARIA dialog + role/tabindex บน leaderboard rows · ดีต่อ screen reader',
-      '🧹 i18n holdouts: dev mode + sign-in toast พูดได้สองภาษาแล้ว',
-    ],
-    en:[
-      '✨ **Friends + leaderboard out of BETA** · now fully GA',
-      '⚡ **Faster app launch** — Service Worker uses stale-while-revalidate · serves cache first, updates in background',
-      '🌐 **API bypass in SW** — Supabase / Gemini / OpenAI / Claude no longer cached · faster + correct',
-      '♿ Added ARIA dialog + role/tabindex on leaderboard rows · better screen-reader UX',
-      '🧹 i18n holdouts: dev mode + sign-in toast now bilingual',
-    ],
+    th:['✨ เพื่อน + กระดานผู้นำ (เปิดใช้จริง)','⚡ ปรับปรุงประสิทธิภาพ'],
+    en:['✨ Friends + Leaderboard (now GA)','⚡ Performance'],
   },
   '2.21.0':{
-    th:[
-      '🎮 **โปรไฟล์ใหม่สไตล์ Steam** — banner สีปรับได้ · level (Lv 1-6) · stats + badges showcase · ใส่ bio ได้',
-      '👥 **ดูโปรไฟล์เพื่อนได้** — กดที่แถวเพื่อนใน leaderboard เปิดดูได้เลย',
-      '🤖 **AI ถ่ายรูปอาหาร ฟรี 20 รูป/วัน** — ผู้สมาชิกใช้ได้ทันที · ใส่ API key เองได้ในตั้งค่าถ้าอยากใช้เกิน limit',
-      '🍱 **ฐานข้อมูลอาหารเพิ่มเป็น 250 รายการ** (+70 รายการใหม่)',
-      '🎨 ค่าเริ่มต้นใหม่: ฟอนต์ Prompt · ธีมสว่าง · แถบล่าง Today/Add/Analysis/Profile/Settings',
-      '🔔 ขอ permission แจ้งเตือนตอนเริ่มแอป · ถ้าปฏิเสธปิดเตือนมื้ออาหารอัตโนมัติ',
-      '📈 กราฟแนวโน้มน้ำหนักใหม่ — ใช้ข้อมูลที่ชั่งจริง · เส้นโค้งเรียบ + Y-axis labels',
-      '🛠️ Capacitor 8 + JDK 21 + Android 15 (APK เร็วขึ้น · รองรับ Android ใหม่)',
-    ],
-    en:[
-      '🎮 **Steam-style profile redesign** — customizable banner color · level (Lv 1-6) · stats + badges showcase · bio',
-      '👥 **View friend profiles** — tap any row in the leaderboard to open',
-      '🤖 **AI food photo free 20/day** — members get it instantly · BYO API key in settings for higher limits',
-      '🍱 **Food database now 250 items** (+70 new dishes)',
-      '🎨 New defaults: Prompt font · light theme · bottom nav Today/Add/Analysis/Profile/Settings',
-      '🔔 Asks for notification permission on first launch · auto-disables meal reminders if denied',
-      '📈 Weight trend chart redesigned — uses actual measurements · smooth curves + Y-axis labels',
-      '🛠️ Capacitor 8 + JDK 21 + Android 15 (faster APK · better new-Android support)',
-    ],
+    th:['🎮 โปรไฟล์ Steam-style · ดูโปรไฟล์เพื่อน','🤖 AI ถ่ายรูปอาหารฟรี','🍱 ฐานข้อมูลอาหาร 250 เมนู'],
+    en:['🎮 Steam-style profile · view friends','🤖 Free AI food photo','🍱 250-item food database'],
   },
   '2.20.0':{
-    th:[
-      '🎯 **Modals ทุกตัวอยู่กลางจอ** — เลิกใช้แบบ bottom-sheet · เด้งขึ้นกลางจอ scale-fade in ดูสมัยใหม่กว่า',
-      '🤖 **AI ถ่ายรูป: status สดๆ + นับถอยหลังเหลือ** — เห็น spinner · "AI กำลังวิเคราะห์... (3s, 4s, 5s)" · chip "เหลือ N/20 รูปวันนี้"',
-      '🔒 **AI ถ่ายรูป สำหรับสมาชิกเท่านั้น** — ต้อง sign up ก่อน (ยังเป็น free tier · เพื่อกัน abuse ระบบ proxy)',
-      '🍱 **หน้าเพิ่มอาหารจัดใหม่** — ช่องค้นหา + ปุ่ม AI/บาร์โค้ดอยู่บนสุด · ของโปรด/ล่าสุด/ชุดอาหารย้ายลงล่าง',
-      '📉 **แนวโน้มน้ำหนัก: 14 วันย้อนหลังเท่านั้น** — เลิกคาดการณ์อนาคต (ไม่แม่นยำ) · แสดงเฉพาะแนวโน้มจริงจากข้อมูลที่ผ่านมา · ไม่รวมวันนี้',
-      '🏆 **เหรียญตราเก็บถาวร** — ได้แล้วอยู่ตลอด · ถึงจะหยุด streak ก็ไม่หาย · บันทึกใน localStorage (`cp_earned_badges`)',
-    ],
-    en:[
-      '🎯 **All modals now center on screen** — no more bottom-sheet · scale-fade entrance feels more modern',
-      '🤖 **AI photo: live status + remaining count** — spinner + "AI analyzing… (3s, 4s, 5s)" heartbeat · "N/20 left today" chip',
-      '🔒 **AI photo is members-only** — sign up first (still free · prevents proxy abuse)',
-      '🍱 **Add Food reordered** — search + AI/barcode at top · Favorites/Recent/Presets moved to bottom',
-      '📉 **Weight chart: past 14 days only** — no more future projection (was inaccurate) · shows actual backward trend · excludes today',
-      '🏆 **Badges are now permanent** — once earned, stay forever · breaking a streak no longer removes the badge · persisted in localStorage',
-    ],
-  },
-  '2.19.3':{
-    th:[
-      '🐞 **แก้ AI photo "sign-in timed out"** — `signInAnonymously()` ของ supabase-js v2 ก็ deadlock เหมือน getSession() · เปลี่ยนไปใช้ REST API ตรงๆ (`POST /auth/v1/signup`) ที่ไม่มี navigator-lock',
-    ],
-    en:[
-      '🐞 **Fix AI photo "sign-in timed out"** — supabase-js v2 `signInAnonymously()` also deadlocks like getSession · switched to direct REST call (`POST /auth/v1/signup`) that bypasses the navigator-lock',
-    ],
-  },
-  '2.19.2':{
-    th:[
-      '🐞 **แก้ AI photo error "invalid_jwt"** — ถ้า session anonymous เก่าใน localStorage ถูก server ลบไปแล้ว · ระบบจะลบ session เก่าทิ้ง + สร้างใหม่ + retry อัตโนมัติ',
-    ],
-    en:[
-      '🐞 **Fix AI photo "invalid_jwt" error** — when the stored anonymous session no longer exists on the server, we now auto-wipe + re-sign-in + retry once',
-    ],
-  },
-  '2.19.1':{
-    th:[
-      '🐞 **แก้บั๊ก AI photo ค้าง** — `getSession()` ของ supabase-js v2 deadlock จาก navigator-lock · ตอนนี้อ่าน session จาก localStorage ตรงๆ แล้วใช้ anonymous sign-in เป็น fallback',
-      '🔧 เปลี่ยน Gemini model default `gemini-2.0-flash` → `gemini-2.5-flash` (free tier ใหม่ใช้ตัวเก่าไม่ได้แล้ว · 2.5 ทำงานได้ดี)',
-    ],
-    en:[
-      '🐞 **Fix AI photo hang** — supabase-js v2 `getSession()` was deadlocking on the navigator lock · now reads session straight from localStorage with anonymous sign-in fallback',
-      '🔧 Switched default Gemini model from `gemini-2.0-flash` → `gemini-2.5-flash` (free tier no longer serves 2.0 · 2.5 works cleanly)',
-    ],
+    th:['🎯 ปรับ UX','🔒 AI ถ่ายรูปเฉพาะสมาชิก','🏆 เหรียญตราเก็บถาวร'],
+    en:['🎯 UX pass','🔒 AI photo for members','🏆 Permanent badges'],
   },
   '2.19.0':{
-    th:[
-      '🤖 **AI วิเคราะห์อาหารจากรูป (ฟรี!)** — ถ่ายรูปอาหาร → AI ประเมินชื่อ/แคล/มาโครให้ · 20 รูป/วัน/คน · ไม่ต้องตั้งค่าอะไรเลย (มี BYO key สำหรับใช้เกิน limit)',
-      '🔥 **Streak-saver** — push notification 21:30 ถ้ายังไม่บันทึก + streak ≥ 3 (เฉพาะ APK) · ตั้งค่าได้ใน Settings → การเตือน',
-      '🎉 **Milestone share อัตโนมัติ** — ครบ 7/14/30/60/100 วันติด → popup share image ทันที + badge ใหม่',
-      '🎁 **ระบบ referral** — share ลิงก์ → เพื่อนเปิด → toast "เพื่อนคุณเชิญคุณมา" + badge "ผู้ได้รับเชิญ"',
-      '🔥 **Daily check-in toast** — เปิดแอปวันใหม่เห็น "X วันติด เก่งมาก!" ทุกครั้ง',
-      '📊 **Onboarding telemetry** ใน Developer Mode (เห็นว่า user drop ที่ step ไหน)',
-    ],
-    en:[
-      '🤖 **AI food photo (free!)** — snap a photo → AI estimates name/kcal/macros · 20 photos/day per user · zero setup (BYO key option for higher limits)',
-      '🔥 **Streak saver** — 21:30 push notification if not logged + streak ≥ 3 (APK only) · toggle in Settings → Reminders',
-      '🎉 **Auto milestone share** — hit 7/14/30/60/100-day streak → share image pops automatically + new badges',
-      '🎁 **Referral system** — share link → friend opens → "A friend invited you" toast + "Invited friend" badge',
-      '🔥 **Daily check-in toast** — open the app on a new day → "X-day streak · keep going!"',
-      '📊 **Onboarding telemetry** in Developer Mode (see where users drop off)',
-    ],
-  },
-  '2.18.3':{
-    th:[
-      '🤝 **เปิดใช้งานลิงก์ Affiliate จริง** (Lazada + Shopee) — แตะการ์ดโฆษณาแล้วไปร้านค้าจริงได้ทันที',
-    ],
-    en:[
-      '🤝 **Real Lazada + Shopee affiliate links live** — tap an ad card to open the actual store',
-    ],
-  },
-  '2.18.2':{
-    th:[
-      '📺 **โฆษณา Affiliate** ในหน้าวันนี้และหน้าวิเคราะห์ — สนับสนุนการพัฒนาแอป (กด × เพื่อปิดในแต่ละ session)',
-      '🛒 รวมสินค้า fitness/health 8 ตัว: เวย์โปรตีน · เชือกกระโดดถ่วงน้ำหนัก · ทดแทนมื้ออาหาร · อาหารคลีน · โปรตีนซีเรียล · ผักเคลอบกรอบ · ธัญพืชรวม · CP อกไก่นุ่ม',
-    ],
-    en:[
-      '📺 **Affiliate ads** on Today + Analysis pages — supports app development (× to dismiss per session)',
-      '🛒 Curated fitness/health products (8): whey protein, weighted jump rope, meal replacement, clean meal pack, protein cereal, kale chips, 9-grain mix, CP chicken breast',
-    ],
-  },
-  '2.18.1':{
-    th:['🔐 ปรับปรุงระบบรักษาความปลอดภัย Developer Mode'],
-    en:['🔐 Hardened Developer Mode access'],
-  },
-  '2.18.0':{
-    th:[
-      '➕ **ปุ่ม FAB เพิ่มอาหาร** ที่มุมขวาล่างของหน้าวันนี้ · กดเดียวกระโดดไป Add tab + คีย์บอร์ดเด้งทันที',
-      '🖥️ **Desktop UI ใหม่** — 3 breakpoints (mobile 480 / tablet 560 / desktop 720) · card frame + shadow + gradient bg · ring ใหญ่ขึ้น',
-      '🔐 ปรับปรุงระบบรักษาความปลอดภัย Developer Mode',
-      '🔧 **Developer Mode** ใน drawer → อื่น ๆ (ต้องใส่รหัสผ่าน) — ดูสถิติ users, อุปกรณ์, settings, IDB usage',
-      '🍱 **ลบหัวข้อสารอาหารซ้ำ** ในหน้าวันนี้ + ใช้ชื่อเต็ม "โปรตีน/คาร์บ/ไขมัน" แทน P/C/F ทุกที่',
-      '📷 **อัปโหลดรูปโปรไฟล์ใหญ่ขึ้น** — รับไฟล์ถึง 8MB (เดิม 2MB), output 512×512 (เดิม 256), JPEG q=0.88',
-      '📤 **Share card iOS** — invite font ลด 42→34, hard char-break, +40px padding (ตัวหนังสือไม่ล้นกรอบบน iPhone)',
-      '🔄 **ปุ่ม Refresh ใน iOS browser** เท่านั้น (Android + Capacitor ไม่มี)',
-      '🤳 **iOS — ปิด double-tap zoom** ใช้ touch-action: manipulation (ยังคง pinch-zoom สำหรับ a11y)',
-      '♿ Reduced-motion media query · text-size-adjust lock · tap-highlight transparent',
-      '🐞 แก้บั๊ค bottom nav กว้าง 140px บน desktop (ควรเป็น 720) · กลับมาใช้ centering pattern ของ mobile',
-    ],
-    en:[
-      '➕ **FAB Add-Food button** at bottom-right of Today · one tap → Add tab + keyboard pops on mobile',
-      '🖥️ **Desktop UI overhaul** — 3 breakpoints (mobile 480 / tablet 560 / desktop 720) · card frame + shadow + gradient bg · bigger ring',
-      '🔐 Hardened Developer Mode access',
-      '🔧 **Developer Mode** in drawer → Other (password required) — show user count, device info, settings, IDB usage',
-      '🍱 **Removed duplicate macro labels** on Today + full names (Protein/Carbs/Fat) everywhere instead of P/C/F',
-      '📷 **Larger profile photo upload** — accepts up to 8MB (was 2MB), output 512×512 (was 256), JPEG q=0.88',
-      '📤 **Share card iOS fix** — invite font 42→34, hard char-break, +40px padding (text no longer clipped on iPhone)',
-      '🔄 **Refresh button on iOS browser only** (hidden on Android + Capacitor APK)',
-      '🤳 **iOS — disabled double-tap zoom** via touch-action: manipulation (pinch-zoom kept for a11y)',
-      '♿ Reduced-motion media query · text-size-adjust lock · tap-highlight transparent',
-      '🐞 Fix: bottom nav was 140px on desktop (should be 720) · reverted to mobile centering pattern',
-    ],
-  },
-  '2.17.0':{
-    th:[
-      '👥 **ฟีเจอร์เพื่อนยกระดับ** — Modal เพิ่มเพื่อนแทน prompt() เก่า · ค้นหาด้วยอีเมล/ชื่อแสดง (debounced 250ms) · เห็น avatar + email ในผลค้นหา',
-      'แสดงสถานะ: "นี่คือคุณ" / "✓ มีอยู่แล้ว" / ปุ่ม "+" ตามสถานะของแต่ละผู้ใช้',
-      '🗑️ ปุ่ม ✕ ในแถว leaderboard สำหรับลบเพื่อน (มี confirm ก่อน)',
-      'หลังเพิ่ม/ลบ — leaderboard refresh อัตโนมัติ',
-    ],
-    en:[
-      '👥 **Friends feature leveled up** — Add Friend modal replaces the prompt() · search by email or display name (debounced 250ms) · see avatar + email in results',
-      'Status badges: "That\'s you" / "✓ Already" / "+" button',
-      '🗑️ ✕ button on each leaderboard row to remove a friend (with confirm)',
-      'After add/remove → leaderboard refreshes automatically',
-    ],
-  },
-  '2.16.0':{
-    th:[
-      '🍱 ฐานข้อมูลอาหารขยายอีก +30 รายการ — รวมเป็น 160+ · เพิ่ม ราดหน้า/ผัดขี้เมา/ข้าวหน้าเป็ด/สุกี้/เย็นตาโฟ/แกงไตปลา + chains (Bonchon/Subway/Yayoi/MK/CP) + เครื่องดื่ม (โกโก้/เอสเปรสโซ/อเมริกาโน) + healthy (ไข่ขาว 3 ฟอง/อะโวคาโดโทสต์)',
-      '♿ **ธีมใหม่ "คมชัด" (High Contrast)** — สำหรับผู้ที่สายตาไม่ดี/ต้องการ contrast สูง (WCAG AAA-style: ดำสนิท + ขาวล้วน + ขอบหนา 2px)',
-      '♿ **Tab-trap ใน modal** — กด Tab จะวนอยู่ใน modal ที่เปิดอยู่ (a11y for keyboard users)',
-      '♿ Reduced-motion: ตามค่า prefers-reduced-motion ของระบบ (ปิด animation ทั้งหมดถ้าเปิดไว้)',
-      '⚡ **Lazy-load Supabase SDK** — script tag เปลี่ยนเป็น `defer` · ลดเวลา first paint · client init รอ SDK ก่อน',
-    ],
-    en:[
-      '🍱 Food DB +30 more entries — total 160+ · added Rad Na, Drunken Noodles, Duck Rice, Suki, Yen Ta Fo, Tai Pla Curry + chains (Bonchon/Subway/Yayoi/MK/CP) + drinks (cocoa/espresso/americano) + healthy (egg whites/avocado toast)',
-      '♿ **New "Contrast" theme** — WCAG AAA-style for users who need stronger visual contrast (pure black + white text + 2px borders)',
-      '♿ **Tab-trap in modals** — Tab cycles within the open modal (a11y for keyboard users)',
-      '♿ Reduced-motion: respects prefers-reduced-motion (kills animations system-wide)',
-      '⚡ **Lazy-load Supabase SDK** — script tag now `defer` · faster first paint · client init waits for SDK',
-    ],
-  },
-  '2.15.1':{
-    th:[
-      '🐞 แก้บั๊ก Barcode Scanner โหลด library ไม่ได้ — เปลี่ยน CDN จาก `@zxing/browser` (ไม่มี UMD bundle, 404) เป็น `@zxing/library@0.20.0` (มี UMD + พร้อม browser API)',
-      'เพิ่ม CDN fallback (unpkg → jsDelivr) ป้องกัน single-CDN outage',
-      'ปรับ scan-stop ให้ใช้ `reader.reset()` ตาม API ของ @zxing/library',
-    ],
-    en:[
-      '🐞 Fix barcode scanner library load — swapped CDN from `@zxing/browser` (no UMD, 404\'d) to `@zxing/library@0.20.0` (UMD + browser API)',
-      'Added CDN fallback (unpkg → jsDelivr) to survive single-CDN outage',
-      'Adjusted stop logic to call `reader.reset()` per @zxing/library API',
-    ],
-  },
-  '2.15.0':{
-    th:[
-      '🖼️ **รูปอาหารย้ายไป IndexedDB** — แทนที่จะใส่ใน localStorage 5MB · ตอนนี้เก็บได้รูประดับ GB+',
-      'ถ่ายรูปอาหารได้เยอะกว่าเดิมหลายเท่าโดยไม่กระทบความเร็ว',
-      'ลบรูปอาหาร/ล้างข้อมูล/ลบรูปเก่า ก็เคลียร์ IDB ให้ครบ',
-      'Cloud sync แปลง IDB photo → data URL อัตโนมัติก่อนอัปโหลด (ใช้กับ schema เดิมได้)',
-      'รูปเก่าที่อยู่ใน localStorage ยังใช้ได้ปกติ (auto-fallback)',
-    ],
-    en:[
-      '🖼️ **Meal photos moved to IndexedDB** — instead of the 5MB localStorage cap · now capacity is GBs',
-      'Take many more meal photos without slowing the app',
-      'Delete/reset/clean-photos paths all clear IDB too',
-      'Cloud sync transparently resolves IDB photos to data URLs at upload',
-      'Existing inline photos still load (graceful fallback)',
-    ],
-  },
-  '2.14.0':{
-    th:[
-      '📷 **Barcode Scanner** — สแกนบาร์โค้ดสินค้าด้วยกล้อง · ดึงข้อมูลโภชนาการจากฐาน OpenFoodFacts (ฟรี ไม่ต้องสมัคร)',
-      'ถ้าไม่มีกล้องหรือสแกนไม่สำเร็จ พิมพ์รหัสบาร์โค้ดเองได้',
-      'ZXing library โหลด **lazy** เฉพาะตอนเปิดสแกนเนอร์ — ไม่หน่วงตอนเปิดแอป',
-      'พบสินค้าแล้วต่อเข้า Portion Picker ตามปกติ — ปรับจำนวนได้ก่อนเพิ่ม',
-    ],
-    en:[
-      '📷 **Barcode Scanner** — point your camera at a product barcode · nutrition pulled from OpenFoodFacts (free, no signup)',
-      'No camera or scan failing? Type the barcode manually',
-      'ZXing library lazy-loaded only when scanner opens — no startup cost',
-      'On found → feeds the existing Portion Picker so you can pick a quantity',
-    ],
-  },
-  '2.13.0':{
-    th:[
-      '🍲 **Recipe Builder (สร้างสูตรอาหาร)** — รวมหลายส่วนผสมเป็นเมนูเดียวบันทึกลงไลบรารี',
-      'ค้นหาส่วนผสม → กดเพิ่ม → ปรับจำนวนเท่าได้ละเอียด · ลบส่วนผสมได้',
-      'แสดง kcal/macros **ต่อเสิร์ฟ** + รวมทั้งหมด แบบ real-time',
-      'บันทึกชื่อซ้ำ = อัปเดตสูตรเดิม (ปรับสูตรง่าย)',
-    ],
-    en:[
-      '🍲 **Recipe Builder** — combine multiple ingredients into one library entry',
-      'Search → tap to add → fine-tune each ingredient\'s quantity · remove any line',
-      'Live **per-serving** kcal/macros + grand total',
-      'Saving with an existing name updates the previous recipe (easy iteration)',
-    ],
-  },
-  '2.12.0':{
-    th:[
-      '👋 **First-launch Onboarding Wizard** — 4 ขั้นตอน: ทักทาย → กรอกข้อมูล (เพศ/อายุ/น้ำหนัก/ส่วนสูง/กิจกรรม) → เลือกเป้าหมาย → สรุป TDEE',
-      'แสดงผลแคลอรี่/วัน แนะนำแบบ real-time ก่อนกด "เริ่มใช้งาน"',
-      'ปุ่ม "ข้ามไปก่อน" สำหรับผู้ใช้ที่อยากสำรวจเอง',
-      '♿ Focus visible — outline สีเด่นเมื่อกด Tab navigate ผ่านปุ่ม',
-    ],
-    en:[
-      '👋 **First-launch Onboarding Wizard** — 4 steps: welcome → basics (gender/age/weight/height/activity) → goal → TDEE summary',
-      'Real-time TDEE preview before tapping "Start using"',
-      '"Skip for now" button for users who want to explore freely',
-      '♿ Focus-visible — accent outline when navigating buttons via keyboard',
-    ],
-  },
-  '2.11.0':{
-    th:[
-      '🍱 ฐานข้อมูลอาหารขยาย +21 รายการ — Thai street food (ข้าวขาหมู/หมูแดง/หมูกรอบ/ก๋วยจั๊บ/ข้าวคลุกกะปิ/หมูสะเต๊ะ/ขนมจีบ/ผัดมาม่า/ไข่เจียวหมูสับ/ผัดผักบุ้ง/ยำมาม่า), chain restaurants (KFC/McDonald\'s/7-11/Starbucks), เครื่องดื่ม + อาหาร healthy',
-      '♿ Accessibility: กด **Esc** เพื่อปิด modal/drawer · ARIA labels บนปุ่ม icon (☰ menu, sync dot, ☀️/🌙 mode toggle, +/− น้ำ)',
-    ],
-    en:[
-      '🍱 Food DB +21 entries — Thai street food (Stewed Pork Leg Rice, Red Pork, Crispy Pork, Kuay Jub, Shrimp Paste Rice, Pork Satay, Steamed Dumpling, Stir-fried Instant Noodles, Thai Omelet w/ Pork, Morning Glory, Spicy Noodle Salad), chains (KFC/McDonald\'s/7-11/Starbucks), drinks + healthy options',
-      '♿ Accessibility: press **Esc** to close modal/drawer · ARIA labels on icon-only buttons (☰ menu, sync dot, ☀️/🌙 toggle, water +/−)',
-    ],
-  },
-  '2.10.0':{
-    th:[
-      '🍱 **ชุดอาหาร (Quick Presets)** — แท็บใหม่ในหน้าเพิ่มอาหาร · กดปุ่มเดียวบันทึกอาหารทั้งวันเป็นชุด → แตะใช้ครั้งหน้าได้ทันที',
-      'สร้างชุดได้ไม่จำกัด เช่น "มื้อเช้าปกติ" "อาหารคลีน" "วันออกกำลังกาย"',
-      'ลบชุดได้ · บันทึกพร้อม meal slot ของแต่ละรายการ',
-      'รวมในไฟล์ export/import เพื่อย้ายข้ามเครื่อง',
-    ],
-    en:[
-      '🍱 **Meal Sets (Quick Presets)** — new tab on Add Food · save the whole day as a set in one tap → re-apply later in one tap',
-      'Unlimited sets — e.g. "Usual breakfast", "Clean eating day", "Workout day"',
-      'Delete sets · meal slots preserved per item',
-      'Included in JSON export / import',
-    ],
-  },
-  '2.9.0':{
-    th:[
-      '📱 **APK rebuild ครั้งแรกตั้งแต่ v2.7.1** — APK รวมทุก feature/fix ตั้งแต่ v2.7.2 ถึงปัจจุบัน',
-      '🤖 Smart Goal v2 — ใช้แคลอรี่ projection แทน weight log (ไม่ต้องชั่งน้ำหนัก)',
-      '🧹 ปุ่ม "ลบรูปอาหารเก่า (>30 วัน)" ในตั้งค่า → จัดการข้อมูล · ช่วยให้พื้นที่ localStorage',
-      '🌐 ปิดท้าย i18n holdouts — TDEE apply toast แสดงตามภาษา',
-    ],
-    en:[
-      '📱 **First APK rebuild since v2.7.1** — packages every feature/fix from v2.7.2 onwards',
-      '🤖 Smart Goal v2 — uses calorie projection (no daily weighing required)',
-      '🧹 "Clear photos older than 30 days" button in Settings → Data',
-      '🌐 Closed remaining i18n holdouts (TDEE apply toast)',
-    ],
-  },
-  '2.8.2':{
-    th:[
-      '🔔 Modal แจ้งเตือนเวอร์ชันใหม่ — เลือก "อัปเดตเลย" หรือ "ไว้ทีหลัง"',
-      '✨ Auto-popup "มีอะไรใหม่" หลังอัปเดต — แสดงรายละเอียดที่เพิ่มเข้ามา',
-      '🔄 ปุ่ม "ตรวจหาเวอร์ชันใหม่" ในหน้าเกี่ยวกับ + ปุ่ม "มีอะไรใหม่" สำหรับเปิดดูซ้ำ',
-      'ระบบ migrate จากเวอร์ชันเก่าๆ — รวมข้ามหลายเวอร์ชันก็ยังแสดง changelog ครบ',
-    ],
-    en:[
-      '🔔 Update prompt modal — choose "Update now" or "Later"',
-      '✨ Auto "What\'s new" popup after every upgrade',
-      '🔄 "Check for updates" button on About page + "What\'s new" replay button',
-      'Migration: spans multiple skipped versions correctly',
-    ],
-  },
-  '2.8.1':{
-    th:[
-      '🎨 ปรับชุดธีม: ลบ ป่า / อุ่น / มหาสมุทร — เพิ่ม กุหลาบ / ฟ้า / ม่วง',
-      '📨 เพิ่ม "ส่งคำแนะนำ" ใน drawer → อื่น ๆ (mailto + แนบเวอร์ชันแอป + UA)',
-      'README ใน GitHub อัปเดตประวัติเวอร์ชันครบจนถึงปัจจุบัน',
-    ],
-    en:[
-      '🎨 Theme refresh: dropped forest/warm/ocean, added rose/sky/violet',
-      '📨 New "Send feedback" in drawer → Other (auto-includes app version + UA)',
-      'GitHub README catch-up to current version',
-    ],
-  },
-  '2.8.0':{
-    th:[
-      '💡 การ์ดคำแนะนำสุขภาพย่อ/ขยายได้ — บันทึก state ไว้',
-      '🍽️ Portion picker เลือกจำนวนเท่า (0.5×–2× + custom) ก่อนเพิ่มอาหาร',
-      '🔤 เลือกฟอนต์ได้ในตั้งค่า: System / Sarabun / Prompt / Kanit / Mitr / IBM Plex',
-      '🏷️ Badge "BETA" หลังคำว่า "เพื่อน" ทั้ง drawer + bottom nav',
-    ],
-    en:[
-      '💡 Collapsible health-tips card (state remembered)',
-      '🍽️ Portion picker (0.5×–2× quick + custom) when adding food',
-      '🔤 Font picker in Settings: System / Sarabun / Prompt / Kanit / Mitr / IBM Plex',
-      '🏷️ "BETA" badge after Friends in drawer + bottom nav',
-    ],
-  },
-  '2.7.9':{
-    th:[
-      '💡 คำแนะนำสุขภาพรายวันบนหน้าวันนี้ — 10 rules วิเคราะห์อาหาร/น้ำ/ออกกำลังกาย',
-      '📖 หน้า "วิธีใช้งาน" ใน drawer → อื่น ๆ (9 sections ครอบคลุมทุกฟีเจอร์)',
-    ],
-    en:[
-      '💡 Daily health-tips card on Today — 10 rules over food/water/workouts',
-      '📖 New "How to use" page in drawer → Other (9 sections)',
-    ],
-  },
-  '2.7.8':{
-    th:[
-      '📈 ตัดฟีเจอร์บันทึกน้ำหนักรายวันออก — แทนด้วย **กราฟแนวโน้มน้ำหนักคาดการณ์** จากแคลอรี่ + workout',
-      'พยากรณ์ 14 วันข้างหน้า + ETA "ถึงเป้าใน ~N สัปดาห์"',
-    ],
-    en:[
-      '📈 Removed daily weight log — replaced with **projected weight chart** computed from calories + workouts',
-      '14-day forecast + "Reach goal in ~N weeks" ETA',
-    ],
-  },
-  '2.7.7':{
-    th:[
-      '💧 แท่งน้ำในหน้าวิเคราะห์เติมสีฟ้าตามจำนวนแก้ว',
-      '🏆 แชร์ความสำเร็จเป็นรูปภาพ 1080×1350',
-      'ปุ่มแชร์สรุปวันนี้ยังแสดงตอน Simple Mode',
-    ],
-    en:[
-      '💧 Water bars fill blue based on cups drunk',
-      '🏆 Share achievements as 1080×1350 image card',
-      'Daily share button visible in Simple Mode',
-    ],
-  },
-  '2.7.6':{
-    th:[
-      '🏋️ Workout ลดเลขกลางวง — ring = net (อาหาร − ออกกำลังกาย)',
-      'Drawer "เครื่องมือ" แสดงเฉพาะตอน Simple Mode เปิด',
-      'แก้บั๊กเลขเวอร์ชันไม่อัปเดต (root cause: element appVer ไม่มีจริง)',
-    ],
-    en:[
-      '🏋️ Workout now reduces ring center number — ring shows net (food − workout)',
-      'Drawer "Tools" only shown when Simple Mode is ON',
-      'Fixed version-display bug (root cause: missing appVer element)',
-    ],
+    th:['🤖 AI ถ่ายรูปอาหารฟรี','🔥 ระบบ Growth (สตรีค/referral/แชร์)'],
+    en:['🤖 Free AI food photo','🔥 Growth system (streak/referral/share)'],
   },
 };
 
