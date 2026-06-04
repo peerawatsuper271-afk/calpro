@@ -2079,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.7';
+const APP_VERSION = '2.36.8';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3802,8 +3802,8 @@ function loadUserData(){
   // or corrupted (NOT a full "clear site data" — that wipes the backup too;
   // Cloud Sync + file export cover that). Runs BEFORE any cloud sync, so a
   // restored-from-backup local won't be seen as "empty" by the push guard.
-  backupLocalData(true);              // schedule an IDB backup of the current good state
-  maybeRestoreFromBackupAsync();      // async safety net — restores + re-renders + toasts if entries are empty
+  backupLocalData(true);                 // schedule an IDB backup of the current good state
+  reconcileEntriesFromBackupAsync();     // async: heal a quota-truncated / empty localStorage from the IDB backup
   const ls = lsLoad(LS_SETTINGS, null);
   if (ls) settings = ls;
   applyTheme();
@@ -3847,34 +3847,55 @@ function _writeBackup(){
 function _flushBackup(){ if(_backupQueued){ _backupQueued=false; _writeBackup(); } }
 window.addEventListener('pagehide',_flushBackup);
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) _flushBackup(); });
-// Async safety-net restore: only acts when the precious keys came back empty.
-// Prefers the IDB backup, falls back to a legacy localStorage backup (pre-IDB),
-// then re-renders + toasts. Not awaited in loadUserData so boot is never blocked.
-async function maybeRestoreFromBackupAsync(){
+// Per-day union that NEVER shrinks data: for each day in either source, keep the
+// array with MORE entries. Heals a localStorage truncated by quota against the
+// complete IDB backup; a fresh localStorage day (more entries) always wins over a
+// slightly-stale backup day. Pure — covered by self-tests.
+function _mergeEntriesByDay(a, b){
+  const out={...(a||{})};
+  for(const k in (b||{})){
+    const av=out[k], bv=b[k];
+    if(!Array.isArray(av) || (Array.isArray(bv) && bv.length>av.length)) out[k]=bv;
+  }
+  return out;
+}
+function _entriesEqual(a, b){
+  const ka=Object.keys(a||{}), kb=Object.keys(b||{});
+  if(ka.length!==kb.length) return false;
+  for(const k of ka){ if(!(k in (b||{})) || ((a[k]||[]).length!==(b[k]||[]).length)) return false; }
+  return true;
+}
+// Async boot reconcile: merge the synchronously-loaded localStorage entries with
+// the complete IDB backup (per-day max). Heals a quota-truncated localStorage AND
+// fully restores an empty one — IndexedDB (big quota) is the authoritative copy,
+// so a full localStorage is no longer required to keep all the data. Prefers the
+// IDB backup, falls back to the legacy localStorage backup (transition). Not
+// awaited in loadUserData → boot stays synchronous.
+async function reconcileEntriesFromBackupAsync(){
   try{
-    if(Object.keys(allEntries||{}).length>0) return false;   // main data present — nothing to do
     let raw=null;
     try{ raw=await idbGet(IDB_BACKUP); }catch(e){}
     if(!raw){ try{ raw=localStorage.getItem(LS_BACKUP); }catch(e){} }   // legacy LS fallback
     if(!raw) return false;
     const snap=(typeof raw==='string')?JSON.parse(raw):raw;
-    if(!snap||!snap.entries||Object.keys(snap.entries).length===0) return false;
-    if(Object.keys(allEntries||{}).length>0) return false;   // re-check: a cloud pull may have filled it
-    allEntries=snap.entries||{};
-    if(snap.weights) allWeights=snap.weights;
-    if(snap.water) allWater=snap.water;
-    if(snap.workouts) allWorkouts=snap.workouts;
-    if(snap.measures) allMeasures=snap.measures;
-    lsSave(LS_ENTRIES,allEntries);
-    if(snap.weights) lsSave(LS_WEIGHTS,allWeights);
-    if(snap.water) lsSave(LS_WATER,allWater);
-    if(snap.workouts) lsSave(LS_WORKOUTS,allWorkouts);
-    if(snap.measures) lsSave(LS_MEASURES,allMeasures);
+    if(!snap||!snap.entries) return false;
+    const wasEmpty=Object.keys(allEntries||{}).length===0;
+    const merged=_mergeEntriesByDay(allEntries, snap.entries);
+    if(_entriesEqual(allEntries, merged)) return false;   // localStorage already complete — nothing to heal
+    allEntries=merged;
+    // The small upsert-only collections: fill them only if localStorage lost them.
+    if(snap.weights && Object.keys(allWeights||{}).length===0) allWeights=snap.weights;
+    if(snap.water && Object.keys(allWater||{}).length===0) allWater=snap.water;
+    if(snap.workouts && Object.keys(allWorkouts||{}).length===0) allWorkouts=snap.workouts;
+    if(snap.measures && Object.keys(allMeasures||{}).length===0) allMeasures=snap.measures;
+    lsSave(LS_ENTRIES,allEntries);     // re-cache (best-effort; IDB backup remains authoritative)
+    lsSave(LS_WEIGHTS,allWeights); lsSave(LS_WATER,allWater);
+    lsSave(LS_WORKOUTS,allWorkouts); lsSave(LS_MEASURES,allMeasures);
     loadEntries();
     if(typeof refreshActivePage==='function') refreshActivePage();
     else if(typeof renderToday==='function') renderToday();
-    try{ showToast(LL('กู้ข้อมูลจากสำรองในเครื่องแล้ว ✓','Restored your data from on-device backup ✓','已从本机备份恢复数据 ✓','已從本機備份還原資料 ✓')); }catch(e){}
-    console.warn('[backup] restored '+Object.keys(allEntries).length+' day(s) from on-device backup (IDB)');
+    if(wasEmpty){ try{ showToast(LL('กู้ข้อมูลจากสำรองในเครื่องแล้ว ✓','Restored your data from on-device backup ✓','已从本机备份恢复数据 ✓','已從本機備份還原資料 ✓')); }catch(e){} }
+    console.warn('[backup] reconciled entries from on-device backup → '+Object.keys(allEntries).length+' day(s)');
     return true;
   }catch(e){ return false; }
 }
@@ -9935,6 +9956,13 @@ function runSelfTests(){
       localStorage.removeItem('__st_quota');
       if(savedBak!=null) origSet('calpro_backup',savedBak); else localStorage.removeItem('calpro_backup');
     } }
+  // ── _mergeEntriesByDay / _entriesEqual (IDB reconcile, never shrinks) ──
+  ok('merge: unions disjoint days', JSON.stringify(_mergeEntriesByDay({a:[1]},{b:[2]}))===JSON.stringify({a:[1],b:[2]}));
+  ok('merge: per-day keeps MORE entries (backup fuller)', _mergeEntriesByDay({a:[1]},{a:[1,2,3]}).a.length===3);
+  ok('merge: never shrinks (localStorage fresher)', _mergeEntriesByDay({a:[1,2,3]},{a:[1]}).a.length===3);
+  ok('merge: restores when localStorage empty', _entriesEqual(_mergeEntriesByDay({},{x:[1],y:[2]}),{x:[1],y:[2]}));
+  ok('entriesEqual: identical → true', _entriesEqual({a:[1]},{a:[1]})===true);
+  ok('entriesEqual: differing length → false', _entriesEqual({a:[1]},{a:[1,2]})===false);
   return R;
 }
 function renderSelfTestResults(){
