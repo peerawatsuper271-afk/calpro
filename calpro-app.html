@@ -2079,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.8';
+const APP_VERSION = '2.36.9';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3595,6 +3595,14 @@ function isEn(){return (settings.lang||'th')!=='th';}
 // UTC calendar day 'YYYY-MM-DD' — used for the server-aligned AI photo quota
 // (the server tracks quota by UTC day; keep client + server on the same key).
 function utcDay(){return new Date().toISOString().slice(0,10);}
+// Cloud auth state — one place for the "is this a REAL (non-anonymous) signed-in
+// user?" question (anon = explicit is_anonymous OR aud 'anon'). Used by social +
+// sync gating and Epic B's habit sync.
+function cloudState(){
+  const u=(typeof cloudUser!=='undefined')?cloudUser:null;
+  const anon=!!(u && (u.is_anonymous===true || u.aud==='anon'));
+  return { user:u, signedIn:!!u, anon, real:!!u && !anon };
+}
 function fmtDate(k){
   const d=new Date(k+'T00:00:00'),tk=todayKey();
   const y=new Date();y.setDate(y.getDate()-1);
@@ -9963,11 +9971,26 @@ function runSelfTests(){
   ok('merge: restores when localStorage empty', _entriesEqual(_mergeEntriesByDay({},{x:[1],y:[2]}),{x:[1],y:[2]}));
   ok('entriesEqual: identical → true', _entriesEqual({a:[1]},{a:[1]})===true);
   ok('entriesEqual: differing length → false', _entriesEqual({a:[1]},{a:[1,2]})===false);
+  // ── cloudState() (save + restore the global cloudUser) ──
+  { const sv=(typeof cloudUser!=='undefined')?cloudUser:null;
+    try{
+      cloudUser={is_anonymous:false}; const real=cloudState().real===true && cloudState().anon===false;
+      cloudUser={is_anonymous:true};  const anon=cloudState().anon===true && cloudState().real===false;
+      cloudUser={aud:'anon'};         const audAnon=cloudState().anon===true;
+      cloudUser=null;                 const none=cloudState().signedIn===false && cloudState().real===false;
+      ok('cloudState: real / anon / aud-anon / none', real&&anon&&audAnon&&none);
+    } finally { cloudUser=sv; } }
   return R;
 }
-function renderSelfTestResults(){
+async function renderSelfTestResults(){
   const el=document.getElementById('selfTestResults'); if(!el)return;
   let R; try{ R=runSelfTests(); }catch(e){ el.innerHTML=`<div style="color:var(--accent)">harness error: ${escapeHtml(e.message)}</div>`; return; }
+  // Version-drift check (async, UI-only): the active SW cache should be calpro-v<APP_VERSION>.
+  // Pragmatic "single source" — flags if APP_VERSION and sw.js VERSION ever diverge.
+  try{
+    if(window.caches){ const ks=await caches.keys(); const cur=(ks||[]).find(k=>k.startsWith('calpro-v'));
+      if(cur) R.push({name:'SW cache version = APP_VERSION', pass: cur===('calpro-v'+APP_VERSION), detail:cur}); }
+  }catch(e){}
   const passed=R.filter(t=>t.pass).length, total=R.length, allGreen=passed===total;
   el.innerHTML=`<div style="font-weight:700;margin-bottom:6px;color:${allGreen?'var(--green)':'var(--accent)'}">${allGreen?'✓ ALL PASS':'✗ FAILURES'} · ${passed}/${total}</div>`+
     R.map(t=>`<div class="dev-row"><span>${t.pass?'✓':'✗'} ${escapeHtml(t.name)}</span><span style="color:${t.pass?'var(--green)':'var(--accent)'}">${t.pass?'pass':'FAIL '+escapeHtml(t.detail)}</span></div>`).join('');
