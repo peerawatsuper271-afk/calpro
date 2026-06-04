@@ -1,6 +1,6 @@
 {
   "name": "calpro-plus",
-  "version": "2.36.9",
+  "version": "2.37.0",
   "description": "CalPro+ — calorie tracking + TDEE calculator (Thai/English PWA wrapped via Capacitor)",
   "private": true,
   "scripts": {

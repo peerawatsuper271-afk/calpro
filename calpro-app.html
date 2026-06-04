@@ -822,6 +822,18 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .card.collapsed .card-collapse-chev{transform:rotate(-90deg);}
 .collapse-body{overflow:hidden;transition:max-height .3s ease,opacity .2s,margin .25s;max-height:1200px;opacity:1;margin-top:10px;}
 .card.collapsed .collapse-body{max-height:0;opacity:0;margin-top:0;}
+/* ── Daily Habits (Epic B) ── */
+.habit-blk+.habit-blk{margin-top:12px;padding-top:12px;border-top:1px solid var(--glass-bd);}
+.habit-lbl{font-size:.84rem;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.sleep-row{display:flex;align-items:center;justify-content:center;gap:14px;}
+.sleep-row button{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.2rem;cursor:pointer;font-family:inherit;line-height:1;}
+.sleep-val{min-width:74px;text-align:center;font-weight:700;font-size:1rem;}
+.sleepq{display:flex;gap:6px;margin-top:9px;}
+.sleepq button{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:6px;font-size:1.25rem;cursor:pointer;opacity:.45;transition:all .15s;}
+.sleepq button.on{opacity:1;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface2));}
+.supp-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.supp-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 13px;font-size:.8rem;cursor:pointer;color:var(--text);font-family:inherit;transition:all .15s;}
+.supp-chip.on{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--surface2));color:var(--green);}
 /* ── Image lightbox (tap avatar / banner to view) ── */
 .imgview{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:24px;}
 .imgview.show{opacity:1;pointer-events:auto;}
@@ -983,6 +995,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           </div>
           <div class="water-dots" id="waterDots"></div>
         </div>
+      </div>
+      <div class="card collapsed" id="habitsCard" style="margin-top:8px">
+        <h3 class="collapse-hdr" onclick="toggleHabitsCard()" style="display:flex;align-items:center;gap:6px"><span>🌙</span><span id="habitsTitle">นิสัยประจำวัน</span><span class="collapse-chev">▼</span></h3>
+        <div class="collapse-body"><div id="habitsBody"></div></div>
       </div>
       <div class="card hide" id="healthCard" style="margin-top:8px">
         <h3 class="collapse-hdr" onclick="toggleHealthCard()" style="display:flex;align-items:center;gap:6px"><span>💡</span><span data-i18n="health_tips">คำแนะนำสุขภาพวันนี้</span><span class="collapse-chev">▼</span></h3>
@@ -2079,7 +2095,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.9';
+const APP_VERSION = '2.37.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2724,6 +2740,7 @@ const LS_CUSTOM = 'calpro_custom_foods'; // Array of {n,e,c,p,cb,f,a,cat:'custom
 const LS_WORKOUTS = 'calpro_workouts';   // { date: [{id,name,minutes,kcal}] }
 const LS_MEASURES = 'calpro_measures';   // { date: {waist,hip,chest,neck,bf} }
 const LS_PRESETS = 'calpro_presets';     // Array of {id, name, foods:[entry-shape], created}
+const LS_HABITS = 'calpro_habits';       // { 'YYYY-MM-DD': {sleep, sleepQ, supps:[ids]} } (Epic B)
 
 // ═══ IndexedDB — store meal photos out of localStorage (5MB quota → ~GBs) ═══
 // Photos stored here keyed by entry.id. entry.photo === 'idb:'+entry.id is the sentinel.
@@ -3511,6 +3528,15 @@ let allEntries = {};  // { 'YYYY-MM-DD': [...] }
 let dailyEntries = [];
 let allWeights = {};  // { date: kg }
 let allWater = {};    // { date: cups }
+let allHabits = {};   // { date: {sleep:hours, sleepQ:'😊', supps:[id,...]} } (Epic B — Habit Tracker)
+// Default supplement checklist (configurable later). id is stable; label via LL().
+const SUPPLEMENTS = [
+  {id:'multi',   th:'วิตามินรวม',  en:'Multivitamin', hans:'复合维生素', hant:'綜合維他命', emoji:'💊'},
+  {id:'omega3',  th:'โอเมก้า 3',   en:'Omega-3',      hans:'欧米伽3',   hant:'奧米加3',   emoji:'🐟'},
+  {id:'probiotic',th:'โปรไบโอติก', en:'Probiotic',    hans:'益生菌',     hant:'益生菌',     emoji:'🦠'},
+  {id:'zinc',    th:'สังกะสี',     en:'Zinc',         hans:'锌',         hant:'鋅',         emoji:'⚡'},
+];
+const SLEEP_Q = ['😩','😐','😊','😴'];   // worst → best
 let favorites = [];   // array of food names (n)
 let recentFoods = []; // array of food names (n), most recent first
 let customFoods = []; // user-saved foods
@@ -3804,6 +3830,7 @@ function loadUserData(){
   allWorkouts = lsLoad(LS_WORKOUTS, {});
   allMeasures = lsLoad(LS_MEASURES, {});
   presets = lsLoad(LS_PRESETS, []);
+  allHabits = lsLoad(LS_HABITS, {});
   loadEntries();
   // ── Local safety net ── if the precious keys came back empty but an on-device
   // backup exists, restore from it. Guards against the main keys being cleared
@@ -3842,7 +3869,7 @@ function _writeBackup(){
     _lastBackup=Date.now();                                // optimistic — throttle while the async put is in flight
     const snap=JSON.stringify({ts:Date.now(), v:APP_VERSION,
       entries:allEntries, weights:allWeights, water:allWater,
-      workouts:allWorkouts, measures:allMeasures});
+      workouts:allWorkouts, measures:allMeasures, habits:allHabits});
     // Store in IndexedDB (async, large quota) — the backup no longer competes
     // with primary data for the ~5MB localStorage budget. Once IDB holds the
     // copy, drop the legacy localStorage backup to reclaim that space.
@@ -3896,9 +3923,10 @@ async function reconcileEntriesFromBackupAsync(){
     if(snap.water && Object.keys(allWater||{}).length===0) allWater=snap.water;
     if(snap.workouts && Object.keys(allWorkouts||{}).length===0) allWorkouts=snap.workouts;
     if(snap.measures && Object.keys(allMeasures||{}).length===0) allMeasures=snap.measures;
+    if(snap.habits && Object.keys(allHabits||{}).length===0) allHabits=snap.habits;
     lsSave(LS_ENTRIES,allEntries);     // re-cache (best-effort; IDB backup remains authoritative)
     lsSave(LS_WEIGHTS,allWeights); lsSave(LS_WATER,allWater);
-    lsSave(LS_WORKOUTS,allWorkouts); lsSave(LS_MEASURES,allMeasures);
+    lsSave(LS_WORKOUTS,allWorkouts); lsSave(LS_MEASURES,allMeasures); lsSave(LS_HABITS,allHabits);
     loadEntries();
     if(typeof refreshActivePage==='function') refreshActivePage();
     else if(typeof renderToday==='function') renderToday();
@@ -5963,6 +5991,55 @@ function toggleHealthCard(){
   lsSave(LS_SETTINGS,settings);
 }
 
+// ═══ DAILY HABITS (Epic B — sleep + supplements; local-first, IDB-backed) ═══
+function _clampSleep(v){ return Math.max(0, Math.min(14, Math.round((+v||0)*2)/2)); }   // 0–14h, 0.5 steps (pure → self-tested)
+function toggleHabitsCard(){
+  const card=document.getElementById('habitsCard');if(!card)return;
+  const willCollapse=!card.classList.contains('collapsed');
+  card.classList.toggle('collapsed',willCollapse);
+  settings.habitsCollapsed=willCollapse; lsSave(LS_SETTINGS,settings);
+}
+function getHabit(date){ return allHabits[date||currentDate] || {}; }
+function saveHabits_LS(){ lsSave(LS_HABITS,allHabits); backupLocalData(); }   // cloud sync = Epic B slice 2
+function setSleep(delta){
+  const h=getHabit(currentDate);
+  allHabits[currentDate]={...h, sleep:_clampSleep((h.sleep||0)+delta)};
+  saveHabits_LS(); renderHabits();
+}
+function setSleepQ(q){
+  const h=getHabit(currentDate);
+  allHabits[currentDate]={...h, sleepQ:(h.sleepQ===q?'':q)};   // tap the active one again to clear
+  saveHabits_LS(); renderHabits();
+}
+function toggleSupp(id){
+  const h=getHabit(currentDate), taken=new Set(h.supps||[]);
+  taken.has(id)?taken.delete(id):taken.add(id);
+  allHabits[currentDate]={...h, supps:[...taken]};
+  saveHabits_LS(); renderHabits();
+}
+function renderHabits(){
+  const body=document.getElementById('habitsBody'); if(!body)return;
+  const card=document.getElementById('habitsCard');
+  if(card) card.classList.toggle('collapsed', settings.habitsCollapsed!==false);   // default collapsed
+  const tt=document.getElementById('habitsTitle'); if(tt) tt.textContent=LL('นิสัยประจำวัน','Daily habits','每日习惯','每日習慣');
+  const h=getHabit(currentDate);
+  const sleep=h.sleep||0, sleepQ=h.sleepQ||'', taken=new Set(h.supps||[]);
+  const sleepTxt = sleep ? sleep+' '+LL('ชม.','h','小时','小時') : '—';
+  let html=`<div class="habit-blk">`+
+    `<div class="habit-lbl">😴 ${LL('การนอน','Sleep','睡眠','睡眠')}</div>`+
+    `<div class="sleep-row"><button onclick="setSleep(-0.5)" aria-label="less">−</button>`+
+      `<span class="sleep-val">${sleepTxt}</span>`+
+      `<button onclick="setSleep(0.5)" aria-label="more">+</button></div>`+
+    `<div class="sleepq">`+SLEEP_Q.map(q=>`<button class="${sleepQ===q?'on':''}" onclick="setSleepQ('${q}')" aria-label="quality">${q}</button>`).join('')+`</div>`+
+  `</div>`+
+  `<div class="habit-blk"><div class="habit-lbl">💊 ${LL('อาหารเสริม','Supplements','补充剂','補充劑')}</div>`+
+    `<div class="supp-grid">`+SUPPLEMENTS.map(s=>{
+      const on=taken.has(s.id), name=LL(s.th,s.en,s.hans,s.hant);
+      return `<button class="supp-chip${on?' on':''}" onclick="toggleSupp('${s.id}')">${s.emoji} ${escapeHtml(name)}${on?' ✓':''}</button>`;
+    }).join('')+`</div></div>`;
+  body.innerHTML=html;
+}
+
 // ═══ FONT PICKER ═══
 const FONT_OPTIONS={
   system:{label_th:'ค่าเริ่มต้น',label_en:'System default',stack:null},
@@ -6937,7 +7014,7 @@ function renderToday(){
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
   document.getElementById('mCB').style.width=Math.min(totC/250*100,100).toFixed(1)+'%';
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
-  renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();
+  renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();renderHabits();
   renderAdSlot('today-1',document.querySelector('[data-ad-slot="today-1"]'));
   renderQuickAddRow();
   const log=document.getElementById('foodLog');
@@ -9980,6 +10057,10 @@ function runSelfTests(){
       cloudUser=null;                 const none=cloudState().signedIn===false && cloudState().real===false;
       ok('cloudState: real / anon / aud-anon / none', real&&anon&&audAnon&&none);
     } finally { cloudUser=sv; } }
+  // ── Habits (Epic B): _clampSleep + supplement list ──
+  ok('clampSleep: 7.3 → 7.5 (0.5 step)', _clampSleep(7.3)===7.5);
+  ok('clampSleep: clamps to 0..14', _clampSleep(-2)===0 && _clampSleep(99)===14);
+  ok('SUPPLEMENTS: 4 items with ids', Array.isArray(SUPPLEMENTS)&&SUPPLEMENTS.length===4&&SUPPLEMENTS.every(s=>s.id));
   return R;
 }
 async function renderSelfTestResults(){
