@@ -345,8 +345,12 @@ html[data-hc="1"] .fab{background:var(--accent)!important;-webkit-backdrop-filte
 
 /* ── SEARCH ── */
 .sbox{position:relative;margin-bottom:9px;}
-.sbox input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 10px 9px 33px;font-size:.87rem;outline:none;font-family:inherit;}
+.sbox input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 38px 9px 33px;font-size:.87rem;outline:none;font-family:inherit;}
 .sbox input:focus{border-color:var(--accent);}
+.mic-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:8px;font-size:1.05rem;cursor:pointer;opacity:.7;padding:0;line-height:1;transition:opacity .15s,background .15s;}
+.mic-btn:hover{opacity:1;background:var(--surface);}
+.mic-btn.listening{opacity:1;color:var(--accent);animation:micPulse 1s ease-in-out infinite;}
+@keyframes micPulse{0%,100%{transform:translateY(-50%) scale(1);}50%{transform:translateY(-50%) scale(1.18);}}
 .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none;}
 .cats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
 /* (food-category chips removed in v2.29.3 — replaced by the #catFilter dropdown) */
@@ -834,6 +838,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .supp-grid{display:flex;flex-wrap:wrap;gap:7px;}
 .supp-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 13px;font-size:.8rem;cursor:pointer;color:var(--text);font-family:inherit;transition:all .15s;}
 .supp-chip.on{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--surface2));color:var(--green);}
+.steps-row{display:flex;align-items:center;gap:9px;}
+.steps-input{max-width:130px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:8px 12px;font-family:inherit;font-size:1rem;font-weight:700;outline:none;}
+.steps-input:focus{border-color:var(--accent);}
+.steps-unit{font-size:.8rem;color:var(--muted);}
 /* ── Image lightbox (tap avatar / banner to view) ── */
 .imgview{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:24px;}
 .imgview.show{opacity:1;pointer-events:auto;}
@@ -1030,7 +1038,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <div class="screen" id="pg-add">
       <div class="card">
         <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
-        <div class="sbox"><span class="si ic" data-ic="search"></span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"></div>
+        <div class="sbox"><span class="si ic" data-ic="search"></span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"><button type="button" class="mic-btn" id="micBtn" onclick="startVoiceSearch()" aria-label="Voice search" title="พูดชื่ออาหาร">🎤</button></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
           <button class="btn-sec" onclick="openBarcodeModal()" style="font-size:.82rem"><span class="ic" data-ic="barcode"></span> <span data-i18n="scan_barcode">บาร์โค้ด</span></button>
           <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem"><span class="ic" data-ic="ai"></span> <span data-i18n="ai_photo_btn">ถ่ายรูป AI</span></button>
@@ -2095,7 +2103,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.37.0';
+const APP_VERSION = '2.37.1';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4063,6 +4071,9 @@ function showApp(){
   const name = userProfile?.display_name || t('you');
   document.getElementById('hdrSub').textContent = name + ' · ' + (userProfile?.goal_cal || 1800).toLocaleString() + ' kcal' + dayUnitShort();
   renderCatFilter(); renderToday(); renderProfileUI();
+  // Voice search: hide the mic button on browsers without the Web Speech API
+  // (iOS Safari, Firefox) so users aren't shown a control that can't work.
+  if(!speechSupported()){ const mb=document.getElementById('micBtn'); if(mb)mb.style.display='none'; }
 }
 
 // ═══ BOTTOM NAV ═══
@@ -4248,6 +4259,27 @@ function doSearch(v){
     if(!t){renderCatResults(activeCat);return;}
     renderResults(allFoods().filter(f=>f.n.includes(t)||(f.e||'').toLowerCase().includes(t)).slice(0,25));
   },130);
+}
+// Voice food logging — Web Speech API. Speak a dish name → fills the search box
+// + runs doSearch. Maps the app language to a recognition locale; degrades
+// gracefully (toast) when the browser has no SpeechRecognition (e.g. iOS Safari,
+// Firefox). The mic button is hidden at boot on unsupported browsers.
+function speechSupported(){ return !!(window.SpeechRecognition||window.webkitSpeechRecognition); }
+let _voiceRecog=null;
+function startVoiceSearch(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ showToast(LL('อุปกรณ์นี้ไม่รองรับการสั่งงานด้วยเสียง','Voice input not supported on this device','此设备不支持语音输入','此裝置不支援語音輸入')); return; }
+  const btn=document.getElementById('micBtn');
+  if(_voiceRecog){ try{_voiceRecog.stop();}catch(_){} _voiceRecog=null; if(btn)btn.classList.remove('listening'); return; }
+  let r; try{ r=new SR(); }catch(_){ return; }
+  const lang=settings.lang||'th';
+  r.lang = lang==='en'?'en-US' : lang==='zh-Hans'?'zh-CN' : lang==='zh-Hant'?'zh-TW' : 'th-TH';
+  r.interimResults=false; r.maxAlternatives=1; r.continuous=false;
+  r.onstart=()=>{ if(btn)btn.classList.add('listening'); showToast(LL('🎤 พูดชื่ออาหารได้เลย…','🎤 Speak the food name…','🎤 请说出食物名称…','🎤 請說出食物名稱…'),2500); };
+  r.onresult=(e)=>{ const txt=(e.results&&e.results[0]&&e.results[0][0]&&e.results[0][0].transcript||'').trim(); if(txt){ const inp=document.getElementById('searchInput'); if(inp){ inp.value=txt; doSearch(txt); inp.focus(); } } };
+  r.onerror=(e)=>{ if(btn)btn.classList.remove('listening'); const err=e&&e.error; if(err==='not-allowed'||err==='service-not-allowed'){ showToast(LL('ไม่ได้รับอนุญาตให้ใช้ไมโครโฟน','Microphone permission denied','麦克风权限被拒绝','麥克風權限被拒絕')); } else if(err==='no-speech'){ showToast(LL('ไม่ได้ยินเสียง ลองอีกครั้ง','No speech detected, try again','未检测到语音，请重试','未偵測到語音，請重試')); } };
+  r.onend=()=>{ if(btn)btn.classList.remove('listening'); _voiceRecog=null; };
+  try{ r.start(); _voiceRecog=r; }catch(_){ if(btn)btn.classList.remove('listening'); _voiceRecog=null; }
 }
 // Food-category filter — a single dropdown (instead of a long, cluttered row of
 // chips). Cuisines are grouped together under one heading; food types under
@@ -5993,6 +6025,7 @@ function toggleHealthCard(){
 
 // ═══ DAILY HABITS (Epic B — sleep + supplements; local-first, IDB-backed) ═══
 function _clampSleep(v){ return Math.max(0, Math.min(14, Math.round((+v||0)*2)/2)); }   // 0–14h, 0.5 steps (pure → self-tested)
+function _clampSteps(v){ return Math.max(0, Math.min(100000, Math.round(+v||0))); }      // 0–100k whole steps (pure)
 function toggleHabitsCard(){
   const card=document.getElementById('habitsCard');if(!card)return;
   const willCollapse=!card.classList.contains('collapsed');
@@ -6017,13 +6050,18 @@ function toggleSupp(id){
   allHabits[currentDate]={...h, supps:[...taken]};
   saveHabits_LS(); renderHabits();
 }
+function setSteps(v){
+  const h=getHabit(currentDate);
+  allHabits[currentDate]={...h, steps:_clampSteps(v)};
+  saveHabits_LS(); renderHabits();   // onchange (fires on blur) → safe to re-render
+}
 function renderHabits(){
   const body=document.getElementById('habitsBody'); if(!body)return;
   const card=document.getElementById('habitsCard');
   if(card) card.classList.toggle('collapsed', settings.habitsCollapsed!==false);   // default collapsed
   const tt=document.getElementById('habitsTitle'); if(tt) tt.textContent=LL('นิสัยประจำวัน','Daily habits','每日习惯','每日習慣');
   const h=getHabit(currentDate);
-  const sleep=h.sleep||0, sleepQ=h.sleepQ||'', taken=new Set(h.supps||[]);
+  const sleep=h.sleep||0, sleepQ=h.sleepQ||'', taken=new Set(h.supps||[]), steps=h.steps||0;
   const sleepTxt = sleep ? sleep+' '+LL('ชม.','h','小时','小時') : '—';
   let html=`<div class="habit-blk">`+
     `<div class="habit-lbl">😴 ${LL('การนอน','Sleep','睡眠','睡眠')}</div>`+
@@ -6031,6 +6069,9 @@ function renderHabits(){
       `<span class="sleep-val">${sleepTxt}</span>`+
       `<button onclick="setSleep(0.5)" aria-label="more">+</button></div>`+
     `<div class="sleepq">`+SLEEP_Q.map(q=>`<button class="${sleepQ===q?'on':''}" onclick="setSleepQ('${q}')" aria-label="quality">${q}</button>`).join('')+`</div>`+
+  `</div>`+
+  `<div class="habit-blk"><div class="habit-lbl">👣 ${LL('ก้าวเดิน','Steps','步数','步數')}</div>`+
+    `<div class="steps-row"><input type="number" inputmode="numeric" class="steps-input" value="${steps||''}" placeholder="0" min="0" max="100000" onchange="setSteps(this.value)" onkeydown="if(event.key==='Enter')this.blur()"> <span class="steps-unit">${LL('ก้าว/วันนี้','steps today','步/今天','步/今天')}</span></div>`+
   `</div>`+
   `<div class="habit-blk"><div class="habit-lbl">💊 ${LL('อาหารเสริม','Supplements','补充剂','補充劑')}</div>`+
     `<div class="supp-grid">`+SUPPLEMENTS.map(s=>{
@@ -10060,6 +10101,7 @@ function runSelfTests(){
   // ── Habits (Epic B): _clampSleep + supplement list ──
   ok('clampSleep: 7.3 → 7.5 (0.5 step)', _clampSleep(7.3)===7.5);
   ok('clampSleep: clamps to 0..14', _clampSleep(-2)===0 && _clampSleep(99)===14);
+  ok('clampSteps: rounds + clamps 0..100k', _clampSteps(8123.6)===8124 && _clampSteps(-5)===0 && _clampSteps(999999)===100000);
   ok('SUPPLEMENTS: 4 items with ids', Array.isArray(SUPPLEMENTS)&&SUPPLEMENTS.length===4&&SUPPLEMENTS.every(s=>s.id));
   return R;
 }
