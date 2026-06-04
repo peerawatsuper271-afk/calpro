@@ -2079,7 +2079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.36.5';
+const APP_VERSION = '2.36.6';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3589,6 +3589,12 @@ function getWaterGoal(){return settings.waterGoal||8;}
 // ═══ HELPERS ═══
 function dateKey(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${da}`;}
 function todayKey(){return dateKey(new Date());}
+// ── Small shared helpers (single source of truth — see Epic A / self-tests) ──
+// Non-Thai locale flag (en + both Chinese fall back to English copy app-wide).
+function isEn(){return (settings.lang||'th')!=='th';}
+// UTC calendar day 'YYYY-MM-DD' — used for the server-aligned AI photo quota
+// (the server tracks quota by UTC day; keep client + server on the same key).
+function utcDay(){return new Date().toISOString().slice(0,10);}
 function fmtDate(k){
   const d=new Date(k+'T00:00:00'),tk=todayKey();
   const y=new Date();y.setDate(y.getDate()-1);
@@ -9329,7 +9335,7 @@ async function aiCallProxy(imageBase64,prompt){
   // Side-effect: stash usage info for the Settings card to read
   try{
     if(typeof j.used==='number'&&typeof j.limit==='number'){
-      localStorage.setItem('cp_ai_proxy_usage',JSON.stringify({used:j.used,limit:j.limit,day:new Date().toISOString().slice(0,10)}));
+      localStorage.setItem('cp_ai_proxy_usage',JSON.stringify({used:j.used,limit:j.limit,day:utcDay()}));
     }
   }catch{}
   return j.text||'';
@@ -9501,7 +9507,7 @@ function renderAiSettingsBody(){
   if(isProxy){
     try{
       const u=JSON.parse(localStorage.getItem('cp_ai_proxy_usage')||'null');
-      const today=new Date().toISOString().slice(0,10);
+      const today=utcDay();
       if(u&&u.day===today){
         usageNote=isEn?`Used today: ${u.used}/${u.limit}`:`ใช้วันนี้: ${u.used}/${u.limit} รูป`;
       }
@@ -9566,7 +9572,7 @@ function refreshAiQuotaInline(){
   }
   try{
     const u=JSON.parse(localStorage.getItem('cp_ai_proxy_usage')||'null');
-    const today=new Date().toISOString().slice(0,10);
+    const today=utcDay();
     if(u&&u.day===today){
       const left=Math.max(0,u.limit-u.used);
       el.textContent=isEn?`${left}/${u.limit} AI photos left today`:`เหลือ ${left}/${u.limit} รูป AI วันนี้`;
@@ -9639,7 +9645,7 @@ function openAiPhotoModal(){
     let txt=isEn?'Free · 20/day':'ฟรี · 20 รูป/วัน';
     try{
       const u=JSON.parse(localStorage.getItem('cp_ai_proxy_usage')||'null');
-      const today=new Date().toISOString().slice(0,10);
+      const today=utcDay();
       if(u&&u.day===today){
         const left=Math.max(0,u.limit-u.used);
         txt=isEn?`${left}/${u.limit} left today`:`เหลือ ${left}/${u.limit} รูปวันนี้`;
@@ -9701,7 +9707,7 @@ async function handleAiPhotoSelect(input){
     // Update usage chip after a successful call (proxy provider returns used/limit)
     try{
       const u=JSON.parse(localStorage.getItem('cp_ai_proxy_usage')||'null');
-      const today=new Date().toISOString().slice(0,10);
+      const today=utcDay();
       const chip=document.getElementById('aiUsageChip');
       if(chip&&u&&u.day===today){
         const left=Math.max(0,u.limit-u.used);
@@ -9875,6 +9881,57 @@ function lockDevMode(){
   showToast(t('dev_locked'));
   navTo('today');
 }
+// ═══ IN-APP SELF-TEST HARNESS (Epic A — regression net for a no-build app) ═══
+// Pure-function assertions, fully isolated (synthetic inputs; any global it
+// touches — settings.lang, the backup key, localStorage.setItem — is restored).
+// Run from Developer Mode → "Run self-tests".
+function runSelfTests(){
+  const R=[]; const ok=(name,cond,detail)=>R.push({name,pass:!!cond,detail:detail||''});
+  // ── date keys ──
+  ok('dateKey() uses LOCAL components', dateKey(new Date(2026,5,4,1,30))==='2026-06-04');
+  ok('todayKey() format YYYY-MM-DD', /^\d{4}-\d{2}-\d{2}$/.test(todayKey()));
+  ok('utcDay() format YYYY-MM-DD', /^\d{4}-\d{2}-\d{2}$/.test(utcDay()));
+  // ── isEn() (save + restore lang) ──
+  { const sv=settings.lang; settings.lang='en'; const a=isEn()===true; settings.lang='th'; const b=isEn()===false; settings.lang=sv;
+    ok('isEn(): en→true, th→false', a&&b); }
+  // ── calcStreak() today-grace ──
+  { const mk=n=>{const d=new Date();d.setDate(d.getDate()-n);return dateKey(d);};
+    const e={}; for(let i=1;i<=5;i++)e[mk(i)]=[{calories:500}];
+    ok('streak: 5 days thru yesterday + today empty → 5', calcStreak(e)===5,'got '+calcStreak(e));
+    e[mk(0)]=[{calories:400}];
+    ok('streak: + logged today → 6', calcStreak(e)===6,'got '+calcStreak(e));
+    const e2={}; for(let i=2;i<=4;i++)e2[mk(i)]=[{calories:300}];
+    ok('streak: gap at yesterday → 0', calcStreak(e2)===0,'got '+calcStreak(e2)); }
+  // ── avatarHtml() ──
+  ok('avatar: data: URL → <img>', avatarHtml('data:image/png;base64,x','P').startsWith('<img'));
+  ok('avatar: emoji → circle', avatarHtml('🐸','P').startsWith('<div')&&avatarHtml('🐸','P').includes('🐸'));
+  ok('avatar: empty → initial fallback', avatarHtml('','X').includes('>X<'));
+  ok('avatar: escapes HTML (no raw <b>)', avatarHtml('','<b>').includes('&lt;b&gt;')&&!avatarHtml('','<b>').includes('<b>'));
+  // ── lsSave() quota → drop backup → retry (isolated; restores real backup) ──
+  { const origSet=localStorage.setItem.bind(localStorage);
+    const savedBak=localStorage.getItem('calpro_backup');
+    try{
+      origSet('calpro_backup','__selftest__'); let threw=0;
+      localStorage.setItem=function(k,v){ if(k==='__st_quota'&&threw<1){threw++;const er=new Error('QuotaExceededError');er.name='QuotaExceededError';er.code=22;throw er;} return origSet(k,v); };
+      const r=lsSave('__st_quota',{a:1});
+      ok('lsSave: quota → drops backup + retries → saved',
+        r===true && localStorage.getItem('__st_quota')!==null && localStorage.getItem('calpro_backup')===null);
+    }catch(e){ ok('lsSave quota recovery', false, e.message); }
+    finally{
+      localStorage.setItem=origSet;
+      localStorage.removeItem('__st_quota');
+      if(savedBak!=null) origSet('calpro_backup',savedBak); else localStorage.removeItem('calpro_backup');
+    } }
+  return R;
+}
+function renderSelfTestResults(){
+  const el=document.getElementById('selfTestResults'); if(!el)return;
+  let R; try{ R=runSelfTests(); }catch(e){ el.innerHTML=`<div style="color:var(--accent)">harness error: ${escapeHtml(e.message)}</div>`; return; }
+  const passed=R.filter(t=>t.pass).length, total=R.length, allGreen=passed===total;
+  el.innerHTML=`<div style="font-weight:700;margin-bottom:6px;color:${allGreen?'var(--green)':'var(--accent)'}">${allGreen?'✓ ALL PASS':'✗ FAILURES'} · ${passed}/${total}</div>`+
+    R.map(t=>`<div class="dev-row"><span>${t.pass?'✓':'✗'} ${escapeHtml(t.name)}</span><span style="color:${t.pass?'var(--green)':'var(--accent)'}">${t.pass?'pass':'FAIL '+escapeHtml(t.detail)}</span></div>`).join('');
+  console.log('[self-test]',passed+'/'+total,allGreen?'ALL PASS':'FAILURES',R.filter(t=>!t.pass));
+}
 async function renderDev(){
   const body=document.getElementById('devBody');
   if(!body)return;
@@ -9951,6 +10008,11 @@ async function renderDev(){
       row('Workouts',totalWorkouts)+
       row('localStorage usage',`${(lsSize/1024).toFixed(1)} KB`)+
       row('IDB meal photos',`${idbCount} files · ${(idbSize/1024).toFixed(1)} KB`)+
+    `</div>`+
+    `<div class="card"><h3>🧪 Self-tests</h3>`+
+      `<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px">Assertions on the pure helpers (isolated — no effect on your data).</div>`+
+      `<button class="btn-sec" onclick="renderSelfTestResults()" style="width:100%">▶ Run self-tests</button>`+
+      `<div id="selfTestResults" style="margin-top:10px"></div>`+
     `</div>`+
     `<div class="card"><h3>☁️ Supabase cloud</h3>`+
       row('Sync status',(typeof syncStatus!=='undefined'?syncStatus:'?'))+
