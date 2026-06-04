@@ -833,11 +833,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .sleep-row button{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.2rem;cursor:pointer;font-family:inherit;line-height:1;}
 .sleep-val{min-width:74px;text-align:center;font-weight:700;font-size:1rem;}
 .sleepq{display:flex;gap:6px;margin-top:9px;}
-.sleepq button{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:6px;font-size:1.25rem;cursor:pointer;opacity:.45;transition:all .15s;}
-.sleepq button.on{opacity:1;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface2));}
-.supp-grid{display:flex;flex-wrap:wrap;gap:7px;}
-.supp-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 13px;font-size:.8rem;cursor:pointer;color:var(--text);font-family:inherit;transition:all .15s;}
-.supp-chip.on{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--surface2));color:var(--green);}
+.sleepq button{flex:1;display:flex;align-items:center;justify-content:center;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px;cursor:pointer;opacity:.4;transition:all .15s;color:var(--text);}
+.sleepq button .ic{width:22px;height:22px;}
+.sleepq button .ic svg{width:100%;height:100%;}
+.sleepq button.on{opacity:1;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface2));color:var(--accent);}
 .steps-row{display:flex;align-items:baseline;gap:7px;}
 .steps-big{font-size:1.7rem;font-weight:800;color:var(--text);line-height:1;font-variant-numeric:tabular-nums;}
 .steps-unit{font-size:.8rem;color:var(--muted);}
@@ -1009,10 +1008,6 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           <div class="water-dots" id="waterDots"></div>
         </div>
       </div>
-      <div class="card collapsed" id="habitsCard" style="margin-top:8px">
-        <h3 class="collapse-hdr" onclick="toggleHabitsCard()" style="display:flex;align-items:center;gap:6px"><span>🌙</span><span id="habitsTitle">นิสัยประจำวัน</span><span class="collapse-chev">▼</span></h3>
-        <div class="collapse-body"><div id="habitsBody"></div></div>
-      </div>
       <div class="card hide" id="healthCard" style="margin-top:8px">
         <h3 class="collapse-hdr" onclick="toggleHealthCard()" style="display:flex;align-items:center;gap:6px"><span>💡</span><span data-i18n="health_tips">คำแนะนำสุขภาพวันนี้</span><span class="collapse-chev">▼</span></h3>
         <div class="collapse-body" id="healthTipsList"></div>
@@ -1025,6 +1020,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <div class="qadd-row" id="quickAddRow"></div>
       </div>
       <div id="foodLog"></div>
+      <div class="card" id="stepsCard" style="margin-top:8px"><div id="stepsBody"></div></div>
       <div class="card" style="margin-top:8px">
         <h3 style="display:flex;justify-content:space-between;align-items:center">
           <span><span data-i18n="workouts">ออกกำลังกาย</span></span>
@@ -1081,6 +1077,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 
     <!-- ANALYSIS -->
     <div class="screen" id="pg-analysis">
+      <div class="card" id="sleepCard"><div id="sleepBody"></div></div>
       <div class="card">
         <div class="card-hdr-row">
           <h3><span id="calChartTitle" data-i18n="cal_7d">แคลอรี่ 7 วัน</span></h3>
@@ -2108,7 +2105,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.39.0';
+const APP_VERSION = '2.40.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2148,6 +2145,10 @@ const ICONS = {
   activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
   footprints:'<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
   pill:'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+  face_sad:'<circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
+  face_meh:'<circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
+  face_happy:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
+  face_great:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M7.5 9h3"/><path d="M13.5 9h3"/>',
   ruler:'<path d="M21.3 8.7l-5.6-5.6a1 1 0 0 0-1.4 0L2.7 14.3a1 1 0 0 0 0 1.4l5.6 5.6a1 1 0 0 0 1.4 0L21.3 10.1a1 1 0 0 0 0-1.4z"/><path d="M7.5 10.5l2 2M10.5 7.5l2 2M13.5 4.5l2 2M4.5 13.5l2 2"/>',
   user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
   users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -3547,15 +3548,12 @@ let allEntries = {};  // { 'YYYY-MM-DD': [...] }
 let dailyEntries = [];
 let allWeights = {};  // { date: kg }
 let allWater = {};    // { date: cups }
-let allHabits = {};   // { date: {sleep:hours, sleepQ:'😊', supps:[id,...]} } (Epic B — Habit Tracker)
-// Default supplement checklist (configurable later). id is stable; label via LL().
-const SUPPLEMENTS = [
-  {id:'multi',   th:'วิตามินรวม',  en:'Multivitamin', hans:'复合维生素', hant:'綜合維他命', emoji:'💊'},
-  {id:'omega3',  th:'โอเมก้า 3',   en:'Omega-3',      hans:'欧米伽3',   hant:'奧米加3',   emoji:'🐟'},
-  {id:'probiotic',th:'โปรไบโอติก', en:'Probiotic',    hans:'益生菌',     hant:'益生菌',     emoji:'🦠'},
-  {id:'zinc',    th:'สังกะสี',     en:'Zinc',         hans:'锌',         hant:'鋅',         emoji:'⚡'},
-];
-const SLEEP_Q = ['😩','😐','😊','😴'];   // worst → best
+let allHabits = {};   // { date: {sleep:hours, sleepQ:0..3, steps:n} } (Epic B — Habit Tracker)
+const SLEEP_Q_ICONS = ['face_sad','face_meh','face_happy','face_great'];   // worst → best (SVG icon keys)
+const SLEEP_Q_LEGACY = ['😩','😐','😊','😴'];   // pre-v2.40 stored these emoji; migrate to the index
+// Canonical sleep-quality value is a 0–3 index (matches the smallint habits.sleepq column).
+// Tolerates legacy emoji strings + out-of-range values → returns null when unset/invalid.
+function _sleepQIndex(v){ if(v==null||v==='')return null; if(typeof v==='number')return (v>=0&&v<=3)?v:null; const i=SLEEP_Q_LEGACY.indexOf(v); return i>=0?i:null; }
 let favorites = [];   // array of food names (n)
 let recentFoods = []; // array of food names (n), most recent first
 let customFoods = []; // user-saved foods
@@ -5862,7 +5860,7 @@ async function syncFromCloud(){
       if(!hb||hb.length===0)return;
       hb.forEach(h=>{ allHabits[h.entry_date]=_habitFromRow(h); });
       lsSave(LS_HABITS,allHabits);
-      if(typeof renderHabits==='function')renderHabits();
+      if(typeof renderSteps==='function')renderSteps(); if(typeof renderSleep==='function')renderSleep();
     });
   }
 }
@@ -6075,37 +6073,25 @@ function _clampSleep(v){ return Math.max(0, Math.min(14, Math.round((+v||0)*2)/2
 function _clampSteps(v){ return Math.max(0, Math.min(100000, Math.round(+v||0))); }      // 0–100k whole steps (pure)
 // Pure mappers between the local habit shape {sleep,sleepQ,supps,steps} and the
 // Supabase row shape {sleep,sleepq,supps,steps}. Kept pure + covered by self-tests.
-function _habitToRow(h){ h=h||{}; return { sleep:_clampSleep(h.sleep), sleepq:(h.sleepQ!=null?h.sleepQ:null), supps:Array.isArray(h.supps)?h.supps:[], steps:_clampSteps(h.steps) }; }
+function _habitToRow(h){ h=h||{}; return { sleep:_clampSleep(h.sleep), sleepq:_sleepQIndex(h.sleepQ), supps:Array.isArray(h.supps)?h.supps:[], steps:_clampSteps(h.steps) }; }
 function _habitFromRow(r){ r=r||{}; let supps=[]; if(Array.isArray(r.supps))supps=r.supps; else if(typeof r.supps==='string'){try{const p=JSON.parse(r.supps);if(Array.isArray(p))supps=p;}catch{}} return { sleep:_clampSleep(r.sleep), sleepQ:(r.sleepq!=null?+r.sleepq:null), supps, steps:_clampSteps(r.steps) }; }
 function _habitHasData(h){ const r=_habitToRow(h); return !!(r.sleep||r.sleepq!=null||(r.supps&&r.supps.length)||r.steps); }
-function toggleHabitsCard(){
-  const card=document.getElementById('habitsCard');if(!card)return;
-  const willCollapse=!card.classList.contains('collapsed');
-  card.classList.toggle('collapsed',willCollapse);
-  settings.habitsCollapsed=willCollapse; lsSave(LS_SETTINGS,settings);
-}
 function getHabit(date){ return allHabits[date||currentDate] || {}; }
 function saveHabits_LS(){ lsSave(LS_HABITS,allHabits); backupLocalData(); scheduleAutoSync('habits'); }
 function setSleep(delta){
   const h=getHabit(currentDate);
   allHabits[currentDate]={...h, sleep:_clampSleep((h.sleep||0)+delta)};
-  saveHabits_LS(); renderHabits();
+  saveHabits_LS(); renderSleep();
 }
-function setSleepQ(q){
-  const h=getHabit(currentDate);
-  allHabits[currentDate]={...h, sleepQ:(h.sleepQ===q?'':q)};   // tap the active one again to clear
-  saveHabits_LS(); renderHabits();
-}
-function toggleSupp(id){
-  const h=getHabit(currentDate), taken=new Set(h.supps||[]);
-  taken.has(id)?taken.delete(id):taken.add(id);
-  allHabits[currentDate]={...h, supps:[...taken]};
-  saveHabits_LS(); renderHabits();
+function setSleepQ(i){
+  const h=getHabit(currentDate), cur=_sleepQIndex(h.sleepQ);
+  allHabits[currentDate]={...h, sleepQ:(cur===i?null:i)};   // tap the active one again to clear
+  saveHabits_LS(); renderSleep();
 }
 function setSteps(v){
   const h=getHabit(currentDate);
   allHabits[currentDate]={...h, steps:_clampSteps(v)};
-  saveHabits_LS(); renderHabits();   // kept for back-compat / programmatic set
+  saveHabits_LS(); renderSteps();   // kept for back-compat / programmatic set
 }
 
 // ═══ AUTOMATIC STEP TRACKING (hybrid) ═══
@@ -6121,7 +6107,7 @@ const StepTracker = {
   webSupported(){ return typeof window!=='undefined' && typeof window.DeviceMotionEvent!=='undefined'; },
   iosNeedsPerm(){ return typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'; },
   nativePlugin(){ try{ const c=window.Capacitor; return (c&&c.isNativePlatform&&c.isNativePlatform()&&c.Plugins&&c.Plugins.Pedometer)||null; }catch(_){ return null; } },
-  // UI state for renderHabits: 'running' | 'needperm' | 'unsupported' | 'idle'
+  // UI state for renderSteps: 'running' | 'needperm' | 'unsupported' | 'idle'
   state(){
     if(this.running) return 'running';
     if(this.nativePlugin()) return 'idle';                                   // native: about to auto-start
@@ -6145,7 +6131,7 @@ const StepTracker = {
         settings.stepPermGranted=true; lsSave(LS_SETTINGS,settings);
       }catch(_){ return; }
     }
-    this._startWeb(); if(typeof renderHabits==='function') renderHabits();
+    this._startWeb(); if(typeof renderSteps==='function') renderSteps();
   },
   _startWeb(){
     if(this.running) return;
@@ -6195,41 +6181,38 @@ document.addEventListener('visibilitychange',()=>{
   else { StepTracker.ensureStarted(); }
 });
 window.addEventListener('pagehide',()=>{ StepTracker._flush(); });
-function renderHabits(){
-  const body=document.getElementById('habitsBody'); if(!body)return;
-  const card=document.getElementById('habitsCard');
-  if(card) card.classList.toggle('collapsed', settings.habitsCollapsed!==false);   // default collapsed
-  const tt=document.getElementById('habitsTitle'); if(tt) tt.textContent=LL('นิสัยประจำวัน','Daily habits','每日习惯','每日習慣');
-  const h=getHabit(currentDate);
-  const sleep=h.sleep||0, sleepQ=h.sleepQ||'', taken=new Set(h.supps||[]), steps=h.steps||0;
-  const sleepTxt = sleep ? sleep+' '+LL('ชม.','h','小时','小時') : '—';
-  // Steps — fully automatic (device motion / native pedometer); no manual entry.
+// Steps card (Today page, sits directly above the Workout card) — fully
+// automatic via StepTracker; no manual entry.
+function renderSteps(){
+  const body=document.getElementById('stepsBody'); if(!body)return;
+  const steps=(getHabit(currentDate).steps)||0;
   StepTracker.ensureStarted();
   const stState=StepTracker.state();
-  const stepsBig=`<div class="steps-row"><span class="steps-big" id="stepsCount">${(steps||0).toLocaleString()}</span><span class="steps-unit">${LL('ก้าว','steps','步','步')}</span>`;
-  let stepsInner;
+  const big=`<div class="steps-row"><span class="steps-big" id="stepsCount">${steps.toLocaleString()}</span><span class="steps-unit">${LL('ก้าว','steps','步','步')}</span>`;
+  let inner;
   if(stState==='needperm'){
-    stepsInner = stepsBig+`</div><button class="steps-enable" onclick="StepTracker.requestAndStart()">${icoSvg('footprints')} ${LL('เริ่มนับก้าวอัตโนมัติ','Start auto step count','开始自动计步','開始自動計步')}</button>`;
+    inner = big+`</div><button class="steps-enable" onclick="StepTracker.requestAndStart()">${icoSvg('footprints')} ${LL('เริ่มนับก้าวอัตโนมัติ','Start auto step count','开始自动计步','開始自動計步')}</button>`;
   }else if(stState==='unsupported'){
-    stepsInner = stepsBig+`</div><div class="steps-auto-note">${LL('อุปกรณ์นี้ไม่รองรับการนับก้าวอัตโนมัติ','Auto step counting isn’t available on this device','此设备不支持自动计步','此裝置不支援自動計步')}</div>`;
+    inner = big+`</div><div class="steps-auto-note">${LL('อุปกรณ์นี้ไม่รองรับการนับก้าวอัตโนมัติ','Auto step counting isn’t available on this device','此设备不支持自动计步','此裝置不支援自動計步')}</div>`;
   }else{
-    stepsInner = stepsBig+`<span class="steps-live" title="${LL('นับอัตโนมัติ','Auto-counting','自动计步','自動計步')}"></span></div>`+
+    inner = big+`<span class="steps-live" title="${LL('นับอัตโนมัติ','Auto-counting','自动计步','自動計步')}"></span></div>`+
       `<div class="steps-auto-note">${LL('นับอัตโนมัติจากการเคลื่อนไหว · วันนี้','Counted automatically from movement · today','根据运动自动计步 · 今天','根據運動自動計步 · 今天')}</div>`;
   }
-  let html=`<div class="habit-blk">`+
+  body.innerHTML=`<div class="habit-blk"><div class="habit-lbl">${icoSvg('footprints')} ${LL('ก้าวเดิน','Steps','步数','步數')}</div>${inner}</div>`;
+}
+// Sleep card (Analysis page) — hours stepper + SVG quality faces.
+function renderSleep(){
+  const body=document.getElementById('sleepBody'); if(!body)return;
+  const h=getHabit(currentDate);
+  const sleep=h.sleep||0, sq=_sleepQIndex(h.sleepQ);
+  const sleepTxt = sleep ? sleep+' '+LL('ชม.','h','小时','小時') : '—';
+  body.innerHTML=`<div class="habit-blk">`+
     `<div class="habit-lbl">${icoSvg('moon')} ${LL('การนอน','Sleep','睡眠','睡眠')}</div>`+
     `<div class="sleep-row"><button onclick="setSleep(-0.5)" aria-label="less">−</button>`+
       `<span class="sleep-val">${sleepTxt}</span>`+
       `<button onclick="setSleep(0.5)" aria-label="more">+</button></div>`+
-    `<div class="sleepq">`+SLEEP_Q.map(q=>`<button class="${sleepQ===q?'on':''}" onclick="setSleepQ('${q}')" aria-label="quality">${q}</button>`).join('')+`</div>`+
-  `</div>`+
-  `<div class="habit-blk"><div class="habit-lbl">${icoSvg('footprints')} ${LL('ก้าวเดิน','Steps','步数','步數')}</div>`+stepsInner+`</div>`+
-  `<div class="habit-blk"><div class="habit-lbl">${icoSvg('pill')} ${LL('อาหารเสริม','Supplements','补充剂','補充劑')}</div>`+
-    `<div class="supp-grid">`+SUPPLEMENTS.map(s=>{
-      const on=taken.has(s.id), name=LL(s.th,s.en,s.hans,s.hant);
-      return `<button class="supp-chip${on?' on':''}" onclick="toggleSupp('${s.id}')">${s.emoji} ${escapeHtml(name)}${on?' ✓':''}</button>`;
-    }).join('')+`</div></div>`;
-  body.innerHTML=html;
+    `<div class="sleepq">`+SLEEP_Q_ICONS.map((ic,i)=>`<button class="${sq===i?'on':''}" onclick="setSleepQ(${i})" aria-label="quality ${i+1}">${icoSvg(ic)}</button>`).join('')+`</div>`+
+  `</div>`;
 }
 
 // ═══ FONT PICKER ═══
@@ -7206,7 +7189,7 @@ function renderToday(){
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
   document.getElementById('mCB').style.width=Math.min(totC/250*100,100).toFixed(1)+'%';
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
-  renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();renderHabits();
+  renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();renderSteps();
   renderAdSlot('today-1',document.querySelector('[data-ad-slot="today-1"]'));
   renderQuickAddRow();
   const log=document.getElementById('foodLog');
@@ -7533,6 +7516,7 @@ function selectCalBar(idx){
   }
 }
 function renderAnalysis(){
+  renderSleep();
   renderProjectionChart();renderWaterStats();
   renderAdSlot('analysis-1',document.querySelector('[data-ad-slot="analysis-1"]'));
   const isEn=(settings.lang||'th')!=='th';
@@ -10257,7 +10241,7 @@ function runSelfTests(){
   ok('habitFromRow: parses string supps + null quality', (()=>{const h=_habitFromRow({sleep:'7.5',sleepq:null,supps:'["omega3"]',steps:'500'});return h.sleep===7.5&&h.sleepQ===null&&h.supps[0]==='omega3'&&h.steps===500;})());
   ok('habit round-trip: row→local→row stable', (()=>{const a=_habitToRow({sleep:6.5,sleepQ:1,supps:['zinc','multi'],steps:3000});const b=_habitToRow(_habitFromRow({...a}));return JSON.stringify(a)===JSON.stringify(b);})());
   ok('habitHasData: empty=false · any field=true', _habitHasData({})===false && _habitHasData({steps:10})===true && _habitHasData({sleepQ:0})===true && _habitHasData({supps:[]})===false);
-  ok('SUPPLEMENTS: 4 items with ids', Array.isArray(SUPPLEMENTS)&&SUPPLEMENTS.length===4&&SUPPLEMENTS.every(s=>s.id));
+  ok('sleepQIndex: emoji→index · number passthrough · clear/oob→null', _sleepQIndex('😊')===2 && _sleepQIndex(3)===3 && _sleepQIndex('')===null && _sleepQIndex(9)===null);
   return R;
 }
 async function renderSelfTestResults(){
@@ -10720,6 +10704,18 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.40.0':{
+    th:[
+      '🧹 **จัดหน้าแรกให้โล่งขึ้น** — หน้าแรกเหลือ **ก้าวเดิน** (อยู่เหนือออกกำลังกาย) · ย้าย **การนอน** ไปไว้ที่หน้า **วิเคราะห์** · เอา **อาหารเสริม** ออก',
+      '😴 **หน้าคุณภาพการนอนเป็นไอคอน SVG** — เปลี่ยนจากอีโมจิเป็นไอคอนเส้นให้เข้ากับทั้งแอป',
+      '🔧 **แก้บั๊กซิงค์คุณภาพการนอน** — เดิมค่าคุณภาพการนอนอาจซิงค์ขึ้นคลาวด์ไม่สำเร็จ ตอนนี้เก็บเป็นตัวเลขและซิงค์ได้ครบถูกต้อง',
+    ],
+    en:[
+      '🧹 **Leaner home screen** — Today now shows just **Steps** (above Workouts) · **Sleep** moved to the **Analysis** page · **Supplements** removed',
+      '😴 **SVG sleep-quality faces** — line icons instead of emoji, matching the rest of the app',
+      '🔧 **Fixed sleep-quality cloud sync** — the quality rating could previously fail to sync; it’s now stored as a number and syncs correctly',
+    ],
+  },
   '2.39.0':{
     th:[
       '👣 **ก้าวเดินอัตโนมัติ** — ไม่ต้องพิมพ์เองอีกต่อไป! แอปนับก้าวให้อัตโนมัติจากเซนเซอร์การเคลื่อนไหวของเครื่อง · ในแอป Android (APK) จะอ่านตัวนับก้าว "ทั้งวัน" ของระบบ · บนเว็บ/PWA จะนับขณะเปิดแอป (iOS แตะอนุญาตใช้เซนเซอร์ครั้งแรก)',
