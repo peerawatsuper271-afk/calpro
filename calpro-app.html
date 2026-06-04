@@ -2103,7 +2103,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.37.1';
+const APP_VERSION = '2.38.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2245,6 +2245,10 @@ let syncStatus = 'idle';  // idle · syncing · synced · error · offline
 let syncTimer = null;     // for debounced auto-sync
 let periodicTimer = null; // for interval-based sync
 let noUpsertSupport = false; // set true when 42P10 detected — switches to fallback diff strategy
+// Set false once we learn the `habits` table isn't migrated on this backend, so
+// habit sync degrades silently (no sync-failed toast) instead of failing every
+// cycle. Re-checked on the next app load. See calpro-database-v2.38-habits.sql.
+let habitsCloudReady = true;
 // DATA-LOSS GUARD: cloud "delete rows missing from local" is only safe AFTER a
 // successful pull this session — at which point local is a superset of cloud, so
 // a push only removes what the user genuinely deleted. Until then (e.g. local was
@@ -5698,6 +5702,27 @@ async function syncToCloud(){
     });
     ok?okCount++:failCount++;
   }
+  // 9. Habits — pure upsert by (user_id, entry_date), like water/weights.
+  //    Skips silently (no failure toast) on backends where the habits table
+  //    hasn't been migrated yet; re-checks next app load. Only pushes days that
+  //    actually hold data so empty days don't create rows.
+  if(habitsCloudReady){
+    const habitRows=Object.entries(allHabits)
+      .filter(([d,h])=>_habitHasData(h))
+      .map(([d,h])=>({ user_id:uid, entry_date:d, ..._habitToRow(h), updated_at:new Date().toISOString() }));
+    if(habitRows.length){
+      const ok=await syncStep('habits', async ()=>{
+        const {error}=await sb.from('habits').upsert(habitRows,{onConflict:'user_id,entry_date'});
+        if(error){
+          if(error.code==='42P01'||error.code==='PGRST205'||/does not exist|schema cache|find the table/i.test(error.message||'')){
+            habitsCloudReady=false; console.warn('[sync] habits table not migrated — skipping habit sync this session'); return;
+          }
+          throw error;
+        }
+      });
+      ok?okCount++:failCount++;
+    }
+  }
   lsSave('calpro_last_sync',new Date().toISOString());
   if(failCount>0){throw new Error(`${okCount} ok, ${failCount} failed (check console)`);}
 }
@@ -5818,6 +5843,21 @@ async function syncFromCloud(){
     customFoods=[...localByName.values()];
     lsSave(LS_CUSTOM,customFoods);
   });
+  // Habits — merge by date, cloud wins (same convention as water/weights).
+  // Degrades silently if the habits table isn't migrated on this backend.
+  if(habitsCloudReady){
+    await syncStep('pull:habits', async ()=>{
+      const {data:hb,error}=await sb.from('habits').select('*').eq('user_id',uid);
+      if(error){
+        if(error.code==='42P01'||error.code==='PGRST205'||/does not exist|schema cache|find the table/i.test(error.message||'')){ habitsCloudReady=false; return; }
+        throw error;
+      }
+      if(!hb||hb.length===0)return;
+      hb.forEach(h=>{ allHabits[h.entry_date]=_habitFromRow(h); });
+      lsSave(LS_HABITS,allHabits);
+      if(typeof renderHabits==='function')renderHabits();
+    });
+  }
 }
 
 // ═══ WORKOUTS ═══
@@ -6026,6 +6066,11 @@ function toggleHealthCard(){
 // ═══ DAILY HABITS (Epic B — sleep + supplements; local-first, IDB-backed) ═══
 function _clampSleep(v){ return Math.max(0, Math.min(14, Math.round((+v||0)*2)/2)); }   // 0–14h, 0.5 steps (pure → self-tested)
 function _clampSteps(v){ return Math.max(0, Math.min(100000, Math.round(+v||0))); }      // 0–100k whole steps (pure)
+// Pure mappers between the local habit shape {sleep,sleepQ,supps,steps} and the
+// Supabase row shape {sleep,sleepq,supps,steps}. Kept pure + covered by self-tests.
+function _habitToRow(h){ h=h||{}; return { sleep:_clampSleep(h.sleep), sleepq:(h.sleepQ!=null?h.sleepQ:null), supps:Array.isArray(h.supps)?h.supps:[], steps:_clampSteps(h.steps) }; }
+function _habitFromRow(r){ r=r||{}; let supps=[]; if(Array.isArray(r.supps))supps=r.supps; else if(typeof r.supps==='string'){try{const p=JSON.parse(r.supps);if(Array.isArray(p))supps=p;}catch{}} return { sleep:_clampSleep(r.sleep), sleepQ:(r.sleepq!=null?+r.sleepq:null), supps, steps:_clampSteps(r.steps) }; }
+function _habitHasData(h){ const r=_habitToRow(h); return !!(r.sleep||r.sleepq!=null||(r.supps&&r.supps.length)||r.steps); }
 function toggleHabitsCard(){
   const card=document.getElementById('habitsCard');if(!card)return;
   const willCollapse=!card.classList.contains('collapsed');
@@ -6033,7 +6078,7 @@ function toggleHabitsCard(){
   settings.habitsCollapsed=willCollapse; lsSave(LS_SETTINGS,settings);
 }
 function getHabit(date){ return allHabits[date||currentDate] || {}; }
-function saveHabits_LS(){ lsSave(LS_HABITS,allHabits); backupLocalData(); }   // cloud sync = Epic B slice 2
+function saveHabits_LS(){ lsSave(LS_HABITS,allHabits); backupLocalData(); scheduleAutoSync('habits'); }
 function setSleep(delta){
   const h=getHabit(currentDate);
   allHabits[currentDate]={...h, sleep:_clampSleep((h.sleep||0)+delta)};
@@ -10102,6 +10147,10 @@ function runSelfTests(){
   ok('clampSleep: 7.3 → 7.5 (0.5 step)', _clampSleep(7.3)===7.5);
   ok('clampSleep: clamps to 0..14', _clampSleep(-2)===0 && _clampSleep(99)===14);
   ok('clampSteps: rounds + clamps 0..100k', _clampSteps(8123.6)===8124 && _clampSteps(-5)===0 && _clampSteps(999999)===100000);
+  ok('habitToRow: clamps + maps to cloud shape', (()=>{const r=_habitToRow({sleep:99,sleepQ:2,supps:['multi'],steps:8123.6});return r.sleep===14&&r.sleepq===2&&r.steps===8124&&Array.isArray(r.supps)&&r.supps[0]==='multi';})());
+  ok('habitFromRow: parses string supps + null quality', (()=>{const h=_habitFromRow({sleep:'7.5',sleepq:null,supps:'["omega3"]',steps:'500'});return h.sleep===7.5&&h.sleepQ===null&&h.supps[0]==='omega3'&&h.steps===500;})());
+  ok('habit round-trip: row→local→row stable', (()=>{const a=_habitToRow({sleep:6.5,sleepQ:1,supps:['zinc','multi'],steps:3000});const b=_habitToRow(_habitFromRow({...a}));return JSON.stringify(a)===JSON.stringify(b);})());
+  ok('habitHasData: empty=false · any field=true', _habitHasData({})===false && _habitHasData({steps:10})===true && _habitHasData({sleepQ:0})===true && _habitHasData({supps:[]})===false);
   ok('SUPPLEMENTS: 4 items with ids', Array.isArray(SUPPLEMENTS)&&SUPPLEMENTS.length===4&&SUPPLEMENTS.every(s=>s.id));
   return R;
 }
@@ -10565,6 +10614,20 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.38.0':{
+    th:[
+      '🌙 **ตัวติดตามนิสัยประจำวัน (ใหม่!)** — การ์ดในหน้าแรก บันทึก **การนอน** (ชั่วโมง + คุณภาพ 😩😐😊😴), **ก้าวเดิน** และ **อาหารเสริม** (วิตามินรวม/โอเมก้า 3/โปรไบโอติก/สังกะสี) · แตะพับเก็บได้',
+      '🎤 **สั่งงานด้วยเสียง** — แตะไมค์ในช่องค้นหาอาหารแล้วพูดชื่อเมนูได้เลย (ไทย/อังกฤษ/จีน)',
+      '☁️ **ซิงค์นิสัยขึ้นคลาวด์** — ข้อมูลนิสัยตามไปทุกอุปกรณ์เมื่อล็อกอิน',
+      '🛟 **เสริมความปลอดภัยข้อมูล** — ระบบสำรอง + กู้คืนอัตโนมัติแข็งแรงขึ้น กันข้อมูลหายแม้พื้นที่เครื่องเต็ม',
+    ],
+    en:[
+      '🌙 **Daily Habit Tracker (new!)** — a Today-page card to log **sleep** (hours + quality 😩😐😊😴), **steps**, and **supplements** (multivitamin / omega-3 / probiotic / zinc) · collapsible',
+      '🎤 **Voice food logging** — tap the mic in the food search and just say the dish name (Thai/English/Chinese)',
+      '☁️ **Habits sync to the cloud** — your habit data follows you across devices when signed in',
+      '🛟 **Stronger data-safety** — hardened auto-backup + auto-restore so your log survives even if storage fills up',
+    ],
+  },
   '2.35.2':{
     th:[
       '🔥 **แก้สตรีคขึ้นถูกต้อง** — ถ้ายังไม่ได้บันทึกอาหารของ "วันนี้" สตรีคจะไม่รีเซ็ตเป็น 0 อีกต่อไป · จะนับวันที่ต่อเนื่องถึงเมื่อวานให้ (สตรีคยังอยู่จนกว่าจะหมดวันจริงๆ)',
