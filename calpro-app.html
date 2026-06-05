@@ -367,6 +367,7 @@ html[data-uikit="1"] .water-stepper button:hover{border-color:var(--accent)!impo
 .sbox input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 38px 9px 33px;font-size:.87rem;outline:none;font-family:inherit;}
 .sbox input:focus{border-color:var(--accent);}
 .mic-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:8px;font-size:1.05rem;cursor:pointer;opacity:.7;padding:0;line-height:1;transition:opacity .15s,background .15s;}
+.mic-btn .ic{width:18px;height:18px;}
 .mic-btn:hover{opacity:1;background:var(--surface);}
 .mic-btn.listening{opacity:1;color:var(--accent);animation:micPulse 1s ease-in-out infinite;}
 @keyframes micPulse{0%,100%{transform:translateY(-50%) scale(1);}50%{transform:translateY(-50%) scale(1.18);}}
@@ -488,9 +489,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .profile-action-primary{background:var(--blue);color:#fff;border:none;}
 .profile-action-primary:active{opacity:.85;}
 .profile-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
-.profile-stat-tile{background:var(--glass2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--glass-bd);border-radius:11px;padding:10px 6px;text-align:center;}
-.pst-icon{font-size:1.1rem;line-height:1;}
-.pst-val{font-size:1.05rem;font-weight:700;color:var(--text);margin-top:4px;}
+.profile-stat-tile{background:var(--glass2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--glass-bd);border-radius:9px;padding:6px 5px;text-align:center;}
+.pst-icon{display:none;}
+.pst-val{font-size:.98rem;font-weight:700;color:var(--text);line-height:1.15;}
 .pst-lbl{font-size:.6rem;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
 .profile-badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:7px;}
 .profile-badge-tile{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 5px;text-align:center;transition:transform .15s;cursor:default;}
@@ -851,29 +852,29 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 /* ── Daily Habits (Epic B) ── */
 .habit-blk+.habit-blk{margin-top:12px;padding-top:12px;border-top:1px solid var(--glass-bd);}
 .habit-lbl{font-size:.84rem;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:8px;}
-.sleep-row{display:flex;align-items:center;justify-content:center;gap:14px;}
-.sleep-row button{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.2rem;cursor:pointer;font-family:inherit;line-height:1;}
-.sleep-val{text-align:center;font-weight:800;font-size:1.5rem;color:var(--text);font-variant-numeric:tabular-nums;line-height:1;}
-/* Sleep hours slider */
-.sleep-sliderwrap{padding:2px 2px 0;}
-.sleep-slider{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:6px;margin:10px 0 2px;background:linear-gradient(90deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 22%,var(--surface2)) 100%);outline:none;cursor:pointer;}
-.sleep-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 1px 5px color-mix(in srgb,var(--accent) 45%,transparent);cursor:pointer;}
-.sleep-slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 1px 5px color-mix(in srgb,var(--accent) 45%,transparent);cursor:pointer;}
-.sleep-ticks{display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);padding:0 2px;}
-.sleepq-lbl{font-size:.72rem;color:var(--muted);margin-top:12px;}
-/* Sleep analysis */
-.sleep-analysis{margin-top:12px;padding-top:11px;border-top:1px solid var(--glass-bd);}
-.sleep-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:7px;}
-.ss-tile{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;}
-.ss-v{font-weight:800;font-size:1.05rem;color:var(--text);line-height:1.1;font-variant-numeric:tabular-nums;}
-.ss-k{font-size:.6rem;color:var(--muted);margin-top:2px;}
-.sleep-insight{font-size:.74rem;font-weight:600;margin-top:8px;}
+/* Sleep — compact: hours + auto-derived quality badge on one row, slider, then analysis */
+.sleep-compact .sleep-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;}
+.sleep-compact .habit-lbl{margin-bottom:0;}
+.sleep-readout{display:inline-flex;align-items:center;gap:8px;}
+.sleep-readout b{font-size:1.15rem;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1;}
+.sleep-qbadge{display:inline-flex;align-items:center;gap:3px;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:999px;}
+.sleep-qbadge:empty{display:none;}
+.sleep-qbadge .ic{width:13px;height:13px;}
+.sleep-qbadge.q0{color:#ef4444;background:color-mix(in srgb,#ef4444 15%,transparent);}
+.sleep-qbadge.q1{color:#f59e0b;background:color-mix(in srgb,#f59e0b 15%,transparent);}
+.sleep-qbadge.q2{color:#84cc16;background:color-mix(in srgb,#84cc16 16%,transparent);}
+.sleep-qbadge.q3{color:#22c55e;background:color-mix(in srgb,#22c55e 16%,transparent);}
+.sleep-slider{-webkit-appearance:none;appearance:none;width:100%;height:7px;border-radius:6px;margin:8px 0 2px;background:linear-gradient(90deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 22%,var(--surface2)) 100%);outline:none;cursor:pointer;}
+.sleep-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 1px 5px color-mix(in srgb,var(--accent) 45%,transparent);cursor:pointer;}
+.sleep-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 1px 5px color-mix(in srgb,var(--accent) 45%,transparent);cursor:pointer;}
+.sleep-ticks{display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);padding:0 2px;}
+.sleep-analysis{margin-top:9px;padding-top:9px;border-top:1px solid var(--glass-bd);}
+.sleep-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(56px,1fr));gap:6px;}
+.ss-tile{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:6px 4px;text-align:center;}
+.ss-v{font-weight:800;font-size:.95rem;color:var(--text);line-height:1.1;font-variant-numeric:tabular-nums;}
+.ss-k{font-size:.58rem;color:var(--muted);margin-top:1px;}
+.sleep-insight{font-size:.72rem;font-weight:600;margin-top:6px;}
 .sleep-insight.muted{color:var(--muted);font-weight:500;}
-.sleepq{display:flex;gap:6px;margin-top:7px;}
-.sleepq button{flex:1;display:flex;align-items:center;justify-content:center;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px;cursor:pointer;opacity:.4;transition:all .15s;color:var(--text);}
-.sleepq button .ic{width:22px;height:22px;}
-.sleepq button .ic svg{width:100%;height:100%;}
-.sleepq button.on{opacity:1;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface2));color:var(--accent);}
 .steps-row{display:flex;align-items:baseline;gap:7px;}
 .steps-big{font-size:1.7rem;font-weight:800;color:var(--text);line-height:1;font-variant-numeric:tabular-nums;}
 .steps-unit{font-size:.8rem;color:var(--muted);}
@@ -1078,7 +1079,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <div class="screen" id="pg-add">
       <div class="card">
         <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
-        <div class="sbox"><span class="si ic" data-ic="search"></span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"><button type="button" class="mic-btn" id="micBtn" onclick="startVoiceSearch()" aria-label="Voice search" title="พูดชื่ออาหาร">🎤</button></div>
+        <div class="sbox"><span class="si ic" data-ic="search"></span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"><button type="button" class="mic-btn" id="micBtn" onclick="startVoiceSearch()" aria-label="Voice search" title="พูดชื่ออาหาร"><span class="ic" data-ic="mic"></span></button></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
           <button class="btn-sec" onclick="openBarcodeModal()" style="font-size:.82rem"><span class="ic" data-ic="barcode"></span> <span data-i18n="scan_barcode">บาร์โค้ด</span></button>
           <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem"><span class="ic" data-ic="ai"></span> <span data-i18n="ai_photo_btn">ถ่ายรูป AI</span></button>
@@ -1248,10 +1249,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       </div>
       <!-- ─── Stats showcase (4 mini cards) ─── -->
       <div class="profile-stats-grid" id="profileStatsGrid">
-        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="flame"></span></div><div class="pst-val" id="pstStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="note"></span></div><div class="pst-val" id="pstDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="target"></span></div><div class="pst-val" id="pstOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="trophy"></span></div><div class="pst-val" id="pstScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
+        <div class="profile-stat-tile"><div class="pst-val" id="pstStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
+        <div class="profile-stat-tile"><div class="pst-val" id="pstDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
+        <div class="profile-stat-tile"><div class="pst-val" id="pstOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
+        <div class="profile-stat-tile"><div class="pst-val" id="pstScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
       </div>
       <!-- ─── Badges showcase (collapsible) ─── -->
       <div class="card" id="badgesCard">
@@ -1756,10 +1757,10 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     </div>
     <div class="fp-content">
       <div class="profile-stats-grid">
-        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="flame"></span></div><div class="pst-val" id="fpStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="note"></span></div><div class="pst-val" id="fpDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="target"></span></div><div class="pst-val" id="fpOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
-        <div class="profile-stat-tile"><div class="pst-icon"><span class="ic" data-ic="trophy"></span></div><div class="pst-val" id="fpScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
+        <div class="profile-stat-tile"><div class="pst-val" id="fpStreak">0</div><div class="pst-lbl" data-i18n="streak_lbl">streak</div></div>
+        <div class="profile-stat-tile"><div class="pst-val" id="fpDays">0</div><div class="pst-lbl" data-i18n="days_lbl">วันที่บันทึก</div></div>
+        <div class="profile-stat-tile"><div class="pst-val" id="fpOnTrack">0</div><div class="pst-lbl" data-i18n="on_track_lbl">อยู่ในเป้า</div></div>
+        <div class="profile-stat-tile"><div class="pst-val" id="fpScore">0</div><div class="pst-lbl" data-i18n="score_lbl">คะแนน</div></div>
       </div>
       <div style="margin-top:10px">
         <div style="font-size:.78rem;font-weight:600;margin-bottom:6px"><span data-i18n="badges_showcase">🏅 เหรียญตรา</span> <span style="font-size:.66rem;color:var(--muted);font-weight:400" id="fpBadgeCount">(0)</span></div>
@@ -2150,7 +2151,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.41.0';
+const APP_VERSION = '2.42.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2190,6 +2191,7 @@ const ICONS = {
   activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
   footprints:'<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
   pill:'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+  mic:'<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
   face_sad:'<circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
   face_meh:'<circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
   face_happy:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
@@ -6205,7 +6207,7 @@ function dayBurn(k){
 //     (DeviceMotion) with peak-detection → counts while the app is foreground.
 // Steps always accrue to LOCAL "today" (todayKey()), never a past day being viewed.
 const StepTracker = {
-  mode:null, running:false, _peaked:false, _avg:9.8, _lastStepAt:0, _saveTimer:null, _lastSave:0, _nativeSub:null, _boundMotion:null, _lastUi:0, _uiTimer:null,
+  mode:null, running:false, _peaked:false, _avg:9.8, _lastStepAt:0, _saveTimer:null, _lastSave:0, _nativeSub:null, _boundMotion:null, _lastUi:0, _uiTimer:null, _natBase:null,
   webSupported(){ return typeof window!=='undefined' && typeof window.DeviceMotionEvent!=='undefined'; },
   iosNeedsPerm(){ return typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'; },
   nativePlugin(){ try{ const c=window.Capacitor; return (c&&c.isNativePlatform&&c.isNativePlatform()&&c.Plugins&&c.Plugins.Pedometer)||null; }catch(_){ return null; } },
@@ -6243,15 +6245,42 @@ const StepTracker = {
   },
   async _startNative(P){
     if(this.running) return;
-    this.running=true; this.mode='native';                                  // optimistic; reverts on failure
+    this.running=true; this.mode='native'; this._natBase=null;              // optimistic; reverts on failure
     try{
       try{ const pc=await P.checkPermissions(); if(pc && pc.activity && pc.activity!=='granted') await P.requestPermissions(); }catch(_){}
-      this._nativeSub=await P.addListener('measurement',(d)=>{ const n=Math.round(+(d&&d.numberOfSteps)||0); if(n>0 && n<60000) this._addSteps(n); });
+      // The phone already counts steps — adopt today's running total as the displayed value.
+      await this._seedTodayFromDevice(P);
+      // `numberOfSteps` is a CUMULATIVE counter; add only the positive delta vs the last
+      // reading (never the raw cumulative), so the count isn't multiplied AND steps the OS
+      // tallied in the background between events are still captured.
+      this._nativeSub=await P.addListener('measurement',(d)=>{
+        const cum=Math.round(+(d&&d.numberOfSteps)||0);
+        if(cum<0||cum>1e7) return;
+        if(this._natBase==null){ this._natBase=cum; return; }                // first sample → baseline only
+        const delta=cum-this._natBase;
+        if(delta>0&&delta<60000){ this._natBase=cum; this._addSteps(delta); }
+        else if(delta<0){ this._natBase=cum; }                              // counter reset (reboot) → rebase
+      });
       await P.startMeasurementUpdates();
     }catch(e){
       console.warn('[steps] native pedometer unavailable → web fallback', e&&e.message);
       this.running=false; this.mode=null; this._startWeb();
     }
+  },
+  // Read the device's already-counted steps for today (midnight→now) if the plugin exposes a
+  // historical query, and adopt it as the display value. Fully optional — no-op if unsupported.
+  async _seedTodayFromDevice(P){
+    try{
+      const q = P.queryData || P.queryPedometerData || P.getStepCount || P.getSteps;
+      if(typeof q!=='function') return;
+      const start=new Date(); start.setHours(0,0,0,0);
+      const res = await q.call(P,{ startDate:start.toISOString(), endDate:new Date().toISOString() });
+      const dev = Math.round(+((res&&(res.numberOfSteps!=null?res.numberOfSteps:res.steps))||0));
+      if(dev>0 && dev<1e6){
+        const d=todayKey(), h=allHabits[d]||{};
+        if(dev>(+h.steps||0)){ allHabits[d]={...h, steps:_clampSteps(dev)}; this._flush(); if(currentDate===d&&typeof renderSteps==='function') renderSteps(); }
+      }
+    }catch(_){}
   },
   stop(){
     if(this.mode==='web'){ try{ window.removeEventListener('devicemotion', this._boundMotion); }catch(_){} }
@@ -6327,28 +6356,36 @@ function renderSteps(){
 }
 // Sleep card (Analysis page) — hours stepper + SVG quality faces.
 function _sleepTxt(n){ return n>0 ? (n+' '+LL('ชม.','h','小时','小時')) : '—'; }
+// Quality is DERIVED from the hours (the user no longer picks it). 4 levels: 0 poor·1 fair·2 good·3 great.
+function _sleepQualityFromHours(h){ h=+h||0; if(h<=0)return null; if(h<5)return 0; if(h<6)return 1; if(h<7)return 2; if(h<=9)return 3; return 2; }
+function _sleepQLabel(q){ return [LL('แย่','Poor','差','差'),LL('พอใช้','Fair','一般','一般'),LL('ดี','Good','好','好'),LL('ดีมาก','Great','很好','很好')][q]||''; }
+function _sleepBadgeHtml(q){ return q==null ? '' : `${icoSvg(SLEEP_Q_ICONS[q])}<span>${_sleepQLabel(q)}</span>`; }
 function renderSleep(){
   const body=document.getElementById('sleepBody'); if(!body)return;
   const h=getHabit(currentDate);
-  const sleep=h.sleep||0, sq=_sleepQIndex(h.sleepQ);
-  body.innerHTML=`<div class="habit-blk">`+
-    `<div class="habit-lbl">${icoSvg('moon')} ${LL('การนอน','Sleep','睡眠','睡眠')}</div>`+
-    `<div class="sleep-sliderwrap">`+
-      `<div class="sleep-val" id="sleepValDisp">${_sleepTxt(sleep)}</div>`+
-      `<input type="range" class="sleep-slider" min="0" max="14" step="0.5" value="${sleep}" oninput="sleepSliderLive(this.value)" onchange="sleepSliderCommit(this.value)" aria-label="${LL('ชั่วโมงการนอน','Sleep hours','睡眠小时','睡眠小時')}">`+
-      `<div class="sleep-ticks"><span>0</span><span>7</span><span>14</span></div>`+
+  const sleep=h.sleep||0;
+  const q=_sleepQualityFromHours(sleep);
+  body.innerHTML=`<div class="habit-blk sleep-compact">`+
+    `<div class="sleep-top">`+
+      `<span class="habit-lbl">${icoSvg('moon')} ${LL('การนอน','Sleep','睡眠','睡眠')}</span>`+
+      `<span class="sleep-readout"><b id="sleepValDisp">${_sleepTxt(sleep)}</b><span class="sleep-qbadge q${q==null?'':q}" id="sleepQBadge">${_sleepBadgeHtml(q)}</span></span>`+
     `</div>`+
-    `<div class="sleepq-lbl">${LL('คุณภาพการนอน','Sleep quality','睡眠质量','睡眠品質')}</div>`+
-    `<div class="sleepq">`+SLEEP_Q_ICONS.map((ic,i)=>`<button class="${sq===i?'on':''}" onclick="setSleepQ(${i})" aria-label="quality ${i+1}">${icoSvg(ic)}</button>`).join('')+`</div>`+
+    `<input type="range" class="sleep-slider" min="0" max="14" step="0.5" value="${sleep}" oninput="sleepSliderLive(this.value)" onchange="sleepSliderCommit(this.value)" aria-label="${LL('ชั่วโมงการนอน','Sleep hours','睡眠小时','睡眠小時')}">`+
+    `<div class="sleep-ticks"><span>0</span><span>7</span><span>14</span></div>`+
     `<div class="sleep-analysis">${sleepAnalysisHtml()}</div>`+
   `</div>`;
 }
-// Live drag → update the big number only (no save/re-render, so the thumb keeps focus).
-function sleepSliderLive(v){ const el=document.getElementById('sleepValDisp'); if(el)el.textContent=_sleepTxt(+v||0); }
-// Release → persist + re-render (refreshes the analysis below).
+// Live drag → update the hours + the auto-quality badge (no save/re-render, so the thumb keeps focus).
+function sleepSliderLive(v){
+  const n=+v||0, q=_sleepQualityFromHours(n);
+  const d=document.getElementById('sleepValDisp'); if(d)d.textContent=_sleepTxt(n);
+  const b=document.getElementById('sleepQBadge'); if(b){ b.className='sleep-qbadge q'+(q==null?'':q); b.innerHTML=_sleepBadgeHtml(q); }
+}
+// Release → persist hours + the quality auto-derived from them, then re-render (refreshes analysis).
 function sleepSliderCommit(v){
+  const n=_clampSleep(+v||0);
   const h=getHabit(currentDate);
-  allHabits[currentDate]={...h, sleep:_clampSleep(+v||0)};
+  allHabits[currentDate]={...h, sleep:n, sleepQ:_sleepQualityFromHours(n)};
   saveHabits_LS(); renderSleep();
 }
 // Sleep insights over the last 14 logged nights — average vs the healthy 7–9 h
@@ -10946,6 +10983,10 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.42.0':{
+    th:['😴 ปรับ UI การนอนให้กระชับ + บอกคุณภาพอัตโนมัติ','👣 นับก้าวจากเซนเซอร์ของเครื่อง','🎨 ปรับปรุง UI'],
+    en:['😴 Compact sleep UI + auto quality','👣 Steps from device sensor','🎨 UI polish'],
+  },
   '2.41.0':{
     th:['🎨 ชุดธีม Nutrition UI System','😴 วิเคราะห์การนอนหลับ','👣 นับก้าวเดินหักแคลอรี่','🔧 แก้ไขบั๊ก'],
     en:['🎨 Nutrition UI System theme set','😴 Sleep analysis','👣 Steps deducted from calories','🔧 Bug fixes'],
