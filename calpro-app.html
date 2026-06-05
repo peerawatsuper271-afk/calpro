@@ -305,6 +305,25 @@ html[data-aurora="1"] .sri-thumb,html[data-aurora="1"] .ax-pop-ic{position:relat
 .thumb-img.on{opacity:1;}
 html[data-aurora="1"] .sri{align-items:center;}
 html[data-aurora="1"] .sri-thumb{display:flex;}
+html[data-aurora="1"] .sri-thumb,html[data-aurora="1"] .ax-pop-ic{cursor:zoom-in;}
+/* In-app food image gallery (lightbox carousel) */
+.fgal-ov{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(15,20,40,.82);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:22px;}
+.fgal-ov.on{display:flex;}
+.fgal-box{position:relative;width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;gap:13px;}
+.fgal-title{color:#fff;font-weight:700;font-size:1.05rem;text-align:center;text-shadow:0 1px 6px rgba(0,0,0,.45);max-width:88%;}
+.fgal-x{position:absolute;top:-8px;right:-4px;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;}
+.fgal-stage{position:relative;width:100%;aspect-ratio:1/1;border-radius:20px;overflow:hidden;background:#0d1326;box-shadow:0 24px 60px -20px rgba(0,0,0,.6);}
+.fgal-track{width:100%;height:100%;position:relative;}
+.fgal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
+.fgal-img.on{display:block;animation:fgalFade .25s ease;}
+@keyframes fgalFade{from{opacity:.4}to{opacity:1}}
+.fgal-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cdd6f0;font-size:.9rem;text-align:center;padding:16px;}
+.fgal-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border:none;border-radius:50%;background:rgba(0,0,0,.42);color:#fff;font-size:1.7rem;line-height:1;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;}
+.fgal-prev{left:10px;}.fgal-next{right:10px;}
+.fgal-dots{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:center;}
+.fgal-dot{width:8px;height:8px;border-radius:50%;border:none;background:rgba(255,255,255,.36);cursor:pointer;padding:0;transition:width .2s,background .2s;}
+.fgal-dot.on{background:#fff;width:22px;border-radius:5px;}
+.fgal-count{color:#cdd6f0;font-size:.78rem;margin-left:8px;}
 /* Add Food — recent searches + popular foods (Aurora default view) */
 #addExtras{display:none;}
 html[data-aurora="1"] #addExtras{display:block;margin-bottom:4px;}
@@ -2288,7 +2307,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.7';
+const APP_VERSION = '2.43.8';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4585,7 +4604,7 @@ function renderAddExtras(){
   }
   if(POP.length){
     html+=`<div class="ax-hd">${LL('อาหารยอดนิยม','Popular','热门食物','熱門食物')}</div><div class="ax-pop">`;
-    POP.forEach(f=>{ const i=_axFoods.push(f)-1; html+=`<button type="button" class="ax-pop-card" onclick="axAdd(${i})"><span class="ax-pop-ic">${foodThumbInner(f)}</span><span class="ax-pop-n">${escapeHtml(foodDisplayName(f))}</span><span class="ax-pop-c">${f.c} kcal</span></button>`; });
+    POP.forEach(f=>{ const i=_axFoods.push(f)-1; html+=`<button type="button" class="ax-pop-card" onclick="axAdd(${i})"><span class="ax-pop-ic" onclick="event.stopPropagation();galFromAx(${i})">${foodThumbInner(f)}</span><span class="ax-pop-n">${escapeHtml(foodDisplayName(f))}</span><span class="ax-pop-c">${f.c} kcal</span></button>`; });
     html+=`</div>`;
   }
   box.innerHTML=html;
@@ -4703,6 +4722,7 @@ function renderQuickList(){
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
+    {const _th=d.querySelector('.sri-thumb'); if(_th) _th.onclick=(e)=>{e.stopPropagation();openFoodGallery(f);};}
     w.appendChild(d);
   });
 }
@@ -4889,9 +4909,87 @@ function renderResults(list){
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
+    {const _th=d.querySelector('.sri-thumb'); if(_th) _th.onclick=(e)=>{e.stopPropagation();openFoodGallery(f);};}
     w.appendChild(d);
   });
 }
+
+// ═══ FOOD IMAGE GALLERY (in-app lightbox carousel) ═══
+// Clicking a food thumbnail opens a modal with MULTIPLE photos of that dish,
+// fetched live from the Wikimedia Commons API (by English name) — swipe/arrows/dots,
+// no redirect to any external site. Results cached in-session per food.
+const _foodGalCache={};
+let _galState=null;
+function _galQuery(f){ return (f&&f.e&&f.e.trim())?f.e.trim():((f&&f.n)||''); }
+async function _galFetch(f){
+  const key=f&&f.n; if(key&&Array.isArray(_foodGalCache[key])) return _foodGalCache[key];
+  const q=_galQuery(f); if(!q) return [];
+  const u='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*'
+    +'&generator=search&gsrnamespace=6&gsrlimit=20&gsrsearch='+encodeURIComponent(q)
+    +'&prop=imageinfo&iiprop=url|mime&iiurlwidth=720';
+  try{
+    const r=await fetch(u); if(!r.ok) return [];
+    const j=await r.json(); const pages=j&&j.query&&j.query.pages; if(!pages) return [];
+    const out=[];
+    Object.values(pages).sort((a,b)=>(a.index||0)-(b.index||0)).forEach(p=>{
+      const ii=p.imageinfo&&p.imageinfo[0]; if(!ii) return;
+      if(!/^image\/(jpeg|png|jpg|webp)$/i.test(ii.mime||'')) return;
+      const src=ii.thumburl||ii.url; if(!src||_FOOD_IMG_BAD.test(src)) return;
+      out.push(src);
+    });
+    const uniq=[...new Set(out)].slice(0,12);
+    if(key) _foodGalCache[key]=uniq;
+    return uniq;
+  }catch(_){ return []; }
+}
+function _galKey(e){ const ov=document.getElementById('foodGalOverlay'); if(!ov||!ov.classList.contains('on'))return;
+  if(e.key==='Escape')closeFoodGallery(); else if(e.key==='ArrowLeft')galStep(-1); else if(e.key==='ArrowRight')galStep(1); }
+function openFoodGallery(f){
+  if(!f) return;
+  let ov=document.getElementById('foodGalOverlay');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='foodGalOverlay'; ov.className='fgal-ov';
+    ov.innerHTML='<div class="fgal-box" role="dialog" aria-modal="true">'
+      +'<button class="fgal-x" aria-label="close" onclick="closeFoodGallery()">✕</button>'
+      +'<div class="fgal-title" id="fgalTitle"></div>'
+      +'<div class="fgal-stage" id="fgalStage">'
+        +'<button class="fgal-nav fgal-prev" aria-label="previous" onclick="galStep(-1)">‹</button>'
+        +'<div class="fgal-track" id="fgalTrack"></div>'
+        +'<button class="fgal-nav fgal-next" aria-label="next" onclick="galStep(1)">›</button>'
+      +'</div><div class="fgal-dots" id="fgalDots"></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{ if(e.target===ov) closeFoodGallery(); });
+    let sx=0; const stage=ov.querySelector('#fgalStage');
+    stage.addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; },{passive:true});
+    stage.addEventListener('touchend',e=>{ const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>40) galStep(dx<0?1:-1); });
+    document.addEventListener('keydown',_galKey);
+  }
+  document.getElementById('fgalTitle').textContent=foodDisplayName(f);
+  const track=document.getElementById('fgalTrack');
+  track.innerHTML='<div class="fgal-load">'+(t('loading')||'กำลังโหลดรูปภาพ…')+'</div>';
+  document.getElementById('fgalDots').innerHTML='';
+  document.querySelectorAll('.fgal-nav').forEach(b=>b.style.display='none');
+  ov.classList.add('on'); document.body.style.overflow='hidden';
+  _galState={imgs:[],idx:0};
+  _galFetch(f).then(imgs=>{
+    const o=document.getElementById('foodGalOverlay'); if(!o||!o.classList.contains('on')) return;
+    if(!imgs.length){ track.innerHTML='<div class="fgal-load">'+(t('no_food')||'ไม่พบรูปภาพ')+'</div>'; return; }
+    _galState={imgs,idx:0}; _galBuild();
+  });
+}
+function _galBuild(){
+  const st=_galState; if(!st||!st.imgs.length) return;
+  document.getElementById('fgalTrack').innerHTML=st.imgs.map((u,i)=>'<img class="fgal-img'+(i===0?' on':'')+'" src="'+u+'" alt="">').join('');
+  document.getElementById('fgalDots').innerHTML=st.imgs.map((_,i)=>'<button class="fgal-dot'+(i===0?' on':'')+'" aria-label="image '+(i+1)+'" onclick="galGo('+i+')"></button>').join('')+'<span class="fgal-count" id="fgalCount">1 / '+st.imgs.length+'</span>';
+  const multi=st.imgs.length>1; document.querySelectorAll('.fgal-nav').forEach(b=>b.style.display=multi?'':'none');
+}
+function galGo(i){ const st=_galState; if(!st||!st.imgs.length) return; const n=st.imgs.length; st.idx=(i%n+n)%n;
+  document.querySelectorAll('.fgal-img').forEach((el,k)=>el.classList.toggle('on',k===st.idx));
+  document.querySelectorAll('.fgal-dot').forEach((el,k)=>el.classList.toggle('on',k===st.idx));
+  const c=document.getElementById('fgalCount'); if(c) c.textContent=(st.idx+1)+' / '+n; }
+function galStep(d){ const st=_galState; if(st) galGo(st.idx+d); }
+function galFromAx(i){ const f=_axFoods&&_axFoods[i]; if(f) openFoodGallery(f); }
+function closeFoodGallery(){ const ov=document.getElementById('foodGalOverlay'); if(ov) ov.classList.remove('on'); document.body.style.overflow=''; }
 
 // ═══ ADD FOOD ═══
 let _portionFood=null;
