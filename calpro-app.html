@@ -2286,7 +2286,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.5';
+const APP_VERSION = '2.43.6';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4545,6 +4545,7 @@ function renderCatFilter(){
   renderCatChips();              // Aurora chip row (CSS shows it only when aurora is active)
   renderCatResults(activeCat);
   renderAddExtras();
+  if(settings.uiMode==='aurora') buildFoodImgCache();   // lazily curate Wikipedia food photos (once, cached)
 }
 function onCatFilterChange(cat){
   const si=document.getElementById('searchInput');if(si)si.value='';
@@ -4835,20 +4836,44 @@ function renderCatResults(cat){
   if(cat==='custom'){renderResults(customFoods);return;}
   renderResults(FOODS.filter(f=>f.cat===cat));
 }
-// Real food-photo thumbnail via LoremFlickr (keyword = English name) with a stable per-food
-// lock + graceful emoji fallback (onerror/offline). Aurora-only — parents are display:none otherwise,
-// so lazy <img> never loads in Standard/Nutrition modes.
-function _hashStr(s){ let h=0; s=String(s||''); for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h); }
-function foodImgUrl(f){
-  const en=String(f.e||f.n||'food').toLowerCase().replace(/[^a-z0-9\s]/g,' ').trim();
-  const kw=en?en.split(/\s+/).slice(0,3).join(','):'food';
-  return `https://loremflickr.com/96/96/${encodeURIComponent(kw)},food?lock=${_hashStr(f.n)%998+1}`;
+// ═══ REAL FOOD PHOTOS — curated from Wikipedia (food-article lead images = the actual dish,
+// no people, free license). Built once on-device (Aurora only), cached in localStorage. Bad
+// matches (SVG diagrams, old botanical plates, a few wrong dishes) are filtered out. Foods with
+// no confident match show their category emoji instead — never a wrong/placeholder photo. ═══
+let _foodImg = {};
+try{ _foodImg = JSON.parse(localStorage.getItem('cp_food_img')||'{}')||{}; }catch(_){ _foodImg={}; }
+const _FOOD_IMG_BAD = /\.svg|k%c3%b6hler|kohler|medizinal|labelled|_2d_|diagram|chemical|logo|map_of/i;
+const _FOOD_IMG_BLOCK = ['มาม่า','ป๊อปคอร์น','เงาะ','น้ำเปล่า','มะละกอ','แฟนต้า'];  // verified-wrong, removed
+let _foodImgBuilding=false, _foodImgDone=false;
+function foodImgUrl(f){ return _foodImg[f && f.n] || null; }
+// Pull lead-image thumbnails from Wikipedia (en by English name, th by Thai name for the rest).
+async function buildFoodImgCache(){
+  if(_foodImgBuilding||_foodImgDone) return;
+  if(Object.keys(_foodImg).length>60){ _foodImgDone=true; return; }   // already cached from a prior session
+  _foodImgBuilding=true;
+  try{
+    const all=(typeof allFoods==='function')?allFoods():[];
+    const res={..._foodImg};
+    const wiki=async(host,titles)=>{ const u='https://'+host+'/w/api.php?action=query&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=240&redirects=1&origin=*&titles='+encodeURIComponent(titles.join('|')); for(let a=0;a<2;a++){ try{ const r=await fetch(u); if(r.ok) return await r.json(); }catch(_){ } await new Promise(z=>setTimeout(z,400)); } return null; };
+    const apply=(q,reqs,cb)=>{ const norm={};(q.normalized||[]).forEach(n=>norm[n.from]=n.to); const redir={};(q.redirects||[]).forEach(r=>redir[r.from]=r.to); const pbt={};Object.values(q.pages||{}).forEach(p=>pbt[p.title]=p); reqs.forEach(rt=>{let t=rt;if(norm[t])t=norm[t];if(redir[t])t=redir[t];const p=pbt[t];const s=p&&p.thumbnail&&p.thumbnail.source;if(s&&!_FOOD_IMG_BAD.test(s))cb(rt,s);}); };
+    const byEng={}; all.forEach(f=>{ if(f.e&&f.e.trim()){const e=f.e.trim();(byEng[e]=byEng[e]||[]).push(f.n);} });
+    const engTitles=Object.keys(byEng);
+    for(let i=0;i<engTitles.length;i+=25){ const ch=engTitles.slice(i,i+25); const d=await wiki('en.wikipedia.org',ch); if(d&&d.query)apply(d.query,ch,(rt,s)=>byEng[rt].forEach(n=>res[n]=s)); await new Promise(z=>setTimeout(z,150)); }
+    const rest=[...new Set(all.filter(f=>!res[f.n]).map(f=>f.n))];
+    for(let i=0;i<rest.length;i+=25){ const ch=rest.slice(i,i+25); const d=await wiki('th.wikipedia.org',ch); if(d&&d.query)apply(d.query,ch,(rt,s)=>res[rt]=s); await new Promise(z=>setTimeout(z,150)); }
+    _FOOD_IMG_BLOCK.forEach(k=>{ delete res[k]; });
+    _foodImg=res; try{ localStorage.setItem('cp_food_img',JSON.stringify(res)); }catch(_){ }
+    _foodImgDone=true;
+    try{ const pg=document.getElementById('pg-add'); if(pg&&getComputedStyle(pg).display!=='none'&&typeof renderCatFilter==='function') renderCatFilter(); }catch(_){ }
+  }catch(_){ }
+  _foodImgBuilding=false;
 }
 function foodThumbInner(f,withImg){
   const emoji=CATS[f.cat]||'🍽️';
-  // Photos only in Aurora + within the first screenful → emoji elsewhere (no network in Standard/Nutrition, offline-safe).
-  if(withImg===false||settings.uiMode!=='aurora') return emoji;
-  return `${emoji}<img class="thumb-img" loading="lazy" alt="" src="${foodImgUrl(f)}" onload="this.classList.add('on')" onerror="this.remove()">`;
+  if(withImg===false||settings.uiMode!=='aurora') return emoji;   // no network in Standard/Nutrition · offline-safe
+  const u=foodImgUrl(f);
+  if(!u) return emoji;                                            // no confident photo → emoji (never a wrong image)
+  return `${emoji}<img class="thumb-img" loading="lazy" alt="" src="${u}" onload="this.classList.add('on')" onerror="this.remove()">`;
 }
 function renderResults(list){
   const w=document.getElementById('sRes');w.innerHTML='';
