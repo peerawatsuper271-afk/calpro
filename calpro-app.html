@@ -294,8 +294,8 @@ html[data-aurora="1"] #insDiv .ins-i{background:color-mix(in srgb,var(--accent) 
 html[data-aurora="1"] #catFilterWrap .cs-native,html[data-aurora="1"] #catFilterWrap .cs-trigger{display:none!important;}
 html[data-aurora="1"] #catChips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 html[data-aurora="1"] #catChips::-webkit-scrollbar{display:none;}
-html[data-aurora="1"] .cat-chip{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:60px;background:#fff;border:1px solid #EEF1F7;border-radius:15px;padding:9px 8px;font-family:inherit;font-size:.64rem;font-weight:600;color:var(--muted);cursor:pointer;box-shadow:0 5px 14px -12px rgba(31,45,90,.25);transition:background .15s,color .15s,border-color .15s;}
-html[data-aurora="1"] .cat-chip .cc-ico{font-size:1.25rem;line-height:1;}
+html[data-aurora="1"] .cat-chip{flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:66px;background:#fff;border:1px solid #EEF1F7;border-radius:16px;padding:11px 9px;font-family:inherit;font-size:.66rem;font-weight:600;color:var(--muted);cursor:pointer;box-shadow:0 5px 14px -12px rgba(31,45,90,.25);transition:background .15s,color .15s,border-color .15s;}
+html[data-aurora="1"] .cat-chip .cc-ico{font-size:1.45rem;line-height:1;}
 html[data-aurora="1"] .cat-chip.on{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 7px 16px -6px color-mix(in srgb,var(--accent) 55%,transparent);}
 /* Add Food — result row thumbnail (category icon in a rounded square) */
 .sri-thumb{display:none;width:40px;height:40px;border-radius:12px;background:#F1F4FA;align-items:center;justify-content:center;font-size:1.25rem;flex:none;margin-right:11px;}
@@ -376,6 +376,8 @@ html[data-aurora="1"] .ax-pop-c{font-size:.68rem;color:var(--accent);font-weight
 .mc-v{font-size:.85rem;font-weight:600;}
 .mc-b{background:var(--surface2);border-radius:99px;height:3px;margin-top:4px;overflow:hidden;}
 .mc-bf{height:100%;border-radius:99px;transition:width .5s;}
+.mc-sub{font-size:.6rem;color:var(--muted);margin-top:5px;font-weight:600;}
+.mc-sub:empty{display:none;}
 
 /* ── WATER / WEIGHT WIDGETS ── */
 .wwrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
@@ -1158,9 +1160,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <div class="ring-sub" id="ringGoal"></div>
       </div>
       <div class="macros">
-        <div class="mc"><div class="mc-l" data-i18n="protein">โปรตีน</div><div class="mc-v" id="mP" style="color:var(--mp,var(--blue))">0g</div><div class="mc-b"><div class="mc-bf" id="mPB" style="width:0%;background:var(--mp,var(--blue))"></div></div></div>
-        <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--mc,var(--amber))">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--mc,var(--amber))"></div></div></div>
-        <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--mf,var(--purple))">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--mf,var(--purple))"></div></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="protein">โปรตีน</div><div class="mc-v" id="mP" style="color:var(--mp,var(--blue))">0g</div><div class="mc-b"><div class="mc-bf" id="mPB" style="width:0%;background:var(--mp,var(--blue))"></div></div><div class="mc-sub" id="mPS"></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--mc,var(--amber))">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--mc,var(--amber))"></div></div><div class="mc-sub" id="mCS"></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--mf,var(--purple))">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--mf,var(--purple))"></div></div><div class="mc-sub" id="mFS"></div></div>
       </div>
       <div class="wwrow">
         <div class="wwcard wwcard-full">
@@ -2286,7 +2288,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.6';
+const APP_VERSION = '2.43.7';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4845,7 +4847,10 @@ try{ _foodImg = JSON.parse(localStorage.getItem('cp_food_img')||'{}')||{}; }catc
 const _FOOD_IMG_BAD = /\.svg|k%c3%b6hler|kohler|medizinal|labelled|_2d_|diagram|chemical|logo|map_of/i;
 const _FOOD_IMG_BLOCK = ['มาม่า','ป๊อปคอร์น','เงาะ','น้ำเปล่า','มะละกอ','แฟนต้า'];  // verified-wrong, removed
 let _foodImgBuilding=false, _foodImgDone=false;
-function foodImgUrl(f){ return _foodImg[f && f.n] || null; }
+// Hand-curated photos (keyed by Thai food name) take priority over the auto Wikipedia map.
+// Fill this from the food-images-todo list as URLs come in.
+const FOOD_IMG_MANUAL = {};
+function foodImgUrl(f){ const n=f&&f.n; return (n&&(FOOD_IMG_MANUAL[n]||_foodImg[n]))||null; }
 // Pull lead-image thumbnails from Wikipedia (en by English name, th by Thai name for the rest).
 async function buildFoodImgCache(){
   if(_foodImgBuilding||_foodImgDone) return;
@@ -7637,14 +7642,13 @@ function renderToday(){
   }
   document.getElementById('ringGoal').textContent=t('goal')+' '+goal.toLocaleString()+' kcal'+(burned?' · −'+burned.toLocaleString()+' kcal':'');
   const pg=(userProfile?.weight||60)*1.6;
-  if(settings.uiMode==='aurora'){
-    // Aurora macro cards show "eaten / target" like the mockup
-    document.getElementById('mP').textContent=totP+' / '+Math.round(pg)+'g';
-    document.getElementById('mC').textContent=totC+' / 250g';
-    document.getElementById('mF').textContent=totF+' / 65g';
-  }else{
-    document.getElementById('mP').textContent=totP+'g';document.getElementById('mC').textContent=totC+'g';document.getElementById('mF').textContent=totF+'g';
-  }
+  document.getElementById('mP').textContent=totP+'g';document.getElementById('mC').textContent=totC+'g';document.getElementById('mF').textContent=totF+'g';
+  {// Aurora: small "/target · %" sub-line under each macro bar, matching the mockup
+   const _au=settings.uiMode==='aurora', pc=(v,t)=>Math.round(Math.min(v/t*100,999))+'%';
+   const sP=document.getElementById('mPS'),sC=document.getElementById('mCS'),sF=document.getElementById('mFS');
+   if(sP)sP.textContent=_au?('/'+Math.round(pg)+'g · '+pc(totP,pg)):'';
+   if(sC)sC.textContent=_au?('/250g · '+pc(totC,250)):'';
+   if(sF)sF.textContent=_au?('/65g · '+pc(totF,65)):'';}
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
   document.getElementById('mCB').style.width=Math.min(totC/250*100,100).toFixed(1)+'%';
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
