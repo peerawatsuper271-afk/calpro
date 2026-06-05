@@ -849,8 +849,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .meal-time-row .mtr-input span{font-size:.78rem;color:var(--muted);}
 
 .theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
-.themeset-seg{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:4px;margin-bottom:12px;}
-.themeset-seg button{flex:1;border:0;background:none;color:var(--muted);padding:9px 6px;border-radius:99px;font-family:inherit;font-weight:700;font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;letter-spacing:-.01em;}
+.themeset-seg{display:flex;flex-direction:column;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:15px;padding:4px;margin-bottom:12px;}
+.themeset-seg button{width:100%;border:0;background:none;color:var(--muted);padding:11px 14px;border-radius:11px;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;transition:background .15s,color .15s;letter-spacing:-.01em;text-align:center;}
 .themeset-seg button.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 5px rgba(0,0,0,.14);}
 .th-swatch{height:42px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;position:relative;display:flex;align-items:center;justify-content:center;font-family:inherit;}
 .th-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,255,255,.2) inset;}
@@ -1395,21 +1395,15 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <!-- SETTINGS · Appearance -->
     <div class="screen" id="pg-set-appearance">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="appearance">รูปลักษณ์</h2></div>
-      <div class="set-sec" data-i18n="ui_style_sec">รูปแบบหน้าจอ</div>
-      <div class="ios-group"><div class="ios-pad">
-        <div class="themeset-seg" id="uiModeSeg" role="tablist">
-          <button id="umOrig" type="button" onclick="setUiMode('original')" data-i18n="ui_original">ดั้งเดิม</button>
-          <button id="umAurora" type="button" onclick="setUiMode('aurora')">Aurora Health</button>
-        </div>
-        <div style="font-size:.7rem;color:var(--muted);margin-top:8px;line-height:1.5" data-i18n="ui_aurora_sub">ดีไซน์พรีเมียมสไตล์สุขภาพ — พื้นหลังออโรรา การ์ดสีขาว มินิมอล เน้นข้อมูล</div>
-      </div></div>
       <div class="set-sec" data-i18n="theme">ธีมสี</div>
       <div class="ios-group"><div class="ios-pad">
         <div class="themeset-seg" id="themeSetSeg" role="tablist">
-          <button id="tsStd" type="button" onclick="setThemeSet('standard')">มาตรฐาน</button>
-          <button id="tsNutri" type="button" onclick="setThemeSet('nutrikit')">Nutrition UI System</button>
+          <button id="tsStd" type="button" onclick="setLook('standard')" data-i18n="ui_original">ดั้งเดิม</button>
+          <button id="tsNutri" type="button" onclick="setLook('nutrikit')">Nutrition UI System</button>
+          <button id="tsAurora" type="button" onclick="setLook('aurora')">Aurora Health</button>
         </div>
         <div class="theme-grid" id="themeGrid"></div>
+        <div id="auroraNote" style="display:none;font-size:.72rem;color:var(--muted);line-height:1.5" data-i18n="ui_aurora_sub">ดีไซน์พรีเมียมสไตล์สุขภาพ — พื้นหลังออโรรา การ์ดสีขาว มินิมอล เน้นข้อมูล</div>
       </div></div>
       <div class="set-sec" data-i18n="accent">สีหลัก</div>
       <div class="ios-group"><div class="ios-pad"><div class="accent-grid" id="accentGrid"></div></div></div>
@@ -2234,7 +2228,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.0';
+const APP_VERSION = '2.43.1';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3790,7 +3784,7 @@ const EXERCISES = [
 ];
 let currentDate = todayKey();
 let activeCat = 'all';
-let settings = {theme:'light', accent:'#ff6b6b', lang:'th', font:'prompt', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','profile','settings'], aiProvider:'proxy'};
+let settings = {theme:'light', accent:'#ff6b6b', lang:'th', font:'prompt', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','profile','settings'], aiProvider:'proxy', uiMode:'original', themeSet:'standard'};
 
 // Bottom-nav tab catalog — id → { icon SVG path, i18n key }
 const NAV_CATALOG = {
@@ -4034,7 +4028,7 @@ function loadUserData(){
   backupLocalData(true);                 // schedule an IDB backup of the current good state
   reconcileEntriesFromBackupAsync();     // async: heal a quota-truncated / empty localStorage from the IDB backup
   const ls = lsLoad(LS_SETTINGS, null);
-  if (ls) settings = ls;
+  if (ls) settings = {...settings, ...ls};   // merge over defaults so new keys (uiMode, themeSet…) always exist
   applyTheme();
 }
 function loadEntries(){
@@ -8669,17 +8663,22 @@ function setThemeSet(set){
   const nt=THEMES[settings.theme]||{}; if(nt.mode==='dark')settings.lastDark=settings.theme; else settings.lastLight=settings.theme;
   lsSave(LS_SETTINGS,settings); applyTheme(); renderSettings();
 }
-// Switch the screen UI style: 'original' or 'aurora' (Aurora Health UI). Picked like a theme —
-// Aurora applies its own premium skin + fixed palette over the 4 main screens.
-function setUiMode(mode){
-  settings.uiMode = (mode==='aurora')?'aurora':'original';
-  lsSave(LS_SETTINGS,settings);
-  applyTheme();
-  try{ renderSettings(); }catch(e){}
-  try{ renderToday(); }catch(e){}    // ring switches to the brand gradient in Aurora
-  showToast(settings.uiMode==='aurora'
-    ? LL('เปิด Aurora Health UI แล้ว','Aurora Health UI on','已开启 Aurora Health UI','已開啟 Aurora Health UI')
-    : LL('ใช้ UI ดั้งเดิม','Using Original UI','使用原始界面','使用原始介面'));
+// Unified "look" picker — one 3-way selector: 'standard' · 'nutrikit' · 'aurora'.
+// standard/nutrikit are the original color-theme sets (uiMode='original'); aurora is the
+// premium Aurora Health UI skin with its own fixed palette.
+function setLook(mode){
+  if(mode==='aurora'){
+    settings.uiMode='aurora'; lsSave(LS_SETTINGS,settings);
+    applyTheme(); try{renderSettings();}catch(e){} try{renderToday();}catch(e){}
+    showToast(LL('เปิด Aurora Health UI แล้ว','Aurora Health UI on','已开启 Aurora Health UI','已開啟 Aurora Health UI'));
+  }else{
+    settings.uiMode='original';
+    setThemeSet(mode);                  // standard|nutrikit — saves + applyTheme + renderSettings
+    try{renderToday();}catch(e){}
+    showToast(mode==='nutrikit'
+      ? LL('ใช้ชุดธีม Nutrition UI System','Nutrition UI System on','已开启 Nutrition UI System','已開啟 Nutrition UI System')
+      : LL('ใช้ธีมดั้งเดิม','Original theme on','使用原始主题','使用原始主題'));
+  }
 }
 const THEME_LABELS={dark:'มืด',night:'ดึก',rose:'กุหลาบ',sky:'ฟ้า',violet:'ม่วง',light:'สว่าง',cream:'ครีม',mint:'มินต์',contrast:'คมชัด'};
 // openSettings deprecated — use navTo('settings') instead
@@ -8872,20 +8871,22 @@ function renderSettings(){
     };
     // Exclusive theme set: Standard OR Nutrition UI System (segmented toggle above).
     const set=settings.themeSet||((THEMES[settings.theme]||{}).nutri?'nutrikit':'standard');
-    const std=document.getElementById('tsStd'), nut=document.getElementById('tsNutri');
-    if(std)std.classList.toggle('on',set==='standard');
-    if(nut)nut.classList.toggle('on',set==='nutrikit');
+    const _aur=settings.uiMode==='aurora';
+    const std=document.getElementById('tsStd'), nut=document.getElementById('tsNutri'), aur=document.getElementById('tsAurora');
+    if(std)std.classList.toggle('on',!_aur && set==='standard');
+    if(nut)nut.classList.toggle('on',!_aur && set==='nutrikit');
+    if(aur)aur.classList.toggle('on',_aur);
     entries.filter(([,v])=> set==='nutrikit' ? !!v.nutri : !v.nutri).forEach(mkSwatch);
   }
-  // UI-mode segmented toggle (Original vs Aurora Health UI) active state.
+  // Aurora supplies its own full palette + typography → hide the swatch grid + accent + font when active
+  // (the 3-way selector itself stays visible so users can switch back). Nutrition UI System defines its
+  // own accent + font → hide just those two.
   const _auroraOn = settings.uiMode==='aurora';
-  {const o=document.getElementById('umOrig'), a=document.getElementById('umAurora');
-   if(o)o.classList.toggle('on',!_auroraOn); if(a)a.classList.toggle('on',_auroraOn);}
-  // Hide pickers that don't apply: Aurora supplies its own full palette + typography (hide theme + accent + font);
-  // Nutrition UI System defines its own accent + font (hide accent + font).
   {const nutriActive=(settings.themeSet||((THEMES[settings.theme]||{}).nutri?'nutrikit':'standard'))==='nutrikit';
+   const tgEl=document.getElementById('themeGrid'); if(tgEl) tgEl.style.display=_auroraOn?'none':'';
+   const noteEl=document.getElementById('auroraNote'); if(noteEl) noteEl.style.display=_auroraOn?'block':'none';
    const hideSec=(gridId,hide)=>{const g=document.getElementById(gridId); const sec=g&&g.closest('.ios-group'); const lbl=sec&&sec.previousElementSibling; if(sec)sec.style.display=hide?'none':''; if(lbl&&lbl.classList&&lbl.classList.contains('set-sec'))lbl.style.display=hide?'none':'';};
-   hideSec('themeGrid', _auroraOn); hideSec('accentGrid', _auroraOn||nutriActive); hideSec('fontGrid', _auroraOn||nutriActive);}
+   hideSec('accentGrid', _auroraOn||nutriActive); hideSec('fontGrid', _auroraOn||nutriActive);}
   const ag=document.getElementById('accentGrid');if(ag){ag.innerHTML='';
     ACCENTS.forEach(ac=>{
       const b=document.createElement('button');b.className='ac-dot'+(settings.accent===ac?' active':'');
