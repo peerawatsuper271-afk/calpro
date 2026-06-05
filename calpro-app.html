@@ -1100,7 +1100,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           </svg>
           <div class="ring-ctr">
             <div class="ring-num" id="ringCal">0</div>
-            <div class="ring-lbl" data-i18n="cal_today">แคลอรี่</div>
+            <div class="ring-lbl" id="ringLbl" data-i18n="cal_today">แคลอรี่</div>
           </div>
         </div>
         <div class="ring-sub" id="ringGoal"></div>
@@ -2228,7 +2228,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.1';
+const APP_VERSION = '2.43.2';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -7473,10 +7473,27 @@ function renderToday(){
   const circ=376.99;
   document.getElementById('ringFill').style.strokeDashoffset=(circ-pct*circ).toFixed(2);
   document.getElementById('ringFill').style.stroke=clr;
-  document.getElementById('ringCal').textContent=net.toLocaleString();
+  const _aurRing = settings.uiMode==='aurora';
+  const _ringLbl = document.getElementById('ringLbl');
+  if(_aurRing){
+    // Aurora hero matches the mockup: show calories REMAINING (goal − net), not net consumed.
+    const remain = goal - net;
+    document.getElementById('ringCal').textContent = Math.abs(remain).toLocaleString();
+    if(_ringLbl) _ringLbl.textContent = remain>=0 ? LL('kcal เหลือ','kcal left','千卡剩余','大卡剩餘') : LL('kcal เกิน','kcal over','千卡超标','大卡超標');
+  }else{
+    document.getElementById('ringCal').textContent=net.toLocaleString();
+    if(_ringLbl) _ringLbl.textContent=t('cal_today');
+  }
   document.getElementById('ringGoal').textContent=t('goal')+' '+goal.toLocaleString()+' kcal'+(burned?' · −'+burned.toLocaleString()+' kcal':'');
   const pg=(userProfile?.weight||60)*1.6;
-  document.getElementById('mP').textContent=totP+'g';document.getElementById('mC').textContent=totC+'g';document.getElementById('mF').textContent=totF+'g';
+  if(settings.uiMode==='aurora'){
+    // Aurora macro cards show "eaten / target" like the mockup
+    document.getElementById('mP').textContent=totP+' / '+Math.round(pg)+'g';
+    document.getElementById('mC').textContent=totC+' / 250g';
+    document.getElementById('mF').textContent=totF+' / 65g';
+  }else{
+    document.getElementById('mP').textContent=totP+'g';document.getElementById('mC').textContent=totC+'g';document.getElementById('mF').textContent=totF+'g';
+  }
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
   document.getElementById('mCB').style.width=Math.min(totC/250*100,100).toFixed(1)+'%';
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
