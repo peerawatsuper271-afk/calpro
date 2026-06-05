@@ -209,7 +209,7 @@ html[data-aurora="1"] .card{
   -webkit-backdrop-filter:none;backdrop-filter:none;
   box-shadow:0 10px 30px -16px rgba(31,45,90,.20),0 2px 6px -2px rgba(31,45,90,.05);
 }
-html[data-aurora="1"] .card h3{color:var(--muted);letter-spacing:.4px;}
+html[data-aurora="1"] .card h3{color:var(--text);text-transform:none;letter-spacing:-.01em;font-size:.9rem;font-weight:700;}
 html[data-aurora="1"] h1,html[data-aurora="1"] h2{letter-spacing:-.02em;}
 /* Floating frosted-glass bottom nav (light) */
 html[data-aurora="1"] .bnav{
@@ -265,6 +265,22 @@ html[data-aurora="1"] .period-tabs{background:#EFF2F8;border-radius:12px;padding
 /* Buttons — rounder, primary = blue with soft glow */
 html[data-aurora="1"] .btn{border-radius:16px;background:var(--accent);box-shadow:0 10px 22px -10px color-mix(in srgb,var(--accent) 55%,transparent);}
 html[data-aurora="1"] .btn-sec{border-radius:16px;background:#fff;border:1px solid #E7EBF3;}
+/* Analytics — KPI overview tiles */
+html[data-aurora="1"] .aurora-kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+html[data-aurora="1"] .akpi-tile{background:#F6F8FC;border:1px solid #EEF1F7;border-radius:16px;padding:14px 12px;text-align:center;}
+html[data-aurora="1"] .akpi-v{font-size:1.5rem;font-weight:800;color:var(--accent);line-height:1.05;font-variant-numeric:tabular-nums;}
+html[data-aurora="1"] .akpi-k{font-size:.66rem;color:var(--muted);margin-top:5px;line-height:1.3;}
+/* Analytics — AI insight cards (style the existing advice .ins items) */
+html[data-aurora="1"] #insDiv .ins{background:#fff;border:1px solid #EEF1F7;border-radius:16px;padding:12px 13px;margin-bottom:8px;gap:11px;align-items:flex-start;box-shadow:0 6px 18px -14px rgba(31,45,90,.2);}
+html[data-aurora="1"] #insDiv .ins-i{background:color-mix(in srgb,var(--accent) 12%,transparent);border-radius:11px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex:none;font-size:1rem;}
+/* Add Food — Aurora swaps the category dropdown for a horizontal icon-chip row (mockup style) */
+#catChips{display:none;}
+html[data-aurora="1"] #catFilterWrap .cs-native,html[data-aurora="1"] #catFilterWrap .cs-trigger{display:none!important;}
+html[data-aurora="1"] #catChips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+html[data-aurora="1"] #catChips::-webkit-scrollbar{display:none;}
+html[data-aurora="1"] .cat-chip{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:60px;background:#fff;border:1px solid #EEF1F7;border-radius:15px;padding:9px 8px;font-family:inherit;font-size:.64rem;font-weight:600;color:var(--muted);cursor:pointer;box-shadow:0 5px 14px -12px rgba(31,45,90,.25);transition:background .15s,color .15s,border-color .15s;}
+html[data-aurora="1"] .cat-chip .cc-ico{font-size:1.25rem;line-height:1;}
+html[data-aurora="1"] .cat-chip.on{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 7px 16px -6px color-mix(in srgb,var(--accent) 55%,transparent);}
 .card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
 
@@ -1167,6 +1183,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <div class="fl" id="catFilterWrap" style="margin-bottom:9px">
           <div class="step-row"><span class="step-no">2</span><label id="catFilterLabel">ประเภทอาหาร</label></div>
           <select id="catFilter" onchange="onCatFilterChange(this.value)"></select>
+          <div class="cat-chips" id="catChips"></div>
         </div>
         <div class="sres" id="sRes"></div>
       </div>
@@ -1193,6 +1210,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <!-- ANALYSIS -->
     <div class="screen" id="pg-analysis">
       <div class="card" id="sleepCard"><div id="sleepBody"></div></div>
+      <!-- Aurora-only KPI overview card (populated in renderAnalysis) -->
+      <div class="card" id="auroraKpiCard" style="display:none"></div>
       <div class="card">
         <div class="card-hdr-row">
           <h3><span id="calChartTitle" data-i18n="cal_7d">แคลอรี่ 7 วัน</span></h3>
@@ -2228,7 +2247,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.2';
+const APP_VERSION = '2.43.3';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4483,6 +4502,7 @@ function renderCatFilter(){
   if(lbl)lbl.textContent=isEn?'Food category':'ประเภทอาหาร';
   customizeSelect(sel);          // wrap once (idempotent)
   if(sel._csSync)sel._csSync();  // options were just rebuilt → refresh trigger label
+  renderCatChips();              // Aurora chip row (CSS shows it only when aurora is active)
   renderCatResults(activeCat);
 }
 function onCatFilterChange(cat){
@@ -4490,6 +4510,15 @@ function onCatFilterChange(cat){
   activeCat=cat;
   renderCatResults(cat);
 }
+// Aurora-only: category icon chips (same categories as the dropdown), matching the mockup.
+function renderCatChips(){
+  const wrap=document.getElementById('catChips'); if(!wrap)return;
+  const isEn=(settings.lang||'th')!=='th';
+  const lab=k=>(CAT_LABELS[k]&&CAT_LABELS[k][isEn?'en':'th'])||k;
+  const cats=['all',...CAT_GROUPS.country,...CAT_GROUPS.type,'custom'];
+  wrap.innerHTML=cats.map(k=>`<button type="button" class="cat-chip${k===activeCat?' on':''}" onclick="pickCatChip('${k}')"><span class="cc-ico">${CATS[k]||''}</span>${escapeHtml(lab(k))}</button>`).join('');
+}
+function pickCatChip(k){ onCatFilterChange(k); renderCatChips(); }
 
 // ═══ CUSTOM SELECT — themed bottom-sheet picker (replaces the OS-native one) ═══
 // Wraps any <select>: hides the native control, shows a styled trigger, and on
@@ -7886,6 +7915,19 @@ function renderAnalysis(){
     <div class="rrow"><span class="rl">${t('days_over')}</span><span class="rv" style="color:${over>3?'var(--accent)':'var(--amber)'}">${over} ${dayUnit}</span></div>
     <div class="rrow"><span class="rl">${t('days_on')}</span><span class="rv" style="color:var(--green)">${under} ${dayUnit}</span></div>
     <div class="rrow"><span class="rl">${t('days_logged')}</span><span class="rv">${act.length}/7 ${dayUnit}</span></div>`;
+  // Aurora-only KPI overview card (avg/day + how far under/over goal), matching the mockup
+  const _akpi=document.getElementById('auroraKpiCard');
+  if(_akpi){
+    if(settings.uiMode==='aurora' && avg>0){
+      const diff=goal-avg, dv=Math.abs(diff).toLocaleString();
+      _akpi.style.display='';
+      _akpi.innerHTML=`<div class="card-hdr-row"><h3>${LL('ภาพรวม','Overview','概览','概覽')}</h3></div>`+
+        `<div class="aurora-kpi">`+
+          `<div class="akpi-tile"><div class="akpi-v">${avg.toLocaleString()}</div><div class="akpi-k">${LL('แคลอรี่เฉลี่ย/วัน','avg kcal/day','日均千卡','日均大卡')}</div></div>`+
+          `<div class="akpi-tile"><div class="akpi-v" style="color:${diff>=0?'var(--green)':'var(--accent)'}">${dv}</div><div class="akpi-k">${diff>=0?LL('ต่ำกว่าเป้าหมาย kcal/วัน','under goal kcal/day','低于目标 千卡/天','低於目標 大卡/天'):LL('เกินเป้าหมาย kcal/วัน','over goal kcal/day','超出目标 千卡/天','超出目標 大卡/天')}</div></div>`+
+        `</div>`;
+    }else{ _akpi.style.display='none'; }
+  }
   const ins=document.getElementById('insDiv');ins.innerHTML='';
   const tips=[];
   if(avg>0&&avg<goal*0.72)tips.push({i:'⚠️',t:isEn?`Avg <strong>${avg} kcal</strong>/day is too low — may affect muscle + metabolism`:`เฉลี่ย <strong>${avg} kcal</strong>/วัน ต่ำเกินไป อาจส่งผลต่อกล้ามเนื้อและเมตาบอลิซึม`});
