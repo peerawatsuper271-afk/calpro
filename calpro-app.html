@@ -270,6 +270,22 @@ html[data-aurora="1"] .aurora-kpi{display:grid;grid-template-columns:1fr 1fr;gap
 html[data-aurora="1"] .akpi-tile{background:#F6F8FC;border:1px solid #EEF1F7;border-radius:16px;padding:14px 12px;text-align:center;}
 html[data-aurora="1"] .akpi-v{font-size:1.5rem;font-weight:800;color:var(--accent);line-height:1.05;font-variant-numeric:tabular-nums;}
 html[data-aurora="1"] .akpi-k{font-size:.66rem;color:var(--muted);margin-top:5px;line-height:1.3;}
+/* Analytics — macro/nutrient donut (สารอาหาร) */
+html[data-aurora="1"] .md-wrap{display:flex;align-items:center;gap:18px;}
+html[data-aurora="1"] .md-donut{width:108px;height:108px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -12px rgba(31,45,90,.3);}
+html[data-aurora="1"] .md-hole{width:70px;height:70px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;font-size:.58rem;color:var(--muted);}
+html[data-aurora="1"] .md-hole b{font-size:1.02rem;color:var(--text);font-weight:800;}
+html[data-aurora="1"] .md-legend{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;}
+html[data-aurora="1"] .md-leg{display:flex;align-items:center;gap:7px;font-size:.76rem;}
+html[data-aurora="1"] .md-dot{width:10px;height:10px;border-radius:3px;flex:none;}
+html[data-aurora="1"] .md-name{color:var(--text);font-weight:600;}
+html[data-aurora="1"] .md-val{margin-left:auto;color:var(--muted);font-size:.72rem;}
+html[data-aurora="1"] .md-pct{color:var(--text);font-weight:700;min-width:36px;text-align:right;}
+/* Native sponsored card → mockup (rounded image block + pill CTA, no left stripe) */
+html[data-aurora="1"] .ad-card{border-left:1px solid #EEF1F7!important;padding:13px 14px;gap:12px;}
+html[data-aurora="1"] .ad-icon{width:52px;height:52px;border-radius:14px;background:color-mix(in srgb,var(--ad-tint,var(--accent)) 15%,#fff);display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+html[data-aurora="1"] .ad-title{font-size:.9rem;font-weight:700;}
+html[data-aurora="1"] .ad-cta{margin-right:0;background:color-mix(in srgb,var(--ad-tint,var(--accent)) 14%,transparent);color:var(--ad-tint,var(--accent));padding:7px 12px;border-radius:11px;font-size:.74rem;}
 /* Analytics — AI insight cards (style the existing advice .ins items) */
 html[data-aurora="1"] #insDiv .ins{background:#fff;border:1px solid #EEF1F7;border-radius:16px;padding:12px 13px;margin-bottom:8px;gap:11px;align-items:flex-start;box-shadow:0 6px 18px -14px rgba(31,45,90,.2);}
 html[data-aurora="1"] #insDiv .ins-i{background:color-mix(in srgb,var(--accent) 12%,transparent);border-radius:11px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex:none;font-size:1rem;}
@@ -281,6 +297,22 @@ html[data-aurora="1"] #catChips::-webkit-scrollbar{display:none;}
 html[data-aurora="1"] .cat-chip{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:60px;background:#fff;border:1px solid #EEF1F7;border-radius:15px;padding:9px 8px;font-family:inherit;font-size:.64rem;font-weight:600;color:var(--muted);cursor:pointer;box-shadow:0 5px 14px -12px rgba(31,45,90,.25);transition:background .15s,color .15s,border-color .15s;}
 html[data-aurora="1"] .cat-chip .cc-ico{font-size:1.25rem;line-height:1;}
 html[data-aurora="1"] .cat-chip.on{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 7px 16px -6px color-mix(in srgb,var(--accent) 55%,transparent);}
+/* Add Food — result row thumbnail (category icon in a rounded square) */
+.sri-thumb{display:none;width:40px;height:40px;border-radius:12px;background:#F1F4FA;align-items:center;justify-content:center;font-size:1.25rem;flex:none;margin-right:11px;}
+html[data-aurora="1"] .sri{align-items:center;}
+html[data-aurora="1"] .sri-thumb{display:flex;}
+/* Add Food — recent searches + popular foods (Aurora default view) */
+#addExtras{display:none;}
+html[data-aurora="1"] #addExtras{display:block;margin-bottom:4px;}
+html[data-aurora="1"] .ax-hd{font-size:.82rem;font-weight:700;color:var(--text);margin:6px 0 8px;letter-spacing:-.01em;}
+html[data-aurora="1"] .ax-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+html[data-aurora="1"] .ax-chip{background:#fff;border:1px solid #EEF1F7;border-radius:12px;padding:7px 11px;font-family:inherit;font-size:.76rem;font-weight:600;color:var(--text);cursor:pointer;box-shadow:0 4px 12px -10px rgba(31,45,90,.25);}
+html[data-aurora="1"] .ax-pop{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+html[data-aurora="1"] .ax-pop::-webkit-scrollbar{display:none;}
+html[data-aurora="1"] .ax-pop-card{flex:none;width:106px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:#fff;border:1px solid #EEF1F7;border-radius:16px;padding:11px;font-family:inherit;cursor:pointer;text-align:left;box-shadow:0 6px 16px -12px rgba(31,45,90,.25);}
+html[data-aurora="1"] .ax-pop-ic{width:42px;height:42px;border-radius:12px;background:#F1F4FA;display:flex;align-items:center;justify-content:center;font-size:1.35rem;}
+html[data-aurora="1"] .ax-pop-n{font-size:.76rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+html[data-aurora="1"] .ax-pop-c{font-size:.68rem;color:var(--accent);font-weight:700;}
 .card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
 
@@ -1185,6 +1217,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
           <select id="catFilter" onchange="onCatFilterChange(this.value)"></select>
           <div class="cat-chips" id="catChips"></div>
         </div>
+        <div class="add-extras" id="addExtras"></div>
         <div class="sres" id="sRes"></div>
       </div>
       <div class="card">
@@ -1212,6 +1245,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="card" id="sleepCard"><div id="sleepBody"></div></div>
       <!-- Aurora-only KPI overview card (populated in renderAnalysis) -->
       <div class="card" id="auroraKpiCard" style="display:none"></div>
+      <!-- Aurora-only macro/nutrient donut (สารอาหาร) -->
+      <div class="card" id="macroDonutCard" style="display:none"></div>
       <div class="card">
         <div class="card-hdr-row">
           <h3><span id="calChartTitle" data-i18n="cal_7d">แคลอรี่ 7 วัน</span></h3>
@@ -2247,7 +2282,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.3';
+const APP_VERSION = '2.43.4';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4455,8 +4490,9 @@ function doSearch(v){
   clearTimeout(sTimer);
   sTimer=setTimeout(()=>{
     const t=v.toLowerCase().trim();
-    if(!t){renderCatResults(activeCat);return;}
-    renderResults(allFoods().filter(f=>f.n.includes(t)||(f.e||'').toLowerCase().includes(t)).slice(0,25));
+    if(!t){renderCatResults(activeCat);}
+    else{renderResults(allFoods().filter(f=>f.n.includes(t)||(f.e||'').toLowerCase().includes(t)).slice(0,25));}
+    renderAddExtras();
   },130);
 }
 // Voice food logging — Web Speech API. Speak a dish name → fills the search box
@@ -4504,6 +4540,7 @@ function renderCatFilter(){
   if(sel._csSync)sel._csSync();  // options were just rebuilt → refresh trigger label
   renderCatChips();              // Aurora chip row (CSS shows it only when aurora is active)
   renderCatResults(activeCat);
+  renderAddExtras();
 }
 function onCatFilterChange(cat){
   const si=document.getElementById('searchInput');if(si)si.value='';
@@ -4513,12 +4550,40 @@ function onCatFilterChange(cat){
 // Aurora-only: category icon chips (same categories as the dropdown), matching the mockup.
 function renderCatChips(){
   const wrap=document.getElementById('catChips'); if(!wrap)return;
-  const isEn=(settings.lang||'th')!=='th';
-  const lab=k=>(CAT_LABELS[k]&&CAT_LABELS[k][isEn?'en':'th'])||k;
-  const cats=['all',...CAT_GROUPS.country,...CAT_GROUPS.type,'custom'];
-  wrap.innerHTML=cats.map(k=>`<button type="button" class="cat-chip${k===activeCat?' on':''}" onclick="pickCatChip('${k}')"><span class="cc-ico">${CATS[k]||''}</span>${escapeHtml(lab(k))}</button>`).join('');
+  const groups=[
+    {k:'all',        ic:'🍽️', t:'ทั้งหมด',  e:'All',     hs:'全部',  ht:'全部'},
+    {k:'grp:carb',   ic:'🍚', t:'ข้าวแป้ง', e:'Carbs',   hs:'主食',  ht:'主食'},
+    {k:'grp:protein',ic:'🍗', t:'โปรตีน',  e:'Protein', hs:'蛋白质', ht:'蛋白質'},
+    {k:'grp:veg',    ic:'🥦', t:'ผัก',     e:'Veg',     hs:'蔬菜',  ht:'蔬菜'},
+    {k:'grp:fruit',  ic:'🍎', t:'ผลไม้',   e:'Fruit',   hs:'水果',  ht:'水果'},
+  ];
+  wrap.innerHTML=groups.map(g=>`<button type="button" class="cat-chip${g.k===activeCat?' on':''}" onclick="pickCatChip('${g.k}')"><span class="cc-ico">${g.ic}</span>${LL(g.t,g.e,g.hs,g.ht)}</button>`).join('');
 }
-function pickCatChip(k){ onCatFilterChange(k); renderCatChips(); }
+function pickCatChip(k){ onCatFilterChange(k); renderCatChips(); renderAddExtras(); }
+// Aurora-only: "ค้นหาล่าสุด" + "อาหารยอดนิยม" shown above results on the default Add view (matches mockup).
+let _axFoods=[];
+function renderAddExtras(){
+  const box=document.getElementById('addExtras'); if(!box)return;
+  const si=document.getElementById('searchInput');
+  const searching=si&&si.value.trim();
+  if(settings.uiMode!=='aurora'||searching||activeCat!=='all'){ box.innerHTML=''; box.style.display='none'; return; }
+  box.style.display=''; _axFoods=[];
+  const recents=(recentFoods||[]).map(n=>findFood(n)).filter(Boolean).slice(0,6);
+  const POP=['ข้าวผัด','ผัดไทย','ข้าวมันไก่','ส้มตำ','ไข่ดาว','ราเมน'].map(n=>findFood(n)).filter(Boolean);
+  let html='';
+  if(recents.length){
+    html+=`<div class="ax-hd">${LL('ค้นหาล่าสุด','Recent','最近搜索','最近搜尋')}</div><div class="ax-chips">`;
+    recents.forEach(f=>{ const i=_axFoods.push(f)-1; html+=`<button type="button" class="ax-chip" onclick="axAdd(${i})">${CATS[f.cat]||'🍽️'} ${escapeHtml(foodDisplayName(f))}</button>`; });
+    html+=`</div>`;
+  }
+  if(POP.length){
+    html+=`<div class="ax-hd">${LL('อาหารยอดนิยม','Popular','热门食物','熱門食物')}</div><div class="ax-pop">`;
+    POP.forEach(f=>{ const i=_axFoods.push(f)-1; html+=`<button type="button" class="ax-pop-card" onclick="axAdd(${i})"><span class="ax-pop-ic">${CATS[f.cat]||'🍽️'}</span><span class="ax-pop-n">${escapeHtml(foodDisplayName(f))}</span><span class="ax-pop-c">${f.c} kcal</span></button>`; });
+    html+=`</div>`;
+  }
+  box.innerHTML=html;
+}
+function axAdd(i){ const f=_axFoods[i]; if(f)addFromSearch(f); }
 
 // ═══ CUSTOM SELECT — themed bottom-sheet picker (replaces the OS-native one) ═══
 // Wraps any <select>: hides the native control, shows a styled trigger, and on
@@ -4627,7 +4692,7 @@ function renderQuickList(){
   }
   w.innerHTML='';list.slice(0,8).forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
+    d.innerHTML=`<span class="sri-thumb">${CATS[f.cat]||'🍽️'}</span><div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
@@ -4746,7 +4811,20 @@ function applyPreset(id){
   showToast(t('preset_added').replace('%n',p.foods.length));
   scheduleAutoSync?.('applyPreset');
 }
+// Derive a food-TYPE group from macros + category (the DB has cuisines, not type groups).
+// Used by the Aurora chip row (ทั้งหมด/ข้าวแป้ง/โปรตีน/ผัก/ผลไม้).
+function _foodTypeGroup(f){
+  const cat=f.cat||'';
+  if(cat==='fruit')return 'fruit';
+  if(cat==='veggie')return 'veg';
+  const c=+f.c||0,p=+f.p||0,cb=+f.cb||0;
+  if(c<=0)return 'other';
+  if(cat==='seafood'||(p*4)/c>=0.25)return 'protein';
+  if((cb*4)/c>=0.45)return 'carb';
+  return 'other';
+}
 function renderCatResults(cat){
+  if(cat&&cat.indexOf('grp:')===0){ const g=cat.slice(4); renderResults(allFoods().filter(f=>_foodTypeGroup(f)===g)); return; }
   // "All" = every built-in food + the user's custom foods
   if(cat==='all'){renderResults(allFoods());return;}
   // Include user's custom foods in their own pseudo-category
@@ -4758,7 +4836,7 @@ function renderResults(list){
   if(!list.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   list.forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
+    d.innerHTML=`<span class="sri-thumb">${CATS[f.cat]||'🍽️'}</span><div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
@@ -7852,8 +7930,34 @@ function selectCalBar(idx){
     ro.innerHTML=d.cal?`<b>${dl}</b> · ${d.cal.toLocaleString()} kcal · ${tag} ${isEn?'vs goal':'จากเป้า'}`:`<b>${dl}</b> · ${isEn?'no data':'ไม่มีข้อมูล'}`;
   }
 }
+// Aurora-only macro/nutrient donut (today's intake by calorie share) — matches the mockup "สารอาหาร".
+function renderMacroDonut(){
+  const card=document.getElementById('macroDonutCard'); if(!card)return;
+  if(settings.uiMode!=='aurora'){ card.style.display='none'; return; }
+  card.style.display='';
+  const E=dailyEntries||[];
+  const p=Math.round(E.reduce((s,e)=>s+(+e.protein||0),0));
+  const cb=Math.round(E.reduce((s,e)=>s+(+e.carbs||0),0));
+  const fat=Math.round(E.reduce((s,e)=>s+(+e.fat||0),0));
+  const pc=p*4, cc=cb*4, fc=fat*9, tot=pc+cc+fc;
+  const hd=`<div class="card-hdr-row"><h3>${LL('สารอาหาร','Macros','营养素','營養素')}</h3></div>`;
+  if(tot<=0){ card.innerHTML=hd+`<div style="padding:12px 0;text-align:center;color:var(--muted);font-size:.78rem">${LL('ยังไม่มีข้อมูลวันนี้ — เริ่มบันทึกอาหาร','No data today — start logging','今天暂无数据','今天暫無數據')}</div>`; return; }
+  const pPct=pc/tot*100, cPct=cc/tot*100;
+  const pgT=Math.round((userProfile?.weight||60)*1.6);
+  const leg=(c,nm,v,tg,pct)=>`<div class="md-leg"><span class="md-dot" style="background:${c}"></span><span class="md-name">${nm}</span><span class="md-val">${v}g / ${tg}g</span><span class="md-pct">${Math.round(pct)}%</span></div>`;
+  card.innerHTML=hd+
+    `<div class="md-wrap">`+
+      `<div class="md-donut" style="background:conic-gradient(var(--mp) 0 ${pPct.toFixed(1)}%,var(--mc) ${pPct.toFixed(1)}% ${(pPct+cPct).toFixed(1)}%,var(--mf) ${(pPct+cPct).toFixed(1)}% 100%)"><span class="md-hole"><b>${Math.round(tot).toLocaleString()}</b>kcal</span></div>`+
+      `<div class="md-legend">`+
+        leg('var(--mp)',LL('โปรตีน','Protein','蛋白质','蛋白質'),p,pgT,pPct)+
+        leg('var(--mc)',LL('คาร์บ','Carbs','碳水','碳水'),cb,250,cPct)+
+        leg('var(--mf)',LL('ไขมัน','Fat','脂肪','脂肪'),fat,65,fc/tot*100)+
+      `</div>`+
+    `</div>`;
+}
 function renderAnalysis(){
   renderSleep();
+  renderMacroDonut();
   renderProjectionChart();renderWaterStats();
   renderAdSlot('analysis-1',document.querySelector('[data-ad-slot="analysis-1"]'));
   const isEn=(settings.lang||'th')!=='th';
