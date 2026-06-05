@@ -171,6 +171,25 @@ html[data-hc="1"] .card,html[data-hc="1"] .modal,html[data-hc="1"] .bnav,html[da
 html[data-hc="1"] .hdr{background:var(--bg)!important;}
 html[data-hc="1"] .hdr::before{display:none;}
 html[data-hc="1"] .fab{background:var(--accent)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--accent)!important;}
+/* ═══ Nutrition UI System skin — full kit design language when a NutriKit theme is active ═══ */
+html[data-uikit="1"]{--r:22px;}
+/* Latin → Plus Jakarta Sans · Thai glyphs → Prompt (Plus Jakarta has no Thai, so Thai falls through to Prompt) */
+html[data-uikit="1"] body,html[data-uikit="1"] button,html[data-uikit="1"] input,html[data-uikit="1"] select,html[data-uikit="1"] textarea,html[data-uikit="1"] .num,html[data-uikit="1"] .ring-num{font-family:'Plus Jakarta Sans','Prompt','Noto Sans Thai','Segoe UI',sans-serif!important;}
+html[data-uikit="1"] body{letter-spacing:-.01em;}
+html[data-uikit="1"] h1,html[data-uikit="1"] h2,html[data-uikit="1"] h3,html[data-uikit="1"] .hdr-left h1,html[data-uikit="1"] .ring-num,html[data-uikit="1"] .set-sec{letter-spacing:-.03em;}
+html[data-uikit="1"] h1,html[data-uikit="1"] h2,html[data-uikit="1"] h3,html[data-uikit="1"] .ring-num{font-weight:800;}
+/* Cards — kit shadow + roomier */
+html[data-uikit="1"] .card{box-shadow:0 8px 26px -12px color-mix(in srgb,var(--text) 26%,transparent);}
+/* Buttons & inputs → kit radius (12px) + bolder + clear focus ring */
+html[data-uikit="1"] .abtn,html[data-uikit="1"] .es-cta,html[data-uikit="1"] .btn-sec,html[data-uikit="1"] .profile-action-primary,html[data-uikit="1"] .crop-save,html[data-uikit="1"] .weight-input button,html[data-uikit="1"] .ai-btn,html[data-uikit="1"] .qtab{border-radius:12px;font-weight:700;}
+html[data-uikit="1"] .fl input,html[data-uikit="1"] .fl select,html[data-uikit="1"] .sbox input,html[data-uikit="1"] .weight-input input,html[data-uikit="1"] textarea{border-radius:12px;}
+html[data-uikit="1"] .fl input:focus,html[data-uikit="1"] .fl select:focus,html[data-uikit="1"] .sbox input:focus{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent);}
+/* Bottom nav active tab → accent pill (kit style) */
+html[data-uikit="1"] .bnt.active{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent);}
+/* Water widget uses the theme accent (10%) instead of fixed blue */
+html[data-uikit="1"] .wd.full{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 65%,#fff),var(--accent))!important;border-color:transparent!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 4px color-mix(in srgb,var(--accent) 40%,transparent)!important;}
+html[data-uikit="1"] .water-stepper button:hover{border-color:var(--accent)!important;color:var(--accent)!important;}
+/* Section chips/quick-add accents already flow via --accent token */
 .card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
 
@@ -754,6 +773,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .meal-time-row .mtr-input span{font-size:.78rem;color:var(--muted);}
 
 .theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+.themeset-seg{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:4px;margin-bottom:12px;}
+.themeset-seg button{flex:1;border:0;background:none;color:var(--muted);padding:9px 6px;border-radius:99px;font-family:inherit;font-weight:700;font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;letter-spacing:-.01em;}
+.themeset-seg button.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 5px rgba(0,0,0,.14);}
 .th-swatch{height:42px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;position:relative;display:flex;align-items:center;justify-content:center;font-family:inherit;}
 .th-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,255,255,.2) inset;}
 .accent-grid{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;}
@@ -831,8 +853,23 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .habit-lbl{font-size:.84rem;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:8px;}
 .sleep-row{display:flex;align-items:center;justify-content:center;gap:14px;}
 .sleep-row button{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.2rem;cursor:pointer;font-family:inherit;line-height:1;}
-.sleep-val{min-width:74px;text-align:center;font-weight:700;font-size:1rem;}
-.sleepq{display:flex;gap:6px;margin-top:9px;}
+.sleep-val{text-align:center;font-weight:800;font-size:1.5rem;color:var(--text);font-variant-numeric:tabular-nums;line-height:1;}
+/* Sleep hours slider */
+.sleep-sliderwrap{padding:2px 2px 0;}
+.sleep-slider{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:6px;margin:10px 0 2px;background:linear-gradient(90deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 22%,var(--surface2)) 100%);outline:none;cursor:pointer;}
+.sleep-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 1px 5px color-mix(in srgb,var(--accent) 45%,transparent);cursor:pointer;}
+.sleep-slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 1px 5px color-mix(in srgb,var(--accent) 45%,transparent);cursor:pointer;}
+.sleep-ticks{display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);padding:0 2px;}
+.sleepq-lbl{font-size:.72rem;color:var(--muted);margin-top:12px;}
+/* Sleep analysis */
+.sleep-analysis{margin-top:12px;padding-top:11px;border-top:1px solid var(--glass-bd);}
+.sleep-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:7px;}
+.ss-tile{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;}
+.ss-v{font-weight:800;font-size:1.05rem;color:var(--text);line-height:1.1;font-variant-numeric:tabular-nums;}
+.ss-k{font-size:.6rem;color:var(--muted);margin-top:2px;}
+.sleep-insight{font-size:.74rem;font-weight:600;margin-top:8px;}
+.sleep-insight.muted{color:var(--muted);font-weight:500;}
+.sleepq{display:flex;gap:6px;margin-top:7px;}
 .sleepq button{flex:1;display:flex;align-items:center;justify-content:center;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px;cursor:pointer;opacity:.4;transition:all .15s;color:var(--text);}
 .sleepq button .ic{width:22px;height:22px;}
 .sleepq button .ic svg{width:100%;height:100%;}
@@ -843,6 +880,8 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .steps-live{align-self:center;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 70%,transparent);animation:stepsPulse 1.8s ease-out infinite;margin-left:2px;}
 @keyframes stepsPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 60%,transparent);}70%{box-shadow:0 0 0 7px transparent;}100%{box-shadow:0 0 0 0 transparent;}}
 .steps-auto-note{font-size:.72rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px;}
+.steps-kcal{font-size:.72rem;color:var(--accent);font-weight:600;margin-top:2px;}
+.steps-kcal:empty{display:none;}
 .steps-enable{margin-top:7px;display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:8px 13px;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;}
 .steps-enable:hover{border-color:var(--accent);}
 .steps-enable .ic{width:16px;height:16px;}
@@ -867,7 +906,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
   right:18px;
   bottom:calc(86px + env(safe-area-inset-bottom) + 12px);
   width:58px;height:58px;border-radius:50%;
-  background:color-mix(in srgb,var(--accent) 90%,transparent);color:#fff;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 92%,transparent),color-mix(in srgb,var(--accent2) 92%,transparent));color:#fff;
   border:1px solid color-mix(in srgb,#fff 50%,transparent);
   -webkit-backdrop-filter:blur(12px) saturate(1.5);backdrop-filter:blur(12px) saturate(1.5);
   display:flex;align-items:center;justify-content:center;
@@ -979,7 +1018,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="ring-wrap">
         <div class="ring-cont">
           <svg width="144" height="144" viewBox="0 0 144 144">
-            <defs><linearGradient id="ringGrad" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset="0.38" stop-color="#22c55e"/><stop offset="0.7" stop-color="#f59e0b"/><stop offset="1" stop-color="#ef4444"/></linearGradient></defs>
+            <defs><linearGradient id="ringGrad" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset="0.38" stop-color="#22c55e"/><stop offset="0.7" stop-color="#f59e0b"/><stop offset="1" stop-color="#ef4444"/></linearGradient><linearGradient id="ringGradBrand" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="var(--primary)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient></defs>
             <circle class="ring-track" cx="72" cy="72" r="60"/>
             <circle class="ring-fill" id="ringFill" cx="72" cy="72" r="60" stroke-dasharray="376.99" stroke-dashoffset="376.99"/>
           </svg>
@@ -991,9 +1030,9 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
         <div class="ring-sub" id="ringGoal"></div>
       </div>
       <div class="macros">
-        <div class="mc"><div class="mc-l" data-i18n="protein">โปรตีน</div><div class="mc-v" id="mP" style="color:var(--blue)">0g</div><div class="mc-b"><div class="mc-bf" id="mPB" style="width:0%;background:var(--blue)"></div></div></div>
-        <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--amber)">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--amber)"></div></div></div>
-        <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--purple)">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--purple)"></div></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="protein">โปรตีน</div><div class="mc-v" id="mP" style="color:var(--mp,var(--blue))">0g</div><div class="mc-b"><div class="mc-bf" id="mPB" style="width:0%;background:var(--mp,var(--blue))"></div></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--mc,var(--amber))">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--mc,var(--amber))"></div></div></div>
+        <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--mf,var(--purple))">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--mf,var(--purple))"></div></div></div>
       </div>
       <div class="wwrow">
         <div class="wwcard wwcard-full">
@@ -1281,7 +1320,13 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <div class="screen" id="pg-set-appearance">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="appearance">รูปลักษณ์</h2></div>
       <div class="set-sec" data-i18n="theme">ธีมสี</div>
-      <div class="ios-group"><div class="ios-pad"><div class="theme-grid" id="themeGrid"></div></div></div>
+      <div class="ios-group"><div class="ios-pad">
+        <div class="themeset-seg" id="themeSetSeg" role="tablist">
+          <button id="tsStd" type="button" onclick="setThemeSet('standard')">มาตรฐาน</button>
+          <button id="tsNutri" type="button" onclick="setThemeSet('nutrikit')">Nutrition UI System</button>
+        </div>
+        <div class="theme-grid" id="themeGrid"></div>
+      </div></div>
       <div class="set-sec" data-i18n="accent">สีหลัก</div>
       <div class="ios-group"><div class="ios-pad"><div class="accent-grid" id="accentGrid"></div></div></div>
       <div class="set-sec" data-i18n="font_setting">ฟอนต์</div>
@@ -2105,7 +2150,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.40.1';
+const APP_VERSION = '2.41.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -3540,6 +3585,49 @@ const THEMES={
   // ♿ High-contrast — WCAG AAA-style · pure black bg + white text + thick borders
   contrast:{bg:'#000000',s:'#0c0c0c',s2:'#181818',b:'#ffffff',t:'#ffffff',m:'#cccccc',mode:'dark',hc:true},
 };
+// ═══ NutriKit themes — 6 families × light/dark, built from the 60-30-10 palettes.
+// Each provides: neutral surfaces derived from the 60% bg (WCAG-minded), accent =
+// the 30% brand identity (brightened in dark mode so it stays legible), and pop =
+// the 10% accent (used as the FAB gradient end → shows the full 60-30-10 trio).
+// Separate from the original themes; merged in so the picker lists them as a group.
+(function buildNutriThemes(){
+  const hx=h=>{h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16));};
+  const tox=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+  const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return tox(A.map((v,i)=>v+(B[i]-v)*t));};
+  const P={
+    fresh:  {name:'Fresh',   l:{c60:'#F8F9F4',c30:'#4CAF50',c10:'#FF9800'}, d:{c60:'#121712',c30:'#2E7D32',c10:'#FFB74D'}},
+    ocean:  {name:'Ocean',   l:{c60:'#F4F9FC',c30:'#2196F3',c10:'#26C6DA'}, d:{c60:'#0F1720',c30:'#1565C0',c10:'#4DD0E1'}},
+    fitness:{name:'Fitness', l:{c60:'#F7F7F7',c30:'#37474F',c10:'#FF5252'}, d:{c60:'#121212',c30:'#546E7A',c10:'#FF867C'}},
+    organic:{name:'Organic', l:{c60:'#FAF9F5',c30:'#8BC34A',c10:'#FFC107'}, d:{c60:'#181815',c30:'#689F38',c10:'#FFD54F'}},
+    premium:{name:'Premium', l:{c60:'#FAFAFA',c30:'#6C63FF',c10:'#FF6B6B'}, d:{c60:'#141414',c30:'#8E88FF',c10:'#FF8A80'}},
+    pure:   {name:'Pure',    l:{c60:'#FFFFFF',c30:'#E8F5E9',c10:'#4CAF50'}, d:{c60:'#111111',c30:'#1E1E1E',c10:'#4CAF50'}},
+  };
+  function variant(c,mode){
+    const light=mode==='light', c60=c.c60, c30=c.c30, c10=c.c10;
+    // Mirror calpro-ui-kit.html EXACTLY: accent = 10% (the pop/CTA), primary = 30%
+    // (structural brand). The Pure family's 30% is a near-neutral surface tone, so
+    // its brand lives in the 10%.
+    const pale=relLumGuess(c30); const primary=(pale>0.78||pale<0.05)?c10:c30;
+    const t = light?mix('#000000',c60,0.13):mix('#ffffff',c60,0.12);
+    const s = light?'#ffffff':mix(c60,'#ffffff',0.07);
+    return {
+      bg:c60, s,
+      s2: light?mix(c60,'#000000',0.05):mix(c60,'#ffffff',0.12),
+      b:  light?mix(c60,'#000000',0.13):mix(c60,'#ffffff',0.15),
+      t,  m: mix(t,c60, light?0.46:0.42),
+      mode, accent:c10, pop:c10, primary, mf:mix(primary,c10,0.5),
+      psoft: light?mix(s,primary,0.14):mix(s,primary,0.26),
+      asoft: light?mix(s,c10,0.16):mix(s,c10,0.26),
+    };
+  }
+  function relLumGuess(h){const [r,g,b]=hx(h);const f=c=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b);}
+  const out={};
+  for(const k in P){const fam=P[k];
+    out['n_'+k+'_l']={...variant(fam.l,'light'),pair:'n_'+k+'_d',nutri:true,label:fam.name};
+    out['n_'+k+'_d']={...variant(fam.d,'dark'), pair:'n_'+k+'_l',nutri:true,label:fam.name};
+  }
+  Object.assign(THEMES,out);
+})();
 const ACCENTS=['#ff6b6b','#ffa94d','#51cf66','#74c0fc','#b197fc','#f783ac','#ffd43b','#63e6be'];
 
 // ═══ STATE ═══
@@ -5930,7 +6018,7 @@ function getHealthTips(){
   const totP=E.reduce((s,e)=>s+(+e.protein||0),0);
   const totC=E.reduce((s,e)=>s+(+e.carbs||0),0);
   const totF=E.reduce((s,e)=>s+(+e.fat||0),0);
-  const burned=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
+  const burned=dayBurn(currentDate);
   const net=Math.max(0,totCal-burned);
   const goal=+userProfile?.goal_cal||1800;
   const weight=+userProfile?.weight||65;
@@ -6093,6 +6181,20 @@ function setSteps(v){
   allHabits[currentDate]={...h, steps:_clampSteps(v)};
   saveHabits_LS(); renderSteps();   // kept for back-compat / programmatic set
 }
+// Steps → estimated kcal burned. Walking burn ≈ weight(kg) × 0.0005 per step
+// (~300 kcal per 10k steps at 60 kg). Folded into the daily burn so the calorie
+// ring nets it out, exactly like a logged workout.
+function stepsKcal(steps){
+  const w=(userProfile&&+userProfile.weight)||60;
+  return Math.round((+steps||0)*w*0.0005);
+}
+// Total kcal burned for a day = logged workouts + the steps estimate.
+function dayBurn(k){
+  k=k||currentDate;
+  const wb=(allWorkouts[k]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
+  const sk=stepsKcal((allHabits[k]&&allHabits[k].steps)||0);
+  return wb+sk;
+}
 
 // ═══ AUTOMATIC STEP TRACKING (hybrid) ═══
 // Counts today's steps with zero manual entry. Two auto-selected sources:
@@ -6103,7 +6205,7 @@ function setSteps(v){
 //     (DeviceMotion) with peak-detection → counts while the app is foreground.
 // Steps always accrue to LOCAL "today" (todayKey()), never a past day being viewed.
 const StepTracker = {
-  mode:null, running:false, _peaked:false, _avg:9.8, _lastStepAt:0, _saveTimer:null, _lastSave:0, _nativeSub:null, _boundMotion:null,
+  mode:null, running:false, _peaked:false, _avg:9.8, _lastStepAt:0, _saveTimer:null, _lastSave:0, _nativeSub:null, _boundMotion:null, _lastUi:0, _uiTimer:null,
   webSupported(){ return typeof window!=='undefined' && typeof window.DeviceMotionEvent!=='undefined'; },
   iosNeedsPerm(){ return typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'; },
   nativePlugin(){ try{ const c=window.Capacitor; return (c&&c.isNativePlatform&&c.isNativePlatform()&&c.Plugins&&c.Plugins.Pedometer)||null; }catch(_){ return null; } },
@@ -6167,10 +6269,27 @@ const StepTracker = {
   _addSteps(n){
     const d=todayKey(), h=allHabits[d]||{};
     allHabits[d]={...h, steps:_clampSteps((h.steps||0)+n)};
-    if(currentDate===d){ const el=document.getElementById('stepsCount'); if(el) el.textContent=allHabits[d].steps.toLocaleString(); }
+    this._scheduleStepUi(d);                                                 // throttled display (~7s, not a realtime ticker)
     const now=Date.now(); if(!this._lastSave) this._lastSave=now;
     if(now-this._lastSave>15000){ this._flush(); }                          // hard-save during sustained walking
     else { clearTimeout(this._saveTimer); this._saveTimer=setTimeout(()=>this._flush(), 4000); }  // trailing debounce
+  },
+  // Display throttle — the live count refreshes at most once per ~7s so it reads as
+  // a periodic update, not a distracting realtime ticker. Data still accrues instantly above.
+  _scheduleStepUi(d){
+    if(currentDate!==d) return;
+    const now=Date.now();
+    if(!this._lastUi) this._lastUi=now;                                      // first step starts the window (no instant paint)
+    const wait=7000-(now-this._lastUi);
+    if(wait<=0){ this._paintSteps(d); }
+    else if(!this._uiTimer){ this._uiTimer=setTimeout(()=>{ this._uiTimer=null; this._paintSteps(todayKey()); }, wait); }
+  },
+  _paintSteps(d){
+    this._lastUi=Date.now();
+    if(currentDate!==d) return;
+    const el=document.getElementById('stepsCount'); if(el) el.textContent=((allHabits[d]||{}).steps||0).toLocaleString();
+    const kc=document.getElementById('stepsKcal');
+    if(kc && typeof stepsKcal==='function'){ const v=stepsKcal((allHabits[d]||{}).steps||0); kc.textContent=v>0?('≈ '+v+' kcal'):''; }
   },
   _flush(){ clearTimeout(this._saveTimer); this._saveTimer=null; this._lastSave=Date.now(); try{ if(typeof saveHabits_LS==='function') saveHabits_LS(); }catch(_){} },
 };
@@ -6199,24 +6318,73 @@ function renderSteps(){
     const note = StepTracker.nativePlugin()
       ? LL('นับอัตโนมัติทั้งวัน · วันนี้','Counted automatically all day · today','全天自动计步 · 今天','全天自動計步 · 今天')
       : LL('นับอัตโนมัติขณะเปิดแอป · วันนี้','Counted automatically while the app is open · today','打开应用时自动计步 · 今天','開啟應用時自動計步 · 今天');
+    const _kc=stepsKcal(steps);
     inner = big+`<span class="steps-live" title="${LL('นับอัตโนมัติ','Auto-counting','自动计步','自動計步')}"></span></div>`+
-      `<div class="steps-auto-note">${note}</div>`;
+      `<div class="steps-auto-note">${note}</div>`+
+      `<div class="steps-kcal" id="stepsKcal">${_kc>0?'≈ '+_kc+' '+LL('kcal เผาผลาญ','kcal burned','千卡消耗','大卡消耗'):''}</div>`;
   }
   body.innerHTML=`<div class="habit-blk"><div class="habit-lbl">${icoSvg('footprints')} ${LL('ก้าวเดิน','Steps','步数','步數')}</div>${inner}</div>`;
 }
 // Sleep card (Analysis page) — hours stepper + SVG quality faces.
+function _sleepTxt(n){ return n>0 ? (n+' '+LL('ชม.','h','小时','小時')) : '—'; }
 function renderSleep(){
   const body=document.getElementById('sleepBody'); if(!body)return;
   const h=getHabit(currentDate);
   const sleep=h.sleep||0, sq=_sleepQIndex(h.sleepQ);
-  const sleepTxt = sleep ? sleep+' '+LL('ชม.','h','小时','小時') : '—';
   body.innerHTML=`<div class="habit-blk">`+
     `<div class="habit-lbl">${icoSvg('moon')} ${LL('การนอน','Sleep','睡眠','睡眠')}</div>`+
-    `<div class="sleep-row"><button onclick="setSleep(-0.5)" aria-label="less">−</button>`+
-      `<span class="sleep-val">${sleepTxt}</span>`+
-      `<button onclick="setSleep(0.5)" aria-label="more">+</button></div>`+
+    `<div class="sleep-sliderwrap">`+
+      `<div class="sleep-val" id="sleepValDisp">${_sleepTxt(sleep)}</div>`+
+      `<input type="range" class="sleep-slider" min="0" max="14" step="0.5" value="${sleep}" oninput="sleepSliderLive(this.value)" onchange="sleepSliderCommit(this.value)" aria-label="${LL('ชั่วโมงการนอน','Sleep hours','睡眠小时','睡眠小時')}">`+
+      `<div class="sleep-ticks"><span>0</span><span>7</span><span>14</span></div>`+
+    `</div>`+
+    `<div class="sleepq-lbl">${LL('คุณภาพการนอน','Sleep quality','睡眠质量','睡眠品質')}</div>`+
     `<div class="sleepq">`+SLEEP_Q_ICONS.map((ic,i)=>`<button class="${sq===i?'on':''}" onclick="setSleepQ(${i})" aria-label="quality ${i+1}">${icoSvg(ic)}</button>`).join('')+`</div>`+
+    `<div class="sleep-analysis">${sleepAnalysisHtml()}</div>`+
   `</div>`;
+}
+// Live drag → update the big number only (no save/re-render, so the thumb keeps focus).
+function sleepSliderLive(v){ const el=document.getElementById('sleepValDisp'); if(el)el.textContent=_sleepTxt(+v||0); }
+// Release → persist + re-render (refreshes the analysis below).
+function sleepSliderCommit(v){
+  const h=getHabit(currentDate);
+  allHabits[currentDate]={...h, sleep:_clampSleep(+v||0)};
+  saveHabits_LS(); renderSleep();
+}
+// Sleep insights over the last 14 logged nights — average vs the healthy 7–9 h
+// range, consistency, and average quality. Returns an HTML fragment.
+function sleepAnalysisHtml(){
+  const today=new Date();
+  const sleeps=[], quals=[];
+  for(let i=0;i<14;i++){
+    const d=new Date(today); d.setDate(d.getDate()-i);
+    const h=allHabits[dateKey(d)]; if(!h)continue;
+    const s=+h.sleep||0; if(s>0)sleeps.push(s);
+    const q=_sleepQIndex(h.sleepQ); if(q!=null)quals.push(q);
+  }
+  if(sleeps.length<2){
+    return `<div class="sleep-insight muted">${LL('บันทึกการนอนอย่างน้อย 2 คืนเพื่อดูบทวิเคราะห์','Log sleep on 2+ nights to see insights','记录至少2晚睡眠以查看分析','記錄至少2晚睡眠以查看分析')}</div>`;
+  }
+  const avg=sleeps.reduce((a,b)=>a+b,0)/sleeps.length;
+  const mn=Math.min(...sleeps), mx=Math.max(...sleeps), range=mx-mn;
+  const avgQ = quals.length ? quals.reduce((a,b)=>a+b,0)/quals.length : null;
+  let verdict, vColor;
+  if(avg<6){ verdict=LL('นอนน้อยเกินไป — ตั้งเป้า 7–9 ชม.','Too little — aim for 7–9 h','睡眠不足 — 目标7–9小时','睡眠不足 — 目標7–9小時'); vColor='var(--accent)'; }
+  else if(avg<7){ verdict=LL('ค่อนข้างน้อย — เพิ่มให้ถึง 7–9 ชม.','A bit low — nudge toward 7–9 h','偏少 — 争取7–9小时','偏少 — 爭取7–9小時'); vColor='var(--amber)'; }
+  else if(avg<=9){ verdict=LL('อยู่ในเกณฑ์ดี (7–9 ชม.) เยี่ยม','Healthy range (7–9 h) — great','健康范围(7–9小时)— 很好','健康範圍(7–9小時)— 很好'); vColor='var(--green)'; }
+  else { verdict=LL('นอนมากกว่าปกติ — รักษาให้สม่ำเสมอ','More than usual — keep it steady','多于平常 — 保持规律','多於平常 — 保持規律'); vColor='var(--amber)'; }
+  const consist = range<=1.5 ? LL('สม่ำเสมอดี','Very consistent','很规律','很規律')
+    : range<=3 ? LL('ค่อนข้างสม่ำเสมอ','Fairly consistent','较规律','較規律')
+    : LL('ไม่ค่อยสม่ำเสมอ','Quite variable','不太规律','不太規律');
+  const QLBL=[LL('แย่','Poor','差','差'),LL('พอใช้','Fair','一般','一般'),LL('ดี','Good','好','好'),LL('ดีมาก','Great','很好','很好')];
+  return `<div class="sleep-stats">`+
+    `<div class="ss-tile"><div class="ss-v">${avg.toFixed(1)}</div><div class="ss-k">${LL('เฉลี่ย ชม.','avg h','平均','平均')}</div></div>`+
+    `<div class="ss-tile"><div class="ss-v">${sleeps.length}</div><div class="ss-k">${LL('คืน','nights','晚','晚')}</div></div>`+
+    `<div class="ss-tile"><div class="ss-v">${mn.toFixed(1)}–${mx.toFixed(1)}</div><div class="ss-k">${LL('ช่วง','range','范围','範圍')}</div></div>`+
+    (avgQ!=null?`<div class="ss-tile"><div class="ss-v" style="font-size:.92rem">${QLBL[Math.round(avgQ)]}</div><div class="ss-k">${LL('คุณภาพ','quality','质量','品質')}</div></div>`:'')+
+  `</div>`+
+  `<div class="sleep-insight" style="color:${vColor}">${verdict}</div>`+
+  `<div class="sleep-insight muted">${LL('ความสม่ำเสมอ','Consistency','规律性','規律性')}: ${consist}</div>`;
 }
 
 // ═══ FONT PICKER ═══
@@ -6976,7 +7144,7 @@ function checkSmartGoal(){
     const entries=allEntries[k]||[];
     if(!entries.length)continue;
     const food=entries.reduce((s,e)=>s+(+e.calories||0),0);
-    const burned=(allWorkouts[k]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
+    const burned=dayBurn(k);
     const net=Math.max(0,food-burned);
     deltas.push(tdee-net);             // positive = deficit vs maintenance
   }
@@ -7172,13 +7340,16 @@ function renderToday(){
   const totC=E.reduce((s,e)=>s+(e.carbs||0),0);
   const totF=E.reduce((s,e)=>s+(e.fat||0),0);
   const goal=userProfile?.goal_cal||1800;
-  const burned=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+w.kcal,0);
-  const net=Math.max(0,totCal-burned);            // net kcal "absorbed" — food in minus workout out
+  const workoutBurn=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+(+w.kcal||0),0);
+  const stepBurn=stepsKcal((getHabit(currentDate).steps)||0);
+  const burned=workoutBurn+stepBurn;
+  const net=Math.max(0,totCal-burned);            // net kcal "absorbed" — food in minus (workouts + steps) out
   const pct=Math.min(net/goal,1);
   const over=net>goal;
   // Cool→warm gradient ring (cyan→green→amber→red) so it visibly warms as it
   // fills; turns solid red once over the goal as a clear warning.
-  const clr=over?'#ef4444':'url(#ringGrad)';
+  const _nutri=(THEMES[settings.theme]||{}).nutri;
+  const clr=over?'#ef4444':(_nutri?'url(#ringGradBrand)':'url(#ringGrad)');
   document.getElementById('dateLabelText').textContent=fmtDate(currentDate);
   // Disable the forward arrow on today (can't log the future)
   const nextBtn=document.getElementById('dnavNext');
@@ -7187,7 +7358,7 @@ function renderToday(){
   document.getElementById('ringFill').style.strokeDashoffset=(circ-pct*circ).toFixed(2);
   document.getElementById('ringFill').style.stroke=clr;
   document.getElementById('ringCal').textContent=net.toLocaleString();
-  document.getElementById('ringGoal').textContent=t('goal')+' '+goal.toLocaleString()+' kcal'+(burned?' · −'+burned+' 🏋️':'');
+  document.getElementById('ringGoal').textContent=t('goal')+' '+goal.toLocaleString()+' kcal'+(burned?' · −'+burned.toLocaleString()+' kcal':'');
   const pg=(userProfile?.weight||60)*1.6;
   document.getElementById('mP').textContent=totP+'g';document.getElementById('mC').textContent=totC+'g';document.getElementById('mF').textContent=totF+'g';
   document.getElementById('mPB').style.width=Math.min(totP/pg*100,100).toFixed(1)+'%';
@@ -8256,6 +8427,14 @@ const DENSITY_CSS = `
 (function(){const s=document.createElement('style');s.textContent=DENSITY_CSS;document.head.appendChild(s);})();
 
 // ═══ SETTINGS / THEME ═══
+let _uikitFontLoaded=false;
+function ensureUiKitFont(){   // lazy-load the Nutrition UI System fonts: Plus Jakarta Sans (Latin) + Prompt (Thai)
+  if(_uikitFontLoaded)return; _uikitFontLoaded=true;
+  try{ const l=document.createElement('link'); l.rel='stylesheet';
+    l.href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap';
+    document.head.appendChild(l);
+  }catch(e){}
+}
 function applyTheme(){
   // Migrate retired themes (forest/warm/ocean) to nearest replacement
   const LEGACY_MIGRATE={forest:'sky',warm:'rose',ocean:'sky'};
@@ -8265,7 +8444,25 @@ function applyTheme(){
   const r=document.documentElement.style;
   r.setProperty('--bg',th.bg);r.setProperty('--surface',th.s);r.setProperty('--surface2',th.s2);
   r.setProperty('--border',th.b);r.setProperty('--text',th.t);r.setProperty('--muted',th.m);
-  r.setProperty('--accent',settings.accent||'#ff6b6b');
+  // NutriKit themes carry their own brand accent (30%, readable) + exact primary
+  // (30%) + pop (10%); originals fall back to the user's accent picker.
+  const acc = th.accent || settings.accent || '#ff6b6b';
+  r.setProperty('--accent', acc);
+  r.setProperty('--accent2', th.pop || acc);
+  r.setProperty('--primary', th.primary || acc);
+  if(th.nutri){
+    // Macro chart colors follow the palette (protein=30% · carbs=10% · fat=blend),
+    // matching the UI-kit preview.
+    r.setProperty('--mp', th.primary); r.setProperty('--mc', th.pop); r.setProperty('--mf', th.mf||th.primary);
+    if(th.psoft) r.setProperty('--primary-soft', th.psoft);
+    if(th.asoft) r.setProperty('--accent-soft', th.asoft);
+    ensureUiKitFont();
+  }else{
+    r.setProperty('--mp','#3b82f6'); r.setProperty('--mc','#f59e0b'); r.setProperty('--mf','#a78bfa');
+  }
+  // Nutrition UI System skin: when a NutriKit theme is active, switch the whole
+  // design language (typography, radii, buttons, inputs, cards) via [data-uikit].
+  document.documentElement.dataset.uikit = th.nutri?'1':'0';
   document.documentElement.dataset.mode=th.mode||'dark';
   document.documentElement.dataset.hc=th.hc?'1':'0';
   document.documentElement.dataset.compact=settings.compact?'1':'0';
@@ -8297,6 +8494,12 @@ function applyTheme(){
 }
 function toggleMode(){
   const th=THEMES[settings.theme]||THEMES.dark;
+  // NutriKit themes flip to their own light/dark pair (keeps the family identity).
+  if(th.pair&&THEMES[th.pair]){
+    settings.theme=th.pair; const nt=THEMES[settings.theme];
+    if(nt.mode==='dark')settings.lastDark=settings.theme; else settings.lastLight=settings.theme;
+    lsSave(LS_SETTINGS,settings); applyTheme(); return;
+  }
   // If currently dark → switch to last-used light (or 'light'); vice versa
   if(th.mode==='dark'){settings.theme=settings.lastLight||'light';}
   else{settings.theme=settings.lastDark||'dark';}
@@ -8306,6 +8509,22 @@ function toggleMode(){
   else settings.lastLight=settings.theme;
   lsSave(LS_SETTINGS,settings);
   applyTheme();
+}
+// Switch the active theme SET (exclusive): 'standard' or 'nutrikit'. Picking a set
+// also swaps the current theme to one belonging to that set (same light/dark mode).
+function setThemeSet(set){
+  if(set!=='standard'&&set!=='nutrikit')return;
+  settings.themeSet=set;
+  const cur=THEMES[settings.theme]||{}, isNutri=!!cur.nutri, mode=cur.mode||'light';
+  if(set==='nutrikit' && !isNutri){
+    settings.theme = mode==='dark'?'n_fresh_d':'n_fresh_l';
+  }else if(set==='standard' && isNutri){
+    const ld=settings.lastDark, ll=settings.lastLight;
+    if(mode==='dark') settings.theme=(ld&&THEMES[ld]&&!THEMES[ld].nutri)?ld:'dark';
+    else settings.theme=(ll&&THEMES[ll]&&!THEMES[ll].nutri)?ll:'light';
+  }
+  const nt=THEMES[settings.theme]||{}; if(nt.mode==='dark')settings.lastDark=settings.theme; else settings.lastLight=settings.theme;
+  lsSave(LS_SETTINGS,settings); applyTheme(); renderSettings();
 }
 const THEME_LABELS={dark:'มืด',night:'ดึก',rose:'กุหลาบ',sky:'ฟ้า',violet:'ม่วง',light:'สว่าง',cream:'ครีม',mint:'มินต์',contrast:'คมชัด'};
 // openSettings deprecated — use navTo('settings') instead
@@ -8485,16 +8704,29 @@ function renderSettings(){
   if(sv)sv.innerHTML=`<b>CalPro+</b> ${(settings.lang||'th')!=='th'?'version':'เวอร์ชั่น'} ${APP_VERSION} · BETA`;
   // Themes
   const tg=document.getElementById('themeGrid');if(tg){tg.innerHTML='';
-    Object.entries(THEMES).forEach(([k,v])=>{
+    const entries=Object.entries(THEMES);
+    const mkSwatch=([k,v])=>{
       const b=document.createElement('button');b.className='th-swatch'+(settings.theme===k?' active':'');
       b.style.background=v.s2;b.style.border='2px solid '+(settings.theme===k?'var(--accent)':'transparent');
-      const lbl=t('theme_'+k)||THEME_LABELS[k]||k;
-      b.title=lbl;
-      b.innerHTML='<span style="font-size:.55rem;color:'+v.t+';font-weight:600">'+lbl+'</span>';
+      const lbl=v.nutri?v.label:(t('theme_'+k)||THEME_LABELS[k]||k);
+      b.title=lbl + (v.nutri?(' · '+(v.mode==='light'?'Light':'Dark')):'');
+      const dot=v.nutri?`<span style="position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;background:${v.accent};box-shadow:0 0 0 2px ${v.s2}"></span>`:'';
+      b.innerHTML=dot+'<span style="font-size:.55rem;color:'+v.t+';font-weight:600">'+lbl+'</span>';
       b.onclick=()=>{settings.theme=k;if(v.mode==='dark')settings.lastDark=k;else settings.lastLight=k;lsSave(LS_SETTINGS,settings);applyTheme();renderSettings();};
       tg.appendChild(b);
-    });
+    };
+    // Exclusive theme set: Standard OR Nutrition UI System (segmented toggle above).
+    const set=settings.themeSet||((THEMES[settings.theme]||{}).nutri?'nutrikit':'standard');
+    const std=document.getElementById('tsStd'), nut=document.getElementById('tsNutri');
+    if(std)std.classList.toggle('on',set==='standard');
+    if(nut)nut.classList.toggle('on',set==='nutrikit');
+    entries.filter(([,v])=> set==='nutrikit' ? !!v.nutri : !v.nutri).forEach(mkSwatch);
   }
+  // When Nutrition UI System is active, the theme defines its own accent + forces
+  // Plus Jakarta Sans → hide the accent ("สีหลัก") + font pickers to avoid confusion.
+  {const nutriActive=(settings.themeSet||((THEMES[settings.theme]||{}).nutri?'nutrikit':'standard'))==='nutrikit';
+   const hideSec=(gridId)=>{const g=document.getElementById(gridId); const sec=g&&g.closest('.ios-group'); const lbl=sec&&sec.previousElementSibling; if(sec)sec.style.display=nutriActive?'none':''; if(lbl&&lbl.classList&&lbl.classList.contains('set-sec'))lbl.style.display=nutriActive?'none':'';};
+   hideSec('accentGrid'); hideSec('fontGrid');}
   const ag=document.getElementById('accentGrid');if(ag){ag.innerHTML='';
     ACCENTS.forEach(ac=>{
       const b=document.createElement('button');b.className='ac-dot'+(settings.accent===ac?' active':'');
@@ -8716,12 +8948,17 @@ function buildShareCanvas(){
   const totC=Math.round(E.reduce((s,e)=>s+(e.carbs||0),0));
   const totF=Math.round(E.reduce((s,e)=>s+(e.fat||0),0));
   const goal=userProfile?.goal_cal||1800;
-  const burned=(allWorkouts[currentDate]||[]).reduce((s,w)=>s+w.kcal,0);
+  const burned=dayBurn(currentDate);
   const net=Math.max(0,totCal-burned);
   const dateStr=fmtDate(currentDate).replace(/^วันนี้ · |^เมื่อวาน · |^Today · |^Yesterday · /,'');
   const isEn=(settings.lang||'th')!=='th';
   const isLight=(THEMES[settings.theme]||THEMES.dark).mode==='light';
-  const accent=settings.accent||'#ff6b6b';
+  // Read the LIVE theme tokens so the share card matches the active theme.
+  const _cs=getComputedStyle(document.documentElement);
+  const _v=(n,f)=>{const x=_cs.getPropertyValue(n).trim();return x||f;};
+  const accent=_v('--accent', settings.accent||'#ff6b6b');
+  const primary=_v('--primary', accent);
+  const _uikit=document.documentElement.dataset.uikit==='1';
   // Determine status (based on net consumption vs goal)
   let statusLabel,statusColor;
   if(totCal===0){statusLabel=isEn?'Not logged':'ยังไม่บันทึก';statusColor='#888';}
@@ -8734,8 +8971,8 @@ function buildShareCanvas(){
   const ctx=cv.getContext('2d');
   // Background gradient
   const bg=ctx.createLinearGradient(0,0,W,H);
-  if(isLight){bg.addColorStop(0,'#ffffff');bg.addColorStop(1,'#f5f5f7');}
-  else{bg.addColorStop(0,'#16161e');bg.addColorStop(1,'#0c0c12');}
+  bg.addColorStop(0,_v('--surface', isLight?'#ffffff':'#16161e'));
+  bg.addColorStop(1,_v('--bg', isLight?'#f5f5f7':'#0c0c12'));
   ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   // Accent glow corner
   const glow=ctx.createRadialGradient(W,0,0,W,0,800);
@@ -8788,9 +9025,9 @@ function buildShareCanvas(){
   const mk=[totP*4,totC*4,totF*9];
   const totMK=(mk[0]+mk[1]+mk[2])||1;
   const macros=[
-    {l:isEn?'Protein':'โปรตีน',v:totP,color:'#74c0fc',frac:mk[0]/totMK},
-    {l:isEn?'Carbs':'คาร์บ',v:totC,color:'#ffa94d',frac:mk[1]/totMK},
-    {l:isEn?'Fat':'ไขมัน',v:totF,color:'#b197fc',frac:mk[2]/totMK},
+    {l:isEn?'Protein':'โปรตีน',v:totP,color:_v('--mp','#74c0fc'),frac:mk[0]/totMK},
+    {l:isEn?'Carbs':'คาร์บ',v:totC,color:_v('--mc','#ffa94d'),frac:mk[1]/totMK},
+    {l:isEn?'Fat':'ไขมัน',v:totF,color:_v('--mf','#b197fc'),frac:mk[2]/totMK},
   ];
   macros.forEach((m,i)=>{
     const cx=200+i*340;
@@ -8897,15 +9134,18 @@ function buildAchievementCanvas(){
   const totalDays=logDays(ebd);
   const isEn=(settings.lang||'th')!=='th';
   const isLight=(THEMES[settings.theme]||THEMES.dark).mode==='light';
-  const accent=settings.accent||'#ff6b6b';
+  const _cs=getComputedStyle(document.documentElement);
+  const _v=(n,f)=>{const x=_cs.getPropertyValue(n).trim();return x||f;};
+  const accent=_v('--accent', settings.accent||'#ff6b6b');
+  const _uikit=document.documentElement.dataset.uikit==='1';
 
   const W=1080,H=1350;
   const cv=document.createElement('canvas');cv.width=W;cv.height=H;
   const ctx=cv.getContext('2d');
   // Background gradient
   const bg=ctx.createLinearGradient(0,0,W,H);
-  if(isLight){bg.addColorStop(0,'#ffffff');bg.addColorStop(1,'#f5f5f7');}
-  else{bg.addColorStop(0,'#16161e');bg.addColorStop(1,'#0c0c12');}
+  bg.addColorStop(0,_v('--surface', isLight?'#ffffff':'#16161e'));
+  bg.addColorStop(1,_v('--bg', isLight?'#f5f5f7':'#0c0c12'));
   ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   // Accent glow corner
   const glow=ctx.createRadialGradient(W,0,0,W,0,800);
@@ -10038,24 +10278,22 @@ async function handleAiPhotoSelect(input){
   }
 }
 function applyAiResult(parsed){
-  // Pre-fill the manual entry form so the user can review + edit + save
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v??'';};
-  set('fName',parsed.name||'');
-  set('fCal',Math.round(parsed.kcal||0));
-  set('fP',Math.round(parsed.protein_g||0));
-  set('fC',Math.round(parsed.carbs_g||0));
-  set('fF',Math.round(parsed.fat_g||0));
-  closeAiPhotoModal();
-  // Make sure we're on the Add tab + scroll to the manual entry form
-  if(typeof navTo==='function'){
-    try{navTo('add');}catch{}
-  }
-  setTimeout(()=>{
-    const fn=document.getElementById('fName');
-    if(fn){fn.scrollIntoView({behavior:'smooth',block:'center'});fn.focus();}
-  },150);
+  // Log the AI estimate straight into today's food log (the fName/fCal inputs live
+  // inside the hidden manual-entry modal, so pre-filling them did nothing visible —
+  // users expect "Use these values" to actually save). insertEntry persists, re-renders
+  // Today, switches to the Today tab, and shows the "Added …" toast.
   const isEn=(settings.lang||'th')!=='th';
-  showToast(isEn?'Filled in from AI · review + save':'กรอกข้อมูลจาก AI แล้ว · ตรวจสอบและบันทึก',2800);
+  const name=(parsed.name||'').trim()||(isEn?'AI meal':'อาหาร (AI)');
+  const cal=Math.round(+parsed.kcal||0);
+  const p=Math.round(+parsed.protein_g||0);
+  const c=Math.round(+parsed.carbs_g||0);
+  const f=Math.round(+parsed.fat_g||0);
+  // Auto-pick the meal by time of day (same buckets as the meal selector).
+  const hr=new Date().getHours();
+  const meal = hr<10 ? 'เช้า' : hr<15 ? 'กลางวัน' : hr<21 ? 'เย็น' : 'ของว่าง';
+  trackRecent(name);
+  closeAiPhotoModal();
+  insertEntry({food_name:name,calories:cal,protein:p,carbs:c,fat:f,amount_g:null,meal});
 }
 
 // ─── One-time branding refresh ───
@@ -10708,6 +10946,10 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.41.0':{
+    th:['🎨 ชุดธีม Nutrition UI System','😴 วิเคราะห์การนอนหลับ','👣 นับก้าวเดินหักแคลอรี่','🔧 แก้ไขบั๊ก'],
+    en:['🎨 Nutrition UI System theme set','😴 Sleep analysis','👣 Steps deducted from calories','🔧 Bug fixes'],
+  },
   '2.40.0':{
     th:['🧹 จัดหน้านิสัยประจำวันใหม่ (ก้าวเดินคู่กับออกกำลังกาย · ย้ายการนอนไปหน้าวิเคราะห์)','🔧 แก้ไขบั๊ก'],
     en:['🧹 Reorganized the habit tracker (steps with workouts · sleep moved to Analysis)','🔧 Bug fixes'],
