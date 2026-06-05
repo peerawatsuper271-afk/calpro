@@ -190,6 +190,81 @@ html[data-uikit="1"] .bnt.active{color:var(--accent);background:color-mix(in srg
 html[data-uikit="1"] .wd.full{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 65%,#fff),var(--accent))!important;border-color:transparent!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 4px color-mix(in srgb,var(--accent) 40%,transparent)!important;}
 html[data-uikit="1"] .water-stepper button:hover{border-color:var(--accent)!important;color:var(--accent)!important;}
 /* Section chips/quick-add accents already flow via --accent token */
+
+/* ═══════════ AURORA HEALTH UI — premium opt-in skin (Home · Add · Analytics · Meals) ═══════════
+   Calm, lightweight, data-focused. Soft aurora gradient canvas · white elevated cards · 24px radius ·
+   frosted-glass floating nav. Reuses all existing DOM, so every feature + monetization stays intact. */
+html[data-aurora="1"]{--r:24px;-webkit-tap-highlight-color:transparent;}
+html[data-aurora="1"] body{
+  background:
+    radial-gradient(125% 80% at 0% 0%, #E8F0FF 0%, rgba(232,240,255,0) 46%),
+    radial-gradient(120% 78% at 100% 2%, #FFE9ED 0%, rgba(255,233,237,0) 44%),
+    radial-gradient(150% 95% at 50% 100%, #E6FBF1 0%, rgba(230,251,241,0) 52%),
+    #F8F9FC;
+  background-attachment:fixed;
+}
+/* White elevated cards — drop the dark glass, add soft shadow + large radius + air */
+html[data-aurora="1"] .card{
+  background:#fff;border:1px solid #EEF1F7;border-radius:24px;padding:16px 18px;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  box-shadow:0 10px 30px -16px rgba(31,45,90,.20),0 2px 6px -2px rgba(31,45,90,.05);
+}
+html[data-aurora="1"] .card h3{color:var(--muted);letter-spacing:.4px;}
+html[data-aurora="1"] h1,html[data-aurora="1"] h2{letter-spacing:-.02em;}
+/* Floating frosted-glass bottom nav (light) */
+html[data-aurora="1"] .bnav{
+  background:color-mix(in srgb,#fff 74%,transparent);border:1px solid rgba(255,255,255,.75);border-radius:30px;
+  box-shadow:0 16px 40px -10px rgba(31,45,90,.26),inset 0 1px 0 rgba(255,255,255,.9);
+}
+html[data-aurora="1"] .bnt{color:#9AA1B2;}
+html[data-aurora="1"] .bnt.active{color:#fff;background:var(--accent);box-shadow:0 7px 16px -5px color-mix(in srgb,var(--accent) 62%,transparent);}
+/* FAB — 15% smaller (58→50), solid blue, premium elevation */
+html[data-aurora="1"] .fab{
+  width:50px;height:50px;background:var(--accent);border:2px solid #fff;
+  box-shadow:0 12px 26px -6px color-mix(in srgb,var(--accent) 68%,transparent);
+}
+html[data-aurora="1"] .fab svg{width:23px;height:23px;}
+/* Home — the calorie ring sits in its own white card; bigger + premium */
+html[data-aurora="1"] .ring-wrap{
+  background:#fff;border:1px solid #EEF1F7;border-radius:24px;padding:24px 16px 18px;margin-bottom:14px;
+  box-shadow:0 10px 30px -16px rgba(31,45,90,.20),0 2px 6px -2px rgba(31,45,90,.05);
+}
+html[data-aurora="1"]:not([data-simple="1"]) .ring-cont,
+html[data-aurora="1"]:not([data-simple="1"]) .ring-cont svg{width:188px;height:188px;}
+html[data-aurora="1"]:not([data-simple="1"]) .ring-num{font-size:2.9rem;font-weight:800;letter-spacing:-.02em;}
+html[data-aurora="1"] .ring-lbl{font-size:.78rem;color:var(--muted);}
+html[data-aurora="1"] .ring-sub{font-size:.82rem;margin-top:9px;font-weight:600;}
+html[data-aurora="1"] .ring-track{stroke:#EDF1F8;}
+/* Macro cards — equal white tiles + rounder progress bars */
+html[data-aurora="1"] .macros{gap:10px;}
+html[data-aurora="1"] .mc{background:#fff;border:1px solid #EEF1F7;border-radius:18px;padding:12px 12px 13px;box-shadow:0 8px 20px -16px rgba(31,45,90,.22);}
+html[data-aurora="1"] .mc-l{font-size:.66rem;}
+html[data-aurora="1"] .mc-v{font-size:1.04rem;font-weight:700;}
+html[data-aurora="1"] .mc-b{height:6px;background:#EEF1F7;margin-top:8px;}
+/* Water — white card + taller glassy cups + round steppers */
+html[data-aurora="1"] .wwcard{background:#fff!important;border:1px solid #EEF1F7!important;border-radius:24px;padding:16px 17px;box-shadow:0 10px 30px -18px rgba(31,45,90,.20);}
+html[data-aurora="1"] .water-dots{gap:6px;margin-top:13px;}
+html[data-aurora="1"] .wd{width:22px;height:28px;border-radius:5px 5px 9px 9px;background:#EFF3FB;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid #E2E8F4;}
+html[data-aurora="1"] .wd.full{background:linear-gradient(180deg,#9CC3FF,var(--accent));border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 3px 8px -3px color-mix(in srgb,var(--accent) 50%,transparent);}
+html[data-aurora="1"] .water-stepper button{width:30px;height:30px;border-radius:50%;border:1.5px solid #E2E8F4;background:#fff;color:var(--accent);}
+/* Native sponsored card */
+html[data-aurora="1"] .ad-card{background:#fff;border:1px solid #EEF1F7;border-radius:24px;box-shadow:0 8px 24px -16px rgba(31,45,90,.20);}
+/* Quick-add chips → clean white pills */
+html[data-aurora="1"] .qadd-chip{background:#fff;border:1px solid #EEF1F7;border-radius:16px;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 5px 16px -12px rgba(31,45,90,.24);}
+html[data-aurora="1"] .qadd-chip .qa-plus{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);}
+/* Add Food — pill search + elevated result cards */
+html[data-aurora="1"] .sbox{background:#fff;border:1px solid #E7EBF3;border-radius:16px;box-shadow:0 6px 18px -13px rgba(31,45,90,.20);}
+html[data-aurora="1"] .sbox input{background:transparent;}
+html[data-aurora="1"] .sri{background:#fff;border:1px solid #EEF1F7;border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:0 6px 18px -14px rgba(31,45,90,.20);}
+html[data-aurora="1"] .sri-c{color:var(--accent);}
+html[data-aurora="1"] .fl input,html[data-aurora="1"] .fl select,html[data-aurora="1"] textarea{background:#fff;border:1px solid #E7EBF3;border-radius:14px;}
+html[data-aurora="1"] .qtab.active{background:#fff;color:var(--accent);box-shadow:0 3px 10px -4px rgba(31,45,90,.2);}
+/* Analytics — pill period tabs + airy charts */
+html[data-aurora="1"] .ptab.active{background:var(--accent);color:#fff;}
+html[data-aurora="1"] .period-tabs{background:#EFF2F8;border-radius:12px;padding:3px;}
+/* Buttons — rounder, primary = blue with soft glow */
+html[data-aurora="1"] .btn{border-radius:16px;background:var(--accent);box-shadow:0 10px 22px -10px color-mix(in srgb,var(--accent) 55%,transparent);}
+html[data-aurora="1"] .btn-sec{border-radius:16px;background:#fff;border:1px solid #E7EBF3;}
 .card.hide{display:none;}
 .card h3{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;font-weight:600;}
 
@@ -1320,6 +1395,14 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
     <!-- SETTINGS · Appearance -->
     <div class="screen" id="pg-set-appearance">
       <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="appearance">รูปลักษณ์</h2></div>
+      <div class="set-sec" data-i18n="ui_style_sec">รูปแบบหน้าจอ</div>
+      <div class="ios-group"><div class="ios-pad">
+        <div class="themeset-seg" id="uiModeSeg" role="tablist">
+          <button id="umOrig" type="button" onclick="setUiMode('original')" data-i18n="ui_original">ดั้งเดิม</button>
+          <button id="umAurora" type="button" onclick="setUiMode('aurora')">Aurora Health</button>
+        </div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:8px;line-height:1.5" data-i18n="ui_aurora_sub">ดีไซน์พรีเมียมสไตล์สุขภาพ — พื้นหลังออโรรา การ์ดสีขาว มินิมอล เน้นข้อมูล</div>
+      </div></div>
       <div class="set-sec" data-i18n="theme">ธีมสี</div>
       <div class="ios-group"><div class="ios-pad">
         <div class="themeset-seg" id="themeSetSeg" role="tablist">
@@ -2151,7 +2234,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.42.0';
+const APP_VERSION = '2.43.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2428,6 +2511,7 @@ const I18N = {
     test_notif:'ทดสอบส่งแจ้งเตือน',customize_nav:'ปรับแต่งแถบล่าง',customize_nav_sub:'เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้',locked:'ติดตั้งไว้',
     account_section:'บัญชี',tools_section:'เครื่องมือ',settings_section:'การตั้งค่า',other_section:'อื่น ๆ',friends_only:'เพื่อน',about:'เกี่ยวกับ',
     appearance:'รูปลักษณ์',compact_mode:'โหมดกะทัดรัด',compact_mode_sub:'ลดช่องว่าง · เห็นข้อมูลได้มากขึ้นต่อหน้า',
+    ui_style_sec:'รูปแบบหน้าจอ',ui_original:'ดั้งเดิม',ui_aurora_sub:'ดีไซน์พรีเมียมสไตล์สุขภาพ — พื้นหลังออโรรา การ์ดสีขาว มินิมอล เน้นข้อมูล',
     simple_mode:'โหมดใช้งานง่าย',simple_mode_sub:'เน้นเฉพาะ ring แคลอรี่ + รายการอาหาร · ฟอนต์ใหญ่ขึ้น · ซ่อนวิดเจ็ตอื่น',
     reminders:'การเตือน',meal_reminders:'เตือนมื้ออาหาร',meal_reminders_sub:'แสดง banner เมื่อเลยเวลามื้อแล้วยังไม่บันทึก',
     streak_saver:'เตือนรักษา streak',streak_saver_sub:'push 21:30 ถ้ายังไม่ได้บันทึก + streak ≥ 3 วัน (เฉพาะ APK)',
@@ -2531,6 +2615,7 @@ const I18N = {
     test_notif:'Send test notification',customize_nav:'Customize bottom bar',customize_nav_sub:'Pick up to 5 tabs · "Today" is pinned',locked:'pinned',
     account_section:'Account',tools_section:'Tools',settings_section:'Settings',other_section:'Other',friends_only:'Friends',about:'About',
     appearance:'Appearance',compact_mode:'Compact mode',compact_mode_sub:'Tighter spacing · more info per screen',
+    ui_style_sec:'Screen style',ui_original:'Original',ui_aurora_sub:'Premium wellness design — aurora background, white cards, minimal, data-focused',
     simple_mode:'Simple mode',simple_mode_sub:'Focus on calorie ring + meals · larger fonts · hides other widgets',
     reminders:'Reminders',meal_reminders:'Meal reminders',meal_reminders_sub:'Banner when meal time passes without logging',
     streak_saver:'Streak saver',streak_saver_sub:'21:30 push if not logged yet + streak ≥ 3 days (APK only)',
@@ -2634,6 +2719,7 @@ const I18N = {
     test_notif:'发送测试通知',customize_nav:'自定义底栏',customize_nav_sub:'最多选 5 个 · “今天” 固定显示',locked:'固定',
     account_section:'账号',tools_section:'工具',settings_section:'设置',other_section:'其他',friends_only:'好友',about:'关于',
     appearance:'外观',compact_mode:'紧凑模式',compact_mode_sub:'更紧凑的间距 · 每屏更多信息',
+    ui_style_sec:'界面风格',ui_original:'原始',ui_aurora_sub:'高级健康设计 — 极光背景 · 白色卡片 · 简约 · 注重数据',
     simple_mode:'简单模式',simple_mode_sub:'专注热量环 + 餐食 · 更大字体 · 隐藏其他组件',
     reminders:'提醒',meal_reminders:'用餐提醒',meal_reminders_sub:'过了用餐时间还没记录时显示横幅',
     streak_saver:'连续打卡提醒',streak_saver_sub:'21:30 若还没记录且连续 ≥ 3 天推送（仅 APK）',
@@ -2737,6 +2823,7 @@ const I18N = {
     test_notif:'傳送測試通知',customize_nav:'自訂底欄',customize_nav_sub:'最多選 5 個 · 「今天」固定顯示',locked:'固定',
     account_section:'帳號',tools_section:'工具',settings_section:'設定',other_section:'其他',friends_only:'好友',about:'關於',
     appearance:'外觀',compact_mode:'緊湊模式',compact_mode_sub:'更緊湊的間距 · 每螢幕更多資訊',
+    ui_style_sec:'介面風格',ui_original:'原始',ui_aurora_sub:'高級健康設計 — 極光背景 · 白色卡片 · 簡約 · 注重數據',
     simple_mode:'簡易模式',simple_mode_sub:'專注熱量環 + 餐食 · 更大字體 · 隱藏其他元件',
     reminders:'提醒',meal_reminders:'用餐提醒',meal_reminders_sub:'過了用餐時間還沒記錄時顯示橫幅',
     streak_saver:'連續打卡提醒',streak_saver_sub:'21:30 若還沒記錄且連續 ≥ 3 天推播（僅 APK）',
@@ -6223,9 +6310,8 @@ const StepTracker = {
     if(this.running) return;
     const np=this.nativePlugin();
     if(np){ this._startNative(np); return; }
-    if(!this.webSupported()) return;
-    if(this.iosNeedsPerm() && !settings.stepPermGranted) return;             // need the permission button first
-    this._startWeb();
+    // Web/PWA step counting is intentionally disabled — accurate all-day counting needs the
+    // native pedometer, which ships in the APK. renderSteps() shows a "coming soon" note instead.
   },
   async requestAndStart(){                                                   // iOS permission button (user gesture)
     if(this.iosNeedsPerm()){
@@ -6334,19 +6420,18 @@ window.addEventListener('pagehide',()=>{ StepTracker._flush(); });
 function renderSteps(){
   const body=document.getElementById('stepsBody'); if(!body)return;
   const steps=(getHabit(currentDate).steps)||0;
-  StepTracker.ensureStarted();
-  const stState=StepTracker.state();
+  const isNative=!!StepTracker.nativePlugin();
+  if(isNative) StepTracker.ensureStarted();
   const big=`<div class="steps-row"><span class="steps-big" id="stepsCount">${steps.toLocaleString()}</span><span class="steps-unit">${LL('ก้าว','steps','步','步')}</span>`;
   let inner;
-  if(stState==='needperm'){
-    inner = big+`</div><button class="steps-enable" onclick="StepTracker.requestAndStart()">${icoSvg('footprints')} ${LL('เริ่มนับก้าวอัตโนมัติ','Start auto step count','开始自动计步','開始自動計步')}</button>`;
-  }else if(stState==='unsupported'){
-    inner = big+`</div><div class="steps-auto-note">${LL('อุปกรณ์นี้ไม่รองรับการนับก้าวอัตโนมัติ','Auto step counting isn’t available on this device','此设备不支持自动计步','此裝置不支援自動計步')}</div>`;
+  if(!isNative){
+    // Web/PWA: accurate step counting needs the native pedometer → coming in the APK. Still shows
+    // today's stored value (e.g. synced from the app) and deducts its kcal from the ring.
+    const _kc=stepsKcal(steps);
+    inner = big+`</div><div class="steps-auto-note">${LL('การนับก้าวจะมาในเวอร์ชั่นแอป (APK) เร็ว ๆ นี้','Step counting is coming soon in the app (APK)','计步功能即将在 App (APK) 版本推出','計步功能即將在 App (APK) 版本推出')}</div>`+
+      (_kc>0?`<div class="steps-kcal" id="stepsKcal">≈ ${_kc} ${LL('kcal เผาผลาญ','kcal burned','千卡消耗','大卡消耗')}</div>`:'');
   }else{
-    // Honest note per platform: native pedometer counts all day; web sensor only while the app is open.
-    const note = StepTracker.nativePlugin()
-      ? LL('นับอัตโนมัติทั้งวัน · วันนี้','Counted automatically all day · today','全天自动计步 · 今天','全天自動計步 · 今天')
-      : LL('นับอัตโนมัติขณะเปิดแอป · วันนี้','Counted automatically while the app is open · today','打开应用时自动计步 · 今天','開啟應用時自動計步 · 今天');
+    const note = LL('นับอัตโนมัติทั้งวัน · วันนี้','Counted automatically all day · today','全天自动计步 · 今天','全天自動計步 · 今天');
     const _kc=stepsKcal(steps);
     inner = big+`<span class="steps-live" title="${LL('นับอัตโนมัติ','Auto-counting','自动计步','自動計步')}"></span></div>`+
       `<div class="steps-auto-note">${note}</div>`+
@@ -7385,7 +7470,7 @@ function renderToday(){
   const over=net>goal;
   // Cool→warm gradient ring (cyan→green→amber→red) so it visibly warms as it
   // fills; turns solid red once over the goal as a clear warning.
-  const _nutri=(THEMES[settings.theme]||{}).nutri;
+  const _nutri=(THEMES[settings.theme]||{}).nutri || settings.uiMode==='aurora';
   const clr=over?'#ef4444':(_nutri?'url(#ringGradBrand)':'url(#ringGrad)');
   document.getElementById('dateLabelText').textContent=fmtDate(currentDate);
   // Disable the forward arrow on today (can't log the future)
@@ -8504,6 +8589,27 @@ function applyTheme(){
   document.documentElement.dataset.hc=th.hc?'1':'0';
   document.documentElement.dataset.compact=settings.compact?'1':'0';
   document.documentElement.dataset.simple=settings.simple?'1':'0';
+  // ─── Aurora Health UI — alternative full-screen skin (opt-in, picked like a theme) ───
+  // Forces its own fixed light palette (60-30-10 · Primary #4A90FF blue · Accent #FF6B6B coral)
+  // and takes precedence over the Nutrition UI System skin.
+  const _aurora = settings.uiMode==='aurora';
+  document.documentElement.dataset.aurora = _aurora?'1':'0';
+  if(_aurora){
+    r.setProperty('--bg','#F8F9FC');
+    r.setProperty('--surface','#FFFFFF');
+    r.setProperty('--surface2','#F1F4FA');
+    r.setProperty('--border','#E7EBF3');
+    r.setProperty('--text','#1C1C1E');
+    r.setProperty('--muted','#8A90A2');
+    r.setProperty('--accent','#4A90FF');      // primary action (blue) — dominant CTA
+    r.setProperty('--accent2','#FF6B6B');     // coral — ring gradient end + highlights
+    r.setProperty('--primary','#4A90FF');
+    r.setProperty('--blue','#4A90FF'); r.setProperty('--green','#34C759'); r.setProperty('--amber','#FFB340'); r.setProperty('--purple','#a78bfa');
+    r.setProperty('--mp','#4A90FF'); r.setProperty('--mc','#FFB340'); r.setProperty('--mf','#a78bfa');
+    document.documentElement.dataset.uikit='0';      // Aurora wins over Nutrition UI System
+    document.documentElement.dataset.mode='light';
+    document.documentElement.dataset.hc='0';
+  }
   // Capacitor native: sync status bar color with current theme
   try{
     const cap=window.Capacitor;
@@ -8562,6 +8668,18 @@ function setThemeSet(set){
   }
   const nt=THEMES[settings.theme]||{}; if(nt.mode==='dark')settings.lastDark=settings.theme; else settings.lastLight=settings.theme;
   lsSave(LS_SETTINGS,settings); applyTheme(); renderSettings();
+}
+// Switch the screen UI style: 'original' or 'aurora' (Aurora Health UI). Picked like a theme —
+// Aurora applies its own premium skin + fixed palette over the 4 main screens.
+function setUiMode(mode){
+  settings.uiMode = (mode==='aurora')?'aurora':'original';
+  lsSave(LS_SETTINGS,settings);
+  applyTheme();
+  try{ renderSettings(); }catch(e){}
+  try{ renderToday(); }catch(e){}    // ring switches to the brand gradient in Aurora
+  showToast(settings.uiMode==='aurora'
+    ? LL('เปิด Aurora Health UI แล้ว','Aurora Health UI on','已开启 Aurora Health UI','已開啟 Aurora Health UI')
+    : LL('ใช้ UI ดั้งเดิม','Using Original UI','使用原始界面','使用原始介面'));
 }
 const THEME_LABELS={dark:'มืด',night:'ดึก',rose:'กุหลาบ',sky:'ฟ้า',violet:'ม่วง',light:'สว่าง',cream:'ครีม',mint:'มินต์',contrast:'คมชัด'};
 // openSettings deprecated — use navTo('settings') instead
@@ -8759,11 +8877,15 @@ function renderSettings(){
     if(nut)nut.classList.toggle('on',set==='nutrikit');
     entries.filter(([,v])=> set==='nutrikit' ? !!v.nutri : !v.nutri).forEach(mkSwatch);
   }
-  // When Nutrition UI System is active, the theme defines its own accent + forces
-  // Plus Jakarta Sans → hide the accent ("สีหลัก") + font pickers to avoid confusion.
+  // UI-mode segmented toggle (Original vs Aurora Health UI) active state.
+  const _auroraOn = settings.uiMode==='aurora';
+  {const o=document.getElementById('umOrig'), a=document.getElementById('umAurora');
+   if(o)o.classList.toggle('on',!_auroraOn); if(a)a.classList.toggle('on',_auroraOn);}
+  // Hide pickers that don't apply: Aurora supplies its own full palette + typography (hide theme + accent + font);
+  // Nutrition UI System defines its own accent + font (hide accent + font).
   {const nutriActive=(settings.themeSet||((THEMES[settings.theme]||{}).nutri?'nutrikit':'standard'))==='nutrikit';
-   const hideSec=(gridId)=>{const g=document.getElementById(gridId); const sec=g&&g.closest('.ios-group'); const lbl=sec&&sec.previousElementSibling; if(sec)sec.style.display=nutriActive?'none':''; if(lbl&&lbl.classList&&lbl.classList.contains('set-sec'))lbl.style.display=nutriActive?'none':'';};
-   hideSec('accentGrid'); hideSec('fontGrid');}
+   const hideSec=(gridId,hide)=>{const g=document.getElementById(gridId); const sec=g&&g.closest('.ios-group'); const lbl=sec&&sec.previousElementSibling; if(sec)sec.style.display=hide?'none':''; if(lbl&&lbl.classList&&lbl.classList.contains('set-sec'))lbl.style.display=hide?'none':'';};
+   hideSec('themeGrid', _auroraOn); hideSec('accentGrid', _auroraOn||nutriActive); hideSec('fontGrid', _auroraOn||nutriActive);}
   const ag=document.getElementById('accentGrid');if(ag){ag.innerHTML='';
     ACCENTS.forEach(ac=>{
       const b=document.createElement('button');b.className='ac-dot'+(settings.accent===ac?' active':'');
@@ -10983,6 +11105,10 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.43.0':{
+    th:['🎨 ดีไซน์ใหม่ Aurora Health UI (เลือกได้ใน ตั้งค่า › รูปลักษณ์)','👣 ย้ายการนับก้าวไปเวอร์ชั่นแอป (APK)'],
+    en:['🎨 New Aurora Health UI design (opt-in · Settings › Appearance)','👣 Step counting moving to the app (APK)'],
+  },
   '2.42.0':{
     th:['😴 ปรับ UI การนอนให้กระชับ + บอกคุณภาพอัตโนมัติ','👣 นับก้าวจากเซนเซอร์ของเครื่อง','🎨 ปรับปรุง UI'],
     en:['😴 Compact sleep UI + auto quality','👣 Steps from device sensor','🎨 UI polish'],

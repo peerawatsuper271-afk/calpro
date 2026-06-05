@@ -1,5 +1,5 @@
 // CalPro Service Worker — offline cache
-const VERSION = '2.42.0';
+const VERSION = '2.43.0';
 const CACHE = 'calpro-v' + VERSION;
 const ASSETS = [
   './',
