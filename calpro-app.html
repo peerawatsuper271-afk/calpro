@@ -2307,7 +2307,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.8';
+const APP_VERSION = '2.43.9';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4604,10 +4604,11 @@ function renderAddExtras(){
   }
   if(POP.length){
     html+=`<div class="ax-hd">${LL('อาหารยอดนิยม','Popular','热门食物','熱門食物')}</div><div class="ax-pop">`;
-    POP.forEach(f=>{ const i=_axFoods.push(f)-1; html+=`<button type="button" class="ax-pop-card" onclick="axAdd(${i})"><span class="ax-pop-ic" onclick="event.stopPropagation();galFromAx(${i})">${foodThumbInner(f)}</span><span class="ax-pop-n">${escapeHtml(foodDisplayName(f))}</span><span class="ax-pop-c">${f.c} kcal</span></button>`; });
+    POP.forEach(f=>{ const i=_axFoods.push(f)-1; html+=`<button type="button" class="ax-pop-card" onclick="axAdd(${i})"><span class="ax-pop-ic" data-food="${escapeHtml(f.n)}" onclick="event.stopPropagation();galFromAx(${i})">${foodThumbInner(f)}</span><span class="ax-pop-n">${escapeHtml(foodDisplayName(f))}</span><span class="ax-pop-c">${f.c} kcal</span></button>`; });
     html+=`</div>`;
   }
   box.innerHTML=html;
+  queueCovers(_axFoods);
 }
 function axAdd(i){ const f=_axFoods[i]; if(f)addFromSearch(f); }
 
@@ -4718,13 +4719,14 @@ function renderQuickList(){
   }
   w.innerHTML='';list.slice(0,8).forEach(f=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<span class="sri-thumb">${foodThumbInner(f)}</span><div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
+    d.innerHTML=`<span class="sri-thumb" data-food="${escapeHtml(f.n)}">${foodThumbInner(f)}</span><div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
     {const _th=d.querySelector('.sri-thumb'); if(_th) _th.onclick=(e)=>{e.stopPropagation();openFoodGallery(f);};}
     w.appendChild(d);
   });
+  queueCovers(list.slice(0,8));
 }
 // ═══ MEAL PRESETS — 1-tap "save today as a set" + "apply set" ═══
 function renderPresetsTab(w){
@@ -4883,11 +4885,11 @@ async function buildFoodImgCache(){
     const apply=(q,reqs,cb)=>{ const norm={};(q.normalized||[]).forEach(n=>norm[n.from]=n.to); const redir={};(q.redirects||[]).forEach(r=>redir[r.from]=r.to); const pbt={};Object.values(q.pages||{}).forEach(p=>pbt[p.title]=p); reqs.forEach(rt=>{let t=rt;if(norm[t])t=norm[t];if(redir[t])t=redir[t];const p=pbt[t];const s=p&&p.thumbnail&&p.thumbnail.source;if(s&&!_FOOD_IMG_BAD.test(s))cb(rt,s);}); };
     const byEng={}; all.forEach(f=>{ if(f.e&&f.e.trim()){const e=f.e.trim();(byEng[e]=byEng[e]||[]).push(f.n);} });
     const engTitles=Object.keys(byEng);
-    for(let i=0;i<engTitles.length;i+=25){ const ch=engTitles.slice(i,i+25); const d=await wiki('en.wikipedia.org',ch); if(d&&d.query)apply(d.query,ch,(rt,s)=>byEng[rt].forEach(n=>res[n]=s)); await new Promise(z=>setTimeout(z,150)); }
+    for(let i=0;i<engTitles.length;i+=25){ const ch=engTitles.slice(i,i+25); const d=await wiki('en.wikipedia.org',ch); if(d&&d.query)apply(d.query,ch,(rt,s)=>byEng[rt].forEach(n=>{ if(!res[n]) res[n]=s; })); await new Promise(z=>setTimeout(z,150)); }
     const rest=[...new Set(all.filter(f=>!res[f.n]).map(f=>f.n))];
-    for(let i=0;i<rest.length;i+=25){ const ch=rest.slice(i,i+25); const d=await wiki('th.wikipedia.org',ch); if(d&&d.query)apply(d.query,ch,(rt,s)=>res[rt]=s); await new Promise(z=>setTimeout(z,150)); }
+    for(let i=0;i<rest.length;i+=25){ const ch=rest.slice(i,i+25); const d=await wiki('th.wikipedia.org',ch); if(d&&d.query)apply(d.query,ch,(rt,s)=>{ if(!res[rt]) res[rt]=s; }); await new Promise(z=>setTimeout(z,150)); }
     _FOOD_IMG_BLOCK.forEach(k=>{ delete res[k]; });
-    _foodImg=res; try{ localStorage.setItem('cp_food_img',JSON.stringify(res)); }catch(_){ }
+    _foodImg={...res,..._foodImg}; try{ localStorage.setItem('cp_food_img',JSON.stringify(_foodImg)); }catch(_){ }
     _foodImgDone=true;
     try{ const pg=document.getElementById('pg-add'); if(pg&&getComputedStyle(pg).display!=='none'&&typeof renderCatFilter==='function') renderCatFilter(); }catch(_){ }
   }catch(_){ }
@@ -4905,13 +4907,14 @@ function renderResults(list){
   if(!list.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   list.forEach((f,idx)=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<span class="sri-thumb">${foodThumbInner(f,idx<24)}</span><div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
+    d.innerHTML=`<span class="sri-thumb" data-food="${escapeHtml(f.n)}">${foodThumbInner(f,idx<24)}</span><div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
     {const _th=d.querySelector('.sri-thumb'); if(_th) _th.onclick=(e)=>{e.stopPropagation();openFoodGallery(f);};}
     w.appendChild(d);
   });
+  queueCovers(list);
 }
 
 // ═══ FOOD IMAGE GALLERY (in-app lightbox carousel) ═══
@@ -4920,6 +4923,29 @@ function renderResults(list){
 // no redirect to any external site. Results cached in-session per food.
 const _foodGalCache={};
 let _galState=null;
+// The gallery's FIRST image doubles as the food's cover thumbnail.
+let _foodImgSaveT=null;
+function _saveFoodImg(){ clearTimeout(_foodImgSaveT); _foodImgSaveT=setTimeout(()=>{ try{ localStorage.setItem('cp_food_img',JSON.stringify(_foodImg)); }catch(_){ } },600); }
+function _refreshThumb(name,url){   // live-swap any visible thumbnail for this food once its cover arrives
+  document.querySelectorAll('.sri-thumb[data-food],.ax-pop-ic[data-food]').forEach(el=>{
+    if(el.getAttribute('data-food')!==name) return;
+    let img=el.querySelector('img.thumb-img');
+    if(!img){ img=document.createElement('img'); img.className='thumb-img'; img.loading='lazy'; img.alt=''; img.onload=()=>img.classList.add('on'); img.onerror=()=>img.remove(); el.appendChild(img); }
+    if(img.getAttribute('src')!==url){ img.classList.remove('on'); img.src=url; }
+  });
+}
+// Lazily pull the cover (= gallery first image) for the foods currently on screen.
+const _coverQueued=new Set(); const _coverQ=[]; let _coverBusy=false;
+function queueCovers(list){
+  if(settings.uiMode!=='aurora'||!Array.isArray(list)) return;
+  list.slice(0,24).forEach(f=>{ const n=f&&f.n; if(!n||_foodGalCache[n]||_coverQueued.has(n)) return; _coverQueued.add(n); _coverQ.push(f); });
+  _drainCovers();
+}
+async function _drainCovers(){
+  if(_coverBusy) return; _coverBusy=true;
+  while(_coverQ.length){ const f=_coverQ.shift(); try{ await _galFetch(f); }catch(_){ } await new Promise(z=>setTimeout(z,140)); }
+  _coverBusy=false;
+}
 function _galQuery(f){ return (f&&f.e&&f.e.trim())?f.e.trim():((f&&f.n)||''); }
 async function _galFetch(f){
   const key=f&&f.n; if(key&&Array.isArray(_foodGalCache[key])) return _foodGalCache[key];
@@ -4938,7 +4964,8 @@ async function _galFetch(f){
       out.push(src);
     });
     const uniq=[...new Set(out)].slice(0,12);
-    if(key) _foodGalCache[key]=uniq;
+    if(key){ _foodGalCache[key]=uniq;
+      if(uniq[0]&&!FOOD_IMG_MANUAL[key]){ if(_foodImg[key]!==uniq[0]){ _foodImg[key]=uniq[0]; _saveFoodImg(); } _refreshThumb(key,uniq[0]); } }
     return uniq;
   }catch(_){ return []; }
 }
