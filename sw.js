@@ -1,5 +1,5 @@
 // CalPro Service Worker — offline cache
-const VERSION = '2.43.9';
+const VERSION = '2.44.0';
 const CACHE = 'calpro-v' + VERSION;
 const ASSETS = [
   './',
@@ -55,15 +55,38 @@ self.addEventListener('notificationclick', (e) => {
 // Skip Supabase + AI provider URLs entirely — they have their own
 // auth/CORS rules and shouldn't be cached.
 const STALE_WHILE_REVALIDATE_PATHS = ['./calpro-app.html', './'];
+const IMAGE_PATHS = /\.(jpg|jpeg|png|webp|gif|ico)$/i;
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // Bypass API hosts — never cache, always go straight to network.
+  
+  // Bypass API hosts entirely — never cache, always go straight to network.
+  // Supabase (data + auth) and the AI providers have their own auth/CORS rules;
+  // caching their responses causes stale sync data + breaks AI photo calls.
   if (/supabase\.co|generativelanguage\.googleapis\.com|api\.anthropic\.com|api\.openai\.com/.test(url.hostname)) {
     return; // let the network handle it
   }
+
+  // Cache-first for images (icons, food photos, etc.) — same-origin only (opaque
+  // cross-origin responses simply pass through uncached).
+  if (IMAGE_PATHS.test(url.pathname)) {
+    e.respondWith(
+      caches.match(req).then(hit => {
+        if (hit) return hit;
+        return fetch(req).then(res => {
+          if (res && res.status === 200 && res.type === 'basic') {
+            const copy = res.clone();
+            caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+          }
+          return res;
+        }).catch(() => null);
+      })
+    );
+    return;
+  }
+
   // Stale-while-revalidate for index HTML — same-origin only
   const isSWR = url.origin === self.location.origin &&
     STALE_WHILE_REVALIDATE_PATHS.some(p => url.pathname.endsWith(p) || url.pathname.endsWith(p.slice(1)));
@@ -81,6 +104,7 @@ self.addEventListener('fetch', (e) => {
     })());
     return;
   }
+  
   // Cache-first for everything else (icons, manifest, fonts via google CDN, etc.)
   e.respondWith(
     caches.match(req).then(hit => {

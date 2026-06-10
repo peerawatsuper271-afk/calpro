@@ -29,3 +29,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Local-only: contains a real user's recovered data — never commit (public repo)
+calpro-recovery.sql

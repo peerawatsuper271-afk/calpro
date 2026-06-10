@@ -27,6 +27,8 @@
   --bg:#0d0f1a;--surface:#1b1e30;--surface2:#262a42;--border:#363c5c;
   --accent:#ff6b6b;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;
   --purple:#a78bfa;--text:#eceefb;--muted:#9398b8;--r:18px;
+  /* Ensure sufficient contrast in light mode */
+  --muted-light: #6b7280;
   /* ── Glassmorphism tokens — translucent surfaces frosted over a soft gradient bg ── */
   --glass:color-mix(in srgb, var(--surface) 60%, transparent);
   --glass2:color-mix(in srgb, var(--surface2) 60%, transparent);
@@ -60,7 +62,7 @@ html[data-native="1"] body{padding-top:env(safe-area-inset-top);}
 
 /* ── BOTTOM NAV — floating glass capsule, icon-only, monochrome active pill ── */
 .bnav{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:14px;right:14px;max-width:452px;margin:0 auto;background:color-mix(in srgb,var(--surface) 55%,transparent);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);border:1px solid var(--glass-bd);border-radius:28px;display:flex;gap:4px;padding:7px;z-index:50;box-shadow:0 14px 40px rgba(8,10,28,.4),inset 0 1px 0 color-mix(in srgb,#fff 24%,transparent);}
-.bnt{flex:1;padding:11px 4px;border-radius:18px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:color .15s,background .18s,transform .12s;}
+.bnt{flex:1;padding:12px 4px;border-radius:18px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:color .15s,background .18s,transform .12s;min-height: 48px;}
 .bnt span{display:none;}
 .bnt:active{transform:scale(.9);}
 .bnt svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
@@ -166,6 +168,8 @@ select,textarea{font-size:max(16px,1rem)!important;}
 .card{background:var(--glass);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.5);backdrop-filter:blur(var(--glass-blur)) saturate(1.5);border:1px solid var(--glass-bd);border-radius:18px;padding:14px 15px;margin-bottom:10px;box-shadow:var(--glass-sh);}
 /* Light mode → more opaque glass so text stays legible on a bright backdrop */
 html[data-mode="light"]{--glass:color-mix(in srgb,var(--surface) 74%,transparent);--glass2:color-mix(in srgb,var(--surface2) 72%,transparent);--glass-solid:color-mix(in srgb,var(--surface) 88%,transparent);--glass-bd:color-mix(in srgb,var(--text) 10%,transparent);--glass-sh:0 8px 30px rgba(70,80,130,.13),inset 0 1px 0 rgba(255,255,255,.55);}
+/* Ensure sufficient contrast in light mode */
+html[data-mode="light"] {--muted: var(--muted-light);}
 /* High-contrast → solid opaque surfaces, no blur (a11y) */
 html[data-hc="1"] .card,html[data-hc="1"] .modal,html[data-hc="1"] .bnav,html[data-hc="1"] .drawer,html[data-hc="1"] .profile-hero,html[data-hc="1"] .profile-stat-tile,html[data-hc="1"] .qadd-chip{background:var(--surface)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--border)!important;}
 html[data-hc="1"] .hdr{background:var(--bg)!important;}
@@ -1127,6 +1131,436 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
   }
   .fab svg{width:28px;height:28px;}
 }
+
+/* Aurora Health UI v2: final mockup alignment layer */
+html[data-aurora="1"] body{
+  padding-top:max(env(safe-area-inset-top),10px);
+  color:#1C1C1E;
+  background:
+    linear-gradient(180deg,#F6F8FF 0%,#F8F9FC 44%,#FFFFFF 100%);
+}
+html[data-aurora="1"] .app{
+  width:100%;
+  max-width:390px;
+  min-height:100vh;
+  margin:0 auto;
+  padding:0 16px;
+  padding-bottom:calc(100px + env(safe-area-inset-bottom));
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+}
+html[data-aurora="1"] .hdr{display:none;}
+html[data-aurora="1"] #pg-today>.dnav{display:none;}
+html[data-aurora="1"] .screen.active{animation:scrIn .18s ease-out;}
+html[data-aurora="1"] .aurora-page-top{
+  min-height:54px;
+  margin:2px 0 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+html[data-aurora="1"] .aurora-greet,
+html[data-aurora="1"] .aurora-title{
+  font-size:1.02rem;
+  line-height:1.15;
+  font-weight:800;
+  letter-spacing:0;
+  color:#111827;
+}
+html[data-aurora="1"] .aurora-sub{
+  margin-top:5px;
+  font-size:.72rem;
+  line-height:1.25;
+  color:#8A90A2;
+  font-weight:600;
+}
+html[data-aurora="1"] .aurora-ico,
+html[data-aurora="1"] .aurora-back{
+  width:38px;
+  height:38px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.88);
+  color:#111827;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8px 22px -15px rgba(31,45,90,.28),inset 0 0 0 1px #EEF1F7;
+  flex:none;
+}
+html[data-aurora="1"] .aurora-back{font-size:1.65rem;line-height:1;padding-bottom:3px;}
+html[data-aurora="1"] .aurora-ico .ic svg{width:19px;height:19px;}
+html[data-aurora="1"] .card,
+html[data-aurora="1"] .ring-wrap,
+html[data-aurora="1"] .wwcard,
+html[data-aurora="1"] .ad-card{
+  border-radius:20px;
+  border-color:#EEF1F7;
+  box-shadow:0 14px 34px -24px rgba(31,45,90,.28),0 2px 8px -5px rgba(31,45,90,.08);
+}
+html[data-aurora="1"] .ring-wrap{
+  padding:26px 16px 18px;
+  margin-bottom:12px;
+}
+html[data-aurora="1"]:not([data-simple="1"]) .ring-cont,
+html[data-aurora="1"]:not([data-simple="1"]) .ring-cont svg{
+  width:210px;
+  height:210px;
+}
+html[data-aurora="1"]:not([data-simple="1"]) .ring-track,
+html[data-aurora="1"]:not([data-simple="1"]) .ring-fill{stroke-width:11;}
+html[data-aurora="1"]:not([data-simple="1"]) .ring-num{font-size:3rem;}
+html[data-aurora="1"] .ring-lbl{font-size:.78rem;font-weight:700;color:#111827;}
+html[data-aurora="1"] .ring-sub{font-size:.76rem;color:#6B7280;margin-top:12px;}
+html[data-aurora="1"] .macros{
+  gap:8px;
+  margin-bottom:12px;
+}
+html[data-aurora="1"] .mc{
+  min-height:88px;
+  border-radius:14px;
+  padding:12px 10px;
+}
+html[data-aurora="1"] .mc-l{font-size:.72rem;font-weight:700;color:#1F2937;}
+html[data-aurora="1"] .mc-v{font-size:1.08rem;font-weight:800;}
+html[data-aurora="1"] .mc-sub{font-size:.56rem;white-space:nowrap;}
+html[data-aurora="1"] .wwcard-full{padding:15px 16px;}
+html[data-aurora="1"] .water-top h4{
+  font-size:.88rem;
+  color:#111827;
+  text-transform:none;
+  letter-spacing:0;
+}
+html[data-aurora="1"] .water-stepper .wwval{font-size:.78rem;color:#111827;}
+html[data-aurora="1"] .wd{width:20px;height:30px;}
+/* Aurora dedupe: Today is the dashboard; the editable meal list lives on the Meals (มื้อ) tab,
+   so hide Today's food log here to avoid showing the same list on two screens. */
+html[data-aurora="1"] #pg-today #foodLog{display:none;}
+html[data-aurora="1"] #foodLog .mg{
+  background:#fff;
+  border:1px solid #EEF1F7;
+  border-radius:20px;
+  padding:14px;
+  box-shadow:0 14px 34px -24px rgba(31,45,90,.28);
+}
+html[data-aurora="1"] .mg-hdr{
+  font-size:.86rem;
+  font-weight:800;
+  margin-bottom:10px;
+}
+html[data-aurora="1"] .mg-cal{
+  background:#F3F6FC;
+  color:#111827;
+}
+html[data-aurora="1"] .fi{
+  border:0;
+  border-radius:14px;
+  background:#FAFBFE;
+  padding:10px;
+  margin-bottom:8px;
+}
+html[data-aurora="1"] .fi-photo{width:46px;height:46px;border-radius:12px;}
+html[data-aurora="1"] .fi-n{font-weight:800;color:#111827;}
+html[data-aurora="1"] .fi-m{font-size:.66rem;}
+html[data-aurora="1"] .fi-c{color:#EF4F62;}
+html[data-aurora="1"] #addSearchCard{
+  padding:0;
+  margin-bottom:14px;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+html[data-aurora="1"] #addSearchCard>h3{display:none;}
+/* Aurora Add page shows ONLY the search card; hide the legacy manual/recipe/quick cards.
+   Targeted by :not(#addSearchCard) so the prepended .aurora-page-top header can't shift positional selectors. */
+html[data-aurora="1"] #pg-add>.card:not(#addSearchCard){
+  display:none;
+}
+html[data-aurora="1"] .sbox{
+  height:48px;
+  margin-bottom:12px;
+  border-radius:15px;
+  box-shadow:none;
+}
+html[data-aurora="1"] .sbox input{
+  height:46px;
+  padding-left:42px;
+  padding-right:42px;
+  font-size:16px!important;
+  color:#111827;
+}
+html[data-aurora="1"] .si{left:15px;}
+html[data-aurora="1"] #pg-add .btn-sec{
+  min-height:44px;
+  border-radius:14px;
+  font-weight:800;
+}
+html[data-aurora="1"] #aiQuotaInline,
+html[data-aurora="1"] #pg-add .step-row{display:none;}
+html[data-aurora="1"] #catFilterWrap{margin:0 0 14px!important;}
+html[data-aurora="1"] #catChips{gap:9px;padding-bottom:8px;}
+html[data-aurora="1"] .cat-chip{
+  min-width:62px;
+  border-radius:15px;
+  padding:10px 8px;
+  color:#1F2937;
+}
+html[data-aurora="1"] .cat-chip.on{background:#4A90FF;color:#fff;}
+html[data-aurora="1"] .ax-hd{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:10px 0 8px;
+  font-size:.86rem;
+}
+html[data-aurora="1"] .ax-chip{border-radius:12px;background:#fff;}
+html[data-aurora="1"] .ax-pop-card{
+  width:112px;
+  border-radius:14px;
+  padding:9px;
+}
+html[data-aurora="1"] .ax-pop-ic{
+  width:100%;
+  height:76px;
+  border-radius:12px;
+  font-size:1.5rem;
+}
+html[data-aurora="1"] .sres{
+  max-height:none;
+  overflow:visible;
+  resize:none;
+  gap:8px;
+}
+html[data-aurora="1"] .sri{
+  min-height:64px;
+  border-radius:16px;
+  padding:10px 12px;
+}
+html[data-aurora="1"] .sri-thumb{width:44px;height:44px;border-radius:13px;}
+html[data-aurora="1"] .sri-n{font-weight:800;color:#111827;}
+html[data-aurora="1"] .sri-c{color:#EF4F62;}
+html[data-aurora="1"] #pg-analysis>.card{
+  margin-bottom:12px;
+}
+html[data-aurora="1"] #sleepCard{display:none!important;}
+html[data-aurora="1"] .period-tabs{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(0,1fr));
+  border-radius:14px;
+  background:#F1F4FA;
+  padding:4px;
+}
+html[data-aurora="1"] .ptab{
+  padding:8px 6px;
+  font-size:.72rem;
+  border-radius:11px;
+}
+html[data-aurora="1"] .card-hdr-row{align-items:flex-start;}
+html[data-aurora="1"] .card-hdr-row h3{font-size:.9rem;}
+html[data-aurora="1"] .akpi-tile{
+  background:#fff;
+  border-radius:16px;
+}
+html[data-aurora="1"] .iosc-plot{--ch:128px;}
+html[data-aurora="1"] .iosc-bar{
+  border-radius:7px 7px 2px 2px;
+  background:#34C759;
+}
+html[data-aurora="1"] .md-donut{width:96px;height:96px;}
+html[data-aurora="1"] .md-hole{width:62px;height:62px;}
+html[data-aurora="1"] .meal-summary{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+html[data-aurora="1"] .meal-ring{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+}
+html[data-aurora="1"] .meal-ring svg{
+  width:132px;
+  height:132px;
+  transform:rotate(-90deg);
+  flex:none;
+}
+html[data-aurora="1"] .meal-ring>div{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  line-height:1.05;
+}
+html[data-aurora="1"] .meal-ring b{font-size:2rem;color:#111827;}
+html[data-aurora="1"] .meal-ring span{font-weight:800;color:#111827;}
+html[data-aurora="1"] .meal-ring small{margin-top:6px;color:#8A90A2;font-size:.68rem;}
+html[data-aurora="1"] .meal-macro-list{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  font-size:.72rem;
+  color:#6B7280;
+}
+html[data-aurora="1"] .meal-macro-list>div{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:10px;
+  border-radius:13px;
+  background:#F6F8FC;
+}
+html[data-aurora="1"] .meal-macro-list b{
+  margin-left:auto;
+  color:#111827;
+}
+html[data-aurora="1"] .meal-list-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:16px 0 8px;
+  font-weight:800;
+  color:#111827;
+}
+html[data-aurora="1"] .meal-list-head button{
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:50%;
+  background:#EEF5FF;
+  color:#4A90FF;
+  font-size:1.45rem;
+  line-height:1;
+}
+html[data-aurora="1"] .meal-row{
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin-bottom:10px;
+  padding:10px;
+  border-radius:16px;
+  background:#fff;
+  border:1px solid #EEF1F7;
+  box-shadow:0 10px 26px -22px rgba(31,45,90,.26);
+}
+html[data-aurora="1"] .meal-thumb{
+  width:48px;
+  height:48px;
+  border-radius:13px;
+  background:#F4F6FB;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  flex:none;
+}
+html[data-aurora="1"] .meal-thumb img{width:100%;height:100%;object-fit:cover;}
+html[data-aurora="1"] .meal-info{flex:1;min-width:0;}
+html[data-aurora="1"] .meal-name{
+  font-size:.86rem;
+  font-weight:800;
+  color:#111827;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+html[data-aurora="1"] .meal-meta{
+  margin-top:4px;
+  font-size:.62rem;
+  color:#8A90A2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+html[data-aurora="1"] .meal-cal{
+  color:#EF4F62;
+  font-weight:900;
+  font-size:.86rem;
+  text-align:right;
+}
+html[data-aurora="1"] .meal-cal small{display:block;color:#8A90A2;font-size:.58rem;font-weight:700;}
+html[data-aurora="1"] .meal-more{
+  width:24px;
+  height:34px;
+  border:0;
+  background:transparent;
+  color:#9AA1B2;
+  font-size:1.1rem;
+}
+html[data-aurora="1"] .meal-total{
+  display:grid;
+  gap:8px;
+  margin-top:14px;
+}
+html[data-aurora="1"] .meal-total span{font-weight:800;color:#111827;}
+html[data-aurora="1"] .meal-total b{font-size:1.28rem;color:#111827;}
+html[data-aurora="1"] .meal-total small{color:#8A90A2;}
+html[data-aurora="1"] .bnav{
+  left:16px;
+  right:16px;
+  bottom:calc(12px + env(safe-area-inset-bottom));
+  max-width:358px;
+  height:68px;
+  border-radius:26px;
+  padding:8px 10px;
+  gap:2px;
+}
+html[data-aurora="1"] .bnt{
+  min-width:0;
+  height:52px;
+  padding:5px 2px;
+  border-radius:18px;
+  gap:3px;
+  font-size:.58rem;
+  font-weight:700;
+}
+html[data-aurora="1"] .bnt span{
+  display:block;
+  max-width:54px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+html[data-aurora="1"] .bnt svg{width:20px;height:20px;}
+html[data-aurora="1"] .bnt.active{
+  background:transparent;
+  color:#4A90FF;
+  box-shadow:none;
+}
+html[data-aurora="1"] .bnt[data-tab="add"]{
+  transform:translateY(-14px);
+  width:58px;
+  height:58px;
+  flex:0 0 58px;
+  border-radius:50%;
+  background:linear-gradient(180deg,#78B4FF,#4A90FF);
+  color:#fff;
+  border:4px solid rgba(255,255,255,.96);
+  box-shadow:0 13px 24px -12px rgba(74,144,255,.8);
+}
+html[data-aurora="1"] .bnt[data-tab="add"] span{display:none;}
+html[data-aurora="1"] .bnt[data-tab="add"] svg{width:25px;height:25px;}
+html[data-aurora="1"] .fab{display:none!important;}
+html[data-aurora="1"] .nav-scrim{
+  height:calc(104px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,#F8F9FC 44%,rgba(248,249,252,0));
+}
+@media (min-width:768px){
+  html[data-aurora="1"] body{padding:18px 0;background:#EEF2FA;}
+  html[data-aurora="1"] .app{
+    max-width:390px;
+    min-height:844px;
+    border-radius:34px;
+    background:#F8F9FC;
+    overflow:hidden;
+    box-shadow:0 24px 70px -34px rgba(31,45,90,.38);
+  }
+  html[data-aurora="1"] .bnav{max-width:358px;bottom:30px;border-radius:26px;}
+}
 </style>
 </head>
 <body>
@@ -1225,7 +1659,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 
     <!-- ADD -->
     <div class="screen" id="pg-add">
-      <div class="card">
+      <div class="card" id="addSearchCard">
         <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
         <div class="sbox"><span class="si ic" data-ic="search"></span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"><button type="button" class="mic-btn" id="micBtn" onclick="startVoiceSearch()" aria-label="Voice search" title="พูดชื่ออาหาร"><span class="ic" data-ic="mic"></span></button></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
@@ -1297,6 +1731,11 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
       <div class="ad-slot" data-ad-slot="analysis-1"></div>
       <div class="card"><h3 data-i18n="summary">สรุป</h3><div id="wkSum"></div></div>
       <div class="card"><h3 data-i18n="advice">คำแนะนำ</h3><div id="insDiv"></div></div>
+    </div>
+
+    <!-- MEAL TRACKING -->
+    <div class="screen" id="pg-meals">
+      <div id="mealTrackBody"></div>
     </div>
 
     <!-- TDEE CALCULATOR -->
@@ -2307,7 +2746,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.43.9';
+const APP_VERSION = '2.44.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2972,14 +3411,26 @@ const LS_HABITS = 'calpro_habits';       // { 'YYYY-MM-DD': {sleep, sleepQ, supp
 // ═══ IndexedDB — store meal photos out of localStorage (5MB quota → ~GBs) ═══
 // Photos stored here keyed by entry.id. entry.photo === 'idb:'+entry.id is the sentinel.
 // Falls back to data-URL inline if IDB ever fails (no breakage).
-const IDB_NAME='calpro-idb',IDB_VER=1,IDB_PHOTOS='photos';
+const IDB_NAME='calpro-idb',IDB_VER=2,IDB_PHOTOS='photos';
 let _idbPromise=null;
 function idbOpen(){
   if(_idbPromise)return _idbPromise;
   _idbPromise=new Promise((res,rej)=>{
     if(!('indexedDB' in window))return rej(new Error('no IDB'));
     const r=indexedDB.open(IDB_NAME,IDB_VER);
-    r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains(IDB_PHOTOS))db.createObjectStore(IDB_PHOTOS);};
+    r.onupgradeneeded=()=>{ 
+      const db=r.result;
+      if(!db.objectStoreNames.contains(IDB_PHOTOS))
+        db.createObjectStore(IDB_PHOTOS);
+      // Create indexes for better query performance
+      if (db.objectStoreNames.contains('food_entries')) {
+        const store = db.transaction('food_entries', 'readwrite').objectStore('food_entries');
+        if (!store.indexNames.contains('foodName'))
+          store.createIndex('foodName', 'food_name', { unique: false });
+        if (!store.indexNames.contains('userId'))
+          store.createIndex('userId', 'user_id', { unique: false });
+      }
+    };
     r.onsuccess=()=>res(r.result);
     r.onerror=()=>rej(r.error);
   });
@@ -3870,6 +4321,7 @@ const NAV_CATALOG = {
   today:    {label_key:'home',    svg:'<path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/>'},
   add:      {label_key:'add',     svg:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'},
   analysis: {label_key:'analysis',svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-7"/>'},
+  meals:    {label_key:'diary',   svg:'<path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/>',label_literal:'มื้อ'},
   tdee:     {label_key:'tdee',    svg:'<path d="M12 2c0 5-5 7-5 12a5 5 0 0 0 10 0c0-2-1-3-2-4 0 2-1 3-2 3 1-3-1-7-1-11z"/>',label_literal:'TDEE'},
   profile:  {label_key:'profile', svg:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>'},
   settings: {label_key:'settings',svg:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'},
@@ -4338,7 +4790,9 @@ function showApp(){
 // ═══ BOTTOM NAV ═══
 function renderBottomNav(){
   const nav=document.getElementById('mainNav');if(!nav)return;
-  const tabs=(settings.navTabs&&settings.navTabs.length)?settings.navTabs:['today','add','analysis','profile','settings'];
+  const tabs=settings.uiMode==='aurora'
+    ? ['today','add','analysis','meals','settings']
+    : ((settings.navTabs&&settings.navTabs.length)?settings.navTabs:['today','add','analysis','profile','settings']);
   // Always ensure "today" is first
   const finalTabs=['today',...tabs.filter(t=>t!=='today')].slice(0,5);
   nav.innerHTML='';
@@ -4350,6 +4804,15 @@ function renderBottomNav(){
     const label=cfg.label_literal||t(cfg.label_key);
     const beta=''; // Friends graduated from BETA in v2.22.0
     btn.innerHTML=`<svg viewBox="0 0 24 24">${cfg.svg}</svg><span>${label}${beta}</span>`;
+    // Add ARIA label for accessibility
+    switch(tabId) {
+      case 'today': btn.setAttribute('aria-label', 'หน้าแรก'); break;
+      case 'add': btn.setAttribute('aria-label', 'เพิ่ม'); break;
+      case 'analysis': btn.setAttribute('aria-label', 'รายงาน'); break;
+      case 'meals': btn.setAttribute('aria-label', 'มื้อ'); break;
+      case 'settings': btn.setAttribute('aria-label', 'ตั้งค่า'); break;
+      default: btn.setAttribute('aria-label', label);
+    }
     nav.appendChild(btn);
   });
   // Highlight active
@@ -4407,6 +4870,7 @@ function showPage(id,btn){
   const renders={
     today:()=>{loadEntries();renderToday();},
     analysis:renderAnalysis,
+    meals:()=>{loadEntries();renderMealTracking();},
     tdee:syncTDEEFromProfile,
     add:()=>{renderCatFilter();renderQuickList();refreshAiQuotaInline();applyDefaultMeal();},
     settings:renderSettings,
@@ -4441,6 +4905,7 @@ function showPage(id,btn){
       requestAnimationFrame(()=>{ try{ fn(); }catch(e2){ console.error('[nav] retry failed',id,e2); } });
     }
   }
+  renderAuroraChrome(id);
 }
 
 // ═══ DATE ═══
@@ -5163,9 +5628,38 @@ function delFood(id){
   dailyEntries=dailyEntries.filter(e=>e.id!==id);
   // Clean up IDB photo if any (cheap, fire-and-forget)
   if(gone?.photo&&gone.photo.startsWith('idb:'))idbDelete(gone.id);
+  
+  // Show undo toast with delay
+  showToastWithUndo(gone, id);
+  
   saveEntries_LS();
   renderToday();
   scheduleAutoSync('delFood');
+}
+
+// Toast with an "undo" action for food deletion. Clears via textContent (never
+// removeChild — a later showToast() wipes children and would crash a removeChild timer).
+function showToastWithUndo(item, id) {
+  const el = document.getElementById('toast');
+  if(!el) return;
+  if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
+  el.textContent = `${item.food_name} ${LL('ถูกลบแล้ว','deleted','已删除','已刪除')}`;
+  el.classList.add('show');
+  const undoBtn = document.createElement('button');
+  undoBtn.textContent = LL('ย้อนกลับ','Undo','撤销','復原');
+  undoBtn.style.cssText = 'margin-left:10px;padding:3px 9px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer;font:inherit;font-size:.8rem;';
+  undoBtn.onclick = function() {
+    if(toastTimer){ clearTimeout(toastTimer); toastTimer=null; }
+    dailyEntries.push(item);
+    saveEntries_LS();
+    if(typeof refreshActivePage==='function') refreshActivePage(); else renderToday();
+    scheduleAutoSync('undoDelFood');
+    el.classList.remove('show'); el.textContent='';
+  };
+  el.appendChild(undoBtn);
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show'); el.textContent=''; toastTimer = null;
+  }, 5000);
 }
 function editFood(id){
   const e=dailyEntries.find(x=>x.id===id);if(!e)return;
@@ -5308,8 +5802,9 @@ function refreshActivePage(){
   try{
     const active=document.querySelector('.app .screen.active')?.id||'';
     if(active==='pg-today'){loadEntries();renderToday();}
-    else if(active==='pg-add')renderQuickList();
+    else if(active==='pg-add'){renderQuickList();renderAuroraChrome('add');}
     else if(active==='pg-analysis')renderAnalysis();
+    else if(active==='pg-meals'){loadEntries();renderMealTracking();}
     else if(active==='pg-tdee')syncTDEEFromProfile();
     else if(active==='pg-profile')renderProfileUI();
     else if(active==='pg-settings')renderSettings();
@@ -5321,6 +5816,8 @@ function refreshActivePage(){
     if(hdr)hdr.textContent=name+' · '+(userProfile?.goal_cal||1800).toLocaleString()+' kcal'+dayUnitShort();
     // drawer if open
     if(document.getElementById('drawer')?.classList.contains('open'))renderDrawerHeader();
+    const activeId=active.replace('pg-','');
+    if(activeId)renderAuroraChrome(activeId);
   }catch(e){ console.error('[refreshActivePage]',e); }
 }
 
@@ -7780,6 +8277,7 @@ function renderToday(){
   renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();renderSteps();
   renderAdSlot('today-1',document.querySelector('[data-ad-slot="today-1"]'));
   renderQuickAddRow();
+  renderAuroraChrome('today');
   const log=document.getElementById('foodLog');
   if(!E.length){
     // Rich empty state — guide the very first action instead of a blank list.
@@ -7823,6 +8321,55 @@ function renderToday(){
     });
     log.appendChild(g);
   });
+}
+
+function renderAuroraChrome(page){
+  if(settings.uiMode!=='aurora')return;
+  const active=document.getElementById('pg-'+page)||document.querySelector('.app .screen.active');
+  if(!active)return;
+  document.querySelectorAll('.aurora-page-top').forEach(el=>el.remove());
+  const name=userProfile?.display_name||t('you');
+  const goal=userProfile?.goal_cal||1800;
+  const totals=(dailyEntries||[]).reduce((s,e)=>s+(+e.calories||0),0);
+  const mealCount=(dailyEntries||[]).length;
+  const headers={
+    today:`<div><div class="aurora-greet">สวัสดีตอนเช้า</div><div class="aurora-sub">เป้าหมายวันนี้ ${goal.toLocaleString()} kcal</div></div><button class="aurora-ico" onclick="openDrawer()" aria-label="Menu">${icoSvg('bell')}</button>`,
+    add:`<button class="aurora-back" onclick="navTo('today')" aria-label="Back">‹</button><div><div class="aurora-title">เพิ่มอาหาร</div><div class="aurora-sub">ค้นหาและบันทึกอย่างรวดเร็ว</div></div><button class="aurora-ico" onclick="openBarcodeModal()" aria-label="Scan">${icoSvg('barcode')}</button>`,
+    analysis:`<div><div class="aurora-title">สถิติ</div><div class="aurora-sub">ภาพรวมสุขภาพและโภชนาการ</div></div><button class="aurora-ico" onclick="openDatePicker()" aria-label="Calendar">${icoSvg('calendar')}</button>`,
+    meals:`<button class="aurora-back" onclick="navTo('today')" aria-label="Back">‹</button><div><div class="aurora-title">มื้ออาหาร</div><div class="aurora-sub">${totals.toLocaleString()} kcal · ${mealCount} รายการ</div></div><button class="aurora-ico" onclick="goToAddFood()" aria-label="Add">${icoSvg('plus')}</button>`
+  };
+  const html=headers[page]; if(!html)return;
+  const top=document.createElement('div');
+  top.className='aurora-page-top';
+  top.innerHTML=html;
+  active.insertAdjacentElement('afterbegin',top);
+}
+
+function renderMealTracking(){
+  const wrap=document.getElementById('mealTrackBody'); if(!wrap)return;
+  const E=dailyEntries||[];
+  const goal=userProfile?.goal_cal||1800;
+  const total=E.reduce((s,e)=>s+(+e.calories||0),0);
+  const p=Math.round(E.reduce((s,e)=>s+(+e.protein||0),0));
+  const c=Math.round(E.reduce((s,e)=>s+(+e.carbs||0),0));
+  const f=Math.round(E.reduce((s,e)=>s+(+e.fat||0),0));
+  const pct=Math.min(total/goal,1);
+  const circ=376.99;
+  let rows='';
+  E.forEach(item=>{
+    const photo=item.photo&&!item.photo.startsWith('idb:')?`<img src="${escapeHtml(item.photo)}" alt="">`:`<span>${MEAL_ICONS[item.meal]||'🍽️'}</span>`;
+    rows+=`<div class="meal-row"><div class="meal-thumb">${photo}</div><div class="meal-info"><div class="meal-name">${escapeHtml(item.food_name)}</div><div class="meal-meta">${escapeHtml(item.meal||'')} · ${t('carbs')} ${item.carbs||0}g · ${t('protein')} ${item.protein||0}g · ${t('fat')} ${item.fat||0}g</div></div><div class="meal-cal">${(+item.calories||0).toLocaleString()} <small>kcal</small></div><button class="meal-more" onclick="editFood('${item.id}')" aria-label="Edit">⋮</button></div>`;
+  });
+  if(!rows)rows=`<div class="empty-state"><div class="es-ico">${icoSvg('utensils')}</div><div class="es-title">ยังไม่มีรายการอาหาร</div><div class="es-sub">เพิ่มอาหารเพื่อเริ่มติดตามมื้อวันนี้</div><button class="es-cta" onclick="goToAddFood()">บันทึกมื้ออาหาร</button></div>`;
+  wrap.innerHTML=
+    `<div class="meal-summary card">`+
+      `<div class="meal-ring"><svg viewBox="0 0 144 144"><circle class="ring-track" cx="72" cy="72" r="60"/><circle class="ring-fill" cx="72" cy="72" r="60" stroke-dasharray="${circ}" stroke-dashoffset="${(circ-pct*circ).toFixed(2)}" style="stroke:url(#ringGradBrand)"/></svg><div><b>${total.toLocaleString()}</b><span>kcal</span><small>จาก ${goal.toLocaleString()} kcal</small></div></div>`+
+      `<div class="meal-macro-list"><div>${icoSvg('note')} รายการอาหาร <b>${E.length}</b></div><div>${icoSvg('flame')} โปรตีน <b>${p}g</b></div><div>${icoSvg('zap')} คาร์บ <b>${c}g</b></div><div>${icoSvg('droplet')} ไขมัน <b>${f}g</b></div></div>`+
+    `</div>`+
+    `<div class="meal-list-head"><span>รายการอาหาร</span><button onclick="goToAddFood()">+</button></div>`+
+    `<div class="meal-list">${rows}</div>`+
+    `<div class="meal-total card"><span>รวมทั้งหมด</span><b>${total.toLocaleString()} kcal</b><small>โปรตีน ${p}g · คาร์บ ${c}g · ไขมัน ${f}g</small><button class="btn" onclick="goToAddFood()">บันทึกมื้ออาหาร</button></div>`;
+  renderAuroraChrome('meals');
 }
 
 // ═══ ANALYSIS ═══
@@ -9005,11 +9552,12 @@ function setThemeSet(set){
 function setLook(mode){
   if(mode==='aurora'){
     settings.uiMode='aurora'; lsSave(LS_SETTINGS,settings);
-    applyTheme(); try{renderSettings();}catch(e){} try{renderToday();}catch(e){}
+    applyTheme(); try{renderBottomNav();}catch(e){} try{renderSettings();}catch(e){} try{renderToday();}catch(e){}
     showToast(LL('เปิด Aurora Health UI แล้ว','Aurora Health UI on','已开启 Aurora Health UI','已開啟 Aurora Health UI'));
   }else{
     settings.uiMode='original';
     setThemeSet(mode);                  // standard|nutrikit — saves + applyTheme + renderSettings
+    try{renderBottomNav();}catch(e){}
     try{renderToday();}catch(e){}
     showToast(mode==='nutrikit'
       ? LL('ใช้ชุดธีม Nutrition UI System','Nutrition UI System on','已开启 Nutrition UI System','已開啟 Nutrition UI System')
@@ -11442,6 +11990,10 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.44.0':{
+    th:['🎨 Aurora Health UI v2 + หน้ามื้ออาหาร','🖼️ แกลเลอรีรูปอาหาร (กดรูปดูได้หลายภาพ)','🐛 แก้ไขบั๊ก'],
+    en:['🎨 Aurora Health UI v2 + Meal Tracking page','🖼️ Food image gallery (tap a photo to browse)','🐛 Bug fixes'],
+  },
   '2.43.0':{
     th:['🎨 ดีไซน์ใหม่ Aurora Health UI (เลือกได้ใน ตั้งค่า › รูปลักษณ์)','👣 ย้ายการนับก้าวไปเวอร์ชั่นแอป (APK)'],
     en:['🎨 New Aurora Health UI design (opt-in · Settings › Appearance)','👣 Step counting moving to the app (APK)'],
