@@ -1133,15 +1133,22 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 }
 
 /* Aurora Health UI v2: final mockup alignment layer */
+/* Background lives on <html> so the gradient always fills the full viewport on any
+   screen size (fixed attachment), instead of stopping at the 390px app column. */
+html[data-aurora="1"]{
+  min-height:100vh;
+  background:linear-gradient(170deg,#EAF0FF 0%,#F4F6FF 38%,#F8F9FC 70%,#FFFFFF 100%) fixed;
+  background-size:cover;
+}
 html[data-aurora="1"] body{
   padding-top:max(env(safe-area-inset-top),10px);
   color:#1C1C1E;
-  background:
-    linear-gradient(180deg,#F6F8FF 0%,#F8F9FC 44%,#FFFFFF 100%);
+  background:transparent;
+  min-height:100vh;
 }
 html[data-aurora="1"] .app{
   width:100%;
-  max-width:390px;
+  max-width:430px;
   min-height:100vh;
   margin:0 auto;
   padding:0 16px;
@@ -1151,7 +1158,14 @@ html[data-aurora="1"] .app{
   border-radius:0;
   box-shadow:none;
 }
-html[data-aurora="1"] .hdr{display:none;}
+/* Aurora keeps the top control bar (menu · sync dot · refresh · dark-mode) */
+html[data-aurora="1"] .hdr{display:flex;margin:0;padding:max(env(safe-area-inset-top),6px) 2px 2px;}
+html[data-aurora="1"] .hdr h1{font-size:1rem;color:#111827;}
+html[data-aurora="1"] .hdr #hdrSub{font-size:.66rem;color:#8A90A2;}
+html[data-aurora="1"] .hdr .icon-btn{color:#4A5468;}
+html[data-aurora="1"] .hdr .icon-btn svg{stroke:#4A5468;}
+/* Tab pages (friends/profile/settings) are top-level in Aurora — drop their back arrow */
+html[data-aurora="1"] .page-hd .back-btn{display:none;}
 html[data-aurora="1"] #pg-today>.dnav{display:none;}
 html[data-aurora="1"] .screen.active{animation:scrIn .18s ease-out;}
 html[data-aurora="1"] .aurora-page-top{
@@ -1527,11 +1541,17 @@ html[data-aurora="1"] .bnav{
   left:16px;
   right:16px;
   bottom:calc(12px + env(safe-area-inset-bottom));
-  max-width:358px;
+  max-width:398px;
   height:68px;
-  border-radius:26px;
+  border-radius:28px;
   padding:8px 10px;
   gap:2px;
+  /* Liquid glass — translucent frosted bar with strong blur + inner highlight */
+  background:rgba(255,255,255,.42);
+  -webkit-backdrop-filter:blur(28px) saturate(1.8);
+  backdrop-filter:blur(28px) saturate(1.8);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:0 18px 44px -14px rgba(31,45,90,.30),inset 0 1.5px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(180,195,230,.25);
 }
 html[data-aurora="1"] .bnt{
   min-width:0;
@@ -2772,7 +2792,7 @@ html[data-aurora="1"] .nav-scrim{
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.44.1';
+const APP_VERSION = '2.44.2';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -5570,6 +5590,7 @@ function confirmPortion(){
     meal,
   });
   closePortionModal();
+  if(settings.uiMode==='aurora') navTo('meals');   // after adding, land on the Meals page
 }
 function addManual(){
   const name=document.getElementById('fName').value.trim();
@@ -5594,6 +5615,7 @@ function addManual(){
   if(customFoods.find(x=>x.n===name))scheduleAutoSync('custom_food');
   const _pp=document.getElementById('photoPreview');if(_pp){_pp.removeAttribute('src');_pp.style.display='none';}pendingPhoto=null;
   closeManualModal();
+  if(settings.uiMode==='aurora') navTo('meals');   // after adding, land on the Meals page
 }
 function openManualModal(){const m=document.getElementById('manualModal');if(m)m.classList.remove('hide');}
 function closeManualModal(){const m=document.getElementById('manualModal');if(m)m.classList.add('hide');}
@@ -8361,7 +8383,7 @@ function renderAuroraChrome(page){
   const totals=(dailyEntries||[]).reduce((s,e)=>s+(+e.calories||0),0);
   const mealCount=(dailyEntries||[]).length;
   const headers={
-    today:`<div><div class="aurora-greet">สวัสดีตอนเช้า</div><div class="aurora-sub">เป้าหมายวันนี้ ${goal.toLocaleString()} kcal</div></div><button class="aurora-ico" onclick="openDrawer()" aria-label="Menu">${icoSvg('bell')}</button>`,
+    today:`<div><div class="aurora-greet">สวัสดีตอนเช้า</div><div class="aurora-sub">เป้าหมายวันนี้ ${goal.toLocaleString()} kcal</div></div>`,
     add:`<button class="aurora-back" onclick="navTo('today')" aria-label="Back">‹</button><div><div class="aurora-title">เพิ่มอาหาร</div><div class="aurora-sub">ค้นหาและบันทึกอย่างรวดเร็ว</div></div><button class="aurora-ico" onclick="openBarcodeModal()" aria-label="Scan">${icoSvg('barcode')}</button>`,
     analysis:`<div><div class="aurora-title">สถิติ</div><div class="aurora-sub">ภาพรวมสุขภาพและโภชนาการ</div></div><button class="aurora-ico" onclick="openDatePicker()" aria-label="Calendar">${icoSvg('calendar')}</button>`,
     meals:`<button class="aurora-back" onclick="navTo('today')" aria-label="Back">‹</button><div><div class="aurora-title">มื้ออาหาร</div><div class="aurora-sub">${totals.toLocaleString()} kcal · ${mealCount} รายการ</div></div><button class="aurora-ico" onclick="goToAddFood()" aria-label="Add">${icoSvg('plus')}</button>`
@@ -8388,7 +8410,7 @@ function mealSummaryCardHTML(tappable){
   const pct=Math.min(total/goal,1); const circ=376.99;
   const tap=tappable?` role="button" tabindex="0" onclick="navTo('meals')" onkeypress="if(event.key==='Enter')navTo('meals')"`:'';
   return `<div class="meal-summary card${tappable?' ms-tap':''}"${tap}>`+
-    `<div class="meal-ring"><svg viewBox="0 0 144 144"><circle class="ring-track" cx="72" cy="72" r="60"/><circle class="ring-fill" cx="72" cy="72" r="60" stroke-dasharray="${circ}" stroke-dashoffset="${(circ-pct*circ).toFixed(2)}" style="stroke:url(#ringGradBrand)"/></svg><div><b>${total.toLocaleString()}</b><span>kcal</span><small>${LL('จาก','of','目标','目標')} ${goal.toLocaleString()} kcal</small></div></div>`+
+    `<div class="meal-ring"><svg viewBox="0 0 144 144"><defs><linearGradient id="mealRingGrad" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="var(--primary,#4A90FF)"/><stop offset="1" stop-color="var(--accent2,#FF6B6B)"/></linearGradient></defs><circle class="ring-track" cx="72" cy="72" r="60"/><circle class="ring-fill" cx="72" cy="72" r="60" stroke-dasharray="${circ}" stroke-dashoffset="${(circ-pct*circ).toFixed(2)}" style="stroke:url(#mealRingGrad)"/></svg><div><b>${total.toLocaleString()}</b><span>kcal</span><small>${LL('จาก','of','目标','目標')} ${goal.toLocaleString()} kcal</small></div></div>`+
     `<div class="meal-macro-list"><div>${icoSvg('note')} ${LL('รายการอาหาร','Items','项目','項目')} <b>${E.length}</b></div><div>${icoSvg('flame')} ${t('protein')} <b>${p}g</b></div><div>${icoSvg('zap')} ${t('carbs')} <b>${c}g</b></div><div>${icoSvg('droplet')} ${t('fat')} <b>${f}g</b></div></div>`+
     (tappable?`<span class="ms-chev">›</span>`:'')+
   `</div>`;
