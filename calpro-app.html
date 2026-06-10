@@ -1241,51 +1241,60 @@ html[data-aurora="1"] #pg-today .aurora-duo,
 html[data-aurora="1"] #pg-today #stepsCard,
 html[data-aurora="1"] #pg-today #workoutCardToday{display:none;}
 html[data-aurora="1"] .awid{
-  background:#fff;border:1px solid #EEF1F7;border-radius:20px;
+  background:#fff;border:1px solid #EEF1F7;border-radius:18px;
   box-shadow:0 14px 34px -24px rgba(31,45,90,.28),0 2px 8px -5px rgba(31,45,90,.08);
-  padding:14px;min-height:182px;display:flex;flex-direction:column;gap:9px;
+  padding:12px;min-height:142px;display:flex;flex-direction:column;gap:6px;
 }
-.awid-top{display:flex;align-items:center;gap:7px;}
-.awid-ic{font-size:1.05rem;line-height:1;}
-.awid-ti{font-size:.82rem;font-weight:800;color:#111827;}
+.awid-top{display:flex;align-items:center;gap:6px;}
+.awid-ic{display:flex;align-items:center;line-height:1;color:#6B7280;}
+.awid-ic .ic svg{width:17px;height:17px;}
+.awid-ti{font-size:.78rem;font-weight:800;color:#111827;}
 /* Progress ring (water + steps) */
 .awid-ring{position:relative;flex:1;display:flex;align-items:center;justify-content:center;min-height:0;}
-.awid-ring svg{width:108px;height:108px;transform:rotate(-90deg);}
-.awr-track{fill:none;stroke:#EDF1F8;stroke-width:11;}
-.awr-fill{fill:none;stroke-width:11;stroke-linecap:round;transition:stroke-dashoffset .55s ease;}
+.awid-ring svg{width:78px;height:78px;transform:rotate(-90deg);}
+.awr-track{fill:none;stroke:#EDF1F8;stroke-width:10;}
+.awr-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .55s ease;}
 .awr-fill.water{stroke:#36A5FF;}
 .awr-fill.steps{stroke:#22C55E;}
 .awid-ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;}
-.awid-ring-c b{font-size:1.5rem;font-weight:800;color:#111827;}
-.awid-ring-c span{font-size:.66rem;color:#8A90A2;font-weight:600;margin-top:3px;}
+.awid-ring-c b{font-size:1.15rem;font-weight:800;color:#111827;}
+.awid-ring-c span{font-size:.55rem;color:#8A90A2;font-weight:600;margin-top:2px;}
 /* Water +/- stepper */
-.awid-wstep{display:flex;align-items:center;justify-content:center;gap:16px;}
-.awid-wstep button{width:34px;height:34px;border-radius:50%;border:0;background:#F3F6FC;color:#111827;font-size:1.3rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.awid-wstep{display:flex;align-items:center;justify-content:center;gap:12px;}
+.awid-wstep button{width:28px;height:28px;border-radius:50%;border:0;background:#F3F6FC;color:#111827;font-size:1.1rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .awid-wstep button:active{transform:scale(.9);}
 /* Steps goal pill */
-.awid-goal{align-self:center;border:0;background:#E8F8EF;color:#1FA463;font-size:.72rem;font-weight:800;padding:6px 13px;border-radius:99px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.awid-goal{align-self:center;border:0;background:#E8F8EF;color:#1FA463;font-size:.64rem;font-weight:800;padding:4px 10px;border-radius:99px;cursor:pointer;display:flex;align-items:center;gap:5px;}
 .awid-goal:active{transform:scale(.95);}
-.awid-goal .ic svg{width:13px;height:13px;}
+.awid-goal .ic svg{width:12px;height:12px;}
 /* Health tips widget */
-.awid-health-body{flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden;}
-.awh-tip{display:flex;gap:7px;align-items:flex-start;font-size:.74rem;line-height:1.35;color:#3A4256;}
-.awh-tip .awh-i{flex:none;font-size:.9rem;line-height:1.25;}
+.awid-health-body{flex:1;display:flex;flex-direction:column;gap:6px;overflow:hidden;}
+.awh-tip{display:flex;gap:6px;align-items:flex-start;font-size:.68rem;line-height:1.3;color:#3A4256;}
+.awh-tip .awh-i{flex:none;display:flex;align-items:center;line-height:1;margin-top:1px;}
+.awh-tip .awh-i .ic svg{width:14px;height:14px;}
+.awh-i.sev-bad{color:#EF4444;}
+.awh-i.sev-warn{color:#F59E0B;}
+.awh-i.sev-ok{color:#22C55E;}
+.awh-i.sev-info{color:#3B82F6;}
 .awh-tip .awh-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .awh-tip .awh-t b{font-weight:800;color:#111827;}
-.awh-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#1FA463;font-size:.78rem;font-weight:700;text-align:center;}
-.awh-empty .awh-emoji{font-size:1.9rem;}
-.awid-more{align-self:flex-start;border:0;background:transparent;color:var(--primary,#4A90FF);font-size:.74rem;font-weight:800;cursor:pointer;padding:2px 0;}
+.awh-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#1FA463;font-size:.74rem;font-weight:700;text-align:center;}
+.awh-empty .awh-emoji{display:flex;}
+.awh-empty .awh-emoji .ic svg{width:28px;height:28px;}
+.awid-more{align-self:flex-start;border:0;background:transparent;color:var(--primary,#4A90FF);font-size:.7rem;font-weight:800;cursor:pointer;padding:2px 0;}
 /* Exercise widget */
-.awid-ex-body{flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden;justify-content:center;}
-.awe-item{display:flex;align-items:center;gap:9px;min-width:0;}
-.awe-emoji{width:40px;height:40px;border-radius:13px;background:#F3F6FC;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex:none;}
+.awid-ex-body{flex:1;display:flex;flex-direction:column;gap:6px;overflow:hidden;justify-content:center;}
+.awe-item{display:flex;align-items:center;gap:8px;min-width:0;}
+.awe-emoji{width:32px;height:32px;border-radius:10px;background:#F3F6FC;display:flex;align-items:center;justify-content:center;color:#5B6472;flex:none;}
+.awe-emoji .ic svg{width:17px;height:17px;}
 .awe-info{min-width:0;}
-.awe-info b{display:block;font-size:.8rem;font-weight:800;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.awe-info small{font-size:.66rem;color:#8A90A2;}
+.awe-info b{display:block;font-size:.76rem;font-weight:800;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.awe-info small{font-size:.62rem;color:#8A90A2;}
 .awe-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
-.awe-empty .awe-big{font-size:2.4rem;line-height:1;opacity:.9;}
-.awe-empty span{font-size:.72rem;color:#8A90A2;font-weight:600;}
-.awid-add{border:0;background:var(--primary,#4A90FF);color:#fff;font-size:.76rem;font-weight:800;padding:9px;border-radius:13px;cursor:pointer;width:100%;}
+.awe-empty .awe-big{line-height:1;opacity:.9;color:#C7CDDB;display:flex;}
+.awe-empty .awe-big .ic svg{width:30px;height:30px;}
+.awe-empty span{font-size:.7rem;color:#8A90A2;font-weight:600;}
+.awid-add{border:0;background:var(--primary,#4A90FF);color:#fff;font-size:.72rem;font-weight:800;padding:7px;border-radius:11px;cursor:pointer;width:100%;}
 .awid-add:active{transform:scale(.97);}
 .awid-add.ghost{background:#EEF3FB;color:var(--primary,#4A90FF);}
 /* Step-goal picker chips */
@@ -1560,6 +1569,8 @@ html[data-aurora="1"] .meal-thumb{
   flex:none;
 }
 html[data-aurora="1"] .meal-thumb img{width:100%;height:100%;object-fit:cover;}
+html[data-aurora="1"] .meal-thumb-ic{display:flex;align-items:center;justify-content:center;color:#8A90A2;}
+html[data-aurora="1"] .meal-thumb-ic .ic svg{width:22px;height:22px;}
 html[data-aurora="1"] .meal-info{flex:1;min-width:0;}
 html[data-aurora="1"] .meal-name{
   font-size:.86rem;
@@ -1610,7 +1621,8 @@ html[data-aurora="1"] .ms-chev{position:absolute;top:12px;right:14px;color:#C7CD
 html[data-aurora="1"] .meal-groups{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
 html[data-aurora="1"] .meal-group{background:#fff;border:1px solid #EEF1F7;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px -14px rgba(31,45,90,.3);}
 html[data-aurora="1"] .mg-head{width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:none;border:none;font-family:inherit;cursor:pointer;text-align:left;}
-html[data-aurora="1"] .mg-ic{font-size:1.2rem;line-height:1;}
+html[data-aurora="1"] .mg-ic{display:flex;align-items:center;line-height:1;color:#5B6472;}
+html[data-aurora="1"] .mg-ic .ic svg{width:18px;height:18px;}
 html[data-aurora="1"] .mg-ti{font-weight:800;color:#111827;font-size:.92rem;}
 html[data-aurora="1"] .mg-meta{margin-left:auto;font-size:.7rem;color:#8A90A2;font-weight:600;white-space:nowrap;}
 html[data-aurora="1"] .mg-add-btn{flex:none;width:27px;height:27px;border-radius:50%;border:0;background:#EEF3FB;color:var(--primary,#4A90FF);display:flex;align-items:center;justify-content:center;cursor:pointer;}
@@ -2911,7 +2923,7 @@ html[data-aurora="1"] .nav-scrim{
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.45.0';
+const APP_VERSION = '2.45.1';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -2950,6 +2962,10 @@ const ICONS = {
   droplet:'<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>',
   activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
   footprints:'<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
+  bulb:'<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  sunrise:'<path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
+  cookie:'<path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/>',
+  bike:'<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
   pill:'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
   mic:'<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
   face_sad:'<circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
@@ -4485,6 +4501,18 @@ const EXERCISE_EMOJI={
   'Jump Rope':'🪢','Stair Climbing':'🧗',
 };
 function exerciseEmoji(w){ return (w&&(EXERCISE_EMOJI[w.name_en]||EXERCISE_EMOJI[w.e]||EXERCISE_EMOJI[w.name]))||'🏃'; }
+// SVG (not emoji) icon per activity → a small reliable set (foot · bike · dumbbell · activity).
+function exerciseIconName(w){
+  const e=((w&&(w.name_en||w.e||''))||'')+'';
+  if(/walk|jog|run|stair/i.test(e)) return 'footprints';
+  if(/cycl|bike/i.test(e)) return 'bike';
+  if(/weight|hiit/i.test(e)) return 'dumbbell';
+  return 'activity';
+}
+// SVG icon per meal slot (replaces the 🌅☀️🌙🍎 emoji).
+function mealIconName(k){ return ({'เช้า':'sunrise','กลางวัน':'sun','เย็น':'moon','ของว่าง':'cookie'})[k] || 'utensils'; }
+// SVG icon per health-tip severity (replaces the 🔥⚠️✅ emoji in the widget).
+function sevIconName(sev){ return ({bad:'alert',warn:'alert',ok:'checkcircle',info:'info'})[sev] || 'info'; }
 let currentDate = todayKey();
 let activeCat = 'all';
 let settings = {theme:'light', accent:'#ff6b6b', lang:'th', font:'prompt', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','profile','settings'], aiProvider:'proxy', uiMode:'original', themeSet:'standard'};
@@ -8576,7 +8604,7 @@ function renderAuroraWidgets(){
   const cups=allWater[currentDate]||0, wgoal=getWaterGoal();
   const wpct=Math.min(cups/Math.max(wgoal,1),1);
   const water=`<div class="awid">`+
-    `<div class="awid-top"><span class="awid-ic">💧</span><span class="awid-ti">${LL('น้ำดื่ม','Water','饮水','飲水')}</span></div>`+
+    `<div class="awid-top"><span class="awid-ic">${icoSvg('droplet')}</span><span class="awid-ti">${LL('น้ำดื่ม','Water','饮水','飲水')}</span></div>`+
     `<div class="awid-ring"><svg viewBox="0 0 104 104"><circle class="awr-track" cx="52" cy="52" r="46"/><circle class="awr-fill water" cx="52" cy="52" r="46" stroke-dasharray="${_AWR_C}" stroke-dashoffset="${(_AWR_C*(1-wpct)).toFixed(1)}"/></svg>`+
     `<div class="awid-ring-c"><b>${cups}</b><span>/${wgoal} ${LL('แก้ว','cups','杯','杯')}</span></div></div>`+
     `<div class="awid-wstep"><button onclick="addWater(-1)" aria-label="${LL('ลดน้ำ','Remove cup','减一杯','減一杯')}">−</button><button onclick="addWater(1)" aria-label="${LL('เพิ่มน้ำ','Add cup','加一杯','加一杯')}">+</button></div>`+
@@ -8585,19 +8613,19 @@ function renderAuroraWidgets(){
   // 2) Health tips — show up to 2 in detail, "see more" opens the full popup
   const tips=getHealthTips();
   let health;
-  const hHead=`<div class="awid-top"><span class="awid-ic">💡</span><span class="awid-ti">${LL('คำแนะนำสุขภาพ','Health tips','健康建议','健康建議')}</span></div>`;
+  const hHead=`<div class="awid-top"><span class="awid-ic">${icoSvg('bulb')}</span><span class="awid-ti">${LL('คำแนะนำสุขภาพ','Health tips','健康建议','健康建議')}</span></div>`;
   if(tips.length){
     health=`<div class="awid">`+hHead+
-      `<div class="awid-health-body">`+tips.slice(0,2).map(tp=>`<div class="awh-tip"><span class="awh-i">${tp.ico}</span><span class="awh-t">${tp.msg}</span></div>`).join('')+`</div>`+
+      `<div class="awid-health-body">`+tips.slice(0,2).map(tp=>`<div class="awh-tip"><span class="awh-i sev-${tp.sev}">${icoSvg(sevIconName(tp.sev))}</span><span class="awh-t">${tp.msg}</span></div>`).join('')+`</div>`+
       `<button class="awid-more" onclick="openHealthTipsModal()">${LL('ดูเพิ่มเติม','See more','查看更多','查看更多')} ›</button></div>`;
   }else{
-    health=`<div class="awid">`+hHead+`<div class="awh-empty"><span class="awh-emoji">✅</span><span>${LL('วันนี้ดูดีมาก','Looking good today','今天很棒','今天很棒')}</span></div></div>`;
+    health=`<div class="awid">`+hHead+`<div class="awh-empty"><span class="awh-emoji">${icoSvg('checkcircle')}</span><span>${LL('วันนี้ดูดีมาก','Looking good today','今天很棒','今天很棒')}</span></div></div>`;
   }
 
   // 3) Steps — green ring + tappable goal
   const steps=(getHabit(currentDate).steps)||0, sgoal=getStepGoal();
   const spct=Math.min(steps/Math.max(sgoal,1),1);
-  const stepsW=`<div class="awid"><div class="awid-top"><span class="awid-ic">👟</span><span class="awid-ti">${LL('ก้าวเดิน','Steps','步数','步數')}</span></div>`+
+  const stepsW=`<div class="awid"><div class="awid-top"><span class="awid-ic">${icoSvg('footprints')}</span><span class="awid-ti">${LL('ก้าวเดิน','Steps','步数','步數')}</span></div>`+
     `<div class="awid-ring"><svg viewBox="0 0 104 104"><circle class="awr-track" cx="52" cy="52" r="46"/><circle class="awr-fill steps" cx="52" cy="52" r="46" stroke-dasharray="${_AWR_C}" stroke-dashoffset="${(_AWR_C*(1-spct)).toFixed(1)}"/></svg>`+
     `<div class="awid-ring-c"><b>${steps.toLocaleString()}</b><span>${LL('ก้าว','steps','步','步')}</span></div></div>`+
     `<button class="awid-goal" onclick="openStepGoal()">${icoSvg('target')} ${LL('เป้า','Goal','目标','目標')} ${sgoal.toLocaleString()}</button></div>`;
@@ -8608,12 +8636,12 @@ function renderAuroraWidgets(){
   if(wks.length){
     exBody=`<div class="awid-ex-body">`+wks.slice(0,2).map(w=>{
       const nm=(settings.lang||'th')!=='th'&&w.name_en?w.name_en:w.name;
-      return `<div class="awe-item"><span class="awe-emoji">${exerciseEmoji(w)}</span><div class="awe-info"><b>${escapeHtml(nm)}</b><small>${w.minutes} ${t('duration_min')} · -${w.kcal} kcal</small></div></div>`;
+      return `<div class="awe-item"><span class="awe-emoji">${icoSvg(exerciseIconName(w))}</span><div class="awe-info"><b>${escapeHtml(nm)}</b><small>${w.minutes} ${t('duration_min')} · -${w.kcal} kcal</small></div></div>`;
     }).join('')+(wks.length>2?`<small style="color:#8A90A2;font-size:.66rem;padding-left:2px">+${wks.length-2} ${LL('รายการ','more','项','項')}</small>`:'')+`</div>`;
   }else{
-    exBody=`<div class="awe-empty"><span class="awe-big">🏃</span><span>${LL('ยังไม่มีกิจกรรม','No activity yet','暂无活动','尚無活動')}</span></div>`;
+    exBody=`<div class="awe-empty"><span class="awe-big">${icoSvg('dumbbell')}</span><span>${LL('ยังไม่มีกิจกรรม','No activity yet','暂无活动','尚無活動')}</span></div>`;
   }
-  const exercise=`<div class="awid"><div class="awid-top"><span class="awid-ic">💪</span><span class="awid-ti">${LL('ออกกำลังกาย','Exercise','运动','運動')}</span></div>`+
+  const exercise=`<div class="awid"><div class="awid-top"><span class="awid-ic">${icoSvg('dumbbell')}</span><span class="awid-ti">${LL('ออกกำลังกาย','Exercise','运动','運動')}</span></div>`+
     exBody+`<button class="awid-add${wks.length?' ghost':''}" onclick="openWorkoutModal()">+ ${LL('เพิ่มกิจกรรม','Add activity','添加活动','新增活動')}</button></div>`;
 
   host.innerHTML=water+health+stepsW+exercise;
@@ -8680,7 +8708,7 @@ function _mealRowHTML(item){
   let thumb;
   if(item.photo&&item.photo.startsWith('idb:')) thumb=`<img data-idb="${item.id}" alt="">`;       // filled async after render
   else if(item.photo) thumb=`<img src="${escapeHtml(item.photo)}" alt="">`;
-  else thumb=`<span>${MEAL_ICONS[item.meal]||'🍽️'}</span>`;
+  else thumb=`<span class="meal-thumb-ic">${icoSvg(mealIconName(item.meal))}</span>`;
   return `<div class="meal-row"><div class="meal-thumb">${thumb}</div>`+
     `<div class="meal-info"><div class="meal-name">${escapeHtml(item.food_name)}</div><div class="meal-meta">${t('carbs')} ${item.carbs||0}g · ${t('protein')} ${item.protein||0}g · ${t('fat')} ${item.fat||0}g</div></div>`+
     `<div class="meal-cal">${(+item.calories||0).toLocaleString()} <small>kcal</small></div>`+
@@ -8708,7 +8736,7 @@ function renderMealTracking(){
     const body=items.length?items.map(_mealRowHTML).join(''):`<div class="mg-empty">${LL('ยังไม่มีรายการ','No items yet','暂无','尚無')}</div>`;
     groups+=`<div class="meal-group${open?' open':''}">`+
       `<div class="mg-head" onclick="this.closest('.meal-group').classList.toggle('open')">`+
-        `<span class="mg-ic">${m.ic}</span><span class="mg-ti">${LL(m.k,m.en,m.k,m.k)}</span>`+
+        `<span class="mg-ic">${icoSvg(mealIconName(m.k))}</span><span class="mg-ti">${LL(m.k,m.en,m.k,m.k)}</span>`+
         `<span class="mg-meta">${items.length} ${LL('รายการ','items','项','項')} · ${cal.toLocaleString()} kcal</span>`+
         `<button type="button" class="mg-add-btn" onclick="event.stopPropagation();goToAddFood('${m.k}')" aria-label="${LL('เพิ่มอาหารมื้อนี้','Add to this meal','添加到此餐','新增到此餐')}">${icoSvg('plus')}</button>`+
         `<span class="mg-chev">›</span>`+
