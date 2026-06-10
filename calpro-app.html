@@ -946,6 +946,13 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 .themeset-seg{display:flex;flex-direction:column;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:15px;padding:4px;margin-bottom:12px;}
 .themeset-seg button{width:100%;border:0;background:none;color:var(--muted);padding:11px 14px;border-radius:11px;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;transition:background .15s,color .15s;letter-spacing:-.01em;text-align:center;}
 .themeset-seg button.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 5px rgba(0,0,0,.14);}
+/* Dark-mode picker (System · Light · Dark · Schedule) */
+.dm-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:15px;padding:5px;}
+.dm-seg button{border:0;background:none;color:var(--muted);padding:10px 8px;border-radius:11px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;transition:background .15s,color .15s;text-align:center;}
+.dm-seg button.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 5px rgba(0,0,0,.14);}
+#darkScheduleRow{align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap;}
+.dm-time{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text);font-weight:600;}
+.dm-time input[type=time]{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:7px 9px;font-family:inherit;font-size:.85rem;}
 .th-swatch{height:42px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;position:relative;display:flex;align-items:center;justify-content:center;font-family:inherit;}
 .th-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,255,255,.2) inset;}
 .accent-grid{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;}
@@ -1705,6 +1712,107 @@ html[data-aurora="1"] .nav-scrim{
   height:calc(104px + env(safe-area-inset-bottom));
   background:linear-gradient(to top,#F8F9FC 44%,rgba(248,249,252,0));
 }
+/* ═══════════ Aurora — DARK MODE ═══════════ */
+html[data-aurora="1"][data-mode="dark"] body{
+  background:
+    radial-gradient(125% 80% at 0% 0%, #16243E 0%, rgba(22,36,62,0) 46%),
+    radial-gradient(120% 78% at 100% 2%, #2A1A2E 0%, rgba(42,26,46,0) 44%),
+    radial-gradient(150% 95% at 50% 100%, #0F2A27 0%, rgba(15,42,39,0) 52%),
+    #0E1117;
+}
+html[data-aurora="1"][data-mode="dark"] .nav-scrim{background:linear-gradient(to top,#0E1117 44%,rgba(14,17,23,0));}
+/* Elevated cards / surfaces */
+html[data-aurora="1"][data-mode="dark"] .card,
+html[data-aurora="1"][data-mode="dark"] .awid,
+html[data-aurora="1"][data-mode="dark"] .ring-wrap,
+html[data-aurora="1"][data-mode="dark"] .wwcard,
+html[data-aurora="1"][data-mode="dark"] .ad-card,
+html[data-aurora="1"][data-mode="dark"] .meal-row,
+html[data-aurora="1"][data-mode="dark"] .meal-group,
+html[data-aurora="1"][data-mode="dark"] #foodLog .mg{
+  background:#1B1F27;border-color:#2A2F3A;
+  box-shadow:0 14px 34px -24px rgba(0,0,0,.7),0 2px 8px -5px rgba(0,0,0,.5);
+}
+/* Inner tiles / chips */
+html[data-aurora="1"][data-mode="dark"] .awid-wstep button,
+html[data-aurora="1"][data-mode="dark"] .awe-emoji,
+html[data-aurora="1"][data-mode="dark"] .meal-thumb,
+html[data-aurora="1"][data-mode="dark"] .mpcf,
+html[data-aurora="1"][data-mode="dark"] .mc,
+html[data-aurora="1"][data-mode="dark"] .sri-thumb,
+html[data-aurora="1"][data-mode="dark"] .fi,
+html[data-aurora="1"][data-mode="dark"] .cat-chip{
+  background:#262B35;border-color:#2F3540;
+}
+html[data-aurora="1"][data-mode="dark"] .mg-cal{background:#2A2F3A;color:#EAEDF3;}
+/* Headings / values → light */
+html[data-aurora="1"][data-mode="dark"] .aurora-greet,
+html[data-aurora="1"][data-mode="dark"] .aurora-title,
+html[data-aurora="1"][data-mode="dark"] .awid-ti,
+html[data-aurora="1"][data-mode="dark"] .awid-ring-c b,
+html[data-aurora="1"][data-mode="dark"] .meal-name,
+html[data-aurora="1"][data-mode="dark"] .mg-ti,
+html[data-aurora="1"][data-mode="dark"] .awe-info b,
+html[data-aurora="1"][data-mode="dark"] .awh-tip .awh-t b,
+html[data-aurora="1"][data-mode="dark"] .hdr h1,
+html[data-aurora="1"][data-mode="dark"] .water-top h4,
+html[data-aurora="1"][data-mode="dark"] .mpcf b,
+html[data-aurora="1"][data-mode="dark"] .awid-wstep button,
+html[data-aurora="1"][data-mode="dark"] .card h3{
+  color:#EAEDF3;
+}
+/* Muted text + monochrome icons */
+html[data-aurora="1"][data-mode="dark"] .aurora-sub,
+html[data-aurora="1"][data-mode="dark"] .awid-ring-c span,
+html[data-aurora="1"][data-mode="dark"] .meal-meta,
+html[data-aurora="1"][data-mode="dark"] .awe-info small,
+html[data-aurora="1"][data-mode="dark"] .mg-meta,
+html[data-aurora="1"][data-mode="dark"] .awid-ic,
+html[data-aurora="1"][data-mode="dark"] .awe-emoji,
+html[data-aurora="1"][data-mode="dark"] .meal-thumb-ic,
+html[data-aurora="1"][data-mode="dark"] .mg-ic{
+  color:#9BA2B2;
+}
+html[data-aurora="1"][data-mode="dark"] .awh-tip{color:#C2C8D4;}
+html[data-aurora="1"][data-mode="dark"] .awr-track{stroke:#2C313C;}
+html[data-aurora="1"][data-mode="dark"] .fi-n{color:#EAEDF3;}
+/* Header round buttons (back / action icons) */
+html[data-aurora="1"][data-mode="dark"] .aurora-ico,
+html[data-aurora="1"][data-mode="dark"] .aurora-back{
+  background:rgba(38,43,53,.92);color:#EAEDF3;
+  box-shadow:0 8px 22px -15px rgba(0,0,0,.7),inset 0 0 0 1px #2A2F3A;
+}
+html[data-aurora="1"][data-mode="dark"] .hdr .icon-btn{color:#C2C8D4;}
+html[data-aurora="1"][data-mode="dark"] .hdr .icon-btn svg{stroke:#C2C8D4;}
+html[data-aurora="1"][data-mode="dark"] .hdr #hdrSub{color:#9BA2B2;}
+/* Bottom nav — dark glass */
+html[data-aurora="1"][data-mode="dark"] .bnav{
+  background:color-mix(in srgb,#1B1F27 80%,transparent);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 16px 40px -10px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.07);
+}
+html[data-aurora="1"][data-mode="dark"] .bnt{color:#8B92A2;}
+html[data-aurora="1"][data-mode="dark"] .fab{border-color:#1B1F27;}
+/* Search box */
+html[data-aurora="1"][data-mode="dark"] .sbox{background:#1B1F27;border-color:#2A2F3A;}
+html[data-aurora="1"][data-mode="dark"] .sbox input{color:#EAEDF3;}
+html[data-aurora="1"][data-mode="dark"] .sbox-act{color:#9BA2B2;}
+/* Chevrons */
+html[data-aurora="1"][data-mode="dark"] .ms-chev,
+html[data-aurora="1"][data-mode="dark"] .mg-chev{color:#5A6172;}
+/* Steps goal pill stays green on a dark tint */
+html[data-aurora="1"][data-mode="dark"] .awid-goal{background:rgba(34,197,94,.16);color:#4ADE80;}
+/* Home hero meal-summary card */
+html[data-aurora="1"][data-mode="dark"] .meal-ring b,
+html[data-aurora="1"][data-mode="dark"] .meal-ring span,
+html[data-aurora="1"][data-mode="dark"] .meal-macro-list b{color:#EAEDF3;}
+html[data-aurora="1"][data-mode="dark"] .meal-ring small,
+html[data-aurora="1"][data-mode="dark"] .meal-macro-list{color:#9BA2B2;}
+html[data-aurora="1"][data-mode="dark"] .meal-macro-list>div{background:#262B35;}
+@media (min-width:768px){
+  html[data-aurora="1"][data-mode="dark"] body{background:#070A0F;}
+  html[data-aurora="1"][data-mode="dark"] .app{background:#0E1117;box-shadow:0 24px 70px -34px rgba(0,0,0,.85);}
+}
 @media (min-width:768px){
   html[data-aurora="1"] body{padding:18px 0;background:#EEF2FA;}
   html[data-aurora="1"] .app{
@@ -2075,6 +2183,20 @@ html[data-aurora="1"] .nav-scrim{
         </div>
         <div class="theme-grid" id="themeGrid"></div>
         <div id="auroraNote" style="display:none;font-size:.72rem;color:var(--muted);line-height:1.5" data-i18n="ui_aurora_sub">ดีไซน์พรีเมียมสไตล์สุขภาพ — พื้นหลังออโรรา การ์ดสีขาว มินิมอล เน้นข้อมูล</div>
+      </div></div>
+      <div class="set-sec" id="darkSecLbl">โหมดมืด</div>
+      <div class="ios-group"><div class="ios-pad">
+        <div class="dm-seg" id="darkModeSeg" role="tablist">
+          <button type="button" data-dm="system" onclick="setDarkMode('system')">ตามระบบ</button>
+          <button type="button" data-dm="light" onclick="setDarkMode('light')">สว่าง</button>
+          <button type="button" data-dm="dark" onclick="setDarkMode('dark')">มืด</button>
+          <button type="button" data-dm="schedule" onclick="setDarkMode('schedule')">ตามเวลา</button>
+        </div>
+        <div id="darkScheduleRow" style="display:none">
+          <label class="dm-time"><span id="darkStartLbl">เริ่ม</span><input type="time" id="darkStartInput" onchange="setDarkTime('start',this.value)"></label>
+          <label class="dm-time"><span id="darkEndLbl">ถึง</span><input type="time" id="darkEndInput" onchange="setDarkTime('end',this.value)"></label>
+        </div>
+        <div id="darkHint" style="font-size:.7rem;color:var(--muted);line-height:1.5;margin-top:10px"></div>
       </div></div>
       <div class="set-sec" data-i18n="accent">สีหลัก</div>
       <div class="ios-group"><div class="ios-pad"><div class="accent-grid" id="accentGrid"></div></div></div>
@@ -2923,7 +3045,7 @@ html[data-aurora="1"] .nav-scrim{
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.45.1';
+const APP_VERSION = '2.46.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4515,7 +4637,7 @@ function mealIconName(k){ return ({'เช้า':'sunrise','กลางวั�
 function sevIconName(sev){ return ({bad:'alert',warn:'alert',ok:'checkcircle',info:'info'})[sev] || 'info'; }
 let currentDate = todayKey();
 let activeCat = 'all';
-let settings = {theme:'light', accent:'#ff6b6b', lang:'th', font:'prompt', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','profile','settings'], aiProvider:'proxy', uiMode:'original', themeSet:'standard'};
+let settings = {theme:'light', accent:'#ff6b6b', lang:'th', font:'prompt', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','profile','settings'], navTabsAurora:['today','friends','analysis','profile','settings'], aiProvider:'proxy', uiMode:'original', themeSet:'standard', darkMode:'light', darkStart:'20:00', darkEnd:'06:00'};
 
 // Bottom-nav tab catalog — id → { icon SVG path, i18n key }
 const NAV_CATALOG = {
@@ -4763,6 +4885,7 @@ function loadUserData(){
   const ls = lsLoad(LS_SETTINGS, null);
   if (ls) settings = {...settings, ...ls};   // merge over defaults so new keys (uiMode, themeSet…) always exist
   applyTheme();
+  initDarkAuto();                            // start OS-scheme + scheduled-time dark-mode watchers
 }
 function loadEntries(){
   dailyEntries = (allEntries[currentDate] || []).slice();
@@ -4990,11 +5113,15 @@ function showApp(){
 }
 
 // ═══ BOTTOM NAV ═══
+// The active bottom-nav tab list for the CURRENT look (Aurora has its own customizable set).
+function navTabsFor(){
+  return settings.uiMode==='aurora'
+    ? ((settings.navTabsAurora&&settings.navTabsAurora.length)?settings.navTabsAurora:['today','friends','analysis','profile','settings'])
+    : ((settings.navTabs&&settings.navTabs.length)?settings.navTabs:['today','add','analysis','profile','settings']);
+}
 function renderBottomNav(){
   const nav=document.getElementById('mainNav');if(!nav)return;
-  const tabs=settings.uiMode==='aurora'
-    ? ['today','friends','analysis','profile','settings']
-    : ((settings.navTabs&&settings.navTabs.length)?settings.navTabs:['today','add','analysis','profile','settings']);
+  const tabs=navTabsFor();
   // Always ensure "today" is first
   const finalTabs=['today',...tabs.filter(t=>t!=='today')].slice(0,5);
   nav.innerHTML='';
@@ -5023,7 +5150,7 @@ function renderBottomNav(){
 }
 function renderNavTabsList(){
   const wrap=document.getElementById('navTabsList');if(!wrap)return;
-  const active=settings.navTabs||['today','add','analysis','tdee'];
+  const active=navTabsFor();
   wrap.innerHTML='';
   Object.entries(NAV_CATALOG).forEach(([id,cfg])=>{
     const label=cfg.label_literal||t(cfg.label_key);
@@ -5045,13 +5172,14 @@ function renderNavTabsList(){
 }
 function toggleNavTab(id){
   if(id==='today')return;
-  const tabs=new Set(settings.navTabs||['today','add','analysis','tdee']);
+  const key=settings.uiMode==='aurora'?'navTabsAurora':'navTabs';   // edit the current look's nav set
+  const tabs=new Set(navTabsFor());
   if(tabs.has(id))tabs.delete(id);
   else if(tabs.size<5)tabs.add(id);
   else{showToast((settings.lang||'th')!=='th'?'Max 5 tabs':'สูงสุด 5 รายการ');renderNavTabsList();return;}
-  // Preserve order
-  const order=['today','add','analysis','tdee','profile','settings','friends','about'];
-  settings.navTabs=order.filter(t=>tabs.has(t));
+  // Preserve a sensible order (includes the Meals tab + all current pages)
+  const order=['today','add','analysis','meals','tdee','friends','profile','settings','about'];
+  settings[key]=order.filter(t=>tabs.has(t));
   lsSave(LS_SETTINGS,settings);
   renderBottomNav();renderNavTabsList();
 }
@@ -9816,9 +9944,45 @@ function ensureUiKitFont(){   // lazy-load the Nutrition UI System fonts: Plus J
     document.head.appendChild(l);
   }catch(e){}
 }
+// ── DARK MODE ──
+// settings.darkMode: 'light' | 'dark' (manual) · 'system' (follow OS) · 'schedule' (time window)
+// Returns whether dark should currently be active.
+function resolveDark(){
+  const m=settings.darkMode||'light';
+  if(m==='dark')return true;
+  if(m==='light')return false;
+  if(m==='system'){ try{ return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }catch(_){ return false; } }
+  if(m==='schedule'){
+    const now=new Date(), cur=now.getHours()*60+now.getMinutes();
+    const p=s=>{const [h,mi]=String(s||'').split(':').map(Number); return (h||0)*60+(mi||0);};
+    const s=p(settings.darkStart||'20:00'), e=p(settings.darkEnd||'06:00');
+    if(s===e)return false;
+    return s<e ? (cur>=s&&cur<e) : (cur>=s||cur<e);   // s<e same-day window · else overnight wrap
+  }
+  return false;
+}
+// Wire up auto sources once: react to OS scheme changes + re-check the schedule each minute.
+let _darkAutoInit=false;
+function initDarkAuto(){
+  if(_darkAutoInit)return; _darkAutoInit=true;
+  try{
+    const mq=window.matchMedia('(prefers-color-scheme: dark)');
+    const h=()=>{ if((settings.darkMode||'')==='system')applyTheme(); };
+    if(mq.addEventListener)mq.addEventListener('change',h); else if(mq.addListener)mq.addListener(h);
+  }catch(_){}
+  setInterval(()=>{ if((settings.darkMode||'')==='schedule')applyTheme(); }, 60000);
+}
 function applyTheme(){
   // Migrate retired themes (forest/warm/ocean) to nearest replacement
   const LEGACY_MIGRATE={forest:'sky',warm:'rose',ocean:'sky'};
+  // Auto dark-mode (system/schedule) for standard/nutrikit → swap to the saved light/dark theme.
+  if(settings.uiMode!=='aurora'){
+    const dm=settings.darkMode||'light';
+    if(dm==='system'||dm==='schedule'){
+      const want=resolveDark()?(settings.lastDark||'dark'):(settings.lastLight||'light');
+      if(THEMES[want])settings.theme=want;
+    }
+  }
   if(settings.theme&&LEGACY_MIGRATE[settings.theme]){settings.theme=LEGACY_MIGRATE[settings.theme];lsSave(LS_SETTINGS,settings);}
   if(settings.lastDark&&LEGACY_MIGRATE[settings.lastDark]){settings.lastDark=LEGACY_MIGRATE[settings.lastDark];lsSave(LS_SETTINGS,settings);}
   const th=THEMES[settings.theme]||THEMES.dark;
@@ -9854,19 +10018,32 @@ function applyTheme(){
   const _aurora = settings.uiMode==='aurora';
   document.documentElement.dataset.aurora = _aurora?'1':'0';
   if(_aurora){
-    r.setProperty('--bg','#F8F9FC');
-    r.setProperty('--surface','#FFFFFF');
-    r.setProperty('--surface2','#F1F4FA');
-    r.setProperty('--border','#E7EBF3');
-    r.setProperty('--text','#1C1C1E');
-    r.setProperty('--muted','#8A90A2');
+    const _adark=resolveDark();
+    if(_adark){
+      // Aurora dark palette (deep charcoal/navy)
+      r.setProperty('--bg','#0E1117');
+      r.setProperty('--surface','#1B1F27');
+      r.setProperty('--surface2','#262B35');
+      r.setProperty('--border','#2A2F3A');
+      r.setProperty('--text','#EAEDF3');
+      r.setProperty('--muted','#9BA2B2');
+      r.setProperty('--glass-bd','rgba(255,255,255,.08)');
+    }else{
+      r.setProperty('--bg','#F8F9FC');
+      r.setProperty('--surface','#FFFFFF');
+      r.setProperty('--surface2','#F1F4FA');
+      r.setProperty('--border','#E7EBF3');
+      r.setProperty('--text','#1C1C1E');
+      r.setProperty('--muted','#8A90A2');
+      r.setProperty('--glass-bd','rgba(255,255,255,.75)');
+    }
     r.setProperty('--accent','#4A90FF');      // primary action (blue) — dominant CTA
     r.setProperty('--accent2','#FF6B6B');     // coral — ring gradient end + highlights
     r.setProperty('--primary','#4A90FF');
     r.setProperty('--blue','#4A90FF'); r.setProperty('--green','#34C759'); r.setProperty('--amber','#FFB340'); r.setProperty('--purple','#a78bfa');
     r.setProperty('--mp','#4A90FF'); r.setProperty('--mc','#FFB340'); r.setProperty('--mf','#a78bfa');
     document.documentElement.dataset.uikit='0';      // Aurora wins over Nutrition UI System
-    document.documentElement.dataset.mode='light';
+    document.documentElement.dataset.mode=_adark?'dark':'light';
     document.documentElement.dataset.hc='0';
   }
   // Capacitor native: sync status bar color with current theme
@@ -9884,22 +10061,31 @@ function applyTheme(){
       }
     }
   }catch(e){}
+  const _dispMode=document.documentElement.dataset.mode;   // actual displayed mode (Aurora may be dark)
   const mi=document.getElementById('modeIcon');
   if(mi){
-    mi.innerHTML=th.mode==='light'
+    mi.innerHTML=_dispMode==='light'
       ?'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>'
       :'<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>';
   }
   // Update browser theme-color meta
   const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta)meta.setAttribute('content',th.bg);
+  if(meta)meta.setAttribute('content', _aurora ? (resolveDark()?'#0E1117':'#F8F9FC') : th.bg);
 }
 function toggleMode(){
+  // Aurora has one fixed palette → the header toggle just flips manual dark on/off.
+  if(settings.uiMode==='aurora'){
+    settings.darkMode=resolveDark()?'light':'dark';
+    lsSave(LS_SETTINGS,settings); applyTheme();
+    try{ if(document.getElementById('pg-settings')?.classList.contains('active'))renderSettings(); }catch(e){}
+    return;
+  }
   const th=THEMES[settings.theme]||THEMES.dark;
   // NutriKit themes flip to their own light/dark pair (keeps the family identity).
   if(th.pair&&THEMES[th.pair]){
     settings.theme=th.pair; const nt=THEMES[settings.theme];
     if(nt.mode==='dark')settings.lastDark=settings.theme; else settings.lastLight=settings.theme;
+    settings.darkMode=nt.mode==='dark'?'dark':'light';   // manual override
     lsSave(LS_SETTINGS,settings); applyTheme(); return;
   }
   // If currently dark → switch to last-used light (or 'light'); vice versa
@@ -9909,8 +10095,41 @@ function toggleMode(){
   const newTh=THEMES[settings.theme];
   if(newTh.mode==='dark')settings.lastDark=settings.theme;
   else settings.lastLight=settings.theme;
+  settings.darkMode=(newTh.mode==='dark')?'dark':'light';   // manual override
   lsSave(LS_SETTINGS,settings);
   applyTheme();
+}
+// Dark-mode preference picker (Settings › รูปลักษณ์ › โหมดมืด)
+function setDarkMode(m){
+  if(!['system','light','dark','schedule'].includes(m))return;
+  settings.darkMode=m; lsSave(LS_SETTINGS,settings);
+  if(m==='system')initDarkAuto();
+  applyTheme(); renderDarkMode();
+  try{ if(typeof refreshActivePage==='function')refreshActivePage(); }catch(e){}
+}
+function setDarkTime(which,val){
+  if(which==='start')settings.darkStart=val||'20:00'; else settings.darkEnd=val||'06:00';
+  lsSave(LS_SETTINGS,settings); applyTheme(); renderDarkMode();
+}
+function renderDarkMode(){
+  const seg=document.getElementById('darkModeSeg'); if(!seg)return;
+  const m=settings.darkMode||'light';
+  const L=document.getElementById('darkSecLbl'); if(L)L.textContent=LL('โหมดมืด','Dark mode','深色模式','深色模式');
+  const labels={system:LL('ตามระบบ','System','跟随系统','跟隨系統'),light:LL('สว่าง','Light','浅色','淺色'),dark:LL('มืด','Dark','深色','深色'),schedule:LL('ตามเวลา','Schedule','定时','定時')};
+  seg.querySelectorAll('button[data-dm]').forEach(b=>{ const k=b.dataset.dm; b.textContent=labels[k]||k; b.classList.toggle('on',k===m); });
+  const sr=document.getElementById('darkScheduleRow'); if(sr)sr.style.display=m==='schedule'?'flex':'none';
+  const sL=document.getElementById('darkStartLbl'); if(sL)sL.textContent=LL('เริ่ม','From','开始','開始');
+  const eL=document.getElementById('darkEndLbl'); if(eL)eL.textContent=LL('ถึง','To','至','至');
+  const si=document.getElementById('darkStartInput'); if(si)si.value=settings.darkStart||'20:00';
+  const ei=document.getElementById('darkEndInput'); if(ei)ei.value=settings.darkEnd||'06:00';
+  const hint=document.getElementById('darkHint');
+  if(hint){
+    const stateTxt=resolveDark()?LL('ขณะนี้: มืด','Now: Dark','当前：深色','當前：深色'):LL('ขณะนี้: สว่าง','Now: Light','当前：浅色','當前：淺色');
+    const desc=m==='system'?LL('เปลี่ยนอัตโนมัติตามการตั้งค่าของเครื่อง','Follows your device setting','跟随设备设置自动切换','跟隨裝置設定自動切換')
+      :m==='schedule'?LL('เปิดมืดตามช่วงเวลาที่กำหนด','Dark during the set hours','在设定时段开启深色','在設定時段開啟深色')
+      :LL('ตั้งค่าเอง','Set manually','手动设置','手動設定');
+    hint.textContent=desc+' · '+stateTxt;
+  }
 }
 // Switch the active theme SET (exclusive): 'standard' or 'nutrikit'. Picking a set
 // also swaps the current theme to one belonging to that set (same light/dark mode).
@@ -10200,6 +10419,7 @@ function renderSettings(){
   const setCk=(id,val)=>{const el=document.getElementById(id);if(el)el.checked=!!val;};
   setCk('compactToggle',settings.compact);
   setCk('simpleToggle',settings.simple);
+  renderDarkMode();
   renderNavTabsList();
   setCk('mealRemToggle',settings.mealReminders!==false);
   setCk('streakSaverToggle',settings.streakSaver!==false);
@@ -12390,6 +12610,10 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.46.0':{
+    th:['🌙 โหมดมืด — อัตโนมัติตามระบบ · ตั้งเวลาเอง · เปิด-ปิดเอง','🧭 ปรับแต่งแถบล่างใช้ได้กับ Aurora'],
+    en:['🌙 Dark mode — auto by system · scheduled hours · manual','🧭 Bottom-nav customization works in Aurora'],
+  },
   '2.45.0':{
     th:['🏠 หน้าแรกวิดเจ็ต 4 ช่อง (น้ำ · คำแนะนำสุขภาพ · ก้าวเดิน+ตั้งเป้า · ออกกำลังกาย)','🔎 ช่องค้นหาใหม่ (กล้อง+ไมค์) · หน้าถ่ายรูป AI ดีไซน์ใหม่','🍽️ หน้ามื้ออาหาร: เพิ่ม/ลบอาหารในแต่ละมื้อ','🧭 หัวข้อกึ่งกลางทุกหน้า · ปุ่มย้อนกลับ','🐛 แก้ไขบั๊ก'],
     en:['🏠 Home dashboard — 4 widgets (water · health tips · steps+goal · exercise)','🔎 New search bar (camera+mic) · redesigned AI photo page','🍽️ Meals page: add/delete food per meal','🧭 Centered page headers · back button','🐛 Bug fixes'],
