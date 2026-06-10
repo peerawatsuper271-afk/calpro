@@ -516,12 +516,29 @@ html[data-aurora="1"] .ax-pop-c{font-size:.68rem;color:var(--accent);font-weight
 
 /* ── SEARCH ── */
 .sbox{position:relative;margin-bottom:9px;}
-.sbox input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 38px 9px 33px;font-size:.87rem;outline:none;font-family:inherit;}
+.sbox input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 74px 9px 33px;font-size:.87rem;outline:none;font-family:inherit;}
 .sbox input:focus{border-color:var(--accent);}
-.mic-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:8px;font-size:1.05rem;cursor:pointer;opacity:.7;padding:0;line-height:1;transition:opacity .15s,background .15s;}
-.mic-btn .ic{width:18px;height:18px;}
-.mic-btn:hover{opacity:1;background:var(--surface);}
-.mic-btn.listening{opacity:1;color:var(--accent);animation:micPulse 1s ease-in-out infinite;}
+/* Search-box right-side actions: voice (mic) + photo (camera) */
+.sbox-actions{position:absolute;right:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:1px;}
+.sbox-act{width:33px;height:33px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:9px;cursor:pointer;color:var(--muted);opacity:.85;padding:0;line-height:1;transition:opacity .15s,background .15s,color .15s;}
+.sbox-act .ic{width:19px;height:19px;}
+.sbox-act:hover{opacity:1;background:var(--surface);color:var(--text);}
+.sbox-act.listening{opacity:1;color:var(--accent);animation:micPulse 1s ease-in-out infinite;}
+/* AI photo modal — themed photo picker */
+.aiphoto-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.aiphoto-hint{font-size:.74rem;color:var(--muted);line-height:1.5;flex:1;min-width:180px;}
+.aiphoto-chip{font-size:.66rem;background:var(--surface2);color:var(--accent);padding:5px 11px;border-radius:99px;white-space:nowrap;font-weight:700;}
+.aiphoto-drop{width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;padding:26px 16px;border:2px dashed var(--border);border-radius:18px;background:var(--surface2);cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s,transform .1s;margin-bottom:12px;}
+.aiphoto-drop:hover{border-color:var(--accent);background:var(--surface);}
+.aiphoto-drop:active{transform:scale(.99);}
+.aiphoto-drop-ic{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);margin-bottom:2px;}
+.aiphoto-drop-ic .ic svg{width:27px;height:27px;}
+.aiphoto-drop-t{font-size:.92rem;font-weight:800;color:var(--text);}
+.aiphoto-drop-s{font-size:.7rem;color:var(--muted);}
+.aiphoto-preview{width:100%;max-height:240px;object-fit:contain;border-radius:14px;background:var(--surface2);margin-bottom:10px;}
+.aiphoto-status{font-size:.78rem;color:var(--muted);text-align:center;margin:6px 0;min-height:20px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.aiphoto-note{font-size:.68rem;color:var(--amber,#f59f00);background:rgba(245,159,0,.08);border-left:3px solid var(--amber,#f59f00);padding:7px 10px;border-radius:8px;margin-bottom:10px;line-height:1.5;}
+html[data-aurora="1"] .aiphoto-drop{border-radius:20px;}
 @keyframes micPulse{0%,100%{transform:translateY(-50%) scale(1);}50%{transform:translateY(-50%) scale(1.18);}}
 .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none;}
 .cats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
@@ -901,7 +918,7 @@ select.cs-native{position:absolute!important;width:1px;height:1px;opacity:0;poin
 
 /* ── PAGE HEADERS ── */
 .page-hd{position:relative;display:flex;align-items:center;justify-content:center;margin:4px 0 16px;min-height:40px;}
-.page-hd h2{font-size:1.1rem;font-weight:700;text-align:center;}
+.page-hd h2{font-size:1.24rem;font-weight:700;text-align:center;}
 .back-btn{position:absolute;left:0;top:50%;transform:translateY(-50%);width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--surface2);border:none;border-radius:50%;color:var(--text);font-size:1.35rem;cursor:pointer;line-height:1;padding:0;transition:background .15s,transform .1s;}
 .back-btn:hover{background:var(--border);}
 .back-btn:active{transform:translateY(-50%) scale(.9);}
@@ -1161,31 +1178,37 @@ html[data-aurora="1"] .app{
 /* Aurora keeps the top control bar (menu · sync dot · refresh · dark-mode) */
 html[data-aurora="1"] .hdr{display:flex;margin:0;padding:max(env(safe-area-inset-top),6px) 2px 2px;}
 html[data-aurora="1"] .hdr h1{font-size:1rem;color:#111827;}
-html[data-aurora="1"] .hdr #hdrSub{font-size:.66rem;color:#8A90A2;}
 html[data-aurora="1"] .hdr .icon-btn{color:#4A5468;}
 html[data-aurora="1"] .hdr .icon-btn svg{stroke:#4A5468;}
-/* Tab pages (friends/profile/settings) are top-level in Aurora — drop their back arrow */
-html[data-aurora="1"] .page-hd .back-btn{display:none;}
+/* CalPro+ top bar: drop the duplicated subtitle (home already shows the greeting + goal) */
+.hdr #hdrSub{display:none;}
+/* Top-level TAB pages (friends/profile/settings) get no back arrow; sub-pages keep theirs */
+html[data-aurora="1"] #pg-profile .back-btn,
+html[data-aurora="1"] #pg-friends .back-btn,
+html[data-aurora="1"] #pg-settings .back-btn{display:none;}
 html[data-aurora="1"] #pg-today>.dnav{display:none;}
 html[data-aurora="1"] .screen.active{animation:scrIn .18s ease-out;}
+/* Page headers — title centered (same size on every page, a touch bigger); side buttons float */
 html[data-aurora="1"] .aurora-page-top{
-  min-height:54px;
-  margin:2px 0 12px;
+  position:relative;
+  min-height:44px;
+  margin:2px 0 14px;
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:12px;
+  justify-content:center;
+  text-align:center;
+  padding:0 46px;
 }
 html[data-aurora="1"] .aurora-greet,
 html[data-aurora="1"] .aurora-title{
-  font-size:1.02rem;
-  line-height:1.15;
+  font-size:1.24rem;
+  line-height:1.2;
   font-weight:800;
   letter-spacing:0;
   color:#111827;
 }
 html[data-aurora="1"] .aurora-sub{
-  margin-top:5px;
+  margin-top:3px;
   font-size:.72rem;
   line-height:1.25;
   color:#8A90A2;
@@ -1193,6 +1216,9 @@ html[data-aurora="1"] .aurora-sub{
 }
 html[data-aurora="1"] .aurora-ico,
 html[data-aurora="1"] .aurora-back{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
   width:38px;
   height:38px;
   border:0;
@@ -1203,10 +1229,68 @@ html[data-aurora="1"] .aurora-back{
   align-items:center;
   justify-content:center;
   box-shadow:0 8px 22px -15px rgba(31,45,90,.28),inset 0 0 0 1px #EEF1F7;
-  flex:none;
 }
-html[data-aurora="1"] .aurora-back{font-size:1.65rem;line-height:1;padding-bottom:3px;}
+html[data-aurora="1"] .aurora-back{left:0;font-size:1.65rem;line-height:1;padding-bottom:3px;}
+html[data-aurora="1"] .aurora-ico{right:0;}
 html[data-aurora="1"] .aurora-ico .ic svg{width:19px;height:19px;}
+/* ── Aurora home widgets — 2×2 grid of equal squares (water · health · steps · exercise) ── */
+.aurora-widgets{display:none;}
+html[data-aurora="1"] .aurora-widgets{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+/* The widget grid replaces the standard water/health/steps/workout cards on Aurora Home */
+html[data-aurora="1"] #pg-today .aurora-duo,
+html[data-aurora="1"] #pg-today #stepsCard,
+html[data-aurora="1"] #pg-today #workoutCardToday{display:none;}
+html[data-aurora="1"] .awid{
+  background:#fff;border:1px solid #EEF1F7;border-radius:20px;
+  box-shadow:0 14px 34px -24px rgba(31,45,90,.28),0 2px 8px -5px rgba(31,45,90,.08);
+  padding:14px;min-height:182px;display:flex;flex-direction:column;gap:9px;
+}
+.awid-top{display:flex;align-items:center;gap:7px;}
+.awid-ic{font-size:1.05rem;line-height:1;}
+.awid-ti{font-size:.82rem;font-weight:800;color:#111827;}
+/* Progress ring (water + steps) */
+.awid-ring{position:relative;flex:1;display:flex;align-items:center;justify-content:center;min-height:0;}
+.awid-ring svg{width:108px;height:108px;transform:rotate(-90deg);}
+.awr-track{fill:none;stroke:#EDF1F8;stroke-width:11;}
+.awr-fill{fill:none;stroke-width:11;stroke-linecap:round;transition:stroke-dashoffset .55s ease;}
+.awr-fill.water{stroke:#36A5FF;}
+.awr-fill.steps{stroke:#22C55E;}
+.awid-ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;}
+.awid-ring-c b{font-size:1.5rem;font-weight:800;color:#111827;}
+.awid-ring-c span{font-size:.66rem;color:#8A90A2;font-weight:600;margin-top:3px;}
+/* Water +/- stepper */
+.awid-wstep{display:flex;align-items:center;justify-content:center;gap:16px;}
+.awid-wstep button{width:34px;height:34px;border-radius:50%;border:0;background:#F3F6FC;color:#111827;font-size:1.3rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.awid-wstep button:active{transform:scale(.9);}
+/* Steps goal pill */
+.awid-goal{align-self:center;border:0;background:#E8F8EF;color:#1FA463;font-size:.72rem;font-weight:800;padding:6px 13px;border-radius:99px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.awid-goal:active{transform:scale(.95);}
+.awid-goal .ic svg{width:13px;height:13px;}
+/* Health tips widget */
+.awid-health-body{flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden;}
+.awh-tip{display:flex;gap:7px;align-items:flex-start;font-size:.74rem;line-height:1.35;color:#3A4256;}
+.awh-tip .awh-i{flex:none;font-size:.9rem;line-height:1.25;}
+.awh-tip .awh-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.awh-tip .awh-t b{font-weight:800;color:#111827;}
+.awh-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#1FA463;font-size:.78rem;font-weight:700;text-align:center;}
+.awh-empty .awh-emoji{font-size:1.9rem;}
+.awid-more{align-self:flex-start;border:0;background:transparent;color:var(--primary,#4A90FF);font-size:.74rem;font-weight:800;cursor:pointer;padding:2px 0;}
+/* Exercise widget */
+.awid-ex-body{flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden;justify-content:center;}
+.awe-item{display:flex;align-items:center;gap:9px;min-width:0;}
+.awe-emoji{width:40px;height:40px;border-radius:13px;background:#F3F6FC;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex:none;}
+.awe-info{min-width:0;}
+.awe-info b{display:block;font-size:.8rem;font-weight:800;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.awe-info small{font-size:.66rem;color:#8A90A2;}
+.awe-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
+.awe-empty .awe-big{font-size:2.4rem;line-height:1;opacity:.9;}
+.awe-empty span{font-size:.72rem;color:#8A90A2;font-weight:600;}
+.awid-add{border:0;background:var(--primary,#4A90FF);color:#fff;font-size:.76rem;font-weight:800;padding:9px;border-radius:13px;cursor:pointer;width:100%;}
+.awid-add:active{transform:scale(.97);}
+.awid-add.ghost{background:#EEF3FB;color:var(--primary,#4A90FF);}
+/* Step-goal picker chips */
+.sg-chip{border:1px solid #E6E9F2;background:#fff;color:var(--text);font-family:inherit;font-size:.84rem;font-weight:700;padding:11px 6px;border-radius:12px;cursor:pointer;}
+.sg-chip.on{background:var(--accent);color:#fff;border-color:transparent;}
 html[data-aurora="1"] .card,
 html[data-aurora="1"] .ring-wrap,
 html[data-aurora="1"] .wwcard,
@@ -1294,19 +1378,22 @@ html[data-aurora="1"] #pg-add>.card:not(#addSearchCard){
   display:none;
 }
 html[data-aurora="1"] .sbox{
-  height:48px;
+  height:50px;
   margin-bottom:12px;
-  border-radius:15px;
+  border-radius:25px;
   box-shadow:none;
 }
 html[data-aurora="1"] .sbox input{
   height:46px;
   padding-left:42px;
-  padding-right:42px;
+  padding-right:82px;
   font-size:16px!important;
   color:#111827;
 }
 html[data-aurora="1"] .si{left:15px;}
+html[data-aurora="1"] .sbox-actions{right:7px;}
+html[data-aurora="1"] .sbox-act{width:36px;height:36px;color:#7A8194;}
+html[data-aurora="1"] .sbox-act:hover{background:#F1F4FA;}
 html[data-aurora="1"] #pg-add .btn-sec{
   min-height:44px;
   border-radius:14px;
@@ -1497,14 +1584,14 @@ html[data-aurora="1"] .meal-cal{
   text-align:right;
 }
 html[data-aurora="1"] .meal-cal small{display:block;color:#8A90A2;font-size:.58rem;font-weight:700;}
+html[data-aurora="1"] .meal-acts{display:flex;align-items:center;gap:1px;flex:none;}
 html[data-aurora="1"] .meal-more{
-  width:24px;
-  height:34px;
-  border:0;
-  background:transparent;
-  color:#9AA1B2;
-  font-size:1.1rem;
+  width:30px;height:34px;border:0;background:transparent;color:#9AA1B2;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:9px;
 }
+html[data-aurora="1"] .meal-more:active{background:#F1F4FA;transform:scale(.92);}
+html[data-aurora="1"] .meal-more .ic svg{width:17px;height:17px;}
+html[data-aurora="1"] .meal-more.del{color:#EF6B7D;}
 html[data-aurora="1"] .meal-total{
   display:grid;
   gap:8px;
@@ -1526,6 +1613,9 @@ html[data-aurora="1"] .mg-head{width:100%;display:flex;align-items:center;gap:10
 html[data-aurora="1"] .mg-ic{font-size:1.2rem;line-height:1;}
 html[data-aurora="1"] .mg-ti{font-weight:800;color:#111827;font-size:.92rem;}
 html[data-aurora="1"] .mg-meta{margin-left:auto;font-size:.7rem;color:#8A90A2;font-weight:600;white-space:nowrap;}
+html[data-aurora="1"] .mg-add-btn{flex:none;width:27px;height:27px;border-radius:50%;border:0;background:#EEF3FB;color:var(--primary,#4A90FF);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+html[data-aurora="1"] .mg-add-btn:active{transform:scale(.9);}
+html[data-aurora="1"] .mg-add-btn .ic svg{width:15px;height:15px;}
 html[data-aurora="1"] .mg-chev{color:#C7CDDB;font-size:1.25rem;line-height:1;transition:transform .2s;margin-left:2px;}
 html[data-aurora="1"] .meal-group.open .mg-chev{transform:rotate(90deg);}
 html[data-aurora="1"] .mg-body{display:none;padding:2px 10px 8px;}
@@ -1673,6 +1763,8 @@ html[data-aurora="1"] .nav-scrim{
         <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--mc,var(--amber))">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--mc,var(--amber))"></div></div><div class="mc-sub" id="mCS"></div></div>
         <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--mf,var(--purple))">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--mf,var(--purple))"></div></div><div class="mc-sub" id="mFS"></div></div>
       </div>
+      <!-- Aurora home widgets: 2×2 grid of equal squares — water ring · health tips · steps ring · exercise. Populated by renderAuroraWidgets(); standard/nutrition UIs use the cards below instead. -->
+      <div class="aurora-widgets" id="auroraWidgets"></div>
       <div class="aurora-duo">
       <div class="wwrow">
         <div class="wwcard wwcard-full">
@@ -1694,14 +1786,9 @@ html[data-aurora="1"] .nav-scrim{
       </div><!-- /.aurora-duo -->
       <!-- Ad slot · filled by renderAdSlot() in renderToday · hidden if user is premium -->
       <div class="ad-slot" data-ad-slot="today-1"></div>
-      <!-- Quick-add: tap a recent/favorite food to log it in one tap -->
-      <div class="qadd-wrap hide" id="quickAddWrap">
-        <div class="qadd-lbl"><span class="ic" data-ic="zap"></span> <span data-i18n="quick_add">เพิ่มด่วน</span></div>
-        <div class="qadd-row" id="quickAddRow"></div>
-      </div>
       <div id="foodLog"></div>
       <div class="card" id="stepsCard" style="margin-top:8px"><div id="stepsBody"></div></div>
-      <div class="card" style="margin-top:8px">
+      <div class="card" id="workoutCardToday" style="margin-top:8px">
         <h3 style="display:flex;justify-content:space-between;align-items:center">
           <span><span data-i18n="workouts">ออกกำลังกาย</span></span>
           <button class="btn-sec" style="font-size:.7rem;padding:4px 10px" onclick="openWorkoutModal()" data-i18n="add_workout">+ เพิ่ม</button>
@@ -1719,11 +1806,7 @@ html[data-aurora="1"] .nav-scrim{
     <div class="screen" id="pg-add">
       <div class="card" id="addSearchCard">
         <h3 data-i18n="search_food">ค้นหาอาหาร</h3>
-        <div class="sbox"><span class="si ic" data-ic="search"></span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"><button type="button" class="mic-btn" id="micBtn" onclick="startVoiceSearch()" aria-label="Voice search" title="พูดชื่ออาหาร"><span class="ic" data-ic="mic"></span></button></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
-          <button class="btn-sec" onclick="openBarcodeModal()" style="font-size:.82rem"><span class="ic" data-ic="barcode"></span> <span data-i18n="scan_barcode">บาร์โค้ด</span></button>
-          <button class="btn-sec" onclick="openAiPhotoModal()" style="font-size:.82rem"><span class="ic" data-ic="ai"></span> <span data-i18n="ai_photo_btn">ถ่ายรูป AI</span></button>
-        </div>
+        <div class="sbox"><span class="si ic" data-ic="search"></span><input type="text" id="searchInput" placeholder="พิมพ์ชื่ออาหาร (ไทย/อังกฤษ)..." oninput="doSearch(this.value)" autocomplete="off" data-i18n="search_ph"><div class="sbox-actions"><button type="button" class="sbox-act" onclick="openAiPhotoModal()" aria-label="Photo" title="ถ่ายรูปอาหาร · AI"><span class="ic" data-ic="camera"></span></button><button type="button" class="sbox-act" id="micBtn" onclick="startVoiceSearch()" aria-label="Voice search" title="พูดชื่ออาหาร"><span class="ic" data-ic="mic"></span></button></div></div>
         <div id="aiQuotaInline" style="font-size:.66rem;color:var(--muted);text-align:right;margin-bottom:8px;padding-right:4px;min-height:14px"></div>
         <div class="fl">
           <div class="step-row"><span class="step-no">1</span><label data-i18n="meal">มื้ออาหาร</label></div>
@@ -1869,7 +1952,7 @@ html[data-aurora="1"] .nav-scrim{
     <!-- PROFILE -->
     <div class="screen" id="pg-profile">
       <div class="page-hd">
-        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <button class="back-btn" onclick="goBack()">‹</button>
         <h2 data-i18n="profile">โปรไฟล์</h2>
       </div>
       <!-- ─── Hero card (Steam-style) ─── -->
@@ -1938,7 +2021,7 @@ html[data-aurora="1"] .nav-scrim{
     <!-- SETTINGS (iOS-style grouped list → drill-in sub-pages) -->
     <div class="screen" id="pg-settings">
       <div class="page-hd">
-        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <button class="back-btn" onclick="goBack()">‹</button>
         <h2 data-i18n="settings">ตั้งค่า</h2>
       </div>
       <div class="ios-group">
@@ -1964,13 +2047,13 @@ html[data-aurora="1"] .nav-scrim{
 
     <!-- SETTINGS · Cloud Sync -->
     <div class="screen" id="pg-set-cloud">
-      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="cloud_sync">Cloud Sync</h2></div>
+      <div class="page-hd"><button class="back-btn" onclick="goBack()">‹</button><h2 data-i18n="cloud_sync">Cloud Sync</h2></div>
       <div class="ios-group"><div class="ios-pad"><div id="cloudStatus"></div></div></div>
     </div>
 
     <!-- SETTINGS · Appearance -->
     <div class="screen" id="pg-set-appearance">
-      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="appearance">รูปลักษณ์</h2></div>
+      <div class="page-hd"><button class="back-btn" onclick="goBack()">‹</button><h2 data-i18n="appearance">รูปลักษณ์</h2></div>
       <div class="set-sec" data-i18n="theme">ธีมสี</div>
       <div class="ios-group"><div class="ios-pad">
         <div class="themeset-seg" id="themeSetSeg" role="tablist">
@@ -2006,7 +2089,7 @@ html[data-aurora="1"] .nav-scrim{
 
     <!-- SETTINGS · Language -->
     <div class="screen" id="pg-set-lang">
-      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="language">ภาษา</h2></div>
+      <div class="page-hd"><button class="back-btn" onclick="goBack()">‹</button><h2 data-i18n="language">ภาษา</h2></div>
       <div class="ios-group">
         <button class="lbtn lang-opt" data-lang="th" onclick="setLang('th')"><span>🇹🇭 ภาษาไทย</span><span class="lang-check">✓</span></button>
         <button class="lbtn lang-opt" data-lang="en" onclick="setLang('en')"><span>🇬🇧 English</span><span class="lang-check">✓</span></button>
@@ -2017,7 +2100,7 @@ html[data-aurora="1"] .nav-scrim{
 
     <!-- SETTINGS · Reminders -->
     <div class="screen" id="pg-set-reminders">
-      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="reminders">การเตือน</h2></div>
+      <div class="page-hd"><button class="back-btn" onclick="goBack()">‹</button><h2 data-i18n="reminders">การเตือน</h2></div>
       <div class="ios-group">
         <div class="setting-row">
           <div class="sr-l">
@@ -2055,21 +2138,21 @@ html[data-aurora="1"] .nav-scrim{
 
     <!-- SETTINGS · AI -->
     <div class="screen" id="pg-set-ai">
-      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="ai_settings_title">AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)</h2></div>
+      <div class="page-hd"><button class="back-btn" onclick="goBack()">‹</button><h2 data-i18n="ai_settings_title">AI วิเคราะห์อาหาร (ใส่ key ของคุณเอง)</h2></div>
       <div class="set-note" data-i18n="ai_settings_sub">ถ่ายรูปอาหาร → AI ประเมินแคล/มาโครให้ · ใช้ API key ของคุณเอง (Claude/OpenAI/Gemini)</div>
       <div class="ios-group"><div class="ios-pad"><div id="aiSettingsBody"></div></div></div>
     </div>
 
     <!-- SETTINGS · Customize nav -->
     <div class="screen" id="pg-set-nav">
-      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="customize_nav">ปรับแต่งแถบล่าง</h2></div>
+      <div class="page-hd"><button class="back-btn" onclick="goBack()">‹</button><h2 data-i18n="customize_nav">ปรับแต่งแถบล่าง</h2></div>
       <div class="set-note" data-i18n="customize_nav_sub">เลือกได้สูงสุด 5 รายการ · "วันนี้" บังคับติดไว้</div>
       <div class="ios-group" id="navTabsList"></div>
     </div>
 
     <!-- SETTINGS · Water goal -->
     <div class="screen" id="pg-set-water">
-      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="water_goal_cfg">เป้าหมายน้ำดื่ม</h2></div>
+      <div class="page-hd"><button class="back-btn" onclick="goBack()">‹</button><h2 data-i18n="water_goal_cfg">เป้าหมายน้ำดื่ม</h2></div>
       <div class="ios-group"><div class="ios-pad">
         <div style="display:flex;align-items:center;gap:10px">
           <input type="range" id="waterGoalRange" min="4" max="16" step="1" oninput="changeWaterGoal(this.value)" style="flex:1">
@@ -2080,7 +2163,7 @@ html[data-aurora="1"] .nav-scrim{
 
     <!-- SETTINGS · Manage data -->
     <div class="screen" id="pg-set-data">
-      <div class="page-hd"><button class="back-btn" onclick="navTo('settings')">‹</button><h2 data-i18n="manage_data">จัดการข้อมูล</h2></div>
+      <div class="page-hd"><button class="back-btn" onclick="goBack()">‹</button><h2 data-i18n="manage_data">จัดการข้อมูล</h2></div>
       <div class="ios-group"><div class="ios-pad">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
           <button class="btn-sec" onclick="exportData()"><span class="ic" data-ic="upload"></span> Export</button>
@@ -2095,7 +2178,7 @@ html[data-aurora="1"] .nav-scrim{
     <!-- FRIENDS -->
     <div class="screen" id="pg-friends">
       <div class="page-hd">
-        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <button class="back-btn" onclick="goBack()">‹</button>
         <h2 data-i18n="friends">เพื่อน + Leaderboard</h2>
       </div>
       <div class="card" id="friendsCard">
@@ -2110,7 +2193,7 @@ html[data-aurora="1"] .nav-scrim{
     <!-- ABOUT -->
     <div class="screen" id="pg-about">
       <div class="page-hd">
-        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <button class="back-btn" onclick="goBack()">‹</button>
         <h2 data-i18n="about">เกี่ยวกับ</h2>
       </div>
       <div class="card" style="text-align:center;padding:24px 14px">
@@ -2142,7 +2225,7 @@ html[data-aurora="1"] .nav-scrim{
     <!-- DEVELOPER MODE (password-gated · session-only unlock) -->
     <div class="screen" id="pg-dev">
       <div class="page-hd">
-        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <button class="back-btn" onclick="goBack()">‹</button>
         <h2><span class="ic" data-ic="code"></span> Developer Mode</h2>
       </div>
       <div id="devBody"></div>
@@ -2151,7 +2234,7 @@ html[data-aurora="1"] .nav-scrim{
     <!-- HELP / HOW TO USE -->
     <div class="screen" id="pg-help">
       <div class="page-hd">
-        <button class="back-btn" onclick="navTo('today')">‹</button>
+        <button class="back-btn" onclick="goBack()">‹</button>
         <h2 data-i18n="help_title">วิธีใช้งาน</h2>
       </div>
       <div id="helpBody"></div>
@@ -2428,20 +2511,25 @@ html[data-aurora="1"] .nav-scrim{
 </div>
 
 <!-- AI VISION MODAL — photo → AI estimate → prefill Add Food form -->
-<div class="modal-bg hide" id="aiPhotoModal">
+<div class="modal-bg hide" id="aiPhotoModal" onclick="if(event.target===this)closeAiPhotoModal()">
   <div class="modal" style="max-width:420px">
     <div class="modal-hdr">
       <h3><span class="ic" data-ic="ai"></span> <span data-i18n="ai_photo_title">ถ่ายรูปอาหาร · AI ประเมิน</span></h3>
       <button class="mc-close" onclick="closeAiPhotoModal()" aria-label="Close"><span class="ic" data-ic="x"></span></button>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-      <div style="font-size:.74rem;color:var(--muted);line-height:1.5;flex:1;min-width:200px" data-i18n="ai_photo_hint">ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก</div>
-      <span id="aiUsageChip" style="font-size:.66rem;background:var(--surface2);color:var(--accent);padding:4px 10px;border-radius:99px;white-space:nowrap;font-weight:600">—</span>
+    <div class="aiphoto-top">
+      <span class="aiphoto-hint" data-i18n="ai_photo_hint">ถ่ายรูปอาหาร 1 รูป · AI จะประเมินชื่อ/แคล/มาโครให้ · ตรวจสอบและแก้ไขก่อนบันทึก</span>
+      <span id="aiUsageChip" class="aiphoto-chip">—</span>
     </div>
-    <div style="font-size:.68rem;color:var(--amber, #f59f00);background:rgba(245,159,0,.08);border-left:3px solid var(--amber, #f59f00);padding:6px 9px;border-radius:6px;margin-bottom:10px;line-height:1.5"><span class="ic" data-ic="info"></span> <span data-i18n="ai_relogin_notice">หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)</span></div>
-    <input type="file" id="aiPhotoFile" accept="image/*" capture="environment" onchange="handleAiPhotoSelect(this)" style="display:block;width:100%;font-size:.82rem;margin-bottom:10px">
-    <img id="aiPhotoPreview" alt="" style="display:none;width:100%;max-height:240px;object-fit:contain;border-radius:9px;background:var(--surface2);margin-bottom:8px">
-    <div id="aiPhotoStatus" style="font-size:.78rem;color:var(--muted);text-align:center;margin:6px 0;min-height:20px;display:flex;align-items:center;justify-content:center;gap:8px"></div>
+    <input type="file" id="aiPhotoFile" accept="image/*" capture="environment" onchange="handleAiPhotoSelect(this)" hidden>
+    <button type="button" class="aiphoto-drop" onclick="document.getElementById('aiPhotoFile').click()">
+      <span class="aiphoto-drop-ic"><span class="ic" data-ic="camera"></span></span>
+      <span class="aiphoto-drop-t" id="aiPhotoCtaT">ถ่ายรูป หรือเลือกรูปอาหาร</span>
+      <span class="aiphoto-drop-s" id="aiPhotoCtaS">แตะเพื่อเปิดกล้องหรือคลังภาพ</span>
+    </button>
+    <img id="aiPhotoPreview" alt="" class="aiphoto-preview" style="display:none">
+    <div id="aiPhotoStatus" class="aiphoto-status"></div>
+    <div class="aiphoto-note"><span class="ic" data-ic="info"></span> <span data-i18n="ai_relogin_notice">หมายเหตุ: ถ้ากล้อง AI ใช้งานไม่ได้ โปรดออกจากระบบและล็อคอินใหม่ (Settings → Cloud Sync)</span></div>
     <div id="aiPhotoResult"></div>
   </div>
 </div>
@@ -2696,6 +2784,25 @@ html[data-aurora="1"] .nav-scrim{
   </div>
 </div>
 
+<!-- STEP-GOAL PICKER — tapped from the steps widget on Home -->
+<div class="modal-bg hide" id="stepGoalModal" onclick="if(event.target===this)closeStepGoal()">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-hdr"><h3><span class="ic" data-ic="footprints"></span> <span id="stepGoalTitleT">เป้าหมายก้าวเดิน</span></h3><button class="mc-close" onclick="closeStepGoal()" aria-label="Close"><span class="ic" data-ic="x"></span></button></div>
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:12px;line-height:1.5" id="stepGoalSubT">เลือกเป้าหมายก้าวเดินต่อวัน</div>
+    <div id="stepGoalChips" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px"></div>
+    <div class="fl"><label id="stepGoalCustomT">กำหนดเอง (ก้าว)</label><input type="number" id="stepGoalInput" min="1000" max="50000" step="500" placeholder="8000"></div>
+    <button class="btn" style="width:100%;margin-top:12px" onclick="saveStepGoal()"><span class="ic" data-ic="check"></span> <span id="stepGoalSaveT">บันทึกเป้าหมาย</span></button>
+  </div>
+</div>
+
+<!-- HEALTH-TIPS POPUP — "see more" from the health widget on Home -->
+<div class="modal-bg hide" id="healthTipsModal" onclick="if(event.target===this)closeHealthTipsModal()">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-hdr"><h3><span>💡</span> <span data-i18n="health_tips">คำแนะนำสุขภาพวันนี้</span></h3><button class="mc-close" onclick="closeHealthTipsModal()" aria-label="Close"><span class="ic" data-ic="x"></span></button></div>
+    <div id="healthTipsModalBody" style="max-height:62vh;overflow-y:auto"></div>
+  </div>
+</div>
+
 <!-- WORKOUT MODAL -->
 <div class="modal-bg hide" id="workoutModal">
   <div class="modal">
@@ -2804,7 +2911,7 @@ html[data-aurora="1"] .nav-scrim{
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.44.3';
+const APP_VERSION = '2.45.0';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4370,6 +4477,14 @@ const EXERCISES = [
   {n:'กระโดดเชือก',e:'Jump Rope',met:11.0},
   {n:'ขึ้นบันได',e:'Stair Climbing',met:8.0},
 ];
+// Per-activity emoji for the Aurora exercise widget (keyed by English name).
+const EXERCISE_EMOJI={
+  'Walking':'🚶','Brisk Walking':'🚶‍♂️','Jogging':'🏃','Running':'🏃‍♂️','Cycling':'🚴','Swimming':'🏊',
+  'Yoga':'🧘','Pilates':'🤸','Weight Training':'🏋️','HIIT':'🔥','Aerobics':'🤸‍♀️','Muay Thai':'🥊',
+  'Soccer':'⚽','Basketball':'🏀','Badminton':'🏸','Table Tennis':'🏓','Tennis':'🎾','Dancing':'💃',
+  'Jump Rope':'🪢','Stair Climbing':'🧗',
+};
+function exerciseEmoji(w){ return (w&&(EXERCISE_EMOJI[w.name_en]||EXERCISE_EMOJI[w.e]||EXERCISE_EMOJI[w.name]))||'🏃'; }
 let currentDate = todayKey();
 let activeCat = 'all';
 let settings = {theme:'light', accent:'#ff6b6b', lang:'th', font:'prompt', compact:false, simple:false, mealReminders:true, smartGoal:true, weeklyRecap:true, mealTimes:{morning:9,lunch:14,dinner:20}, waterGoal:8, navTabs:['today','add','analysis','profile','settings'], aiProvider:'proxy', uiMode:'original', themeSet:'standard'};
@@ -4388,6 +4503,7 @@ const NAV_CATALOG = {
 };
 let tdeeGoalType = 'lose';
 function getWaterGoal(){return settings.waterGoal||8;}
+function getStepGoal(){return settings.stepGoal||8000;}
 
 // ═══ HELPERS ═══
 function dateKey(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${da}`;}
@@ -4916,6 +5032,9 @@ function toggleNavTab(id){
 function showPage(id,btn){
   const target=document.getElementById('pg-'+id);
   if(!target){console.warn('[nav] unknown page',id);return;}   // never blank-screen
+  // Track nav history so the top-left back button (goBack) returns to the ACTUAL previous page.
+  const _cur=document.querySelector('.app .screen.active')?.id?.replace(/^pg-/,'')||'';
+  if(!_navBacking && _cur && _cur!==id){ _navHist.push(_cur); if(_navHist.length>40)_navHist.shift(); }
   document.querySelectorAll('.app .screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.bnt').forEach(b=>b.classList.remove('active'));
   target.classList.add('active');
@@ -5392,8 +5511,17 @@ function renderCatResults(cat){
 // no confident match show their category emoji instead — never a wrong/placeholder photo. ═══
 let _foodImg = {};
 try{ _foodImg = JSON.parse(localStorage.getItem('cp_food_img')||'{}')||{}; }catch(_){ _foodImg={}; }
-const _FOOD_IMG_BAD = /\.svg|k%c3%b6hler|kohler|medizinal|labelled|_2d_|diagram|chemical|logo|map_of/i;
+// Reject obviously-non-food image filenames (diagrams, heraldry, currency, botanical plates,
+// illustrations, maps, logos…). These are the classic Wikipedia mismatches for food names.
+const _FOOD_IMG_BAD = /\.svg|k%c3%b6hler|kohler|medizinal|labelled|_2d_|diagram|chemical|logo|map_of|coat_of_arms|flag_of|emblem|seal_of|banknote|postage|herbarium|botanical|lithograph|engraving|illustration|signature|_icon|coin_/i;
 const _FOOD_IMG_BLOCK = ['มาม่า','ป๊อปคอร์น','เงาะ','น้ำเปล่า','มะละกอ','แฟนต้า'];  // verified-wrong, removed
+// One-time cleanup: drop any photo cached in an earlier version whose URL now fails the filter
+// or is in the verified-wrong block list, then persist the cleaned map. Removes old non-food images.
+try{
+  _FOOD_IMG_BLOCK.forEach(k=>{ delete _foodImg[k]; });
+  for(const k in _foodImg){ if(!_foodImg[k]||_FOOD_IMG_BAD.test(_foodImg[k])) delete _foodImg[k]; }
+  localStorage.setItem('cp_food_img',JSON.stringify(_foodImg));
+}catch(_){ }
 let _foodImgBuilding=false, _foodImgDone=false;
 // Hand-curated photos (keyed by Thai food name) take priority over the auto Wikipedia map.
 // Fill this from the food-images-todo list as URLs come in.
@@ -5433,14 +5561,13 @@ function renderResults(list){
   if(!list.length){w.innerHTML=`<div class="sno">${t('no_food')}</div>`;return;}
   list.forEach((f,idx)=>{
     const d=document.createElement('div');d.className='sri';
-    d.innerHTML=`<span class="sri-thumb" data-food="${escapeHtml(f.n)}">${foodThumbInner(f,idx<24)}</span><div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
+    d.innerHTML=`<span class="sri-thumb" data-food="${escapeHtml(f.n)}">${foodThumbInner(f,true)}</span><div style="flex:1"><div class="sri-n">${escapeHtml(foodDisplayName(f))}</div><div class="sri-m">${escapeHtml(foodSubLine(f))}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="sri-c">${f.c}</div><span class="star ${isFav(f.n)?'on':''}">${icoSvg('star')}</span></div>`;
     d.onclick=()=>addFromSearch(f);
     const starEl=d.querySelector('.star');
     starEl.onclick=(e)=>{e.stopPropagation();toggleFavorite(f.n);};
-    {const _th=d.querySelector('.sri-thumb'); if(_th) _th.onclick=(e)=>{e.stopPropagation();openFoodGallery(f);};}
+    {const _th=d.querySelector('.sri-thumb'); if(_th){ _th.onclick=(e)=>{e.stopPropagation();openFoodGallery(f);}; observeCover(_th,f); }}
     w.appendChild(d);
   });
-  queueCovers(list);
 }
 
 // ═══ FOOD IMAGE GALLERY (in-app lightbox carousel) ═══
@@ -5462,9 +5589,25 @@ function _refreshThumb(name,url){   // live-swap any visible thumbnail for this 
 }
 // Lazily pull the cover (= gallery first image) for the foods currently on screen.
 const _coverQueued=new Set(); const _coverQ=[]; let _coverBusy=false;
+// IntersectionObserver — fetch a row's cover the moment it scrolls into view so thumbnails
+// load automatically while scrolling (previously only the first ~24 loaded; the rest needed a tap).
+let _coverIO=null;
+function _coverIOInst(){
+  if(_coverIO||typeof IntersectionObserver==='undefined') return _coverIO;
+  _coverIO=new IntersectionObserver((ents)=>{
+    ents.forEach(en=>{ if(!en.isIntersecting)return; const el=en.target; _coverIO.unobserve(el); if(el.__food)queueCovers([el.__food]); });
+  },{rootMargin:'250px 0px'});
+  return _coverIO;
+}
+function observeCover(el,f){
+  if(!el||!f||settings.uiMode!=='aurora') return;
+  el.__food=f;
+  const io=_coverIOInst();
+  if(io) io.observe(el); else queueCovers([f]);   // no IO support → fetch right away
+}
 function queueCovers(list){
   if(settings.uiMode!=='aurora'||!Array.isArray(list)) return;
-  list.slice(0,24).forEach(f=>{ const n=f&&f.n; if(!n||_foodGalCache[n]||_coverQueued.has(n)) return; _coverQueued.add(n); _coverQ.push(f); });
+  list.forEach(f=>{ const n=f&&f.n; if(!n||_foodGalCache[n]||_coverQueued.has(n)) return; _coverQueued.add(n); _coverQ.push(f); });
   _drainCovers();
 }
 async function _drainCovers(){
@@ -5688,15 +5831,16 @@ function insertEntry(data){
 }
 function delFood(id){
   const gone=dailyEntries.find(e=>e.id===id);
+  if(!gone)return;   // nothing matched — never crash the undo toast on a stale id
   dailyEntries=dailyEntries.filter(e=>e.id!==id);
   // Clean up IDB photo if any (cheap, fire-and-forget)
   if(gone?.photo&&gone.photo.startsWith('idb:'))idbDelete(gone.id);
   
   // Show undo toast with delay
   showToastWithUndo(gone, id);
-  
+
   saveEntries_LS();
-  renderToday();
+  refreshActivePage();   // refresh Today OR the Meals page, whichever is open
   scheduleAutoSync('delFood');
 }
 
@@ -8236,6 +8380,7 @@ function addWater(delta){
   allWater[currentDate]=next;
   lsSave(LS_WATER,allWater);
   renderWaterWidget();
+  if(settings.uiMode==='aurora')renderAuroraWidgets();
   scheduleAutoSync('water');
 }
 // ── QUICK ACTIONS (drawer tools) ──
@@ -8339,7 +8484,7 @@ function renderToday(){
   document.getElementById('mFB').style.width=Math.min(totF/65*100,100).toFixed(1)+'%';
   renderWaterWidget();renderReminderBanner();renderWorkoutsList();renderHealthTips();renderSteps();
   renderAdSlot('today-1',document.querySelector('[data-ad-slot="today-1"]'));
-  renderQuickAddRow();
+  renderAuroraWidgets();
   renderAuroraChrome('today');
   // Aurora dashboard hero — the tappable meal-summary card (replaces ring-wrap+macros, which are CSS-hidden in Aurora)
   {const _tmc=document.getElementById('todayMealCard'); if(_tmc) _tmc.innerHTML = settings.uiMode==='aurora' ? mealSummaryCardHTML(true) : '';}
@@ -8388,6 +8533,17 @@ function renderToday(){
   });
 }
 
+// Time-aware greeting + the user's name (re-evaluated on every render so it tracks the clock).
+function greetingText(){
+  const h=new Date().getHours();
+  const name=(userProfile&&userProfile.display_name)?(' '+userProfile.display_name):'';
+  let g;
+  if(h>=5&&h<12) g=LL('สวัสดีตอนเช้า','Good morning','早上好','早安');
+  else if(h>=12&&h<17) g=LL('สวัสดีตอนบ่าย','Good afternoon','下午好','午安');
+  else if(h>=17&&h<21) g=LL('สวัสดีตอนเย็น','Good evening','晚上好','晚安');
+  else g=LL('สวัสดีตอนดึก','Good night','晚上好','晚安');
+  return g+name;
+}
 function renderAuroraChrome(page){
   if(settings.uiMode!=='aurora')return;
   const active=document.getElementById('pg-'+page)||document.querySelector('.app .screen.active');
@@ -8398,16 +8554,106 @@ function renderAuroraChrome(page){
   const totals=(dailyEntries||[]).reduce((s,e)=>s+(+e.calories||0),0);
   const mealCount=(dailyEntries||[]).length;
   const headers={
-    today:`<div><div class="aurora-greet">สวัสดีตอนเช้า</div><div class="aurora-sub">เป้าหมายวันนี้ ${goal.toLocaleString()} kcal</div></div>`,
-    add:`<button class="aurora-back" onclick="navTo('today')" aria-label="Back">‹</button><div><div class="aurora-title">เพิ่มอาหาร</div><div class="aurora-sub">ค้นหาและบันทึกอย่างรวดเร็ว</div></div><button class="aurora-ico" onclick="openBarcodeModal()" aria-label="Scan">${icoSvg('barcode')}</button>`,
-    analysis:`<div><div class="aurora-title">สถิติ</div><div class="aurora-sub">ภาพรวมสุขภาพและโภชนาการ</div></div><button class="aurora-ico" onclick="openDatePicker()" aria-label="Calendar">${icoSvg('calendar')}</button>`,
-    meals:`<button class="aurora-back" onclick="navTo('today')" aria-label="Back">‹</button><div><div class="aurora-title">มื้ออาหาร</div><div class="aurora-sub">${totals.toLocaleString()} kcal · ${mealCount} รายการ</div></div><button class="aurora-ico" onclick="goToAddFood()" aria-label="Add">${icoSvg('plus')}</button>`
+    today:`<div><div class="aurora-greet">${escapeHtml(greetingText())}</div><div class="aurora-sub">${LL('เป้าหมายวันนี้','Today’s goal','今日目标','今日目標')} ${goal.toLocaleString()} kcal</div></div>`,
+    add:`<button class="aurora-back" onclick="goBack()" aria-label="Back">‹</button><div><div class="aurora-title">${LL('เพิ่มอาหาร','Add food','添加食物','新增食物')}</div><div class="aurora-sub">${LL('ค้นหาและบันทึกอย่างรวดเร็ว','Search and log fast','快速搜索记录','快速搜尋記錄')}</div></div>`,
+    analysis:`<div><div class="aurora-title">${LL('สถิติ','Stats','统计','統計')}</div><div class="aurora-sub">${LL('ภาพรวมสุขภาพและโภชนาการ','Health & nutrition overview','健康与营养概览','健康與營養概覽')}</div></div><button class="aurora-ico" onclick="openDatePicker()" aria-label="Calendar">${icoSvg('calendar')}</button>`,
+    meals:`<button class="aurora-back" onclick="goBack()" aria-label="Back">‹</button><div><div class="aurora-title">${LL('มื้ออาหาร','Meals','餐食','餐食')}</div><div class="aurora-sub">${totals.toLocaleString()} kcal · ${mealCount} ${LL('รายการ','items','项','項')}</div></div>`
   };
   const html=headers[page]; if(!html)return;
   const top=document.createElement('div');
   top.className='aurora-page-top';
   top.innerHTML=html;
   active.insertAdjacentElement('afterbegin',top);
+}
+
+// ── Aurora home widgets — 2×2 grid: water ring · health tips · steps ring · exercise ──
+const _AWR_C=289.03;   // 2π·46 (ring radius 46 in the 0 0 104 104 viewBox)
+function renderAuroraWidgets(){
+  const host=document.getElementById('auroraWidgets'); if(!host)return;
+  if(settings.uiMode!=='aurora'){ host.innerHTML=''; return; }
+
+  // 1) Water — blue ring + −/＋ stepper
+  const cups=allWater[currentDate]||0, wgoal=getWaterGoal();
+  const wpct=Math.min(cups/Math.max(wgoal,1),1);
+  const water=`<div class="awid">`+
+    `<div class="awid-top"><span class="awid-ic">💧</span><span class="awid-ti">${LL('น้ำดื่ม','Water','饮水','飲水')}</span></div>`+
+    `<div class="awid-ring"><svg viewBox="0 0 104 104"><circle class="awr-track" cx="52" cy="52" r="46"/><circle class="awr-fill water" cx="52" cy="52" r="46" stroke-dasharray="${_AWR_C}" stroke-dashoffset="${(_AWR_C*(1-wpct)).toFixed(1)}"/></svg>`+
+    `<div class="awid-ring-c"><b>${cups}</b><span>/${wgoal} ${LL('แก้ว','cups','杯','杯')}</span></div></div>`+
+    `<div class="awid-wstep"><button onclick="addWater(-1)" aria-label="${LL('ลดน้ำ','Remove cup','减一杯','減一杯')}">−</button><button onclick="addWater(1)" aria-label="${LL('เพิ่มน้ำ','Add cup','加一杯','加一杯')}">+</button></div>`+
+  `</div>`;
+
+  // 2) Health tips — show up to 2 in detail, "see more" opens the full popup
+  const tips=getHealthTips();
+  let health;
+  const hHead=`<div class="awid-top"><span class="awid-ic">💡</span><span class="awid-ti">${LL('คำแนะนำสุขภาพ','Health tips','健康建议','健康建議')}</span></div>`;
+  if(tips.length){
+    health=`<div class="awid">`+hHead+
+      `<div class="awid-health-body">`+tips.slice(0,2).map(tp=>`<div class="awh-tip"><span class="awh-i">${tp.ico}</span><span class="awh-t">${tp.msg}</span></div>`).join('')+`</div>`+
+      `<button class="awid-more" onclick="openHealthTipsModal()">${LL('ดูเพิ่มเติม','See more','查看更多','查看更多')} ›</button></div>`;
+  }else{
+    health=`<div class="awid">`+hHead+`<div class="awh-empty"><span class="awh-emoji">✅</span><span>${LL('วันนี้ดูดีมาก','Looking good today','今天很棒','今天很棒')}</span></div></div>`;
+  }
+
+  // 3) Steps — green ring + tappable goal
+  const steps=(getHabit(currentDate).steps)||0, sgoal=getStepGoal();
+  const spct=Math.min(steps/Math.max(sgoal,1),1);
+  const stepsW=`<div class="awid"><div class="awid-top"><span class="awid-ic">👟</span><span class="awid-ti">${LL('ก้าวเดิน','Steps','步数','步數')}</span></div>`+
+    `<div class="awid-ring"><svg viewBox="0 0 104 104"><circle class="awr-track" cx="52" cy="52" r="46"/><circle class="awr-fill steps" cx="52" cy="52" r="46" stroke-dasharray="${_AWR_C}" stroke-dashoffset="${(_AWR_C*(1-spct)).toFixed(1)}"/></svg>`+
+    `<div class="awid-ring-c"><b>${steps.toLocaleString()}</b><span>${LL('ก้าว','steps','步','步')}</span></div></div>`+
+    `<button class="awid-goal" onclick="openStepGoal()">${icoSvg('target')} ${LL('เป้า','Goal','目标','目標')} ${sgoal.toLocaleString()}</button></div>`;
+
+  // 4) Exercise — per-activity emoji
+  const wks=allWorkouts[currentDate]||[];
+  let exBody;
+  if(wks.length){
+    exBody=`<div class="awid-ex-body">`+wks.slice(0,2).map(w=>{
+      const nm=(settings.lang||'th')!=='th'&&w.name_en?w.name_en:w.name;
+      return `<div class="awe-item"><span class="awe-emoji">${exerciseEmoji(w)}</span><div class="awe-info"><b>${escapeHtml(nm)}</b><small>${w.minutes} ${t('duration_min')} · -${w.kcal} kcal</small></div></div>`;
+    }).join('')+(wks.length>2?`<small style="color:#8A90A2;font-size:.66rem;padding-left:2px">+${wks.length-2} ${LL('รายการ','more','项','項')}</small>`:'')+`</div>`;
+  }else{
+    exBody=`<div class="awe-empty"><span class="awe-big">🏃</span><span>${LL('ยังไม่มีกิจกรรม','No activity yet','暂无活动','尚無活動')}</span></div>`;
+  }
+  const exercise=`<div class="awid"><div class="awid-top"><span class="awid-ic">💪</span><span class="awid-ti">${LL('ออกกำลังกาย','Exercise','运动','運動')}</span></div>`+
+    exBody+`<button class="awid-add${wks.length?' ghost':''}" onclick="openWorkoutModal()">+ ${LL('เพิ่มกิจกรรม','Add activity','添加活动','新增活動')}</button></div>`;
+
+  host.innerHTML=water+health+stepsW+exercise;
+}
+function openHealthTipsModal(){
+  const tips=getHealthTips();
+  const body=document.getElementById('healthTipsModalBody'); if(!body)return;
+  body.innerHTML=tips.length
+    ? tips.map(tp=>`<div class="ins ${tp.sev}"><div class="ins-i">${tp.ico}</div><div class="ins-t">${tp.msg}</div></div>`).join('')
+    : `<div style="text-align:center;color:var(--muted);padding:20px;font-size:.84rem">${LL('วันนี้ยังไม่มีคำแนะนำ','No tips yet today','今天暂无建议','今天尚無建議')}</div>`;
+  document.getElementById('healthTipsModal').classList.remove('hide');
+}
+function closeHealthTipsModal(){ const m=document.getElementById('healthTipsModal'); if(m)m.classList.add('hide'); }
+// Step-goal picker (tap the goal pill on the steps widget)
+function openStepGoal(){
+  const cur=getStepGoal();
+  const opts=[6000,8000,10000,12000,15000,20000];
+  const wrap=document.getElementById('stepGoalChips');
+  if(wrap)wrap.innerHTML=opts.map(v=>`<button class="sg-chip${v===cur?' on':''}" data-v="${v}" onclick="pickStepGoal(${v})">${v.toLocaleString()}</button>`).join('');
+  const inp=document.getElementById('stepGoalInput'); if(inp)inp.value=cur;
+  const _st=(id,th,en,zh,tw)=>{const e=document.getElementById(id);if(e)e.textContent=LL(th,en,zh,tw);};
+  _st('stepGoalTitleT','เป้าหมายก้าวเดิน','Step goal','步数目标','步數目標');
+  _st('stepGoalSubT','เลือกเป้าหมายก้าวเดินต่อวัน','Choose your daily step goal','选择每日步数目标','選擇每日步數目標');
+  _st('stepGoalCustomT','กำหนดเอง (ก้าว)','Custom (steps)','自定义(步)','自訂(步)');
+  _st('stepGoalSaveT','บันทึกเป้าหมาย','Save goal','保存目标','儲存目標');
+  document.getElementById('stepGoalModal').classList.remove('hide');
+}
+function pickStepGoal(v){
+  const inp=document.getElementById('stepGoalInput'); if(inp)inp.value=v;
+  document.querySelectorAll('#stepGoalChips .sg-chip').forEach(b=>b.classList.toggle('on',+b.dataset.v===v));
+}
+function closeStepGoal(){ const m=document.getElementById('stepGoalModal'); if(m)m.classList.add('hide'); }
+function saveStepGoal(){
+  let v=parseInt(document.getElementById('stepGoalInput').value,10);
+  if(!v||v<1000)v=8000; if(v>50000)v=50000;
+  settings.stepGoal=v; lsSave(LS_SETTINGS,settings);
+  closeStepGoal();
+  if(settings.uiMode==='aurora')renderAuroraWidgets();
+  showToast(LL('ตั้งเป้า ','Goal set: ','已设定 ','已設定 ')+v.toLocaleString()+LL(' ก้าว/วัน ✓',' steps/day ✓',' 步/天 ✓',' 步/天 ✓'));
+  scheduleAutoSync('stepGoal');
 }
 
 function _mealTotals(E){
@@ -8431,8 +8677,15 @@ function mealSummaryCardHTML(tappable){
   `</div>`;
 }
 function _mealRowHTML(item){
-  const photo=item.photo&&!item.photo.startsWith('idb:')?`<img src="${escapeHtml(item.photo)}" alt="">`:`<span>${MEAL_ICONS[item.meal]||'🍽️'}</span>`;
-  return `<div class="meal-row"><div class="meal-thumb">${photo}</div><div class="meal-info"><div class="meal-name">${escapeHtml(item.food_name)}</div><div class="meal-meta">${t('carbs')} ${item.carbs||0}g · ${t('protein')} ${item.protein||0}g · ${t('fat')} ${item.fat||0}g</div></div><div class="meal-cal">${(+item.calories||0).toLocaleString()} <small>kcal</small></div><button class="meal-more" onclick="editFood('${item.id}')" aria-label="Edit">⋮</button></div>`;
+  let thumb;
+  if(item.photo&&item.photo.startsWith('idb:')) thumb=`<img data-idb="${item.id}" alt="">`;       // filled async after render
+  else if(item.photo) thumb=`<img src="${escapeHtml(item.photo)}" alt="">`;
+  else thumb=`<span>${MEAL_ICONS[item.meal]||'🍽️'}</span>`;
+  return `<div class="meal-row"><div class="meal-thumb">${thumb}</div>`+
+    `<div class="meal-info"><div class="meal-name">${escapeHtml(item.food_name)}</div><div class="meal-meta">${t('carbs')} ${item.carbs||0}g · ${t('protein')} ${item.protein||0}g · ${t('fat')} ${item.fat||0}g</div></div>`+
+    `<div class="meal-cal">${(+item.calories||0).toLocaleString()} <small>kcal</small></div>`+
+    `<div class="meal-acts"><button class="meal-more" onclick="editFood('${item.id}')" aria-label="${t('edit')}">${icoSvg('edit')}</button><button class="meal-more del" onclick="delFood('${item.id}')" aria-label="${t('del')}">${icoSvg('trash')}</button></div>`+
+  `</div>`;
 }
 // Meals detail: food grouped by meal (collapsible) + protein/carb/fat totals below.
 function renderMealTracking(){
@@ -8453,11 +8706,21 @@ function renderMealTracking(){
     const cal=items.reduce((s,e)=>s+(+e.calories||0),0);
     const open=items.length>0;
     const body=items.length?items.map(_mealRowHTML).join(''):`<div class="mg-empty">${LL('ยังไม่มีรายการ','No items yet','暂无','尚無')}</div>`;
-    groups+=`<div class="meal-group${open?' open':''}"><button type="button" class="mg-head" onclick="this.closest('.meal-group').classList.toggle('open')"><span class="mg-ic">${m.ic}</span><span class="mg-ti">${LL(m.k,m.en,m.k,m.k)}</span><span class="mg-meta">${items.length} ${LL('รายการ','items','项','項')} · ${cal.toLocaleString()} kcal</span><span class="mg-chev">›</span></button><div class="mg-body">${body}</div></div>`;
+    groups+=`<div class="meal-group${open?' open':''}">`+
+      `<div class="mg-head" onclick="this.closest('.meal-group').classList.toggle('open')">`+
+        `<span class="mg-ic">${m.ic}</span><span class="mg-ti">${LL(m.k,m.en,m.k,m.k)}</span>`+
+        `<span class="mg-meta">${items.length} ${LL('รายการ','items','项','項')} · ${cal.toLocaleString()} kcal</span>`+
+        `<button type="button" class="mg-add-btn" onclick="event.stopPropagation();goToAddFood('${m.k}')" aria-label="${LL('เพิ่มอาหารมื้อนี้','Add to this meal','添加到此餐','新增到此餐')}">${icoSvg('plus')}</button>`+
+        `<span class="mg-chev">›</span>`+
+      `</div><div class="mg-body">${body}</div></div>`;
   });
   const pcf=`<div class="meal-pcf card"><div class="mpcf"><span style="color:var(--mp,var(--blue))">${t('protein')}</span><b>${p}g</b></div><div class="mpcf"><span style="color:var(--mc,var(--amber))">${t('carbs')}</span><b>${c}g</b></div><div class="mpcf"><span style="color:var(--mf,var(--purple))">${t('fat')}</span><b>${f}g</b></div></div>`;
-  const addCta=`<button class="btn meal-add-cta" onclick="goToAddFood()">+ ${LL('เพิ่มอาหาร','Add food','添加食物','新增食物')}</button>`;
-  wrap.innerHTML=`<div class="meal-groups">${groups}</div>`+pcf+addCta;
+  wrap.innerHTML=`<div class="meal-groups">${groups}</div>`+pcf;
+  // Fill IDB-backed photos async so meal thumbnails appear on scroll (not only after opening one)
+  wrap.querySelectorAll('.meal-thumb img[data-idb]').forEach(img=>{
+    const id=img.getAttribute('data-idb');
+    if(id)idbGet(id).then(src=>{ if(src&&img.isConnected)img.src=src; }).catch(()=>{});
+  });
   renderAuroraChrome('meals');
 }
 
@@ -9685,6 +9948,19 @@ function renderDrawerHeader(){
   // (anon + unsigned can browse "all users"; the Friends tab itself prompts
   // sign-in when needed).
   document.getElementById('drawerFriendsBtn').style.display='flex';
+}
+// ── NAV HISTORY (back button) ──
+// goBack() returns to the previous page the user was on; if there's none, falls back to Home.
+let _navHist=[];
+let _navBacking=false;
+function goBack(){
+  if(_navHist.length){
+    const prev=_navHist.pop();
+    _navBacking=true;
+    try{ navTo(prev); } finally{ _navBacking=false; }
+  }else{
+    navTo('today');
+  }
 }
 function navTo(page){
   closeDrawer();
@@ -11327,6 +11603,8 @@ function openAiPhotoModal(){
     }catch{}
     chip.textContent=txt;
   }
+  const ctaT=document.getElementById('aiPhotoCtaT'); if(ctaT)ctaT.textContent=LL('ถ่ายรูป หรือเลือกรูปอาหาร','Take or choose a food photo','拍照或选择食物照片','拍照或選擇食物照片');
+  const ctaS=document.getElementById('aiPhotoCtaS'); if(ctaS)ctaS.textContent=LL('แตะเพื่อเปิดกล้องหรือคลังภาพ','Tap to open camera or gallery','点按打开相机或相册','點按開啟相機或相簿');
 }
 function closeAiPhotoModal(){
   document.getElementById('aiPhotoModal').classList.add('hide');
@@ -11815,9 +12093,11 @@ function defaultMealForNow(){
   if(h>=16&&h<22)return 'เย็น';
   return 'ของว่าง';
 }
+let _pendingMeal=null;   // set by goToAddFood(meal) when adding to a specific meal slot
 function applyDefaultMeal(){
   const sel=document.getElementById('mealSel');
-  if(sel)sel.value=defaultMealForNow();
+  if(sel)sel.value=_pendingMeal||defaultMealForNow();
+  _pendingMeal=null;
 }
 
 // ── QUICK-ADD: log a recent/favorite food in ONE tap from the Today page ──
@@ -11856,7 +12136,8 @@ function quickAdd(name,chipEl){
     amount_g:f.a||null, meal:defaultMealForNow(),
   });
 }
-function goToAddFood(){
+function goToAddFood(meal){
+  if(meal)_pendingMeal=meal;   // preselect this meal on the Add page (from a meal's "+" button)
   showPage('add',document.querySelector('.bnt[data-tab="add"]'));
   setTimeout(()=>{
     const el=document.getElementById('searchInput');
@@ -12081,6 +12362,10 @@ document.addEventListener('keydown',(e)=>{
 //   (showUpdateModal/applyUpdate/dismissUpdate are retained but no longer wired.)
 
 const CHANGELOG={
+  '2.45.0':{
+    th:['🏠 หน้าแรกวิดเจ็ต 4 ช่อง (น้ำ · คำแนะนำสุขภาพ · ก้าวเดิน+ตั้งเป้า · ออกกำลังกาย)','🔎 ช่องค้นหาใหม่ (กล้อง+ไมค์) · หน้าถ่ายรูป AI ดีไซน์ใหม่','🍽️ หน้ามื้ออาหาร: เพิ่ม/ลบอาหารในแต่ละมื้อ','🧭 หัวข้อกึ่งกลางทุกหน้า · ปุ่มย้อนกลับ','🐛 แก้ไขบั๊ก'],
+    en:['🏠 Home dashboard — 4 widgets (water · health tips · steps+goal · exercise)','🔎 New search bar (camera+mic) · redesigned AI photo page','🍽️ Meals page: add/delete food per meal','🧭 Centered page headers · back button','🐛 Bug fixes'],
+  },
   '2.44.0':{
     th:['🎨 Aurora Health UI v2 + หน้ามื้ออาหาร','🖼️ แกลเลอรีรูปอาหาร (กดรูปดูได้หลายภาพ)','🐛 แก้ไขบั๊ก'],
     en:['🎨 Aurora Health UI v2 + Meal Tracking page','🖼️ Food image gallery (tap a photo to browse)','🐛 Bug fixes'],
