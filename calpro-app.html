@@ -1499,6 +1499,30 @@ html[data-aurora="1"] .meal-total{
 html[data-aurora="1"] .meal-total span{font-weight:800;color:#111827;}
 html[data-aurora="1"] .meal-total b{font-size:1.28rem;color:#111827;}
 html[data-aurora="1"] .meal-total small{color:#8A90A2;}
+/* ── Aurora dashboard hero: tappable meal-summary card replaces ring-wrap+macros on Today ── */
+html[data-aurora="1"] #pg-today .ring-wrap,
+html[data-aurora="1"] #pg-today .macros{display:none;}
+html[data-aurora="1"] .ms-tap{position:relative;cursor:pointer;transition:transform .12s;}
+html[data-aurora="1"] .ms-tap:active{transform:scale(.99);}
+html[data-aurora="1"] .ms-chev{position:absolute;top:12px;right:14px;color:#C7CDDB;font-size:1.4rem;line-height:1;font-weight:700;}
+/* ── Meals detail: collapsible meal groups ── */
+html[data-aurora="1"] .meal-groups{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+html[data-aurora="1"] .meal-group{background:#fff;border:1px solid #EEF1F7;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px -14px rgba(31,45,90,.3);}
+html[data-aurora="1"] .mg-head{width:100%;display:flex;align-items:center;gap:10px;padding:13px 14px;background:none;border:none;font-family:inherit;cursor:pointer;text-align:left;}
+html[data-aurora="1"] .mg-ic{font-size:1.2rem;line-height:1;}
+html[data-aurora="1"] .mg-ti{font-weight:800;color:#111827;font-size:.92rem;}
+html[data-aurora="1"] .mg-meta{margin-left:auto;font-size:.7rem;color:#8A90A2;font-weight:600;white-space:nowrap;}
+html[data-aurora="1"] .mg-chev{color:#C7CDDB;font-size:1.25rem;line-height:1;transition:transform .2s;margin-left:2px;}
+html[data-aurora="1"] .meal-group.open .mg-chev{transform:rotate(90deg);}
+html[data-aurora="1"] .mg-body{display:none;padding:2px 10px 8px;}
+html[data-aurora="1"] .meal-group.open .mg-body{display:block;}
+html[data-aurora="1"] .mg-empty{padding:10px 6px;color:#9AA0B2;font-size:.8rem;text-align:center;}
+/* ── Meals detail: protein/carb/fat totals row ── */
+html[data-aurora="1"] .meal-pcf{display:flex;gap:10px;padding:14px;margin-bottom:12px;}
+html[data-aurora="1"] .mpcf{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 6px;background:#F6F8FC;border-radius:13px;}
+html[data-aurora="1"] .mpcf span{font-size:.72rem;font-weight:800;}
+html[data-aurora="1"] .mpcf b{font-size:1.1rem;color:#111827;}
+html[data-aurora="1"] .meal-add-cta{width:100%;}
 html[data-aurora="1"] .bnav{
   left:16px;
   right:16px;
@@ -1544,7 +1568,7 @@ html[data-aurora="1"] .bnt[data-tab="add"]{
 }
 html[data-aurora="1"] .bnt[data-tab="add"] span{display:none;}
 html[data-aurora="1"] .bnt[data-tab="add"] svg{width:25px;height:25px;}
-html[data-aurora="1"] .fab{display:none!important;}
+/* Aurora: the floating + FAB IS the add-food trigger (Add Food has no nav tab — it pops up the add page on tap) */
 html[data-aurora="1"] .nav-scrim{
   height:calc(104px + env(safe-area-inset-bottom));
   background:linear-gradient(to top,#F8F9FC 44%,rgba(248,249,252,0));
@@ -1598,6 +1622,8 @@ html[data-aurora="1"] .nav-scrim{
         <button class="dnav-arrow" id="dnavNext" onclick="changeDay(1)" aria-label="วันถัดไป">›</button>
       </div>
       <div id="reminderBanner"></div>
+      <!-- Aurora dashboard hero: tappable meal-summary card (populated in renderToday; replaces ring-wrap+macros which are CSS-hidden in Aurora). Tap → Meals detail. -->
+      <div id="todayMealCard"></div>
       <div class="ring-wrap">
         <div class="ring-cont">
           <svg width="144" height="144" viewBox="0 0 144 144">
@@ -2746,7 +2772,7 @@ html[data-aurora="1"] .nav-scrim{
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.44.0';
+const APP_VERSION = '2.44.1';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -4791,7 +4817,7 @@ function showApp(){
 function renderBottomNav(){
   const nav=document.getElementById('mainNav');if(!nav)return;
   const tabs=settings.uiMode==='aurora'
-    ? ['today','add','analysis','meals','settings']
+    ? ['today','friends','analysis','profile','settings']
     : ((settings.navTabs&&settings.navTabs.length)?settings.navTabs:['today','add','analysis','profile','settings']);
   // Always ensure "today" is first
   const finalTabs=['today',...tabs.filter(t=>t!=='today')].slice(0,5);
@@ -8278,6 +8304,8 @@ function renderToday(){
   renderAdSlot('today-1',document.querySelector('[data-ad-slot="today-1"]'));
   renderQuickAddRow();
   renderAuroraChrome('today');
+  // Aurora dashboard hero — the tappable meal-summary card (replaces ring-wrap+macros, which are CSS-hidden in Aurora)
+  {const _tmc=document.getElementById('todayMealCard'); if(_tmc) _tmc.innerHTML = settings.uiMode==='aurora' ? mealSummaryCardHTML(true) : '';}
   const log=document.getElementById('foodLog');
   if(!E.length){
     // Rich empty state — guide the very first action instead of a blank list.
@@ -8345,30 +8373,54 @@ function renderAuroraChrome(page){
   active.insertAdjacentElement('afterbegin',top);
 }
 
+function _mealTotals(E){
+  return {
+    total:E.reduce((s,e)=>s+(+e.calories||0),0),
+    p:Math.round(E.reduce((s,e)=>s+(+e.protein||0),0)),
+    c:Math.round(E.reduce((s,e)=>s+(+e.carbs||0),0)),
+    f:Math.round(E.reduce((s,e)=>s+(+e.fat||0),0)),
+  };
+}
+// The summary card (ring + 4 tiles). On Home it's tappable → opens the Meals detail.
+function mealSummaryCardHTML(tappable){
+  const E=dailyEntries||[]; const goal=userProfile?.goal_cal||1800;
+  const {total,p,c,f}=_mealTotals(E);
+  const pct=Math.min(total/goal,1); const circ=376.99;
+  const tap=tappable?` role="button" tabindex="0" onclick="navTo('meals')" onkeypress="if(event.key==='Enter')navTo('meals')"`:'';
+  return `<div class="meal-summary card${tappable?' ms-tap':''}"${tap}>`+
+    `<div class="meal-ring"><svg viewBox="0 0 144 144"><circle class="ring-track" cx="72" cy="72" r="60"/><circle class="ring-fill" cx="72" cy="72" r="60" stroke-dasharray="${circ}" stroke-dashoffset="${(circ-pct*circ).toFixed(2)}" style="stroke:url(#ringGradBrand)"/></svg><div><b>${total.toLocaleString()}</b><span>kcal</span><small>${LL('จาก','of','目标','目標')} ${goal.toLocaleString()} kcal</small></div></div>`+
+    `<div class="meal-macro-list"><div>${icoSvg('note')} ${LL('รายการอาหาร','Items','项目','項目')} <b>${E.length}</b></div><div>${icoSvg('flame')} ${t('protein')} <b>${p}g</b></div><div>${icoSvg('zap')} ${t('carbs')} <b>${c}g</b></div><div>${icoSvg('droplet')} ${t('fat')} <b>${f}g</b></div></div>`+
+    (tappable?`<span class="ms-chev">›</span>`:'')+
+  `</div>`;
+}
+function _mealRowHTML(item){
+  const photo=item.photo&&!item.photo.startsWith('idb:')?`<img src="${escapeHtml(item.photo)}" alt="">`:`<span>${MEAL_ICONS[item.meal]||'🍽️'}</span>`;
+  return `<div class="meal-row"><div class="meal-thumb">${photo}</div><div class="meal-info"><div class="meal-name">${escapeHtml(item.food_name)}</div><div class="meal-meta">${t('carbs')} ${item.carbs||0}g · ${t('protein')} ${item.protein||0}g · ${t('fat')} ${item.fat||0}g</div></div><div class="meal-cal">${(+item.calories||0).toLocaleString()} <small>kcal</small></div><button class="meal-more" onclick="editFood('${item.id}')" aria-label="Edit">⋮</button></div>`;
+}
+// Meals detail: food grouped by meal (collapsible) + protein/carb/fat totals below.
 function renderMealTracking(){
   const wrap=document.getElementById('mealTrackBody'); if(!wrap)return;
   const E=dailyEntries||[];
-  const goal=userProfile?.goal_cal||1800;
-  const total=E.reduce((s,e)=>s+(+e.calories||0),0);
-  const p=Math.round(E.reduce((s,e)=>s+(+e.protein||0),0));
-  const c=Math.round(E.reduce((s,e)=>s+(+e.carbs||0),0));
-  const f=Math.round(E.reduce((s,e)=>s+(+e.fat||0),0));
-  const pct=Math.min(total/goal,1);
-  const circ=376.99;
-  let rows='';
-  E.forEach(item=>{
-    const photo=item.photo&&!item.photo.startsWith('idb:')?`<img src="${escapeHtml(item.photo)}" alt="">`:`<span>${MEAL_ICONS[item.meal]||'🍽️'}</span>`;
-    rows+=`<div class="meal-row"><div class="meal-thumb">${photo}</div><div class="meal-info"><div class="meal-name">${escapeHtml(item.food_name)}</div><div class="meal-meta">${escapeHtml(item.meal||'')} · ${t('carbs')} ${item.carbs||0}g · ${t('protein')} ${item.protein||0}g · ${t('fat')} ${item.fat||0}g</div></div><div class="meal-cal">${(+item.calories||0).toLocaleString()} <small>kcal</small></div><button class="meal-more" onclick="editFood('${item.id}')" aria-label="Edit">⋮</button></div>`;
+  if(!E.length){
+    wrap.innerHTML=`<div class="empty-state"><div class="es-ico">${icoSvg('utensils')}</div><div class="es-title">${LL('ยังไม่มีรายการอาหาร','No meals yet','暂无记录','尚無紀錄')}</div><div class="es-sub">${LL('เพิ่มอาหารเพื่อเริ่มติดตามมื้อวันนี้','Add a meal to start tracking today','添加食物开始记录','新增食物開始記錄')}</div><button class="es-cta" onclick="goToAddFood()">${LL('บันทึกมื้ออาหาร','Log a meal','记录一餐','記錄一餐')}</button></div>`;
+    renderAuroraChrome('meals'); return;
+  }
+  const {p,c,f}=_mealTotals(E);
+  const MEALS=[{k:'เช้า',ic:'🌅',en:'Breakfast'},{k:'กลางวัน',ic:'☀️',en:'Lunch'},{k:'เย็น',ic:'🌙',en:'Dinner'},{k:'ของว่าง',ic:'🍎',en:'Snack'}];
+  const known=MEALS.map(m=>m.k);
+  [...new Set(E.map(e=>e.meal||'').filter(m=>m&&!known.includes(m)))].forEach(k=>MEALS.push({k,ic:'🍽️',en:k,extra:1}));
+  let groups='';
+  MEALS.forEach(m=>{
+    const items=E.filter(e=>(e.meal||'')===m.k);
+    if(!items.length&&m.extra) return;
+    const cal=items.reduce((s,e)=>s+(+e.calories||0),0);
+    const open=items.length>0;
+    const body=items.length?items.map(_mealRowHTML).join(''):`<div class="mg-empty">${LL('ยังไม่มีรายการ','No items yet','暂无','尚無')}</div>`;
+    groups+=`<div class="meal-group${open?' open':''}"><button type="button" class="mg-head" onclick="this.closest('.meal-group').classList.toggle('open')"><span class="mg-ic">${m.ic}</span><span class="mg-ti">${LL(m.k,m.en,m.k,m.k)}</span><span class="mg-meta">${items.length} ${LL('รายการ','items','项','項')} · ${cal.toLocaleString()} kcal</span><span class="mg-chev">›</span></button><div class="mg-body">${body}</div></div>`;
   });
-  if(!rows)rows=`<div class="empty-state"><div class="es-ico">${icoSvg('utensils')}</div><div class="es-title">ยังไม่มีรายการอาหาร</div><div class="es-sub">เพิ่มอาหารเพื่อเริ่มติดตามมื้อวันนี้</div><button class="es-cta" onclick="goToAddFood()">บันทึกมื้ออาหาร</button></div>`;
-  wrap.innerHTML=
-    `<div class="meal-summary card">`+
-      `<div class="meal-ring"><svg viewBox="0 0 144 144"><circle class="ring-track" cx="72" cy="72" r="60"/><circle class="ring-fill" cx="72" cy="72" r="60" stroke-dasharray="${circ}" stroke-dashoffset="${(circ-pct*circ).toFixed(2)}" style="stroke:url(#ringGradBrand)"/></svg><div><b>${total.toLocaleString()}</b><span>kcal</span><small>จาก ${goal.toLocaleString()} kcal</small></div></div>`+
-      `<div class="meal-macro-list"><div>${icoSvg('note')} รายการอาหาร <b>${E.length}</b></div><div>${icoSvg('flame')} โปรตีน <b>${p}g</b></div><div>${icoSvg('zap')} คาร์บ <b>${c}g</b></div><div>${icoSvg('droplet')} ไขมัน <b>${f}g</b></div></div>`+
-    `</div>`+
-    `<div class="meal-list-head"><span>รายการอาหาร</span><button onclick="goToAddFood()">+</button></div>`+
-    `<div class="meal-list">${rows}</div>`+
-    `<div class="meal-total card"><span>รวมทั้งหมด</span><b>${total.toLocaleString()} kcal</b><small>โปรตีน ${p}g · คาร์บ ${c}g · ไขมัน ${f}g</small><button class="btn" onclick="goToAddFood()">บันทึกมื้ออาหาร</button></div>`;
+  const pcf=`<div class="meal-pcf card"><div class="mpcf"><span style="color:var(--mp,var(--blue))">${t('protein')}</span><b>${p}g</b></div><div class="mpcf"><span style="color:var(--mc,var(--amber))">${t('carbs')}</span><b>${c}g</b></div><div class="mpcf"><span style="color:var(--mf,var(--purple))">${t('fat')}</span><b>${f}g</b></div></div>`;
+  const addCta=`<button class="btn meal-add-cta" onclick="goToAddFood()">+ ${LL('เพิ่มอาหาร','Add food','添加食物','新增食物')}</button>`;
+  wrap.innerHTML=`<div class="meal-groups">${groups}</div>`+pcf+addCta;
   renderAuroraChrome('meals');
 }
 
