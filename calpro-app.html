@@ -1537,6 +1537,16 @@ html[data-aurora="1"] .mpcf{flex:1;display:flex;flex-direction:column;align-item
 html[data-aurora="1"] .mpcf span{font-size:.72rem;font-weight:800;}
 html[data-aurora="1"] .mpcf b{font-size:1.1rem;color:#111827;}
 html[data-aurora="1"] .meal-add-cta{width:100%;}
+/* Today: water + health tips as side-by-side square cards (water spans full width if no tips) */
+html[data-aurora="1"] .aurora-duo{display:flex;gap:12px;align-items:stretch;}
+html[data-aurora="1"] .aurora-duo>.wwrow{flex:1;min-width:0;margin:0;}
+html[data-aurora="1"] .aurora-duo>.wwrow .wwcard-full{height:100%;}
+html[data-aurora="1"] .aurora-duo>#healthCard{flex:1;min-width:0;margin-top:0!important;}
+html[data-aurora="1"] .aurora-duo .water-top{flex-direction:column;align-items:flex-start;gap:8px;}
+html[data-aurora="1"] .aurora-duo .water-top h4{white-space:nowrap;}
+html[data-aurora="1"] .aurora-duo .water-dots{flex-wrap:wrap;gap:5px;}
+html[data-aurora="1"] .aurora-duo .wd{width:15px;height:22px;}
+html[data-aurora="1"] .md-chev{margin-left:auto;color:#C7CDDB;font-size:1.3rem;line-height:1;}
 html[data-aurora="1"] .bnav{
   left:16px;
   right:16px;
@@ -1663,6 +1673,7 @@ html[data-aurora="1"] .nav-scrim{
         <div class="mc"><div class="mc-l" data-i18n="carbs">คาร์บ</div><div class="mc-v" id="mC" style="color:var(--mc,var(--amber))">0g</div><div class="mc-b"><div class="mc-bf" id="mCB" style="width:0%;background:var(--mc,var(--amber))"></div></div><div class="mc-sub" id="mCS"></div></div>
         <div class="mc"><div class="mc-l" data-i18n="fat">ไขมัน</div><div class="mc-v" id="mF" style="color:var(--mf,var(--purple))">0g</div><div class="mc-b"><div class="mc-bf" id="mFB" style="width:0%;background:var(--mf,var(--purple))"></div></div><div class="mc-sub" id="mFS"></div></div>
       </div>
+      <div class="aurora-duo">
       <div class="wwrow">
         <div class="wwcard wwcard-full">
           <div class="water-top">
@@ -1680,6 +1691,7 @@ html[data-aurora="1"] .nav-scrim{
         <h3 class="collapse-hdr" onclick="toggleHealthCard()" style="display:flex;align-items:center;gap:6px"><span>💡</span><span data-i18n="health_tips">คำแนะนำสุขภาพวันนี้</span><span class="collapse-chev">▼</span></h3>
         <div class="collapse-body" id="healthTipsList"></div>
       </div>
+      </div><!-- /.aurora-duo -->
       <!-- Ad slot · filled by renderAdSlot() in renderToday · hidden if user is premium -->
       <div class="ad-slot" data-ad-slot="today-1"></div>
       <!-- Quick-add: tap a recent/favorite food to log it in one tap -->
@@ -2792,7 +2804,7 @@ html[data-aurora="1"] .nav-scrim{
 // ╔══════════════════════════════════════╗
 // ║  CalPro — Local-only (localStorage)  ║
 // ╚══════════════════════════════════════╝
-const APP_VERSION = '2.44.2';
+const APP_VERSION = '2.44.3';
 
 // ═══ LINE-ICON SYSTEM (Feather-style) ═══
 // Central map of monochrome line icons that replace UI emojis app-wide, matching
@@ -5017,7 +5029,10 @@ function renderCalendar(){
 }
 function pickDate(v){
   if(!v||v>todayKey())return;
-  currentDate=v;loadEntries();renderToday();
+  currentDate=v;loadEntries();
+  // Always surface the chosen day on the Today screen (esp. when picked from the
+  // Analysis calendar) so the change is visible and the user can navigate back.
+  if(typeof navTo==='function') navTo('today'); else renderToday();
 }
 
 // ═══ SEARCH ═══
@@ -8727,14 +8742,16 @@ function selectCalBar(idx){
 // Aurora-only macro/nutrient donut (today's intake by calorie share) — matches the mockup "สารอาหาร".
 function renderMacroDonut(){
   const card=document.getElementById('macroDonutCard'); if(!card)return;
-  if(settings.uiMode!=='aurora'){ card.style.display='none'; return; }
+  if(settings.uiMode!=='aurora'){ card.style.display='none'; card.onclick=null; card.style.cursor=''; return; }
   card.style.display='';
+  card.style.cursor='pointer';                        // tap the nutrition ring → per-food breakdown
+  card.onclick=()=>{ if(typeof navTo==='function') navTo('meals'); };
   const E=dailyEntries||[];
   const p=Math.round(E.reduce((s,e)=>s+(+e.protein||0),0));
   const cb=Math.round(E.reduce((s,e)=>s+(+e.carbs||0),0));
   const fat=Math.round(E.reduce((s,e)=>s+(+e.fat||0),0));
   const pc=p*4, cc=cb*4, fc=fat*9, tot=pc+cc+fc;
-  const hd=`<div class="card-hdr-row"><h3>${LL('สารอาหาร','Macros','营养素','營養素')}</h3></div>`;
+  const hd=`<div class="card-hdr-row"><h3>${LL('สารอาหาร','Macros','营养素','營養素')}</h3><span class="md-chev" aria-hidden="true">›</span></div>`;
   if(tot<=0){ card.innerHTML=hd+`<div style="padding:12px 0;text-align:center;color:var(--muted);font-size:.78rem">${LL('ยังไม่มีข้อมูลวันนี้ — เริ่มบันทึกอาหาร','No data today — start logging','今天暂无数据','今天暫無數據')}</div>`; return; }
   const pPct=pc/tot*100, cPct=cc/tot*100;
   const pgT=Math.round((userProfile?.weight||60)*1.6);
